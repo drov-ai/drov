@@ -1,0 +1,27 @@
+{
+  "baseline_id": "P4-2026-10-13",
+  "review_completed_on": "2026-10-13",
+  "timezone": "Asia/Shanghai",
+  "scope": "Historical planning document fingerprints; not runtime verification or a signature. Do not overwrite when source documents later change.",
+  "hash_algorithm": "SHA-256",
+  "files": {
+    "AGENTS.md": "920b640912562aed8ab767c221ad6aea59d79ab9252fda32c138660f6c7461b4",
+    "docs/decisions/0001-project-direction.md": "3baccb6d8f750c4e443b99691fe17be7126764ac03434cbe8b5f4d0985e5891b",
+    "docs/decisions/0002-unified-runtime.md": "78eaa9678086502129532ce2617d787164070dbcdef2124e98808025ca3e7b1b",
+    "docs/decisions/0003-context-and-memory.md": "c357c0b56c1ee81a7eb4ce8c4510a11d274c61f7d7663dd9efefaad7e803c525",
+    "docs/decisions/0004-first-release-engineering.md": "585846f1b5dacf21f9cf930f90c45c07aed7f8ef67315102fadcb41faeb1e208",
+    "docs/decisions/0005-control-and-observation.md": "87dcc5f9aa8603d197b61a44f8c93363a4196663b09b3a1d47e70449ca92062f",
+    "docs/planning/api-draft.md": "e1a26d08999619d8c9d67146932e00ff5bf361d33e9916147461286450de1902",
+    "docs/planning/architecture.md": "c8b989ce7c8fe3bc853c9ba140ae5b672382f0969dff4caabf7ebedbbaf4d2fc",
+    "docs/planning/capability-matrix.md": "523864c88f8c328feb83982c9549073158374865cdd6f2b7039a4eceb70db7ee",
+    "docs/planning/delivery-plan.md": "0d1223c1d45ce0d02afc65a3a72d3946f19360f083ef521aa284b2faf630acd3",
+    "docs/planning/engineering.md": "2c5968b86feebd1b91474b1f0e16ad00e43f0bf78d213c8e434780b3d61e1761",
+    "docs/planning/evidence.md": "74e12f18527e9e2c39540fdbc22aa3a503cff6feaf35084d6b477f3b42dd893a",
+    "docs/planning/implementation-plan.md": "461e28ae274bfa0c3d106e1d513b9223a368b4d40597d66f9871c9af295f22ca",
+    "docs/planning/product.md": "f4905345e709c8c79528f9e6183b97f1c0918f8488b1456aa2e5423e57ad9c99",
+    "docs/planning/quality-plan.md": "981cd7f176b310c944ba9dd93a20a38b66363ce461cbe5323d96a9cb26224a1c",
+    "docs/planning/reference-scenarios.md": "39ee4fbbc9d631a8b7e99af11d09e1ef72ce860d9500e1799a2528c4c8f0fd0d",
+    "docs/planning/release-policy.md": "34e52abc992a52a0f1f8e2fffe8fe82f9a6ef04f2ff2e1539b2d01b2d8648b01",
+    "docs/planning/runtime-contract.md": "6ee57cfa63998ccef6cf446e9aabedecae64e78004960d70f2e785031377af61"
+  }
+}
