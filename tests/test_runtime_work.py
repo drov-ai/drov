@@ -13,6 +13,7 @@ import pytest
 from drov import Limits, Runtime, SQLiteStorage
 from drov.errors import CapacityExceeded, ConfigurationError, ShutdownIncomplete, StorageInUse
 from drov.runtime.core import _Work
+from tests.fixtures import close_released_runtime
 from tests.test_runtime import definition
 
 
@@ -147,7 +148,7 @@ async def test_cancel_refusing_work_keeps_slot_and_blocks_new_dispatch(tmp_path:
     finally:
         finish.set()
         await work.wait()
-        await runtime.aclose()
+        await close_released_runtime(runtime)
     assert runtime.active_slots == 0 and not storage.is_open
 
 
@@ -193,7 +194,7 @@ async def test_real_thread_outlives_cancelled_task_and_retains_storage_lock(tmp_
     finally:
         release.set()
         await asyncio.to_thread(executor.shutdown, wait=True)
-        await runtime.aclose()
+        await close_released_runtime(runtime)
     assert runtime.active_slots == 0 and not storage.is_open
     async with SQLiteStorage(storage.path):
         pass
@@ -242,7 +243,7 @@ async def test_pending_acceptance_slot_blocks_shutdown_until_released() -> None:
     with pytest.raises(ShutdownIncomplete):
         await runtime.aclose()
     slot.release()
-    await runtime.aclose()
+    await close_released_runtime(runtime)
 
 
 @pytest.mark.asyncio

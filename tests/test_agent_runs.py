@@ -48,6 +48,7 @@ from drov.models.protocol import (
 from drov.storage.records import EventDraft
 from drov.tools.schema import compile_tool
 from drov.types import Completed, DurableEvent, Failed, StreamGap, TokenDelta, Usage
+from tests.fixtures import close_released_runtime
 
 ALICE = RunContext(tenant_id="test", user_id="alice")
 BOB = RunContext(tenant_id="test", user_id="bob")
@@ -574,7 +575,7 @@ async def test_cancelled_actual_thread_retains_slot_and_sqlite_lock(tmp_path: Pa
         while runtime.active_slots:
             runtime._changed.clear()
             await asyncio.wait_for(runtime._changed.wait(), 1)
-        await runtime.aclose()
+        await close_released_runtime(runtime)
     async with SQLiteStorage(path) as storage:
         record = await storage.get_run(ALICE, ref.run_id)
         assert record.state.status == "cancelled"
@@ -742,7 +743,7 @@ async def test_shutdown_during_receiving_retains_resources_until_handoff_settles
     storage.release.set()
     with pytest.raises(ConfigurationError):
         await receiving
-    await runtime.aclose()
+    await close_released_runtime(runtime)
     async with storage.transaction() as tx:
         run = (await tx.runs((await tx.sessions(ALICE))[0].scope))[0]
     assert run.state.status == "suspended" and run.state.reason == "recovery" and not model.calls
@@ -846,7 +847,7 @@ async def test_noncooperative_model_keeps_slot_after_timeout_until_actual_stop()
         while runtime.active_slots:
             runtime._changed.clear()
             await asyncio.wait_for(runtime._changed.wait(), 1)
-        await runtime.aclose()
+        await close_released_runtime(runtime)
 
 
 @pytest.mark.asyncio

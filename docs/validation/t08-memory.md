@@ -55,7 +55,7 @@ git diff --check
 
 T-08 首次实现提交 [d997f17](https://github.com/drov-ai/drov/commit/d997f17f7bcf34f6ceea170b378fab956240923b) 已推送 main，包含原本只在本地的 T-06/07 提交。首轮 [CI 38412265349](https://github.com/drov-ai/drov/actions/runs/38412265349) 为 failure：quality、Linux 四版本、macOS 两版本和 Python 3.15 advisory 通过；Windows 3.11 的旧线程测试在已释放线程后的第二次 aclose 仍要求 20ms 内完成 SQLite 清理，Windows 3.14 的安装验证因中文示例重定向到 cp1252 抛 UnicodeEncodeError。两份日志都显示 T-08 的 56 项 Memory 测试通过，不能据此跳过整套 CI 的失败。
 
-同轮修正：旧线程测试的收尾在 5s 外层期限内重试符合契约的 ShutdownIncomplete，最初的线程仍占槽位/SQLite 锁断言保留；安装验证的示例解释器显式传 -X utf8，保留 -I/-B 和核心隔离。没有修改 SDK 超时/所有权语义、全局编码或代理。修正后本地两解释器各重跑 41 项工具回归通过，静态/类型/schema 通过，并重跑各两套干净安装/三个示例普通与 stream 验证；新 CI 结果结束前补记。
+同轮修正：旧线程测试的收尾在 5s 外层期限内重试符合契约的 ShutdownIncomplete，最初的线程仍占槽位/SQLite 锁断言保留；安装验证的示例解释器显式传 -X utf8，保留 -I/-B 和核心隔离。没有修改 SDK 超时/所有权语义、全局编码或代理。修正后本地两解释器各重跑 41 项工具回归通过，静态/类型/schema 通过，并重跑各两套干净安装/三个示例普通与 stream 验证；第二轮 [CI 38412955005](https://github.com/drov-ai/drov/actions/runs/38412955005) 的 Windows 3.14 已完成测试/构建/安装/extras，但 Windows 3.11 另一个 T-04 线程所有权测试暴露同样的 20ms 收尾假设。审查同类测试后，仅在已释放测试屏障、已完成最初失败/锁/容量断言的收尾使用公共测试夹具 close_released_runtime，在 5s 内重试既有 aclose；最初所有权与错误断言全部保留，SDK 没有改动。再次全库回归及 CI 结果结束前补记。
 
 ## 未实现、未验证与恢复步骤
 

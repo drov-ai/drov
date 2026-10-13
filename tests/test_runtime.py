@@ -15,7 +15,7 @@ from drov.runtime.registration import fingerprint
 from drov.storage.records import SessionScope, StartRequest
 from drov.tools.schema import compile_tool
 from drov.types import RunContext
-from tests.fixtures import ScriptedAdapter
+from tests.fixtures import ScriptedAdapter, close_released_runtime
 
 
 def definition(**kwargs: Any) -> Agent[str]:
@@ -334,7 +334,7 @@ async def test_failed_or_slow_close_retains_lock_and_can_retry(tmp_path: Path) -
         await runtime.aclose()
     assert storage.is_open
     resource.close_release.set()
-    await runtime.aclose()
+    await close_released_runtime(runtime)
     assert not storage.is_open
     assert log == ["close:blocked", "close:blocked"]
     async with SQLiteStorage(storage.path):
