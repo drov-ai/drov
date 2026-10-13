@@ -43,7 +43,11 @@ uv run --locked twine check --strict dist/*.whl dist/*.tar.gz .drov/dist-py314/*
 
 维护者本机 uv 为 `.drov/tooling/bin/uv` 0.13.0，3.14 环境明确指定解释器，不重置默认 3.11。构建检查包括源码 wheel/sdist、sdist 重建内容比较、两个干净核心环境安装和禁用导入副作用；不上传包。
 
-文档相对链接、Python 片段、任务依赖、schema 漂移、55 个品牌文件摘要、原 P4 baseline 完整性已检查。品牌源文件保留本地并排除 Git，未验证来源前不随代码同步。
+31 份 Markdown、215 个相对链接、11 个 Python 片段语法、18 个任务/23 条依赖、schema 漂移、55 个品牌文件摘要及原 P4 baseline 完整性已检查。品牌源文件保留本地并排除 Git，未验证来源前不随代码同步。
+
+## GitHub CI
+
+实现提交：[751ff55](https://github.com/drov-ai/drov/commit/751ff55629c8ac8d97b20973b741ab0b373e97cf)。[CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 已完成，10 个 job 全部 success：quality、Linux 3.11/3.12/3.13/3.14、macOS 3.11/3.14、Windows 3.11/3.14、Python 3.15 非阻塞探测。标准矩阵执行测试、构建/干净核心安装及 all-extras 导入检查；没有模型 Key 或 live 调用。后续纯交接文档提交不改变已验证代码。
 
 ## 实际发现的修正
 

@@ -4,12 +4,12 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-03 本地实施验收完成；下一项 T-04 注册与资源所有权。GitHub CI 本轮首次接入，结果单列，不能用本地结果代替远程结果。
+- 阶段：P1 至 P4、T-01 至 T-03 本地实施验收完成；下一项 T-04 注册与资源所有权。GitHub CI 本轮首次接入已通过，结果单列。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-03 细化见 [ADR-0007](../decisions/0007-transactional-storage.md)。旧 fingerprint JSON 保持原样。
 - 已实现：本地包 0.1.0a0、定义/公共类型/配置/工具 schema/模型协议、内存/SQLite 事务存储、记录归属/版本 CAS/去重/原子步骤/Memory 存储原语、排他锁/版本 metadata/取消处理。
 - 未实现：Runtime/Agent.run、实际工具/Memory 工具、权限引擎、运行恢复调度、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-04 至 T-18 未开始。存储进程实验不是 Agent 副作用恢复验证。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
-- 用户已建立公开仓库 [drov-ai/drov](https://github.com/drov-ai/drov)，权限已核实。origin 使用同仓库 SSH URL；初始 T-01/T-02 检查点为 478cb12，T-03 正在提交/同步；品牌源文件保持本地，不进入 Git。
+- 用户已建立公开仓库 [drov-ai/drov](https://github.com/drov-ai/drov)，权限已核实。origin 使用同仓库 SSH URL；初始 T-01/T-02 检查点为 478cb12，T-03 实现提交为 751ff55，已推送 main；当前交接文档补充不改变该实现。品牌源文件保持本地，不进入 Git。
 
 ## 已确认方向
 
@@ -31,7 +31,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 - 仓库确为空且账号可写；HTTPS Git 受本机失效代理/连接限制，SSH 已验证可用。未更改用户全局代理或认证配置。
 - 初始基线与 T-03 分开提交，保留可查看的代码差异；提交前检查可识别凭据模式及 Git 跟踪范围，品牌文件与本地环境/运行数据库排除。
-- T-03 同步及 CI 正在执行，尚未在此记录通过结论；完成后同轮追加实际运行链接和支持矩阵结果。
+- [CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对实现提交 751ff55629c8ac8d97b20973b741ab0b373e97cf 验证成功：quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14 的测试/构建/干净安装/extras 导入全部通过。Python 3.15 advisory probe 也通过，不据此扩大支持矩阵。Windows 的打开文件替换用例按平台限制跳过，其余结果见验证报告。
 
 ## 下一轮：T-04 注册与资源所有权
 
