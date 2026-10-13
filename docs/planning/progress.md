@@ -92,7 +92,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## GitHub / CI
 
-- 本轮仅文档变更，完成检查后按用户授权保存并同步到既有 origin/main；使用 `[skip ci]` 文档检查点，不重跑不变的 SDK 矩阵。实际提交/同步状态以 git log/status 为准，保护旧验证与品牌。
+- 本轮范围文档检查点 7cc0fc4 已提交并推送既有 origin/main，推送后工作区干净、与远程同步；本记录随后补记该事实。两次均为 `[skip ci]` 文档提交，不重跑不变的 SDK 矩阵；实际最新提交以 git log/status 为准，保护旧验证与品牌。
 
 - 继续使用现有 origin 和用户已有 GitHub 身份；不修改全局代理/认证、不建立新仓库。提交前检查可识别凭据模式与 Git 跟踪范围，品牌/环境/数据库排除。
 - 历史 T-08：实施 [d997f17](https://github.com/drov-ai/drov/commit/d997f17f7bcf34f6ceea170b378fab956240923b)，跨平台检查修正 40160ff / [5ff654c](https://github.com/drov-ai/drov/commit/5ff654cf0ac8044125554029acae0638bc85ca6a) 已推送 main（同时包含 T-06/07 的 adc9793）。最终 [CI 38413817284](https://github.com/drov-ai/drov/actions/runs/38413817284) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success；测试、构建、核心干净安装/三个离线示例、extras 隔离导入通过。两轮失败原因、适用跳过和恢复证据见 [T-08 验证](../validation/t08-memory.md)。
