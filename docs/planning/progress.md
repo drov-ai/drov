@@ -4,12 +4,12 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-05 本地实施验收完成；下一项 T-06 离线运行闭环。本轮 Git/CI 状态见下节。
+- 阶段：P1 至 P4、T-01 至 T-05 本地实施验收完成；下一项 T-06 离线运行闭环。本轮最终实现已推送 main，GitHub CI 通过，见下节。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-05 细化见 [ADR-0009](../decisions/0009-python-tools.md)。历史 fingerprint JSON 不覆盖，源契约变化由 ADR 说明。
 - 已实现：包 0.1.0a0、定义/公共类型/配置/工具 schema/模型协议、内存/SQLite 事务存储及记录/CAS/去重/原子步骤/Memory 原语/锁/取消处理；Runtime 注册指纹/资源与任务所有权；PythonTool/@tool、PermissionPolicy/OwnerAuthorizer、私有只读工具派发、有界线程队列及事务操作记录。
 - 未实现：Agent 执行入口、Memory 工具、完整审批/核查与恢复调度、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-06 至 T-18 未开始。私有任务和实际线程测试不是 Agent 副作用恢复或模型质量验证。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
-- 本轮起点：`/Users/yanlong/projects/drov`，main / e8588a7，工作区干净。origin 为已有公开仓库 [drov-ai/drov](https://github.com/drov-ai/drov) 的 SSH URL；T-01/T-02 检查点 478cb12、T-03 实现 751ff55、T-04 实现 45a57ea 已在 main。品牌源文件保留本地，不进入 Git。
+- 本轮起点：`/Users/yanlong/projects/drov`，main / e8588a7，工作区干净。origin 为已有公开仓库 [drov-ai/drov](https://github.com/drov-ai/drov) 的 SSH URL；T-01/T-02 检查点 478cb12、T-03 实现 751ff55、T-04 实现 45a57ea、T-05 实现 d84c66f/最终修正 ecc734b 已在 main。品牌源文件保留本地，不进入 Git。
 
 ## 已确认方向
 
@@ -32,7 +32,8 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 - 继续使用现有 origin 和用户已有 GitHub 身份；不修改全局代理/认证、不建立新仓库。提交前检查可识别凭据模式与 Git 跟踪范围，品牌/环境/数据库排除。
 - T-04 实现提交 [45a57ea](https://github.com/drov-ai/drov/commit/45a57eab30b633889f625e2cde80b00c6b532205) 已推送 main；[CI 38387899628](https://github.com/drov-ai/drov/actions/runs/38387899628) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14 和 Python 3.15 advisory 共 10 个 job 全部 success。测试/构建/干净安装/extras 导入通过；3.11 即时任务 API 和 Windows 打开文件替换用例的适用跳过见 T-04 报告。
-- T-05 本地验收已完成；本轮实现检查点与新 CI 同步后补记。上面的 T-04 CI 是历史证据，不用于声明 T-05 代码已通过远程验证。
+- T-05 实现 d84c66f 与最终修正 [ecc734b](https://github.com/drov-ai/drov/commit/ecc734ba595a43579172d7631153925052962208) 已推送 main；[CI 38396712936](https://github.com/drov-ai/drov/actions/runs/38396712936) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。实际测试数量/适用跳过及构建/安装/extras 证据见 T-05 验证。
+- 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
 ## 下一轮：T-06 离线运行闭环

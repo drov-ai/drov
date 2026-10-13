@@ -54,7 +54,19 @@ UV_PROJECT_ENVIRONMENT=.drov/check-py314 .drov/tooling/bin/uv run --locked --pyt
 
 ## GitHub CI
 
-本轮实现的远程提交和矩阵结果同步后补记。T-04 的成功不作为新代码的 CI 证据。
+实现检查点为 d84c66f；最终修正提交：[ecc734b](https://github.com/drov-ai/drov/commit/ecc734ba595a43579172d7631153925052962208)。[CI 38396712936](https://github.com/drov-ai/drov/actions/runs/38396712936) 验证该最终实现，10 个 job 全部 success。quality 完成格式/Ruff/mypy/schema，八个标准平台 job 完成测试、wheel/sdist、重建/干净核心安装、twine 与 all-extras 导入；没有 Key/live 调用。
+
+| 平台 / Python | pytest 实际结果 |
+| --- | --- |
+| Linux 3.11 | 256 passed / 1 skipped（即时任务工厂 API 不适用） |
+| Linux 3.12 / 3.13 / 3.14 | 各 257 passed |
+| macOS 3.11 | 256 passed / 1 skipped（即时任务工厂 API 不适用） |
+| macOS 3.14 | 257 passed |
+| Windows 3.11 | 255 passed / 2 skipped（即时任务工厂 API；平台不允许替换已打开 SQLite 文件） |
+| Windows 3.14 | 256 passed / 1 skipped（平台不允许替换已打开 SQLite 文件） |
+| Python 3.15 advisory | 257 passed；不扩大支持矩阵 |
+
+本轮随后补记 CI 的文档提交不改变已验证代码，不称作另一次完整矩阵验证。
 
 ## 限制与后续
 
