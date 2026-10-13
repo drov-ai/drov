@@ -24,7 +24,7 @@
 | 超时/取消 / B-06/12 | wait 取消不取消工具，显式工作取消协作停止；实际线程超时后继续占槽位与 SQLite 锁，不能关闭或被另一实例拿走；迟到结果/异常不变成成功 |
 | 不合作异步调用 | 拒绝取消的真实 asyncio Task 在包装工作结束后仍占槽位，关闭报 ShutdownIncomplete；释放屏障后才关闭 |
 
-新增 51 项测试（permissions 11、tool_execution 40），共收集 256 项。Python 3.11：255 passed / 1 skipped（eager_task_factory 为 3.12+ API）；Python 3.14：256 passed。Ruff、格式、严格 mypy、生成 schema 及文档/构建检查结果见本轮实际日志。
+新增 52 项测试（permissions 11、tool_execution 41），共收集 257 项。Python 3.11：256 passed / 1 skipped（eager_task_factory 为 3.12+ API）；Python 3.14：257 passed。Ruff、格式、严格 mypy、生成 schema 及文档/构建检查结果见本轮实际日志。
 
 ## 检查命令
 
@@ -50,6 +50,7 @@ UV_PROJECT_ENVIRONMENT=.drov/check-py314 .drov/tooling/bin/uv run --locked --pyt
 - 包装 Future 超时后迟到异常可能无人观察：登记原 Future 并观察包装 Future，保持资源直至实际停止，迟到输出不用。
 - 返回了 coroutine 不能将其偷偷当第二工具执行：关闭并记输出不可用。
 - 工具对象替换、无限线程排队与提交故障：固定注册身份、有界预留、真实 Future 所有权和未执行记录。
+- 实际异步工具在子 Task 中运行，自我等待 Runtime 关闭会相互等待；关闭检查扩展到已登记的实际调用，拒绝自关闭而不误取消父工作。
 
 ## GitHub CI
 

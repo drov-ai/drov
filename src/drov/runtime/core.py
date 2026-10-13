@@ -504,7 +504,7 @@ class Runtime:
             resource.closing is current for resource in self._resources
         ):
             raise ConfigurationError("Runtime cannot be closed from its own lifecycle task")
-        if any(work.task is asyncio.current_task() for work in self._works):
+        if any(work.task is current or current in work._calls for work in self._works):
             raise ConfigurationError("Runtime cannot be closed from its own execution task")
         self._closing_requested = True
         if self._state == "closed":

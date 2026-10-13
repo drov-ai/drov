@@ -701,3 +701,20 @@ async def test_submission_failure_records_no_execution_and_configuration_is_read
             result.operation.status == "not_executed"
             and result.operation.error_code == "tool_dispatch_error"
         )
+
+
+@pytest.mark.asyncio
+async def test_actual_async_tool_cannot_wait_for_its_own_runtime_shutdown() -> None:
+    from drov.errors import ConfigurationError
+
+    @tool(name="search", effect="read")
+    async def search() -> str:
+        with pytest.raises(ConfigurationError, match="own execution"):
+            await runtime.aclose()
+        return "still open"
+
+    agent = agent_for(search)
+    async with Runtime(agents=[agent]) as runtime:
+        record = await create_run(runtime, agent)
+        result = await dispatch(runtime, search, record).wait()
+        assert result.operation.has_result and runtime.storage.is_open
