@@ -144,7 +144,97 @@
           "title": "ContextSource",
           "type": "object"
         },
-        "JsonValue": {}
+        "JsonValue": {},
+        "Usage": {
+          "additionalProperties": false,
+          "properties": {
+            "cached_input_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Cached Input Tokens"
+            },
+            "complete": {
+              "default": false,
+              "title": "Complete",
+              "type": "boolean"
+            },
+            "cost_amount": {
+              "anyOf": [
+                {
+                  "pattern": "^(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Cost Amount"
+            },
+            "currency": {
+              "anyOf": [
+                {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Currency"
+            },
+            "input_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Input Tokens"
+            },
+            "output_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Output Tokens"
+            },
+            "total_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Total Tokens"
+            }
+          },
+          "title": "Usage",
+          "type": "object"
+        }
       },
       "additionalProperties": false,
       "properties": {
@@ -155,7 +245,7 @@
           "type": "string"
         },
         "budget": {
-          "exclusiveMinimum": 0,
+          "minimum": 0,
           "title": "Budget",
           "type": "integer"
         },
@@ -163,6 +253,12 @@
           "default": false,
           "title": "Content Visible",
           "type": "boolean"
+        },
+        "estimated_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Estimated Tokens",
+          "type": "integer"
         },
         "estimator": {
           "minLength": 1,
@@ -183,6 +279,9 @@
           "minLength": 1,
           "title": "Model Call Id",
           "type": "string"
+        },
+        "reported_usage": {
+          "$ref": "#/$defs/Usage"
         },
         "retrieval_status": {
           "enum": [
@@ -1845,7 +1944,7 @@
               "type": "string"
             },
             "budget": {
-              "exclusiveMinimum": 0,
+              "minimum": 0,
               "title": "Budget",
               "type": "integer"
             },
@@ -1853,6 +1952,12 @@
               "default": false,
               "title": "Content Visible",
               "type": "boolean"
+            },
+            "estimated_tokens": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Estimated Tokens",
+              "type": "integer"
             },
             "estimator": {
               "minLength": 1,
@@ -1873,6 +1978,9 @@
               "minLength": 1,
               "title": "Model Call Id",
               "type": "string"
+            },
+            "reported_usage": {
+              "$ref": "#/$defs/Usage"
             },
             "retrieval_status": {
               "enum": [

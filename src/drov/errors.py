@@ -65,3 +65,9 @@ class TransientToolError(DrovError):
     """Application-declared transient read failure; never enables write retries."""
 
     code = "transient_tool_error"
+
+
+class TransientModelError(DrovError):
+    """Adapter-declared transient failure; permits only bounded model retries."""
+
+    code = "transient_model_error"

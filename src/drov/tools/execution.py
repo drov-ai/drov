@@ -149,7 +149,15 @@ class ToolDispatcher:
             status="prepared",
         )
         await journal.commit(
-            operation, EventDraft(type="tool.prepared", data={"operation_id": operation_id})
+            operation,
+            EventDraft(
+                type="tool.prepared",
+                data={
+                    "operation_id": operation_id,
+                    "tool_name": tool.name,
+                    "arguments": normalized,
+                },
+            ),
         )
 
         async def save(
@@ -173,7 +181,11 @@ class ToolDispatcher:
                         DurableEventType,
                         "tool.denied" if code == "permission_denied" else "tool." + status,
                     ),
-                    data={"operation_id": operation_id},
+                    data={
+                        "operation_id": operation_id,
+                        "error_code": code,
+                        **({"result": result} if has_result else {}),
+                    },
                 ),
             )
             operation = updated

@@ -1,6 +1,6 @@
 # 三类参考应用与跨入口案例
 
-状态：P4 实施基线中的使用片段与验收设计，未实现、未运行。更新：2026-10-13。
+状态：P4 案例设计；S-01-A/C 的只读 SDK/stream 离线路径已运行，Memory/审批案例及真实模型质量仍待后续验收。更新：2026-10-13。
 
 这些案例用来检验通用框架，不限制 Drov 的业务范围。所有 `drov` 符号均来自 [API 草案](api-draft.md) 的拟议接口；本文件不提供可安装教程。模型参数在离线验证中使用 ScriptedModel，真实验证使用显式配置的 OpenAIResponses；知识检索是合成夹具或应用自己的工具，Memory 为内置事务存储。详见 [工程方案](engineering.md) / [质量计划](quality-plan.md)。所有场景遵守 [行为契约](runtime-contract.md)，不能单独放宽规则。
 
@@ -20,7 +20,7 @@
 ### 使用片段
 
 ```python
-# 拟议 API，非可运行教程。
+# T-06 只读 API 可用片段；model/knowledge 由应用提供。
 from dataclasses import dataclass
 from drov import Agent, tool
 
@@ -38,7 +38,7 @@ class Report:
 
 
 async def research_example(model, knowledge):
-    @tool(effect="read")
+    @tool(name="search_docs", effect="read")
     async def search_docs(query: str) -> list[Source]:
         return await knowledge.search(query)
 
@@ -66,6 +66,8 @@ async def research_example(model, knowledge):
 | S-01-B | 检索工具超时或失败 | 运行保留工具错误；按照配置报告失败或给出明确受限结果，不伪造已检索成功 |
 | S-01-C | 工具结果超出预算 | 能查看被选入、裁剪或截断的内容来源；引用关系不因处理而静默损坏；模型摘要不属首期 |
 | S-01-D | 资料不足 | 明确说明证据不足；不能靠输出 schema 正确就判定任务成功 |
+
+T-06 已交付 [离线可运行例子](../../examples/README.md) / [research_offline.py](../../examples/research_offline.py)：真实合成语料检索、ScriptedModel 工具结果检查、Report 严格输出及实际引用集合核对，SDK/stream 共用内核。该例回答为预设夹具，验收 S-01-A 离线契约。T-07 的 [context_preview_offline.py](../../examples/context_preview_offline.py) 验收 S-01-C：实际长工具结果、带引用/版本的预览、get_context 清单核对及 full_document_read=False；SDK/stream 共用内核。完整历史组选取/排除与预算失败另由 [test_context.py](../../tests/test_context.py) 验证，真实模型质量仍待 T-11/T-16。
 
 ## S-02：跨会话个人助手
 
@@ -263,7 +265,7 @@ S-03-E 的补充输入变体在 tools 中另注册 `HumanInput(name="ask_item", 
 
 ## 从说明片段到可运行示例
 
-P3 已指定依赖、完整夹具、模型适配器及规则断言，并把 [B-01 至 B-15](runtime-contract.md) 中首期适用项映射到质量计划和任务；B-14 属后续。代码阶段再创建实际 examples 和测试文件；当前片段未导入或运行 Drov。
+P3 已指定依赖、完整夹具、模型适配器及规则断言，并把 [B-01 至 B-15](runtime-contract.md) 中首期适用项映射到质量计划和任务；B-14 属后续。已实现的只读 examples/测试见上文；含 Memory/审批的设计片段尚未导入或运行。
 
 三类 Agent 都需通过同一 DrovApp 入口复测。X-01 使用显式 Runtime 的相同权限、存储和限额配置对照 HTTP/流式；不将临时 Agent.run 与持久化 Runtime 的配置差异判为内核差异。
 

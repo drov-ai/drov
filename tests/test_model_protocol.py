@@ -89,7 +89,7 @@ def test_agent_definition_opens_nothing_and_requires_explicit_capabilities() -> 
     agent: Agent[str] = Agent(model=adapter, name="assistant", revision="1")
     assert agent.require_registration_identity() == ("assistant", "1")
     assert adapter.calls == [] and adapter.closed is False
-    assert not hasattr(agent, "run")
+    assert callable(agent.run)
     ephemeral: Agent[str] = Agent(model=adapter)
     with pytest.raises(ConfigurationError):
         ephemeral.require_registration_identity()

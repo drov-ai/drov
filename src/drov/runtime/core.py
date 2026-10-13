@@ -1,4 +1,4 @@
-"""Resource lifecycle and private scheduling primitives; no Agent execution loop."""
+"""Unified Runtime ownership, lifecycle, and read-only Agent entry points."""
 
 import asyncio
 import threading
@@ -17,6 +17,8 @@ from drov.errors import CapacityExceeded, ConfigurationError, Conflict, Shutdown
 from drov.models.protocol import ModelAdapter
 from drov.runtime.registration import AgentRegistration, fingerprint
 from drov.runtime.resources import ResourceBinding
+from drov.runtime.runs import RunController
+from drov.runtime.streams import RunEvents, RunStream
 from drov.storage import MemoryStorage
 from drov.storage.base import Storage
 from drov.storage.records import RunRecord
@@ -24,7 +26,15 @@ from drov.tools._pool import ToolPool
 from drov.tools.execution import ToolDispatcher
 from drov.tools.permissions import PermissionPolicy
 from drov.tools.python import PythonTool
-from drov.types import ScopedIdentifier
+from drov.types import (
+    CancelReceipt,
+    ContextManifest,
+    RunContext,
+    RunInspection,
+    RunOutcome,
+    RunRef,
+    ScopedIdentifier,
+)
 
 T = TypeVar("T")
 
@@ -111,6 +121,7 @@ class _Work(Generic[T]):
         self.runtime = runtime
         self.slot = slot
         self.cancel_requested = False
+        self.started = False
         self.task: asyncio.Task[T]
         self._calls: set[asyncio.Future[Any] | ThreadFuture[Any]] = set()
 
@@ -121,7 +132,8 @@ class _Work(Generic[T]):
     def request_cancel(self) -> None:
         if not self.cancel_requested:
             self.cancel_requested = True
-            self.task.cancel()
+            if self.started:
+                self.task.cancel()
 
     async def wait(self) -> T:
         return await asyncio.shield(self.task)
@@ -161,7 +173,7 @@ class _Work(Generic[T]):
 
 
 class Runtime:
-    """Register definitions and manage resources. Run/start/control APIs arrive in T-06+."""
+    """Own read-only Agent execution and its resources; recovery is a later task."""
 
     def __init__(
         self,
@@ -224,6 +236,111 @@ class Runtime:
         self._works: set[_Work[Any]] = set()
         self._changed = asyncio.Event()
         self._tool_dispatcher: ToolDispatcher | None = None
+        self._controls: set[asyncio.Task[Any]] = set()
+        self._runs = RunController(self)
+
+    async def start(
+        self,
+        agent: Agent[Any],
+        input: str,
+        *,
+        session_id: str,
+        context: RunContext,
+        request_key: str | None = None,
+        limits: Limits | None = None,
+    ) -> RunRef:
+        return await self._runs.start(
+            agent,
+            input,
+            session_id=session_id,
+            context=context,
+            request_key=request_key,
+            limits=limits,
+        )
+
+    async def run(
+        self,
+        agent: Agent[T],
+        input: str,
+        *,
+        session_id: str,
+        context: RunContext,
+        request_key: str | None = None,
+        limits: Limits | None = None,
+    ) -> RunOutcome[T]:
+        ref = await self._runs.start(
+            agent,
+            input,
+            session_id=session_id,
+            context=context,
+            request_key=request_key,
+            limits=limits,
+            content=True,
+        )
+        return await self.wait(ref.run_id, context=context)
+
+    async def wait(self, run_id: str, *, context: RunContext) -> RunOutcome[Any]:
+        return await self._runs.wait(run_id, context=context)
+
+    async def cancel(self, run_id: str, *, context: RunContext) -> CancelReceipt:
+        return await self._runs.cancel(run_id, context=context)
+
+    async def inspect(
+        self,
+        run_id: str,
+        *,
+        context: RunContext,
+        after: str | None = None,
+        limit: int = 100,
+        include_content: bool = False,
+    ) -> RunInspection:
+        return await self._runs.inspect(
+            run_id, context=context, after=after, limit=limit, include_content=include_content
+        )
+
+    def events(
+        self,
+        run_id: str,
+        *,
+        context: RunContext,
+        after: str | None = None,
+        include_content: bool = False,
+    ) -> RunEvents:
+        return RunEvents(
+            self._runs, run_id, context=context, after=after, include_content=include_content
+        )
+
+    def stream(
+        self,
+        agent: Agent[Any],
+        input: str,
+        *,
+        session_id: str,
+        context: RunContext,
+        request_key: str | None = None,
+        limits: Limits | None = None,
+    ) -> RunStream:
+        return RunStream(
+            self._runs,
+            agent,
+            input,
+            session_id=session_id,
+            context=context,
+            request_key=request_key,
+            limits=limits,
+        )
+
+    async def get_context(
+        self,
+        run_id: str,
+        model_call_id: str,
+        *,
+        context: RunContext,
+        include_content: bool = False,
+    ) -> ContextManifest:
+        return await self._runs.get_context(
+            run_id, model_call_id, context=context, include_content=include_content
+        )
 
     def _require_loop(self) -> asyncio.AbstractEventLoop:
         loop = asyncio.get_running_loop()
@@ -427,14 +544,18 @@ class Runtime:
         self._slots.add(slot)
         return slot
 
-    def _spawn(self, slot: _Slot, execute: Callable[[_Work[T]], Awaitable[T]]) -> _Work[T]:
+    def _spawn(
+        self, slot: _Slot, execute: Callable[[_Work[T]], Awaitable[T]], *, check_cancel: bool = True
+    ) -> _Work[T]:
         self._require_open()
         if slot.runtime is not self or slot.released or slot.claimed:
             raise ConfigurationError("Invalid or already scheduled slot")
         work: _Work[T] = _Work(self, slot)
 
         async def run() -> T:
-            work.checkpoint()
+            work.started = True
+            if check_cancel:
+                work.checkpoint()
             return await execute(work)
 
         try:
@@ -481,6 +602,12 @@ class Runtime:
         self._state = "closing"
         loop = self._require_loop()
         deadline = loop.time() + self.limits.shutdown_grace_seconds
+        if self._controls:
+            _, pending = await asyncio.wait(
+                tuple(self._controls), timeout=max(0, deadline - loop.time())
+            )
+            if pending:
+                raise ShutdownIncomplete("Receiving/control transactions retain resource ownership")
         for work in tuple(self._works):
             work.request_cancel()
         while self._slots:
@@ -500,6 +627,8 @@ class Runtime:
     async def aclose(self) -> None:
         self._require_loop()
         current = asyncio.current_task()
+        if current in self._controls:
+            raise ConfigurationError("Runtime cannot close from its own control task")
         if current in (self._opening, self._closing) or any(
             resource.closing is current for resource in self._resources
         ):

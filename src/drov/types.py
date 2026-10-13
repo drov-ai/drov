@@ -406,8 +406,10 @@ class ContextManifest(WireModel):
     revision: ScopedIdentifier
     input_ref: Identifier
     input_hash: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
-    budget: PositiveInt
+    budget: NonNegativeInt
     estimator: NonEmpty
+    estimated_tokens: NonNegativeInt = 0
+    reported_usage: Usage = Field(default_factory=Usage)
     sources: list[ContextSource]
     retrieval_status: Literal["disabled", "included", "empty", "timeout", "failed", "excluded"]
     content_visible: bool = False

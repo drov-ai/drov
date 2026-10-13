@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 类型/协议、T-03 存储、T-04 Runtime 生命周期、T-05 Python 工具/权限与私有只读派发已实现；Agent 执行入口仍未实现。v3 控制与查看见 [ADR-0005](../decisions/0005-control-and-observation.md)，T-05 细化见 [ADR-0009](../decisions/0009-python-tools.md)。更新：2026-10-13。
+状态：P4 v3 基线；T-02 至 T-07 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取及上下文选择/清单；Memory、审批恢复和真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-13。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -45,12 +45,16 @@ run/wait/resume/stream/recover(wait=True) 返回正文，预检 read 与 view_co
 
 verify 需要核查响应权限及 read/view_content，以原执行者当前权限进行只读查询；同一 operation 同时至多一个 verifier 调用，占用活动容量并保留资源所有权。它不接受模型传来的新查询目标，也不执行写入。查询期间原请求被其他合法响应消费时，迟到建议不能再用于推进旧请求。
 
+T-06 已实现表中的 start/run/wait/cancel/inspect/events/stream 与 Agent.run/run_sync。T-07 已实现 get_context；respond/resume/verify/recover/sessions/session 仍未实现，不能将表中设计入口当作已有功能。当前只接收含 callable 的 read 工具，Memory/write/unknown 接收前拒绝；所有 ASK 均失败为 interaction_unavailable。inspect.context_manifests 只返回本次事件页中 context.prepared 对应的摘要（sources=[]、content_visible=False），沿事件游标可遍历全部索引；get_context 返回完整来源清单，include_content=True 返回选入内容/预览，provider 正文始终不可见。旧完整轮次确定性选取，保护项无法装入时提前失败；清单预算/粗估包括协议和 schema，供应商已报告用量单独关联。查询按 context 的 tenant/user 隔离，跨归属查看和审批尚未交付。
+
+Runtime 的有效限额从 Agent 默认与管理员上限取较严格值，显式 Limits 仅覆盖设置过的字段且不得放宽管理员上限；Agent.run 临时环境由应用配置限额。ScriptedModel/ScriptedStep 可从 drov.models 导入，用预定响应或事件/异常及输入检查构建离线序列，不调用外部模型。
+
 ## 一次性调用
 
 `Agent.run` 不延续历史、不写持久化文件。显式启用持久化 Memory 的定义不能走这个入口，必须使用 Runtime。动态审批/补充输入返回 failed / interaction_unavailable，待授权动作不会执行，且不会生成不可用的恢复 ID。
 
 ```python
-# API 设计片段；model、search、Answer 由应用提供。
+# T-06 可用入口；model、search、Answer 由应用提供。
 # search 需由应用声明为只读并通过相应权限检查。
 agent = Agent(
     model=model,
@@ -67,7 +71,7 @@ if result.status == "completed":
 
 ## 持久化与注册
 
-T-04 可调用 `Runtime(agents=..., storage=..., dependencies=..., owned_models=..., limits=...)` 的 open/aclose 或异步上下文。`registration(name, revision)` 返回 AgentRegistration（name/revision/fingerprint_version/config_hash）；`validate_record(record)` 是对存储载入记录的版本/指纹/必要依赖检查，不推进运行。`storage` 和 `dependencies` 只在打开时可取，dependencies 映射只读；`active_slots` 展示私有内核当前预留量。Runtime 绑定一个事件循环，关闭后不能重新打开；关闭不完整可重试 aclose。下面的 run 示例仍是待 T-06 实现的设计。
+T-04 可调用 `Runtime(agents=..., storage=..., dependencies=..., owned_models=..., limits=...)` 的 open/aclose 或异步上下文。`registration(name, revision)` 返回 AgentRegistration（name/revision/fingerprint_version/config_hash）；`validate_record(record)` 是对存储载入记录的版本/指纹/必要依赖检查，不推进运行。`storage` 和 `dependencies` 只在打开时可取，dependencies 映射只读；`active_slots` 展示私有内核当前预留量。Runtime 绑定一个事件循环，关闭后不能重新打开；关闭不完整可重试 aclose。下面的 run 示例已可使用注册的离线适配器及 read 工具执行，完整例子见 [离线检索](../../examples/README.md)。
 
 Agent 的 `model_config={...}` 用于非秘密的模型配置/版本引用，`required_dependencies=[...]` 用于声明必要依赖名。注册指纹不能检测任意函数体和未声明的客户端配置，应用仍须更新 revision；同一个 Runtime 内替换模型对象也会被拒绝，防止绕过资源所有权。缺 revision、指纹/记录 schema 不兼容或必要依赖缺失均拒绝恢复接点。
 
@@ -96,7 +100,7 @@ async with Runtime(
 装配/逆序清理、工厂返回前失败的责任、关闭宽限与保留锁规则见运行契约第 9 节及 ADR-0008。实际线程 Future 的登记与任务控制是私有内核接点，不作为应用公开执行接口。
 
 ```python
-# API 设计片段；Agent 定义与模型适配器由应用重建。
+# T-06 可用只读入口；Agent 定义与模型适配器由应用重建。
 agent = Agent(name="assistant", revision="1", model=model, tools=[search])
 caller = RunContext(tenant_id="local", user_id="alice")
 
@@ -120,7 +124,7 @@ Session 以 tenant_id、user_id、session_id 共同寻址。RunContext 不进入
 ## 流式入口
 
 ```python
-# API 设计片段；以下位于已有 Runtime 的上下文中。
+# T-06 可用流式入口；以下位于已有 Runtime 的上下文中。
 async with runtime.stream(
     agent,
     "生成报告",
@@ -197,7 +201,7 @@ assert decision.decision == "allow"
 
 PermissionPolicy(deny={...}, ask={...}, allow={...}) 保存不可变集合，支持 set/frozenset/list。decide 返回 PermissionDecision 的 decision/reason；业务 Authorizer 使用新增 execute_tool action 与 ToolResource 检查原归属及规范参数。默认 OwnerAuthorizer 只允许本人，跨用户查看/审批仍需宿主明确授权。Runtime 接收 policy/authorizer，配置引用只读，原 authorizer 对象可反映动态业务权限；当前权限会在尝试、队列等待后、派发标记提交后再次检查，allow 不覆盖否决或 required approval。
 
-真实派发目前是私有内核接点，只有 read 可执行；write/unknown 明确 not_executed/effect_not_supported，ASK 保存 prepared/approval_required 而不制造 request_id。后续 Agent.run/Runtime.start 接口尚未实现，完整审批/核查仍待 T-09。结果必须经 codec 和大小校验；非法输出不当成功，None 用内部 has_result 区分可用结果。只读瞬态错误用 `drov.errors.TransientToolError`，其他错误/超时/非法结果不自动重试。排队/线程与原子记录规则见运行契约第 4 节和 ADR-0009。
+真实派发目前是私有内核接点，只有 read 可执行；write/unknown 明确 not_executed/effect_not_supported，ASK 保存 prepared/approval_required 而不制造 request_id。T-06 已接通 Agent.run/Runtime.start 只读路径，ASK 在 Run 收尾为 failed/interaction_unavailable；完整审批/核查仍待 T-09。结果必须经 codec 和大小校验；非法输出不当成功，None 用内部 has_result 区分可用结果。只读瞬态错误用 `drov.errors.TransientToolError`，其他错误/超时/非法结果不自动重试。排队/线程与原子记录规则见运行契约第 4 节和 ADR-0009。
 
 
 ```python
@@ -238,7 +242,7 @@ policy = PermissionPolicy(allow={"memory.remember", "memory.forget"})
 
 Memory 工具仍受用户作用域与应用权限限制；allow 只在该配置启用时生效。工具成功意味着本地写入和操作结果共同提交；任务 completed 不保证模型调用了保存工具。通过 inspection 的 memory.changed 事件及测试数据验证记忆行为。
 
-ContextPolicy 管理明确的输入预算、Memory 子预算和内容处理策略。每次新的模型输入都有 ContextManifest；其选入顺序、required/best_effort 时序、删除与历史保留边界唯一规定在行为契约第 7 节。
+当前 ContextPolicy 字段为 memory_fraction/memory_max_tokens；输入预算与工具预览大小使用 Limits.max_input_tokens/output_reserve_tokens/tool_preview_bytes。T-07 在 Memory 未启用时不占用 Memory 子预算；T-08 再接入实际检索。每次新的模型输入都有 ContextManifest；其选入顺序、required/best_effort 时序、删除与历史保留边界唯一规定在行为契约第 7 节。
 
 ## 应用服务与资源
 
@@ -275,7 +279,7 @@ DrovApp 在服务生命周期内管理其创建的 Runtime；也允许接收外�
 
 ## 首期公共字段约定
 
-T-02 已将下列 DTO/配置与模型协议落成 Python 类型，并生成 [schema 文档集合](../reference/schema-v1.json)；T-13 才生成 OpenAPI，目前没有可调用服务。实际模块导出见 [定义参考](../reference/README.md)。数据值不允许任意 Python 对象；类型子集与严格校验见 [工程方案](engineering.md) / [ADR-0006](../decisions/0006-python-contracts.md)。本文的运行入口示例仍是待实现设计。
+T-02 已将下列 DTO/配置与模型协议落成 Python 类型，并生成 [schema 文档集合](../reference/schema-v1.json)；T-13 才生成 OpenAPI，目前没有可调用服务。实际模块导出见 [定义参考](../reference/README.md)。数据值不允许任意 Python 对象；类型子集与严格校验见 [工程方案](engineering.md) / [ADR-0006](../decisions/0006-python-contracts.md)。运行入口按上文实施状态使用，含 Memory/审批/服务的片段仍为设计。
 
 ### 公共配置与标识
 
@@ -301,7 +305,7 @@ T-02 已将下列 DTO/配置与模型协议落成 Python 类型，并生成 [sch
 | CancelReceipt | run_id、cancel_requested、state_version、status；状态仅为请求时快照 |
 | DurableEvent | schema_version=1、run_id、seq（从 1 递增）、state_version、type、occurred_at、durable=True、data、content_visible: bool；data 为授权后的结构化投影，不能直接序列化底层完整记录 |
 | TransientEvent | run_id、type=token.delta/stream.gap/stream.error、durable=False、data；无 durable seq，不给可补读游标；stream.error 只含安全错误码/摘要 |
-| ContextManifest | schema_version、model_call_id、run_id、agent revision、input_ref/input_hash、budget/estimator、sources、retrieval_status、content_visible: bool；source 含 id/version/kind、included、reason、transform、估算用量；正文按权限另带，原始供应商协议项不可展示 |
+| ContextManifest | schema_version、model_call_id、run_id、agent revision、input_ref/input_hash、budget/estimator/estimated_tokens、reported_usage、sources、retrieval_status、content_visible: bool；source 含 id/version/kind、included、reason、transform、估算用量；正文按权限另带，原始供应商协议项不可展示 |
 | RunInspection | snapshot、events: list[DurableEvent]、next_cursor: str 或 None、has_more: bool、context_manifests: 本页事件涉及的清单摘要；不通过一次请求返回无限事件/清单 |
 | SessionPage / SessionView | Page 含 items/next_cursor/has_more；item 为 session_id/agent_name/active_run_id/created_at/updated_at；View 加分页 runs 和对应游标，不隐式删改会话 |
 

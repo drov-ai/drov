@@ -42,6 +42,8 @@ def inspect_archives(wheel: Path, sdist: Path) -> None:
             "src/drov/py.typed",
             "pyproject.toml",
             "uv.lock",
+            "examples/research_offline.py",
+            "examples/context_preview_offline.py",
             "LICENSE",
             "THIRD_PARTY.md",
         } <= names
@@ -137,13 +139,28 @@ def main() -> None:
             )
             run([uv, "pip", "check", "--python", str(python)], temporary)
             run([str(python), "-I", "-B", str(checker), "--installed", "--no-extras"], temporary)
+            for example, example_args in (
+                (name, arguments)
+                for name in ("research_offline.py", "context_preview_offline.py")
+                for arguments in ([], ["--stream"])
+            ):
+                run(
+                    [
+                        str(python),
+                        "-I",
+                        "-B",
+                        str(ROOT / "examples" / example),
+                        *example_args,
+                    ],
+                    temporary,
+                )
 
         output = options.out_dir.resolve()
         output.mkdir(parents=True, exist_ok=True)
         for artifact in (wheel, sdist):
             shutil.copy2(artifact, output / artifact.name)
         report = {
-            "scope": "package installation/import only; no Agent runtime or live model checks",
+            "scope": "package install/import and offline SDK/stream; no live model checks",
             "python": options.python,
             "checks": "passed",
             "artifacts": {

@@ -54,7 +54,7 @@ packages = ["src/drov"]
 
 [tool.hatch.build.targets.sdist]
 only-include = [
-  "src", "tests", "scripts", "docs", "pyproject.toml", "uv.lock",
+  "src", "tests", "scripts", "examples", "docs", "pyproject.toml", "uv.lock",
   "README.md", "AGENTS.md", "LICENSE", "THIRD_PARTY.md", ".python-version",
 ]
 
@@ -68,7 +68,7 @@ select = ["E", "F", "I", "UP", "B", "ASYNC"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src", "tests", "scripts"]
+files = ["src", "tests", "scripts", "examples"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

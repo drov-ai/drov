@@ -1,4 +1,4 @@
-"""Drov definitions, storage, and runtime lifecycle. Agent execution is still pending."""
+"""Drov definitions, transactional storage, and read-only Agent runtime."""
 
 from drov.agent import Agent
 from drov.auth import OwnerAuthorizer

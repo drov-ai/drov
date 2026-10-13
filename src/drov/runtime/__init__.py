@@ -1,4 +1,4 @@
-"""Registration, resource lifecycle, and private kernel scheduling."""
+"""Unified registration, resource lifecycle, and read-only execution."""
 
 from drov.runtime.core import Runtime
 from drov.runtime.registration import AgentRegistration

@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：T-01 至 T-05 的类型、存储、生命周期和 Python 工具/权限接点已实现；Agent 循环和真实适配器仍未实现。实际范围见 [T-05 验证](../validation/t05-tools.md)。更新：2026-10-13。
+状态：T-01 至 T-07 已本地验收，含只读 Agent 闭环、上下文选择/预览/清单；Memory、真实适配器及服务仍未实现。实际范围见 [T-07 验证](../validation/t07-context.md)。更新：2026-10-13。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 
@@ -24,7 +24,7 @@
 
 Python 导入名使用 `drov`；PyPI 分发名暂定 `drov`，占用和控制权待发布准备核实。若不可用，变更分发名不自动变更导入名。npm 组织保留，v0.1 不为凑产品线发布 JS SDK。
 
-T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，Agent 执行/恢复调度尚未实现。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。
+T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；显式恢复调度尚未实现。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。
 
 以下是完整首版的目标布局。T-01 只建立元数据包、测试/构建检查和 CI，其他模块按任务创建，不以空壳占位：
 
@@ -123,7 +123,7 @@ MCP 先连接应用显式配置的本地 stdio 服务，完成初始化、分页
 
 初始文本 token 估算采用序列化内容 UTF-8 字节数 + 每次请求 256、每协议项 32 的显式粗估规则，工具 schema 和输出 schema 也计入；这是启发式估算，不是供应商精确计费或任意 tokenizer 的硬上界。ContextManifest 同时标记 estimator 与供应商已报告值，预算错误不静默改写历史。供应商报告 context overflow 时明确失败，后续可通过单独 adapter 增加 tokenizer。
 
-T-02 的 Limits 字段名和配置 schema 由 [Python 类型](../../src/drov/config.py) / [生成文档](../reference/schema-v1.json) 给出。max_input_tokens 默认 None：已知窗口在 T-07 取 min(16384, context_window - output_reserve_tokens)，未知窗口必须由应用显式给上限，Agent 定义已前置校验。None 不是取消默认安全预算。write_tool_retries 只接受整数 0；上表默认值是工程决定，不是性能承诺。
+T-02 的 Limits 字段名和配置 schema 由 [Python 类型](../../src/drov/config.py) / [生成文档](../reference/schema-v1.json) 给出。max_input_tokens 默认 None：已知窗口取 min(16384, context_window - output_reserve_tokens)，未知窗口必须由应用显式给上限，Agent 定义已前置校验。None 不是取消默认安全预算。write_tool_retries 只接受整数 0；上表默认值是工程决定，不是性能承诺。
 
 ## 7. 服务和工作台
 
@@ -136,3 +136,15 @@ T-02 的 Limits 字段名和配置 schema 由 [Python 类型](../../src/drov/con
 ## 8. 实施前与实施中分界
 
 T-01 已验证锁定依赖的本地安装组合，T-02 已验证类型、工具 schema 与归一模型协议；各集成行为仍由对应任务验证。T-01/T-02 负责把这些决定变成可导入的类型、锁文件和有意义的契约测试；发现版本不兼容时记录差异，不能偷偷切换架构。最低 Python、范围或语义变化需要同步 ADR 和验收。缺少真实 Key、发布账号或最终域名不阻塞这些任务。
+
+## T-06 落地边界
+
+RunController 连接接收、模型循环、只读工具、限额、历史和正文投影；RunEvents/RunStream 以有界临时缓冲和持久事件分页读取实现 SDK 订阅。模型瞬态重试只使用 TransientModelError，固定已保存输入、每次独立 attempt_id；ScriptedModel/ScriptedStep 为无网络离线适配器，额外调用失败。T-06 未增加依赖或改变 uv.lock。
+
+Checkpoint.engine_schema=1；model_input/model_response payload 各 schema_version=1；session_sequence 在接收事务使用 Session 版本保存，避免相同时间戳的随机 ID 打乱历史。计数及活动预留保留原 Run 事实；正常返回按实耗结算，未停止调用保留预留与资源，禁止迟到结果变成成功。T-07 已替换完整历史模式为确定性组选取/预览/清单，仍对保护输入溢出前置失败。SDK 活动订阅至多 50ms 轮询提交，durable 事件不进入无界队列。所有 ASK 当前失败，Memory/write/unknown 接收前拒绝；完整细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
+
+## T-07 落地边界
+
+内部 context/assembly.py 是无存储/模型副作用的选择器；RunController 负责已提交数据投影及输入/清单同事务。estimator 固定 utf8-json-bytes+request256+item32-v1，全请求 JSON 含工具/输出 schema 及 provider_items。源级 estimated_tokens 仅表示各自内容的 UTF-8 JSON 字节贡献，不是总估算的可加分解；总数以清单 estimated_tokens 为准。输出预留扣完窗口时 budget=0，并保留 rejected 清单。
+
+预览上限包含完整标记/引用、UTF-8 文本和 JSON 转义；当前结果在预算不足时按契约确定性缩小，历史组不改变原事实。ContextManifest 新增带默认值的 estimated_tokens/reported_usage，公共生成 schema 同步；model_input/model_response/context payload 均为 schema_version=1，无 SQLite DDL、锁或依赖变化。旧 T-06 输入未保存清单，不回填虚假来源。API/选择/权限规则见运行契约第 7 节和 [ADR-0011](../decisions/0011-context-assembly.md)。

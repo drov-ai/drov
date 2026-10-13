@@ -1,10 +1,10 @@
 # 本地开发
 
-T-01 至 T-05 已完成，包版本为 `0.1.0a0`。提供定义/类型/schema、模型协议、事务存储、Runtime 生命周期、Python 工具/权限与私有只读派发；Agent 执行入口、Memory 工具、完整审批/核查、服务与 CLI 均未实现。不要把规划中的运行片段当成可运行教程。
+T-01 至 T-07 已本地验收，包版本为 `0.1.0a0`。提供定义/类型/schema、模型协议、事务存储、Runtime 生命周期、只读 Agent 执行、Python 工具/权限及上下文选择/预览/清单；Memory 工具、完整审批/核查、服务与 CLI 均未实现。不要把规划中的运行片段当成可运行教程。
 
 ## 环境与安装
 
-最低 Python 3.11，`.python-version` 将开发默认值设为 3.11。包声明允许 Python 3.11 及以上；3.11–3.14 是目标支持矩阵，3.15 只有非阻塞探测，不能仅凭依赖解析成功宣称支持。准确验证范围见 [T-05 记录](validation/t05-tools.md)。
+最低 Python 3.11，`.python-version` 将开发默认值设为 3.11。包声明允许 Python 3.11 及以上；3.11–3.14 是目标支持矩阵，3.15 只有非阻塞探测，不能仅凭依赖解析成功宣称支持。准确验证范围见 [T-07 记录](validation/t07-context.md)。
 
 使用 uv **0.13.0**，项目配置会拒绝不同版本，升级工具须同步验证与记录。可以按 [uv 官方安装说明](https://docs.astral.sh/uv/getting-started/installation/) 安装指定版本。也可只在当前项目建立隔离工具环境，不修改系统 Python：
 
@@ -41,7 +41,7 @@ uv run --locked mypy
 uv run --locked pytest
 ```
 
-格式修改使用 `uv run --locked ruff format .`。T-02 已加入公共类型、工具 schema 和脚本适配协议测试；包级检查仍在仓库外启动独立解释器，核对版本/类型标记和导入行为。测试夹具不调用真实模型；T-04/T-05 实际运行任务、工具与可释放线程检查权限、队列、记录和所有权，不能代表 Agent 任务质量。
+格式修改使用 `uv run --locked ruff format .`。T-02 已加入公共类型、工具 schema 和脚本适配协议测试；包级检查仍在仓库外启动独立解释器，核对版本/类型标记和导入行为。测试夹具不调用真实模型；T-04/T-05 实际运行任务、工具与可释放线程检查权限、队列、记录和所有权，T-06 接入可实际执行的脚本 Agent 与合成检索示例，仍不能代表真实模型任务质量。
 
 生成 schema 与检查漂移：
 
@@ -61,7 +61,7 @@ uv run --locked python scripts/check_package.py
 uv run --locked twine check --strict dist/*.whl dist/*.tar.gz
 ```
 
-检查器从源码构建 wheel/sdist，再从 sdist 重建 wheel 并比较内容。它在两个全新环境中分别安装、检查依赖，并从仓库外验证实际 site-packages 导入、`py.typed`、版本与许可证；核心安装不包含 OpenAI/MCP/FastAPI/Uvicorn。
+检查器从源码构建 wheel/sdist，再从 sdist 重建 wheel 并比较内容。它在两个全新环境中分别安装、检查依赖，并从仓库外验证实际 site-packages 导入、`py.typed`、版本与许可证；核心安装不包含 OpenAI/MCP/FastAPI/Uvicorn；随后在仓库外用隔离解释器运行普通/流式离线检索及上下文预览示例，验证安装后的执行能力。
 
 导入检查禁用 Python 自身的字节缓存写入，阻止导入期间应用级文件写入、网络、子进程、线程和常用事件循环创建入口，并阻止可选组件导入。这是针对当前包的回归检查，不是对任意第三方 Python 代码的安全沙箱证明。
 
@@ -75,6 +75,6 @@ uv run --locked python scripts/check_package.py --python /path/to/python
 
 ## CI 与变更记录
 
-CI 使用只读仓库权限，无发布或凭据步骤；Actions 固定到上游 commit，uv 与本地版本一致。Linux 配置 3.11–3.14，macOS/Windows 各配置 3.11/3.14；另有非阻塞 3.15 探测。T-03 的远程 CI 已运行通过；T-05 的准确提交及矩阵结果见验证记录，不把旧 CI 用作新代码通过证据。
+CI 使用只读仓库权限，无发布或凭据步骤；Actions 固定到上游 commit，uv 与本地版本一致。Linux 配置 3.11–3.14，macOS/Windows 各配置 3.11/3.14；另有非阻塞 3.15 探测。T-03 的远程 CI 已运行通过；T-05 的准确提交及矩阵结果见验证记录，T-06/07 当前只做本地验证，没有推送或运行新远程 CI，不把旧 CI 用作新代码通过证据。
 
 每轮按 [协作规则](../AGENTS.md) 更新进度、受影响契约和验证记录；新会话按 [交接说明](handoff.md) 恢复工作。上游依赖与源码复用入口见 [THIRD_PARTY](../THIRD_PARTY.md)。下一项以 [progress](planning/progress.md) 为准。

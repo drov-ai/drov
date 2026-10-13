@@ -1,6 +1,6 @@
 # 运行行为契约 v3
 
-状态：P4 实施基线；T-03 存储原语、T-04 注册/资源与私有任务、T-05 只读工具/权限/原子记录已验证；完整 Agent/交互/恢复行为尚未实现。T-05 细化见 [ADR-0009](../decisions/0009-python-tools.md)。更新：2026-10-13。
+状态：P4 实施基线；T-03 至 T-07 已本地验证事务存储、资源/任务、只读 Agent 闭环、正文授权、SDK 订阅及上下文选择/清单；Memory、交互/显式恢复、HTTP 和真实模型尚未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-13。
 
 本文是 Drov 自己拟采用的行为规则，不是竞品能力声明或已通过的测试报告。关联 C-01 至 C-15 和 Q-API-01 至 Q-API-08；模块归属见 [架构](architecture.md)，用户调用见 [API](api-draft.md)，默认数值见 [工程方案](engineering.md)。子运行内容为后续 C-16 契约，v0.1 不提供该能力。
 
@@ -8,7 +8,7 @@
 
 所有入口使用同一执行内核。`Runtime.start` 接收并保存运行后返回 RunRef；`run` 是 start + wait，`stream` 是 start + subscribe；HTTP 使用 start 后以独立请求取得事件或结果。
 
-Runtime 拥有执行任务并保留强引用；等待层须隔离调用者取消向执行任务的直接传播。调用者取消等待、关闭流订阅或 HTTP 断连，均只解除订阅/等待，不等于取消执行；必须显式 `cancel`。Runtime 退出时执行第 9 节的关闭协议，不能产生无人管理的执行任务。Python 语义依据为 [E-07](evidence.md)，T-04 已验证私有内核任务/等待/真实底层调用引用；SDK 流与 HTTP 断连仍由 T-06/T-13 验证。
+Runtime 拥有执行任务并保留强引用；等待层须隔离调用者取消向执行任务的直接传播。调用者取消等待、关闭流订阅或 HTTP 断连，均只解除订阅/等待，不等于取消执行；必须显式 `cancel`。Runtime 退出时执行第 9 节的关闭协议，不能产生无人管理的执行任务。Python 语义依据为 [E-07](evidence.md)，T-04 已验证私有内核任务/等待/真实底层调用引用；T-06 已验证 SDK wait/stream 退出与显式 cancel；HTTP 断连由 T-13 验证。
 
 `Agent.run` 创建临时内存运行环境，默认无会话延续、长期记忆或可恢复交互。配置持久化 Memory 时提前抛出 ConfigurationError，要求显式 Runtime。动态遇到审批/补充输入时，返回 `failed / interaction_unavailable`，附非可恢复的交互说明；对应待授权工具不执行，不生成暗示可恢复的 request_id。此前已发生的合法操作仍保留在结果说明中。
 
@@ -78,7 +78,7 @@ HTTP SSE 使用 `run_id:seq` 作为持久化事件游标，可重送，由客户
 
 ## 4. 工具执行、重试与未知结果
 
-T-05 已实现 @tool/PythonTool 和私有只读派发接点：同步工具先有界排队再派发，异步工具保留真实 Task；OperationJournal 同事务保存操作/Run 摘要、检查点、事件和 tool_dispatch_count 预算预留。每个重试只有显式 TransientToolError 才允许，超时/非法输出不重试。已有 operation_id 返回旧事实，不自动批准或重做；完整计划提交、Run 收尾和交互仍由 T-06/T-09 接入。write/unknown 在本轮明确拒绝实际派发。
+T-05 已实现 @tool/PythonTool 和私有只读派发接点：同步工具先有界排队再派发，异步工具保留真实 Task；OperationJournal 同事务保存操作/Run 摘要、检查点、事件和 tool_dispatch_count 预算预留。每个重试只有显式 TransientToolError 才允许，超时/非法输出不重试。已有 operation_id 返回旧事实，不自动批准或重做；T-06 已接入完整计划提交与只读 Run 收尾；交互仍由 T-09 接入。write/unknown 在公共入口接收前拒绝。
 
 工具先完成 schema 校验和权限判断，再执行。参数被校验后规范化为确定性的 JSON 值：键排序、禁止 NaN/Infinity、保留值类型；首期不隐式转换 datetime 等非 JSON 类型，应用须显式转为受支持的表示。调用摘要包含工具名/版本、参数、归属和目标操作标识；不能仅 hash 提示词。
 
@@ -143,7 +143,7 @@ ToolContext 由内核注入，包含已验证归属、run_id、operation_id 和�
 
 ### 7.1 模型输入装配
 
-Session 历史是已提交消息事实的投影：接收事务只追加一次用户输入；完整模型计划和实际工具结果随步骤提交，以稳定记录 ID 引用，不能在每次检查点复制后又重复拼接。模型未完成的流不进入历史。只有当前计划各调用都有明确结果，才允许下一次模型请求。
+Session 历史是已提交消息事实的投影：接收 RunRecord.input 是用户输入的唯一事实，Checkpoint.session_sequence 同事务保存以保持会话顺序，不依赖相同墙钟时间戳的 UUID 顺序；完整模型计划和实际工具结果随步骤提交，以稳定记录 ID 引用，不能在每次检查点复制后又重复拼接。模型未完成的流不进入历史。只有当前计划各调用都有明确结果，才允许下一次模型请求。
 
 failed/cancelled 结束时，对计划内从未派发的调用记录 not_executed 及原因，保留实际结果和未知效果说明；这些结束记录不是可重试的执行检查点。终态与会话投影游标同事务提交，下一 Run 使用完整的调用/结果组，不拼接半个计划。显式 data_abandoned 也保留 indeterminate 事实，不合成成功或“未执行”结论。历史 schema/协议不兼容时在模型调用前报错，不重写旧事实；裁剪以完整组为单位。
 
@@ -153,11 +153,15 @@ failed/cancelled 结束时，对计划内从未派发的调用记录 not_execute
 
 必须保留的部分包括系统规则、当前工具 schema、当前用户请求和协议要求的完整消息/工具结果关系。完整工具调用与结果成组处理，不能裁掉一半导致协议失配。保留部分已超预算时，模型调用前失败为 context_overflow。
 
-余量先按明确的 Memory 子预算纳入检索记忆，再选择最近的完整历史组；当前工具结果按结果大小策略保留预览/引用，必须标注来源和处理方式。v0.1 只提供确定性的裁剪与结果截断；模型生成压缩摘要移到后续，届时也必须显式启用并记录调用、错误与消耗。
+余量先按明确的 Memory 子预算纳入检索记忆，再选择最近的完整历史组；Memory 未启用时不保留空置份额。一个旧 Run 的输入、完整响应、工具结果及对应 provider_items 是一个组；按最近到最旧尝试，装不下的组排除后继续尝试更旧组，最后按原顺序排列。当前 Run 的输入及所有已提交协议链均保护。当前工具结果按结果大小策略保留预览/引用，必须标注来源和处理方式。v0.1 只提供确定性的裁剪与结果截断；模型生成压缩摘要移到后续，届时也必须显式启用并记录调用、错误与消耗。
 
 输入预算从模型能力和应用上限计算并预留输出空间；模型上限未知且未配置应用上限时拒绝猜测。默认数值及粗估算法在 [工程方案](engineering.md)，选择顺序与溢出行为在此固定；估算不能冒充供应商精确 token 计数。
 
 检查视图记录来源 ID/版本、估算或报告的 token 数、选入/排除及原因、截断/压缩操作、记忆检索结果状态。不能承诺展示模型未公开的内部思维。
+
+T-06 已交付完整历史投影及固定模型输入；内部 model_input/model_response payload schema_version=1，完整响应与所有稳定 operation_id 先提交再派发，provider_items 仅内部往返。终态事务将 prepared 操作保存为 not_executed；计划中尚未创建的调用在历史中依据终态投影为 run_ended_before_dispatch。临时增量不入历史。T-07 已接入完整组选取、预览和 ContextManifest。工具预览是带 source_ref/source_version、sha256、original_bytes、truncated 的 drov.tool_preview 文本摘录，绝不把半段 JSON 当原结果；原始工具记录保留。保护输入超预算时，当前结果的共享预览上限依次减半至引用/标记所需最小值；标记或其他保护项仍无法装入就前置失败。历史结果按配置上限预览，整组不合预算就排除。
+
+候选读取、model_input/context（payload schema_version=1）、事件和检查点同事务保存；提交失败无模型调用。context_overflow 仍保存 rejected 的固定输入/清单及 context.prepared（带 error_code），模型步/attempt 计数不增加。重试不改变输入 hash/清单。来源正文只包含选入的处理后消息，排除项仅保留元数据，provider 正文从不展示。estimated_tokens 是全请求粗估，reported_usage 关联已提交完整响应，未知不填 0，且不改写装配快照。get_context 默认元数据、读取后复核权限；context.prepared 保存固定大小摘要；inspect 只索引当前事件页，索引不读取完整输入/清单，reported_usage 保留装配时的未知值，详细 sources/已报告用量由 get_context 读取。T-06 无摘要事件不生成伪索引，状态/事件仍可读。见 [ADR-0011](../decisions/0011-context-assembly.md) / [T-07 验证](../validation/t07-context.md)。
 
 ### 7.2 读取策略
 
@@ -187,6 +191,8 @@ forget 使对应当前记忆不再参与后续检索，不等于删除既有对�
 
 凭据不进入普通消息、操作参数和导出器；内容脱敏、授权、保留与删除规则在 [维护策略](release-policy.md)。删除恢复必需数据后明确将对应运行标记为不可恢复，不静默编造缺失内容。
 
+T-06 的正文查询按 context 的 tenant/user 作用域，包含结果投影和每次事件发送的动态复核；跨归属查看/审批及服务身份解析尚未交付。SDK 订阅只将临时增量放入有界队列，durable 事件从存储分页补读，至多 50ms 轮询活动执行的提交；追平当前暂停/终态才结束。未知事件不展示任意载荷。当前所有 ASK 均 failed/interaction_unavailable，无实际交互 ID；T-09 再提供持久交互和显式恢复。
+
 ## 8. 进程恢复与版本兼容
 
 新 Runtime 获得排他存储所有权后扫描未结束记录，不自动重启所有外部动作。原 suspended 请求保留；accepted/running 变为 suspended / recovery，已派发且结果未知的写入优先变为 reconciliation。
@@ -199,7 +205,7 @@ forget 使对应当前记忆不再参与后续检索，不等于删除既有对�
 
 ## 9. 超时、取消和退出
 
-T-04 已实现资源生命周期、私有任务控制和槽位原语，见 [ADR-0008](../decisions/0008-runtime-ownership.md)。私有取消标志不等于已保存 Run.cancel_requested；本节完整状态/操作/限额规则仍由 T-06/T-09/T-10 接入事务验证。已派发调用必须登记真实 Future，取消后的包装 Task 不能用作实际调用已结束的证据。
+T-04 已实现资源生命周期、私有任务控制和槽位原语，见 [ADR-0008](../decisions/0008-runtime-ownership.md)。T-06 将公开只读 cancel、模型/工具/活动预算接入事务；完整恢复及未知写入仍由 T-09/T-10 验证。已派发调用必须登记真实 Future，取消后的包装 Task 不能用作实际调用已结束的证据。
 
 每次模型/工具调用、单次推进和整个 Run 的累计执行都有明确预算；人工等待不消耗活动执行时间，但请求有效期与可配置总墙钟期限仍生效。默认数值与崩溃后的保守预算结算见工程方案；重启不重置计数。终态费用只能标识已知消耗，超时/取消可能仍有供应商计费。
 

@@ -2,9 +2,9 @@
 
 面向 Python 开发者的通用 Agent 框架，目标是以少量核心概念提供完整、可组合的能力，并让开发、调试和服务化使用一致的运行机制。
 
-**当前阶段：T-05 Python 工具与权限已实现，本地开发版本 `0.1.0a0`。** 包提供类型/schema、模型协议、事务存储、Runtime 注册/资源生命周期、@tool/权限判断及私有只读工具派发与事务记录；Agent 执行入口、Memory 工具、完整审批/核查与服务仍未实现，没有公开发布包或真实模型评测结果。
+**当前阶段：T-07 可检查上下文已完成本地验收，开发版本 `0.1.0a0`。** 包提供类型/schema、模型协议、事务存储、Runtime 注册/资源、Python 工具/权限、只读 Agent 执行、授权结果/事件读取和上下文选择/预览/来源清单。Memory、完整审批/恢复、真实模型与服务尚未实现；尚未公开发布包或获得真实模型评测结果。
 
-P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-05 验证记录](docs/validation/t05-tools.md)。下一项任务为 T-06 离线运行闭环；换会话方法见 [交接说明](docs/handoff.md)。
+P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-07 验证记录](docs/validation/t07-context.md)。下一项任务为 T-08 内置 Memory；换会话方法见 [交接说明](docs/handoff.md)。
 
 ## 本地开发
 
@@ -22,6 +22,15 @@ uv run --locked pytest
 uv run --locked python scripts/check_package.py
 uv run --locked twine check --strict dist/*.whl dist/*.tar.gz
 ```
+
+可直接运行 [离线检索示例](examples/README.md)，使用真实本地检索工具、预设 ScriptedModel 和严格 Report 输出：
+
+```sh
+uv run --locked python examples/research_offline.py
+uv run --locked python examples/research_offline.py --stream
+```
+
+预设回答只验证运行契约，不证明模型推理质量。当前仅支持 read 工具，ASK 明确失败，Memory/write/unknown 配置接收前拒绝；上下文裁剪/预览和来源清单已接入 get_context，Memory 下一项交付。
 
 这些操作不需要 API Key。构件生成在本地 `dist/`，不会发布到 PyPI。extras 当前仅声明依赖，尚无对应适配器实现。
 

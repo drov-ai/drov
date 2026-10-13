@@ -61,9 +61,9 @@ def test_constructor_is_inert_and_has_no_execution_placeholders(tmp_path: Path) 
     runtime = Runtime(agents=[agent], storage=SQLiteStorage(tmp_path / "no-file.db"))
     assert not (tmp_path / "no-file.db").exists()
     assert agent.model.calls == []  # type: ignore[attr-defined]
-    for name in ("run", "start", "wait", "cancel", "recover", "stream"):
+    for name in ("recover", "respond", "resume", "verify"):
         assert not hasattr(runtime, name)
-    assert not hasattr(agent, "run")
+    assert callable(agent.run)
 
 
 def test_duplicate_missing_identity_and_owned_model_validation() -> None:

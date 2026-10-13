@@ -269,11 +269,7 @@ class Transaction:
             self._secret, canonical_json(value).encode("utf-8"), hashlib.sha256
         ).hexdigest()
 
-    @_mutation
-    async def start(self, request: StartRequest, *, max_unfinished: int = 1000) -> RunRef:
-        self._check()
-        request = StartRequest.model_validate(request)
-        TypeAdapter(PositiveInt).validate_python(max_unfinished, strict=True)
+    def _start_identity(self, request: StartRequest) -> tuple[str | None, str]:
         scope = request.scope
         key_hash = (
             self._digest(
@@ -300,14 +296,33 @@ class Transaction:
                 ),
             }
         )
+        return key_hash, fingerprint
+
+    async def lookup_start(self, request: StartRequest) -> RunRef | None:
+        """Check dedup before Runtime reserves a slot, within the same transaction."""
+        self._check()
+        request = StartRequest.model_validate(request)
+        key_hash, fingerprint = self._start_identity(request)
         if key_hash is not None:
             previous = await self._get(
-                StartKeyRecord, "start_key", scope, scope.session_id, key_hash
+                StartKeyRecord, "start_key", request.scope, request.scope.session_id, key_hash
             )
             if previous is not None:
                 if not hmac.compare_digest(previous.fingerprint, fingerprint):
                     raise Conflict("Request key was already used with different input")
                 return previous.ref
+        return None
+
+    @_mutation
+    async def start(self, request: StartRequest, *, max_unfinished: int = 1000) -> RunRef:
+        self._check()
+        request = StartRequest.model_validate(request)
+        TypeAdapter(PositiveInt).validate_python(max_unfinished, strict=True)
+        scope = request.scope
+        key_hash, fingerprint = self._start_identity(request)
+        previous = await self.lookup_start(request)
+        if previous is not None:
+            return previous
         try:
             session = await self.get_session(scope)
         except RecordNotFound:
@@ -367,7 +382,9 @@ class Transaction:
             )
         )
         checkpoint = Checkpoint(
-            **ref.model_dump(), cursor="accepted", data={"input_ref": f"run:{run_id}:input"}
+            **ref.model_dump(),
+            cursor="accepted",
+            data={"input_ref": f"run:{run_id}:input", "session_sequence": new_session.version},
         )
         await self._driver.insert(_row("checkpoint", scope, run_id, "current", checkpoint))
         event = EventRecord(

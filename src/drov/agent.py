@@ -1,7 +1,9 @@
-"""Reusable Agent definition. Execution/lifecycle is deliberately a later task."""
+"""Reusable Agent definition with temporary entry points using the same Runtime."""
 
+import asyncio
 from collections.abc import Mapping, Sequence
 from typing import Generic, TypeVar, cast
+from uuid import uuid4
 
 from pydantic import TypeAdapter
 
@@ -10,7 +12,7 @@ from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.errors import ConfigurationError
 from drov.models.protocol import ModelAdapter
 from drov.tools.schema import ToolDefinition, compile_output
-from drov.types import ScopedIdentifier
+from drov.types import RunContext, RunOutcome, ScopedIdentifier
 
 T = TypeVar("T")
 
@@ -97,3 +99,52 @@ class Agent(Generic[T]):
         if self.name is None or self.revision is None:
             raise ConfigurationError("Persistent registration requires Agent name and revision")
         return self.name, self.revision
+
+    async def run(
+        self,
+        input: str,
+        *,
+        context: RunContext | None = None,
+        limits: Limits | None = None,
+    ) -> RunOutcome[T]:
+        from drov.runtime.core import Runtime
+
+        if self.memory is not None:
+            raise ConfigurationError("Temporary Agent.run cannot use persistent Memory")
+        # Clone identity only; never mutate a definition borrowed by an existing Runtime.
+        temporary = Agent(
+            model=self.model,
+            name=self.name or "temporary",
+            revision=self.revision or "1",
+            instructions=self.instructions,
+            tools=self.tools,
+            output_type=self.output_type,
+            context_policy=self.context_policy,
+            limits=self.limits,
+            model_config=self.model_config,
+            required_dependencies=self.required_dependencies,
+        )
+        temporary_limits = Limits.model_validate(
+            self.limits.model_dump() | (limits.model_dump(exclude_unset=True) if limits else {})
+        )
+        async with Runtime(agents=[temporary], limits=temporary_limits) as runtime:
+            return await runtime.run(
+                temporary,
+                input,
+                session_id=str(uuid4()),
+                context=context or RunContext(tenant_id="local", user_id="local"),
+                limits=limits,
+            )
+
+    def run_sync(
+        self,
+        input: str,
+        *,
+        context: RunContext | None = None,
+        limits: Limits | None = None,
+    ) -> RunOutcome[T]:
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(self.run(input, context=context, limits=limits))
+        raise ConfigurationError("An event loop is running; use await agent.run(...) instead")
