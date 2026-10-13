@@ -1,10 +1,11 @@
 """Reusable Agent definition. Execution/lifecycle is deliberately a later task."""
 
-from collections.abc import Sequence
-from typing import Generic, TypeVar
+from collections.abc import Mapping, Sequence
+from typing import Generic, TypeVar, cast
 
 from pydantic import TypeAdapter
 
+from drov._json import StrictJson, canonical_json, load_json
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.errors import ConfigurationError
 from drov.models.protocol import ModelAdapter
@@ -27,6 +28,8 @@ class Agent(Generic[T]):
         memory: Memory | None = None,
         context_policy: ContextPolicy | None = None,
         limits: Limits | None = None,
+        model_config: Mapping[str, StrictJson] | None = None,
+        required_dependencies: Sequence[str] = (),
     ) -> None:
         if not isinstance(model, ModelAdapter):
             raise ConfigurationError("model must implement ModelAdapter")
@@ -78,6 +81,17 @@ class Agent(Generic[T]):
             else ContextPolicy.model_validate(context_policy)
         )
         self.limits = limits
+        # Only application-declared, non-secret configuration; never inspect client internals.
+        self.model_config = cast(
+            dict[str, StrictJson], load_json(canonical_json(dict(model_config or {})))
+        )
+        if isinstance(required_dependencies, (str, bytes)):
+            raise ConfigurationError("required_dependencies must be a sequence of names")
+        for dependency in required_dependencies:
+            TypeAdapter(ScopedIdentifier).validate_python(dependency, strict=True)
+        if len(set(required_dependencies)) != len(required_dependencies):
+            raise ConfigurationError("Duplicate required dependency names")
+        self.required_dependencies = tuple(required_dependencies)
 
     def require_registration_identity(self) -> tuple[str, str]:
         if self.name is None or self.revision is None:

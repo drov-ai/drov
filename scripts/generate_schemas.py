@@ -10,6 +10,7 @@ from pydantic import TypeAdapter
 from drov.auth import Resource
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
+from drov.runtime import AgentRegistration
 from drov.storage.sqlite import DDL, RECORD_VERSION, SCHEMA_VERSION
 from drov.types import (
     CancelReceipt,
@@ -53,6 +54,7 @@ def schema_text() -> str:
         "ContextPolicy": ContextPolicy,
         "Memory": Memory,
         "Resource": Resource,
+        "AgentRegistration": AgentRegistration,
     }
     bundle = {
         "schema_version": 1,

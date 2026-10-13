@@ -2,6 +2,41 @@
   "description": "Independent JSON Schema documents; cross-field invariants also require Python validation.",
   "schema_version": 1,
   "schemas": {
+    "AgentRegistration": {
+      "additionalProperties": false,
+      "properties": {
+        "config_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Config Hash",
+          "type": "string"
+        },
+        "fingerprint_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Fingerprint Version",
+          "type": "integer"
+        },
+        "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "revision",
+        "config_hash"
+      ],
+      "title": "AgentRegistration",
+      "type": "object"
+    },
     "CancelReceipt": {
       "additionalProperties": false,
       "properties": {

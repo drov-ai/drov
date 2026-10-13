@@ -1,6 +1,6 @@
 # 实施前规划导航
 
-状态：P1 至 P4 完成，T-01 工程骨架、T-02 类型/协议和 T-03 存储已交付；下一轮 T-04。Agent 运行能力尚未实现。日期：2026-10-13（Asia/Shanghai）。
+状态：P1 至 P4 完成，T-01 工程骨架、T-02 类型/协议和 T-03 存储、T-04 注册与资源已交付；下一轮 T-05。Agent 运行能力尚未实现。日期：2026-10-13（Asia/Shanghai）。
 
 ## 当前共识
 
@@ -28,6 +28,7 @@ Drov 面向通用 Agent 应用，以 Python 为主要语言、AgentScope 2.0 为
 | 15 | [运行内核](../decisions/0002-unified-runtime.md) / [上下文记忆](../decisions/0003-context-and-memory.md) / [首版工程](../decisions/0004-first-release-engineering.md) / [控制与查看](../decisions/0005-control-and-observation.md) | 采用了什么工作设计，有什么代价？ |
 | 16 | [Python 类型契约](../decisions/0006-python-contracts.md) / [已实现定义](../reference/README.md) / [会话交接](../handoff.md) | 类型子集怎样落地，换会话怎样恢复实施？ |
 | 17 | [事务存储决定](../decisions/0007-transactional-storage.md) | 存储、去重、取消与所有权怎样保持一致？ |
+| 18 | [注册与所有权决定](../decisions/0008-runtime-ownership.md) | 指纹、任务及资源生命周期怎样落地？ |
 
 ## 状态词约定
 
@@ -49,7 +50,7 @@ P1 至 P4 文档完成只表示设计和实施准备通过审查，不表示 API
        外部证据 E / 差异化假设 H
 ```
 
-G、C、S、X、B、E、H 标识在对应源文档定义。B-01 至 B-15 都是未来运行测试要求；B-14 已延后。T-01 至 T-18 在实施任务中定义，当前 T-01 至 T-03 完成；状态在 progress，实际证据见 [T-03 验证](../validation/t03-storage.md)。新会话方法见 [交接说明](../handoff.md)。质量计划建立映射，不另改需求含义。
+G、C、S、X、B、E、H 标识在对应源文档定义。B-01 至 B-15 都是未来运行测试要求；B-14 已延后。T-01 至 T-18 在实施任务中定义，当前 T-01 至 T-04 完成；状态在 progress，实际证据见 [T-04 验证](../validation/t04-runtime.md)。新会话方法见 [交接说明](../handoff.md)。质量计划建立映射，不另改需求含义。
 
 ## 规划边界
 

@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 数据类型/协议已实现可本地导入，运行入口仍未实现。v3 的控制和查看语义见 [ADR-0005](../decisions/0005-control-and-observation.md)。更新：2026-10-13。
+状态：P4 v3 基线；T-02 类型/协议、T-03 存储、T-04 Runtime 注册/资源生命周期已实现；Agent 执行入口仍未实现。v3 控制与查看见 [ADR-0005](../decisions/0005-control-and-observation.md)，T-04 细化见 [ADR-0008](../decisions/0008-runtime-ownership.md)。更新：2026-10-13。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -66,6 +66,34 @@ if result.status == "completed":
 工具默认为 unknown effect；纯检索工具应明确声明 read。审批不可用时不能通过默认放行来让入门示例“看起来能运行”。
 
 ## 持久化与注册
+
+T-04 可调用 `Runtime(agents=..., storage=..., dependencies=..., owned_models=..., limits=...)` 的 open/aclose 或异步上下文。`registration(name, revision)` 返回 AgentRegistration（name/revision/fingerprint_version/config_hash）；`validate_record(record)` 是对存储载入记录的版本/指纹/必要依赖检查，不推进运行。`storage` 和 `dependencies` 只在打开时可取，dependencies 映射只读；`active_slots` 展示私有内核当前预留量。Runtime 绑定一个事件循环，关闭后不能重新打开；关闭不完整可重试 aclose。下面的 run 示例仍是待 T-06 实现的设计。
+
+Agent 的 `model_config={...}` 用于非秘密的模型配置/版本引用，`required_dependencies=[...]` 用于声明必要依赖名。注册指纹不能检测任意函数体和未声明的客户端配置，应用仍须更新 revision；同一个 Runtime 内替换模型对象也会被拒绝，防止绕过资源所有权。缺 revision、指纹/记录 schema 不兼容或必要依赖缺失均拒绝恢复接点。
+
+未打开的 Storage 默认是 Runtime 自有描述；传入已打开实例默认借用。模型和 dependencies 中的现有客户端默认借用，`owned_models=[agent.model]` 显式转交模型所有权。`ResourceBinding.borrowed(value)` / `.owned(value, close=...)` 显式选择所有权，`.factory(create, close=...)` 在 open 时异步创建自有存储或依赖。自有对象默认调用 aclose；也可提供异步 close(value)。借用存储必须已打开，宿主负责它的最终关闭。不要在 Runtime 构造后自行改变所传对象的打开/关闭状态。
+
+```python
+# T-04 生命周期片段；model/items/create_client 由应用提供，不执行 Agent。
+from drov import Agent, ResourceBinding, Runtime, SQLiteStorage
+
+agent = Agent(
+    name="assistant",
+    revision="1",
+    model=model,
+    model_config={"model_id": "application-config-v1"},
+    required_dependencies=["items", "client"],
+)
+async with Runtime(
+    agents=[agent],
+    storage=SQLiteStorage("drov.db"),
+    dependencies={"items": items, "client": ResourceBinding.factory(create_client)},
+) as runtime:
+    registration = runtime.registration("assistant", "1")
+    assert runtime.dependencies["items"] is items
+```
+
+装配/逆序清理、工厂返回前失败的责任、关闭宽限与保留锁规则见运行契约第 9 节及 ADR-0008。实际线程 Future 的登记与任务控制是私有内核接点，不作为应用公开执行接口。
 
 ```python
 # API 设计片段；Agent 定义与模型适配器由应用重建。

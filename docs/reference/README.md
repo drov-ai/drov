@@ -1,19 +1,20 @@
 # 已实现的定义与数据契约
 
-T-02/T-03 提供类型、校验、协议和内存/SQLite 事务存储，尚无 Runtime、Agent.run、@tool 或真实模型适配器。公共入口语义仍以 [API 草案](../planning/api-draft.md) 为准。实际边界见 [ADR-0006](../decisions/0006-python-contracts.md)。
+T-02 至 T-04 提供类型/schema、协议、事务存储与 Runtime 注册/资源生命周期，尚无 Agent 执行入口、@tool 或真实模型适配器。公共入口语义仍以 [API 草案](../planning/api-draft.md) 为准。实际边界见 [ADR-0006](../decisions/0006-python-contracts.md)。
 
 ## 模块入口
 
 | 入口 | 已实现内容 |
 | --- | --- |
-| drov | Agent 定义、Limits/ModelCapabilities/ContextPolicy/Memory 配置描述、RunContext/ToolContext、四类结果、三类交互响应 |
+| drov | Agent 定义、Limits/ModelCapabilities/ContextPolicy/Memory 配置描述、RunContext/ToolContext、四类结果、三类交互响应、Runtime/ResourceBinding |
+| drov.runtime | Runtime open/aclose/异步上下文、registration/validate_record、storage/dependencies/active_slots；AgentRegistration/ResourceBinding；没有运行或恢复入口 |
 | drov.types | 状态/结果/交互/事件/上下文/分页 DTO、Usage、RunError、parse_outcome/parse_response/parse_event、outcome_adapter |
 | drov.models.protocol | ModelAdapter、ModelRequest/Response、消息/工具调用、delta/complete、collect_response |
 | drov.tools.schema | compile_tool、compile_type、compile_output、strict_schema、ToolDefinition/JsonCodec |
 | drov.auth / drov.errors | 异步身份/授权协议与类型化异常；不代表已有权限引擎或服务 |
 | drov.storage | MemoryStorage / SQLiteStorage；异步 open/aclose、start/查询、原子 transaction 接点；内部协议尚不稳定 |
 
-Memory 是配置对象，MemoryStorage 是事务内存后端；模型 Memory 工具和检索装配尚未实现；Agent 只定义行为，构造不会执行。存储描述只在 open/异步上下文进入时获取连接和锁；完整记录只能交给未来内核做授权投影，不能直接作为 API 响应。工具描述通过 compile_tool 创建，T-05 才添加装饰器与调用管理。provider_items 仅供适配器往返，不用于向用户显示内部协议数据。
+Memory 是配置对象，MemoryStorage 是事务内存后端；模型 Memory 工具和检索装配尚未实现；Agent 只定义行为，构造不会执行。存储描述只在 open/异步上下文进入时获取连接和锁；完整记录只能交给后续内核做授权投影，不能直接作为 API 响应。工具描述通过 compile_tool 创建，T-05 才添加装饰器与调用管理。provider_items 仅供适配器往返，不用于向用户显示内部协议数据。
 
 ## 生成与校验
 

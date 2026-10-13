@@ -33,6 +33,11 @@ class Storage(ABC):
     @abstractmethod
     async def open(self) -> None: ...
 
+    @property
+    def is_open(self) -> bool:
+        """Whether this instance is open; uncertain transactions can still block use."""
+        return self._opened
+
     @abstractmethod
     async def aclose(self) -> None: ...
 

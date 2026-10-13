@@ -1,7 +1,8 @@
-"""Drov definitions and contracts. Runtime execution is not implemented yet."""
+"""Drov definitions, storage, and runtime lifecycle. Agent execution is still pending."""
 
 from drov.agent import Agent
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
+from drov.runtime import ResourceBinding, Runtime
 from drov.storage import MemoryStorage, SQLiteStorage
 from drov.tools.schema import ToolContext
 from drov.types import (
@@ -30,7 +31,9 @@ __all__ = [
     "MemoryStorage",
     "ModelCapabilities",
     "ReconciliationDecision",
+    "ResourceBinding",
     "RunContext",
+    "Runtime",
     "SQLiteStorage",
     "Suspended",
     "ToolContext",

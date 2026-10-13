@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：T-01 已建立包、依赖锁与检查配置；运行内核和适配器仍未实现。实际安装范围见 [T-01 验证](../validation/t01-engineering.md)。更新：2026-10-13。
+状态：T-01 至 T-04 的类型、存储和生命周期已实现；Agent 循环和真实适配器仍未实现。实际范围见 [T-04 验证](../validation/t04-runtime.md)。更新：2026-10-13。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 
@@ -18,13 +18,13 @@
 | 项目工具 | uv、Hatchling；Ruff、mypy、pytest、pytest-asyncio | 开发锁文件、标准 wheel/sdist、异步回归；需要的 HTTP/浏览器测试依赖放开发组 |
 | 官网文档 | MkDocs 静态构建 + 自定义首页/主题样式，Cloudflare Pages | 官网和文档共用导航、版本与品牌素材；不把 Python Runtime 部署在静态站点中 |
 
-依据：[E-09 至 E-23](evidence.md)。T-01 已解析并在仓库生成精确 `uv.lock`，安装检查不等于运行时集成兼容；Git 尚未提交。T-14 再生成前端锁文件。库的依赖下界从实际安装的版本开始，范围内其他版本仍需后续兼容检查；锁文件用于开发/CI，用户安装库不会自动继承开发锁。后续适配任务补充最低版本与锁定版本的协议/行为测试，不能只测试维护者电脑。
+依据：[E-09 至 E-23](evidence.md)。T-01 已解析并在仓库生成精确 `uv.lock`，安装检查不等于运行时集成兼容；已提交与 CI 状态见 progress。T-14 再生成前端锁文件。库的依赖下界从实际安装的版本开始，范围内其他版本仍需后续兼容检查；锁文件用于开发/CI，用户安装库不会自动继承开发锁。后续适配任务补充最低版本与锁定版本的协议/行为测试，不能只测试维护者电脑。
 
 ## 2. 一个 Python 分发包，按需安装
 
 Python 导入名使用 `drov`；PyPI 分发名暂定 `drov`，占用和控制权待发布准备核实。若不可用，变更分发名不自动变更导入名。npm 组织保留，v0.1 不为凑产品线发布 JS SDK。
 
-T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，Runtime/恢复调度尚未实现。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。
+T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，Agent 执行/恢复调度尚未实现。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。
 
 以下是完整首版的目标布局。T-01 只建立元数据包、测试/构建检查和 CI，其他模块按任务创建，不以空壳占位：
 
