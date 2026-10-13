@@ -154,6 +154,8 @@ def main() -> None:
                         str(python),
                         "-I",
                         "-B",
+                        "-X",
+                        "utf8",
                         str(ROOT / "examples" / example),
                         *example_args,
                     ],

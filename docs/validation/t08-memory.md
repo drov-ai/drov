@@ -51,6 +51,12 @@ git diff --check
 
 两解释器分别完成 wheel/sdist 构建、从 sdist 重建并比较 wheel payload；各在两个干净核心环境安装/兼容/隔离导入检查，再从仓库外运行检索、预览及 Memory 三个示例的普通/stream 入口。共四个干净安装，Memory 各运行七个独立子进程。构件与 package-check.json 保存在 dist/ 和 .drov/dist-py314/，未上传。文档相对链接、Python 片段语法、状态/引用及变更范围凭据模式计数检查保存到 `.drov/t08-doc-check.json`；模式检查不证明任意秘密均被识别，环境文件/真实密钥不读取。
 
+## 远程 CI 与跨平台修正
+
+T-08 首次实现提交 [d997f17](https://github.com/drov-ai/drov/commit/d997f17f7bcf34f6ceea170b378fab956240923b) 已推送 main，包含原本只在本地的 T-06/07 提交。首轮 [CI 38412265349](https://github.com/drov-ai/drov/actions/runs/38412265349) 为 failure：quality、Linux 四版本、macOS 两版本和 Python 3.15 advisory 通过；Windows 3.11 的旧线程测试在已释放线程后的第二次 aclose 仍要求 20ms 内完成 SQLite 清理，Windows 3.14 的安装验证因中文示例重定向到 cp1252 抛 UnicodeEncodeError。两份日志都显示 T-08 的 56 项 Memory 测试通过，不能据此跳过整套 CI 的失败。
+
+同轮修正：旧线程测试的收尾在 5s 外层期限内重试符合契约的 ShutdownIncomplete，最初的线程仍占槽位/SQLite 锁断言保留；安装验证的示例解释器显式传 -X utf8，保留 -I/-B 和核心隔离。没有修改 SDK 超时/所有权语义、全局编码或代理。修正后本地两解释器各重跑 41 项工具回归通过，静态/类型/schema 通过，并重跑各两套干净安装/三个示例普通与 stream 验证；新 CI 结果结束前补记。
+
 ## 未实现、未验证与恢复步骤
 
 - T-08 卡无剩余本地验收项；内置记忆实际写入/读取是存储事实，预设回答不证明真实模型会选对保存工具或正确使用偏好。实际质量待 T-11/T-16。

@@ -421,7 +421,15 @@ async def test_thread_timeout_retains_slot_lock_and_late_result_is_unused(tmp_pa
         for call in tuple(work._calls):
             pending = asyncio.wrap_future(call) if isinstance(call, ThreadFuture) else call
             await asyncio.gather(pending, return_exceptions=True)
-        await runtime.aclose()
+        # SQLite cleanup may need another grace window on a slower scheduler. Retry the
+        # documented retained-resource close; the initial ShutdownIncomplete/lock checks stand.
+        async with asyncio.timeout(5):
+            while True:
+                try:
+                    await runtime.aclose()
+                    break
+                except ShutdownIncomplete:
+                    await asyncio.sleep(0)
     async with SQLiteStorage(storage.path) as reopened:
         saved = await OperationJournal(reopened, record.scope).get(record.state.run_id, "op")
         assert saved is not None and not saved.has_result and saved.error_code == "tool_timeout"
