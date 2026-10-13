@@ -1,6 +1,6 @@
 # 三类参考应用与跨入口案例
 
-状态：P4 案例设计；S-01-A/C 和 S-02 的 SDK/stream 离线路径已运行，审批案例及真实模型质量仍待后续验收。更新：2026-10-14。
+状态：P4 案例设计；S-01-A/C 和 S-02 的 SDK/stream 离线路径已运行，T-09 审批/输入子范围已有实际离线证据；完整外部写入/核查案例及真实模型质量仍待验收。更新：2026-10-14。
 
 这些案例用来检验通用框架，不限制 Drov 的业务范围。使用契约来自 [API 草案](api-draft.md)，各段按实际状态标注；可运行教程在 examples，本文件保留说明片段和待实施案例。模型参数在离线验证中使用 ScriptedModel，真实验证使用显式配置的 OpenAIResponses；知识检索是合成夹具或应用自己的工具，Memory 为内置事务存储。详见 [工程方案](engineering.md) / [质量计划](quality-plan.md)。所有场景遵守 [行为契约](runtime-contract.md)，不能单独放宽规则。
 
@@ -223,9 +223,8 @@ async def propose_phase(model, items, db_path, caller):
             request_key="update-001",
         )
         if result.status == "suspended":
-            approvals = [r for r in result.pending if r.kind == "approval"]
-            if approvals:
-                return result.run_id, approvals[0]
+            if result.pending is not None and result.pending.kind == "approval":
+                return result.run_id, result.pending
         return result
 
 
@@ -275,7 +274,7 @@ S-03-E 的补充输入变体在 tools 中另注册 `HumanInput(name="ask_item", 
 
 ## 从说明片段到可运行示例
 
-P3/P4 已指定依赖、完整夹具、模型适配器及规则断言，本轮补充沙箱要求；已把 [B-01 至 B-17](runtime-contract.md) 中首期适用项映射到质量计划和任务；B-14 属后续。已实现的只读及 Memory examples/测试见上文；审批设计片段尚未导入或运行。
+P3/P4 已指定依赖、完整夹具、模型适配器及规则断言，本轮补充沙箱要求；已把 [B-01 至 B-17](runtime-contract.md) 中首期适用项映射到质量计划和任务；B-14 属后续。已实现的只读及 Memory examples/测试见上文；上面的 update_item 外部 write 设计片段尚不可运行；不能把 T-09 子范围当作完整 S-03 通过。
 
 三类 Agent 都需通过同一 DrovApp 入口复测。X-01 使用显式 Runtime 的相同权限、存储和限额配置对照 HTTP/流式；不将临时 Agent.run 与持久化 Runtime 的配置差异判为内核差异。
 
@@ -284,3 +283,5 @@ T-05 已验证 S-01-B 的只读瞬态重试/超时及 S-03-A/C 的权限否决�
 ## 代码沙箱变体的交付边界
 
 S-01-E/S-02-E/S-03-F/X-03 为 2026-10-14 纳入首版的新增测试要求，当前无 PythonSandbox/DockerSandbox 源码或可运行示例。配置用法见 API 的沙箱草案，语义见运行契约第 13 节，T-10A/T-10B 按任务卡交付一个真实沙箱离线 example 并复用到三类应用。ScriptedModel 用固定代码验证机制；T-16 才验证真实模型生成代码、运行与使用结果，不能相互代替。
+
+T-09 的实际 [interactions_offline.py](../../examples/interactions_offline.py) 为安全的只读演练：每个批准/拒绝案例用四个新进程先提出 HumanInput、提交合法回答生成固定 read_item 候选、审批并读取/拒绝，再重复原响应验证旧回执和计数。两种入口核对实际原计划、返回值与 1/0 次独立工具计数。另有两后端 Memory ASK 原子写入与取消保留事实测试。它们交付审批/输入机制及 S-03-E 的补充输入子路径，完整 S-03 的外部业务写入、响应丢失核查与 recover 仍未实现。

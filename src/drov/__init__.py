@@ -6,6 +6,7 @@ from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.runtime import ResourceBinding, Runtime
 from drov.storage import MemoryStorage, SQLiteStorage
 from drov.tools import PermissionPolicy, tool
+from drov.tools.human import HumanInput
 from drov.tools.schema import ToolContext
 from drov.types import (
     ApprovalDecision,
@@ -27,6 +28,7 @@ __all__ = [
     "Completed",
     "ContextPolicy",
     "Failed",
+    "HumanInput",
     "InputResponse",
     "Limits",
     "Memory",

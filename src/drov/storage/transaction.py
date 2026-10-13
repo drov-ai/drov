@@ -203,6 +203,16 @@ class Transaction:
             raise RecordNotFound("Run is unavailable")
         return record
 
+    async def _locate_run(self, actor: RunContext, run_id: str) -> RunRecord:
+        """Trusted controller lookup within a tenant; callers MUST authorize before use."""
+        self._check()
+        actor = RunContext.model_validate(actor)
+        TypeAdapter(Identifier).validate_python(run_id, strict=True)
+        rows = await self._driver.select(Query("run", actor.tenant_id, None, key=run_id, limit=2))
+        if len(rows) != 1:
+            raise RecordNotFound("Run is unavailable")
+        return _decode(RunRecord, rows[0])
+
     async def get_session(self, scope: SessionScope) -> SessionRecord:
         scope = SessionScope.model_validate(scope)
         record = await self._get(SessionRecord, "session", scope, "", scope.session_id)

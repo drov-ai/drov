@@ -85,8 +85,11 @@ class SQLiteDriver:
         return int(rows[0][0])
 
     async def select(self, query: Query) -> list[Row]:
-        clauses = ["kind=?", "tenant_id=?", "user_id=?"]
-        parameters: list[Any] = [query.kind, query.tenant_id, query.user_id]
+        clauses = ["kind=?", "tenant_id=?"]
+        parameters: list[Any] = [query.kind, query.tenant_id]
+        if query.user_id is not None:
+            clauses.append("user_id=?")
+            parameters.append(query.user_id)
         for column in ("namespace", "key", "state"):
             value = getattr(query, column)
             if value is not None:

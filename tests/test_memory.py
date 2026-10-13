@@ -271,7 +271,7 @@ async def test_write_permissions_and_cancellation_prevent_mutation(mode: str) ->
             "tool_dispatch_count", 0
         ) == 0
         if mode == "ask":
-            assert isinstance(result, Failed) and result.error.code == "interaction_unavailable"
+            assert result.status == "suspended" and result.reason == "approval"
         elif mode == "cancel":
             assert result.status == "cancelled"
 

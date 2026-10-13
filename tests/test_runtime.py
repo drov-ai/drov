@@ -61,7 +61,7 @@ def test_constructor_is_inert_and_has_no_execution_placeholders(tmp_path: Path) 
     runtime = Runtime(agents=[agent], storage=SQLiteStorage(tmp_path / "no-file.db"))
     assert not (tmp_path / "no-file.db").exists()
     assert agent.model.calls == []  # type: ignore[attr-defined]
-    for name in ("recover", "respond", "resume", "verify"):
+    for name in ("recover", "verify"):
         assert not hasattr(runtime, name)
     assert callable(agent.run)
 

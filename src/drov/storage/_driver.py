@@ -27,7 +27,7 @@ class Row:
 class Query:
     kind: str
     tenant_id: str
-    user_id: str
+    user_id: str | None
     namespace: str | None = None
     key: str | None = None
     state: str | None = None

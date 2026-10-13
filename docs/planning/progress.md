@@ -4,20 +4,36 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-08 **本地实施验收完成**；下一项 T-09 审批与显式恢复。T-06/07 与 T-08 已推送 origin/main，最终验证提交 5ff654c 的 CI 38413817284 共 10 个 job 全部 success；两轮 Windows 失败与修正证据保留。
-- 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，本轮首版沙箱范围前移见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
-- 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；新增内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照。
-- 未实现：完整审批/核查/HumanInput/显式恢复、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-09 至 T-18 及新增 T-10A/T-10B 未开始。最小 Python 代码沙箱已纳入首版必交，尚未实现；B-14、多 Agent、Skill 与更深沙箱后续，无公共空壳。
+- 阶段：P1 至 P4、T-01 至 T-08 **本地实施验收完成**；T-09 审批/输入子范围已本地验收，整卡仍进行中；下一步外部未知效果、verify 与显式恢复。T-06/07 与 T-08 已推送 origin/main，最终验证提交 5ff654c 的 CI 38413817284 共 10 个 job 全部 success；两轮 Windows 失败与修正证据保留。
+- 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱范围前移见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
+- 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；本轮新增保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执。
+- 未实现：外部 write/unknown 与 reconciliation、verify/recover/启动扫描、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-09 未完整验收，T-10 至 T-18 及新增 T-10A/T-10B 未开始。最小 Python 代码沙箱已纳入首版必交，尚未实现；B-14、多 Agent、Skill 与更深沙箱后续，无公共空壳。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 - 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
-- 本轮起点：同一 `/Users/yanlong/projects/drov`、main / 8f3c5e0，工作区干净且与 origin/main 同步。本轮仅修改规划、协作/开发说明与验证文档；未改 SDK 源码、测试、schema、依赖锁、DDL 或品牌，未运行/拉取容器或调用模型。文档检查点以本轮 Git 提交和下述验证记录为准。
+- 2026-10-14 首版范围文档轮起点（历史）：同一 `/Users/yanlong/projects/drov`、main / 8f3c5e0，工作区干净且与 origin/main 同步。本轮仅修改规划、协作/开发说明与验证文档；未改 SDK 源码、测试、schema、依赖锁、DDL 或品牌，未运行/拉取容器或调用模型。文档检查点以本轮 Git 提交和下述验证记录为准。
 
 ## 已确认方向
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 本轮交付：首版代码沙箱范围与任务（文档完成）
+## 本轮交付：T-09 审批/输入子范围（整卡进行中）
+
+起点为当前 Local `/Users/yanlong/projects/drov`、main / d9bafbc，工作区干净并与 origin/main 同步。阅读 AGENTS/本页/导航/handoff、T-08 与范围验证；前置复跑 398 passed / 2 skipped 及静态/格式/类型/schema 全通过后实施。决定见 [ADR-0014](../decisions/0014-durable-approval-input.md)，实际环境/命令/子范围证据见 [T-09 验证](../validation/t09-interactions.md)。
+
+| 交付 | 实际结果 / 限制 |
+| --- | --- |
+| 保存原计划 | 检查点引用已提交响应/稳定操作 ID；审批后不重问模型，已有结果不重派发，多调用顺序及累计 step/attempt/tool/活动时间保留 |
+| 审批/回执 | 显式 Runtime 的 read PythonTool/Memory ASK 保存审批；批准/拒绝、20 次重复响应、冲突、到期、原参数/配置/归属绑定，响应/消费/状态/事件同事务；容量或缺 revision 不消费 |
+| HumanInput | 固定注册 schema，合法答案原子成为原工具结果，非法答案可修正；可先审批再输入；临时入口仍 interaction_unavailable，无恢复 ID |
+| 权限/取消 | 同 tenant 跨用户 Authorizer 分别授予 respond/read/view_content；执行始终原用户，撤权阻止派发或答案消费；取消竞争无重复派发，已成功 Memory 保留；调度失败保留回执及 recovery 暂停 |
+| 实际示例 | interactions_offline 普通/stream，批准/拒绝各四个独立进程，重建原 revision、固定参数、实际只读结果和计数 1/0；重复回执不调用模型 |
+| 本地回归 | 新增 48 项，全库 448 项；Python 3.11.9：446 passed / 2 skipped，Python 3.14.3：448 passed；静态/格式/严格 mypy（66 files）及 schema 通过；两解释器共四次干净安装/四示例普通与 stream、wheel/sdist 重建及 Twine 通过 |
+| 保护范围 | 无新依赖、公共 DTO/schema、DDL/uv.lock/历史基线变化；品牌未改。外部 write/unknown 接收前继续拒绝，没有 verify/recover 或沙箱空壳；无 Key/付费调用/包上传/部署 |
+
+**本轮只验收审批与补充输入子范围，不关闭 T-09。** S-03 的外部业务写入、unknown/reconciliation、verify、recover/启动扫描以及完整 B-05/B-07 未实现；当前只读计数/Memory 事务不代表外部副作用保证。T-10 及沙箱卡不提前开始。剩余恢复步骤见下面“下一项”。
+
+## 2026-10-14 首版代码沙箱范围调整（历史文档交付）
 
 | 交付 | 实际结果 / 限制 |
 | --- | --- |
@@ -44,7 +60,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 新增 56 项 Memory 测试，移除一个过期的 Memory 拒绝参数断言，全库 400 项。Python 3.11.9：398 passed / 2 skipped（即时任务工厂 API 不适用）；Python 3.14.3：400 passed。静态/类型/schema、两个解释器的 wheel/sdist/重建、各两个干净核心安装及三个示例的普通/stream 入口通过；详见 [T-08 验证](../validation/t08-memory.md)。
 
-T-08 无剩余任务卡本地缺项。只保证基础 scoped 检索与本地事务，不代表真实模型记忆质量、大规模检索性能或语义检索。forget 不删除历史/输入快照；非协作后端超出清理宽限时保留任务/槽位并抛 PersistenceUnavailable，不伪造 durable 终态。所有 ASK 仍失败；完整交互/显式恢复和外部写入未知效果待 T-09/T-10。
+T-08 历史交付无剩余任务卡本地缺项。只保证基础 scoped 检索与本地事务，不代表真实模型记忆质量、大规模检索性能或语义检索。forget 不删除历史/输入快照；非协作后端超出清理宽限时保留任务/槽位并抛 PersistenceUnavailable，不伪造 durable 终态。T-08 当时所有 ASK 失败；本轮 T-09 已交付审批/输入子范围，外部未知效果与显式恢复仍待后续验收。
 
 ## T-07 历史交付
 
@@ -92,7 +108,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## GitHub / CI
 
-- 本轮范围文档检查点 7cc0fc4 已提交并推送既有 origin/main，推送后工作区干净、与远程同步；本记录随后补记该事实。两次均为 `[skip ci]` 文档提交，不重跑不变的 SDK 矩阵；实际最新提交以 git log/status 为准，保护旧验证与品牌。
+- 首版范围文档轮检查点（历史）7cc0fc4 已提交并推送既有 origin/main，推送后工作区干净、与远程同步；本记录随后补记该事实。两次均为 `[skip ci]` 文档提交，不重跑不变的 SDK 矩阵；实际最新提交以 git log/status 为准，保护旧验证与品牌。
 
 - 继续使用现有 origin 和用户已有 GitHub 身份；不修改全局代理/认证、不建立新仓库。提交前检查可识别凭据模式与 Git 跟踪范围，品牌/环境/数据库排除。
 - 历史 T-08：实施 [d997f17](https://github.com/drov-ai/drov/commit/d997f17f7bcf34f6ceea170b378fab956240923b)，跨平台检查修正 40160ff / [5ff654c](https://github.com/drov-ai/drov/commit/5ff654cf0ac8044125554029acae0638bc85ca6a) 已推送 main（同时包含 T-06/07 的 adc9793）。最终 [CI 38413817284](https://github.com/drov-ai/drov/actions/runs/38413817284) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success；测试、构建、核心干净安装/三个离线示例、extras 隔离导入通过。两轮失败原因、适用跳过和恢复证据见 [T-08 验证](../validation/t08-memory.md)。
@@ -102,22 +118,22 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 - 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
-## 下一项：T-09 审批与显式恢复
+## 下一项：继续 T-09 未知效果、verify 与显式恢复
 
-前置 T-08 已完整本地验收且最终远程 CI 全部成功；新增沙箱卡排在 T-10 后，T-09 不需要 Docker、不预建沙箱公共符号。按 [实施计划](implementation-plan.md) 的 T-09 卡推进，不再追加一般规划轮。
+前置 T-08 已完整验收，本轮已完成审批/输入子范围；T-09 整卡仍未关闭。继续当前 checkout，先核实本轮提交/验证，运行锁定静态/schema/pytest，保持新交互与 Memory 回归。
 
-1. 持久审批请求、到期/重复响应、原参数与归属绑定、原子响应/推进；派发前动态权限复核，取消不重派发。
-2. HumanInput 以保存的原调用及 schema 消费回答，不重跑已提交工具，不开放任意函数栈恢复。
-3. 外部写入 unknown/reconciliation、verify、respond/resume/recover：保持原 revision/指纹、预算、操作结果和所有权；合法控制不绕过审批/核查。
-4. 完成 S-03-A/B/C/D/E 全部离线路径，审批 example；先验收审批响应子范围，再 HumanInput，再核查/恢复。T-10 再承担完整真实进程崩溃/故障矩阵。
+1. 外部 write/unknown 派发与结果未知分类：真实合成事项服务提供独立操作计数/结果查询；已派发写入失败/取消保持 reconciliation，输出不可用不能误记未执行。不重试非幂等写，不沿用不匹配批准。
+2. 注册只读 verifier 与 verify：固定原 operation/身份查询，有限时间/容量/真实调用所有权；只给建议、不消费请求。applied/not_applied/unresolved 的证据/结果校验、换新请求、取消/预算耗尽后只核查收尾，不再写入。
+3. recover 与启动扫描：accepted/running 崩溃边界显式暂停；原 revision/指纹/依赖复核；保存输入/模型计划/操作/累计预算恢复。没有旧调用停止证据不重派发，终态不复活；响应提交后调度失败的 recovery 路径补齐。
+4. 接入实际外部写入的审批 example，完成 S-03-A/B/C/D/E 五路径与 B-01/04/05/07 全部离线证据，再关闭 T-09；T-10 单独完成真实进程硬崩溃/故障矩阵。
 
-完成标准：整张 T-09 卡要求的五个 S-03 离线路径及 B-01/04/05/07 有证据；无额外写入、无旧审批复用或参数/身份伪造、合法重复响应不重派发，取消未知操作仍待核查。分批完成时记录子范围，不提前关闭 T-09。
+本轮调度失败留下的记录已经有不可变回执，重复 respond 只返回它，不能借此推进。恢复该类记录需下一子范围实现 recover；当前不要改写数据库、重复调用模型或新派发来冒充恢复。正常已保存审批/input 可用本轮接口在重建原定义后响应。
 
 ## 用户准备事项
 
 | 事项 | 当前状态 / 需要时点与配置方式 |
 | --- | --- |
-| T-09 审批与显式恢复 | 现在无需新增仓库/账号/Key/私有资料；复用当前仓库、SQLite、ScriptedModel 和自有合成审批/输入/核查夹具，不接真实业务写服务 |
+| T-09 审批与显式恢复 | 现在无需新增仓库/账号/Key/私有资料；复用当前仓库、SQLite、ScriptedModel；下一子范围由执行者建立独立合成事项写入/只读核查服务与故障夹具，不接真实业务写服务 |
 | GitHub 仓库 | 已提供，继续使用当前 origin；有具体同步/CI 阻碍再说明，无需重新建仓库 |
 | T-10A/T-10B 本地沙箱环境与镜像 | 需要时点在 T-10A 真实执行前。当前只确认存在 `/usr/local/bin/docker` 命令路径，daemon/Engine/CLI 版本、镜像及资源控制未验证；准备可用 Linux 容器服务、预装可信 Python 镜像并记录 digest/平台/许可，配置留宿主，不挂控制 socket/仓库/密钥给代码；无需云沙箱账号、模型 Key 或付费预算 |
 | 模型服务、可访问 model ID、密钥和总预算 | T-11 smoke/T-16 live 前提供可访问服务/model ID 并批准共同费用上限；工程执行者先按新增代码任务量估价。Key 仅本地环境/忽略配置或凭据管理，聊天/Git 不贴密钥；未授权预算前不付费调用 |
@@ -128,9 +144,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## 会话切换建议
 
-**下一轮建议 New Chat，实施 T-09。** T-08 已完整验收，审批/核查/恢复进入新的复杂模块边界；新会话按项目文件接续，避免把 Memory 的专用原子写路径误用到外部写入；本轮已完整交付首版沙箱的任务/契约调整，没有待补文档阻塞。你的引导词 prompt 已经足够好了，可原样使用，具体任务由 progress 与依赖决定。
-
-选择 Drov 项目 **Local / 当前目录 `/Users/yanlong/projects/drov`**。阅读 AGENTS/progress/导航/handoff、T-08 验证及本轮范围验证，核实最新 Git/远程状态；运行锁定静态/schema/pytest 检查，再按 T-09 卡分批实施，保持 T-08 Memory 回归。无需为了新会话新建仓库或 worktree，也不要切回缺少 T-06/07/08 的旧 checkout。
+**下一轮建议继续本会话，完成 T-09 的未知效果/核查/显式恢复子范围。** 原计划、审批回执与 HumanInput 边界刚落地，继续有利于同轮复用；不因子范围通过提前进入 T-10。若选择 New Chat，仍用当前 Local `/Users/yanlong/projects/drov`，读 AGENTS/progress/导航/handoff、ADR-0014 和 T-09 验证，按上面恢复顺序继续；无需新 checkout、仓库或 Key。
 
 ## 阶段记录
 
@@ -147,3 +161,4 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | 2026-10-13 | T-07 | 完整上下文组选取、确定性预算/预览、固定来源清单、授权查询及安装执行本地验收完成；下一项 T-08；未推送新 CI |
 | 2026-10-13 | T-08 | 内置 Memory 原子工具/CAS/墓碑、隔离/限时检索/子预算/固定快照、七进程普通/stream 示例及 400 项回归本地验收完成；10 个远程 CI job success；下一项 T-09 |
 | 2026-10-14 | 首版范围调整 | 用户确认代码生成/执行首版必交，新增 T-10A/T-10B，契约/案例/质量/发布及交接文档同步并检查；沙箱未实施，下一项仍 T-09 |
+| 2026-10-14 | T-09 子范围 | 审批/输入、原子 respond/resume、原计划/预算与回执、同 tenant 授权及四进程示例本地验收；外部未知效果/verify/recover 未实施，整卡进行中 |

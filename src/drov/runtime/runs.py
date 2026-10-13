@@ -46,6 +46,7 @@ from drov.storage.records import (
     StartRequest,
 )
 from drov.storage.transaction import Transaction
+from drov.tools.human import HumanInput
 from drov.tools.operations import OperationJournal, ToolOperation
 from drov.tools.python import PythonTool
 from drov.types import (
@@ -107,6 +108,9 @@ def _usage(previous: Usage, current: Usage, *, first: bool) -> Usage:
 class RunController:
     def __init__(self, runtime: "Runtime") -> None:
         self.runtime = runtime
+        from drov.runtime.interactions import InteractionController
+
+        self.interactions = InteractionController(self)
         self.works: dict[str, _Work[None]] = {}
         self.failures: dict[str, BaseException] = {}
         self.subscribers: dict[str, set[RunEvents]] = {}
@@ -159,11 +163,17 @@ class RunController:
     async def visible(self, run_id: str, context: RunContext, content: bool) -> RunRecord:
         self.runtime._require_open()
         context = RunContext.model_validate(context)
-        record = await self.storage.get_run(context, run_id)
+        async with self.storage.transaction() as tx:
+            record = await tx._locate_run(context, run_id)
         await self.authorize(
             context, self.resource(record), ("read", "view_content") if content else ("read",)
         )
-        return record
+        await self.interactions.expire(record)
+        current = await self.storage.get_run(record.scope, run_id)
+        await self.authorize(
+            context, self.resource(current), ("read", "view_content") if content else ("read",)
+        )
+        return current
 
     def effective_limits(self, agent: Agent[Any], requested: Limits | None) -> Limits:
         data: dict[str, Any] = {}
@@ -190,7 +200,9 @@ class RunController:
         if self.runtime._agents[(name, revision)] is not agent:
             raise ConfigurationError("Use the Agent object registered in this Runtime")
         if any(
-            not isinstance(item, PythonTool) or not callable(item.function) or item.effect != "read"
+            not isinstance(item, (PythonTool, HumanInput))
+            or (isinstance(item, PythonTool) and not callable(item.function))
+            or item.effect != "read"
             for item in agent.tools
         ):
             raise ConfigurationError("This development snapshot executes only callable read tools")
@@ -260,14 +272,7 @@ class RunController:
                     # Accepted is durable; a failed handoff must have a recoverable fact.
                     await self.suspend_recovery(ref.run_id, context)
                     raise
-                self.works[ref.run_id] = work
-
-                def done(task: asyncio.Task[None]) -> None:
-                    self.works.pop(ref.run_id, None)
-                    if not task.cancelled() and task.exception() is not None:
-                        self.failures[ref.run_id] = cast(BaseException, task.exception())
-
-                work.task.add_done_callback(done)
+                self.attach(ref.run_id, work)
                 return ref
             finally:
                 if slot is not None and not slot.claimed:
@@ -275,6 +280,18 @@ class RunController:
                     slot.release()
 
         return await self.control(accept)
+
+    def attach(self, run_id: str, work: "_Work[None]") -> None:
+        self.failures.pop(run_id, None)
+        self.works[run_id] = work
+
+        def done(task: asyncio.Task[None]) -> None:
+            if self.works.get(run_id) is work:
+                self.works.pop(run_id, None)
+            if not task.cancelled() and task.exception() is not None:
+                self.failures[run_id] = cast(BaseException, task.exception())
+
+        work.task.add_done_callback(done)
 
     async def suspend_recovery(self, run_id: str, context: RunContext) -> None:
         async with self.storage.transaction() as tx:
@@ -343,82 +360,96 @@ class RunController:
         cancelled: bool = False,
     ) -> None:
         async with self.storage.transaction() as tx:
-            record = await tx.get_run(context, run_id)
-            if record.state.status in TERMINAL:
-                return
-            checkpoint = await tx.get_checkpoint(context, run_id)
-            summaries = list(record.state.operations)
-            final_events: list[EventDraft] = []
-            for index, summary in enumerate(summaries):
-                if summary.status != "prepared":
-                    continue
-                item = await tx.get_item(context, run_id, "operation", summary.operation_id)
-                operation = ToolOperation.from_json(canonical_json(item.data))
-                stopped = operation.model_copy(
-                    update={
-                        "version": operation.version + 1,
-                        "status": "not_executed",
-                        "error_code": "run_ended_before_dispatch",
-                    }
-                )
-                await tx.put_item(
-                    context,
-                    item.model_copy(
-                        update={
-                            "version": stopped.version,
-                            "state": stopped.status,
-                            "data": stopped.model_dump(mode="json"),
-                        }
-                    ),
-                    expected_version=item.version,
-                )
-                summaries[index] = stopped.summary()
-                final_events.append(
-                    EventDraft(
-                        type="tool.not_executed",
-                        data={
-                            "operation_id": stopped.operation_id,
-                        },
-                    )
-                )
-            fields: dict[str, Any] = {
-                "run_id": run_id,
-                "state_version": record.state.state_version + 1,
-                "usage": record.state.usage,
-            }
-            outcome: JsonOutcome
-            if cancelled or record.state.cancel_requested:
-                outcome = Cancelled(**fields, operations=summaries)
-            elif error is not None:
-                outcome = Failed(**fields, error=error, operations=summaries)
-            else:
-                outcome = Completed[StrictJson](**fields, output=output)
-            body: dict[str, StrictJson] = {"usage": record.state.usage.model_dump(mode="json")}
-            if outcome.status == "completed":
-                body["output"] = output
-            elif isinstance(outcome, Failed):
-                body["error_code"] = outcome.error.code
-            await tx.save_step(
+            await self.finish_in(
+                tx, run_id, context, output=output, error=error, cancelled=cancelled
+            )
+
+    async def finish_in(
+        self,
+        tx: Transaction,
+        run_id: str,
+        context: RunContext,
+        *,
+        output: StrictJson = None,
+        error: RunError | None = None,
+        cancelled: bool = False,
+    ) -> None:
+        record = await tx.get_run(context, run_id)
+        if record.state.status in TERMINAL:
+            return
+        checkpoint = await tx.get_checkpoint(context, run_id)
+        summaries = list(record.state.operations)
+        final_events: list[EventDraft] = []
+        for index, summary in enumerate(summaries):
+            if summary.status != "prepared":
+                continue
+            item = await tx.get_item(context, run_id, "operation", summary.operation_id)
+            operation = ToolOperation.from_json(canonical_json(item.data))
+            stopped = operation.model_copy(
+                update={
+                    "version": operation.version + 1,
+                    "status": "not_executed",
+                    "error_code": "run_ended_before_dispatch",
+                }
+            )
+            await tx.put_item(
                 context,
-                state=record.state.model_copy(
+                item.model_copy(
                     update={
-                        "status": outcome.status,
-                        "state_version": outcome.state_version,
-                        "outcome": outcome,
-                        "operations": summaries,
-                        "cancel_requested": outcome.status == "cancelled",
-                        "pending": None,
-                        "reason": None,
-                        "recoverable": False,
+                        "version": stopped.version,
+                        "state": stopped.status,
+                        "data": stopped.model_dump(mode="json"),
                     }
                 ),
-                expected_version=record.state.state_version,
-                checkpoint=checkpoint.model_copy(update={"state_version": outcome.state_version}),
-                events=[
-                    *final_events,
-                    EventDraft(type=cast(Any, "run." + outcome.status), data=body),
-                ],
+                expected_version=item.version,
             )
+            summaries[index] = stopped.summary()
+            final_events.append(
+                EventDraft(
+                    type="tool.not_executed",
+                    data={
+                        "operation_id": stopped.operation_id,
+                    },
+                )
+            )
+        fields: dict[str, Any] = {
+            "run_id": run_id,
+            "state_version": record.state.state_version + 1,
+            "usage": record.state.usage,
+        }
+        outcome: JsonOutcome
+        if cancelled or record.state.cancel_requested:
+            outcome = Cancelled(**fields, operations=summaries)
+        elif error is not None:
+            outcome = Failed(**fields, error=error, operations=summaries)
+        else:
+            outcome = Completed[StrictJson](**fields, output=output)
+        body: dict[str, StrictJson] = {"usage": record.state.usage.model_dump(mode="json")}
+        if outcome.status == "completed":
+            body["output"] = output
+        elif isinstance(outcome, Failed):
+            body["error_code"] = outcome.error.code
+        await tx.save_step(
+            context,
+            state=record.state.model_copy(
+                update={
+                    "status": outcome.status,
+                    "state_version": outcome.state_version,
+                    "outcome": outcome,
+                    "operations": summaries,
+                    "cancel_requested": outcome.status == "cancelled",
+                    "pending": None,
+                    "reason": None,
+                    "recoverable": False,
+                }
+            ),
+            expected_version=record.state.state_version,
+            checkpoint=checkpoint.model_copy(update={"state_version": outcome.state_version}),
+            events=[
+                *final_events,
+                EventDraft(type=cast(Any, "run." + outcome.status), data=body),
+            ],
+        )
 
     async def history(
         self, record: RunRecord, tx: Transaction
@@ -791,15 +822,42 @@ class RunController:
         try:
             record = await self.storage.get_run(context, run_id)
             agent = self.runtime._agents[(record.agent_name, record.revision)]
-            end = started + min(record.limits.run_active_seconds, record.limits.advance_seconds)
+            checkpoint = await self.storage.get_checkpoint(context, run_id)
+            prior_active = cast(Any, checkpoint.data.get("active_seconds", 0))
+            attempt_count = cast(Any, checkpoint.data.get("model_attempt_count", 0))
+            if (
+                type(prior_active) not in (int, float)
+                or prior_active < 0
+                or type(attempt_count) is not int
+            ):
+                raise PersistenceUnavailable("Invalid cumulative execution budget")
+            started -= prior_active
+            end = min(
+                started + record.limits.run_active_seconds,
+                loop.time() + record.limits.advance_seconds,
+            )
             end_code = "limit_exceeded"
             if record.limits.expires_at is not None:
-                wall_end = started + (record.limits.expires_at - datetime.now(UTC)).total_seconds()
+                wall_end = (
+                    loop.time() + (record.limits.expires_at - datetime.now(UTC)).total_seconds()
+                )
                 if wall_end < end:
                     end_code = "deadline_exceeded"
                 end = min(end, wall_end)
             work.checkpoint()
             await self.step(run_id, context, [EventDraft(type="run.running")])
+            pending_plan = checkpoint.data.get("pending_plan")
+            if pending_plan is not None:
+                if not isinstance(pending_plan, str):
+                    raise PersistenceUnavailable("Invalid pending model plan")
+                async with self.storage.transaction() as tx:
+                    saved = await tx.get_item(context, run_id, "model_response", pending_plan)
+                saved_response = ModelResponse.model_validate(saved.data["response"])
+                operation_ids = cast(list[str], saved.data["operation_ids"])
+                if not await self.execute_plan(
+                    record, saved_response, operation_ids, work, started, end
+                ):
+                    return
             while True:
                 work.checkpoint()
                 if loop.time() >= end:
@@ -926,7 +984,11 @@ class RunController:
                             },
                         )
                     ],
-                    data={"response_ids": [*ids, call_id], "active_seconds": loop.time() - started},
+                    data={
+                        "response_ids": [*ids, call_id],
+                        "active_seconds": loop.time() - started,
+                        "pending_plan": call_id if response.tool_calls else None,
+                    },
                     usage=_usage(prior_usage, response.usage, first=attempt_count == 1),
                     items=(
                         RunItem(
@@ -966,82 +1028,8 @@ class RunController:
                         raise _RunFailure(end_code, "runtime")
                     await self.finish(run_id, context, output=output)
                     return
-                tools = {tool.name: tool for tool in agent._execution_tools}
-                for call, operation_id in zip(response.tool_calls, operation_ids, strict=True):
-                    work.checkpoint()
-                    if call.name not in tools:
-                        raise _RunFailure("unknown_tool", "tool")
-                    allowance = min(
-                        end - loop.time(),
-                        record.limits.tool_timeout_seconds * (record.limits.read_tool_retries + 1)
-                        + record.limits.retry_backoff_seconds * record.limits.read_tool_retries,
-                    )
-                    if allowance <= 0:
-                        raise _RunFailure(end_code, "tool")
-                    await self.step(
-                        run_id,
-                        context,
-                        [
-                            EventDraft(
-                                type="run.running",
-                                data={
-                                    "operation_id": operation_id,
-                                },
-                            )
-                        ],
-                        data={"active_seconds": loop.time() - started + allowance},
-                    )
-                    work.checkpoint()
-                    selected_tool = tools[call.name]
-                    dispatcher = (
-                        MemoryDispatcher(
-                            storage=self.storage,
-                            policy=self.runtime.policy,
-                            authorizer=self.runtime.authorizer,
-                            validate=self.runtime.validate_record,
-                        )
-                        if isinstance(selected_tool, MemoryTool)
-                        else self.runtime._tool_dispatcher
-                    )
-                    assert dispatcher is not None
-                    result = await dispatcher.execute(
-                        cast(Any, selected_tool),
-                        canonical_json(call.arguments),
-                        work=work,
-                        record=record,
-                        operation_id=operation_id,
-                        deadline=min(end, loop.time() + allowance),
-                    )
-                    if result.permission is not None and result.permission.decision == "ask":
-                        await OperationJournal(self.storage, context).commit(
-                            result.operation.model_copy(
-                                update={
-                                    "version": result.operation.version + 1,
-                                    "status": "not_executed",
-                                    "error_code": "interaction_unavailable",
-                                }
-                            ),
-                            EventDraft(
-                                type="tool.not_executed", data={"operation_id": operation_id}
-                            ),
-                        )
-                        raise _RunFailure("interaction_unavailable", "tool")
-                    if any(not call.done() for call in work._calls):
-                        raise _RunFailure(result.operation.error_code or "tool_timeout", "tool")
-                    # Tool errors become explicit messages; the model may choose another action.
-                    await self.step(
-                        run_id,
-                        context,
-                        [
-                            EventDraft(
-                                type="run.running",
-                                data={
-                                    "operation_id": operation_id,
-                                },
-                            )
-                        ],
-                        data={"active_seconds": loop.time() - started},
-                    )
+                if not await self.execute_plan(record, response, operation_ids, work, started, end):
+                    return
         except PersistenceUnavailable:
             raise
         except asyncio.CancelledError:
@@ -1069,6 +1057,117 @@ class RunController:
                     stage="runtime",
                 ),
             )
+
+    async def execute_plan(
+        self,
+        record: RunRecord,
+        response: ModelResponse,
+        operation_ids: list[str],
+        work: "_Work[None]",
+        started: float,
+        end: float,
+    ) -> bool:
+        loop = asyncio.get_running_loop()
+        run_id, context = record.state.run_id, self.resource(record).owner
+        agent = self.runtime._agents[(record.agent_name, record.revision)]
+        tools = {tool.name: tool for tool in agent._execution_tools}
+        for call, operation_id in zip(response.tool_calls, operation_ids, strict=True):
+            work.checkpoint()
+            if call.name not in tools:
+                raise _RunFailure("unknown_tool", "tool")
+            allowance = min(
+                end - loop.time(),
+                record.limits.tool_timeout_seconds * (record.limits.read_tool_retries + 1)
+                + record.limits.retry_backoff_seconds * record.limits.read_tool_retries,
+            )
+            if allowance <= 0:
+                raise _RunFailure("limit_exceeded", "tool")
+            await self.step(
+                run_id,
+                context,
+                [
+                    EventDraft(
+                        type="run.running",
+                        data={
+                            "operation_id": operation_id,
+                        },
+                    )
+                ],
+                data={"active_seconds": loop.time() - started + allowance},
+            )
+            work.checkpoint()
+            selected_tool = tools[call.name]
+            dispatcher = (
+                MemoryDispatcher(
+                    storage=self.storage,
+                    policy=self.runtime.policy,
+                    authorizer=self.runtime.authorizer,
+                    validate=self.runtime.validate_record,
+                )
+                if isinstance(selected_tool, MemoryTool)
+                else self.interactions
+                if isinstance(selected_tool, HumanInput)
+                else self.runtime._tool_dispatcher
+            )
+            assert dispatcher is not None
+            result = await dispatcher.execute(
+                cast(Any, selected_tool),
+                canonical_json(call.arguments),
+                work=work,
+                record=record,
+                operation_id=operation_id,
+                deadline=min(end, loop.time() + allowance),
+                continuation=True,
+            )
+            if result.permission is not None and result.permission.decision == "ask":
+                if not self.runtime._temporary:
+                    await self.interactions.suspend(
+                        record, result.operation, active_seconds=loop.time() - started
+                    )
+                    return False
+                await OperationJournal(self.storage, context).commit(
+                    result.operation.model_copy(
+                        update={
+                            "version": result.operation.version + 1,
+                            "status": "not_executed",
+                            "error_code": "interaction_unavailable",
+                        }
+                    ),
+                    EventDraft(type="tool.not_executed", data={"operation_id": operation_id}),
+                )
+                raise _RunFailure("interaction_unavailable", "tool")
+            if isinstance(selected_tool, HumanInput) and result.operation.status == "prepared":
+                if self.runtime._temporary:
+                    raise _RunFailure("interaction_unavailable", "tool")
+                await self.interactions.suspend(
+                    record,
+                    result.operation,
+                    active_seconds=loop.time() - started,
+                    input_tool=selected_tool,
+                )
+                return False
+            if result.operation.error_code == "interaction_expired":
+                raise _RunFailure("interaction_expired", "tool")
+            if any(not call.done() for call in work._calls):
+                raise _RunFailure(result.operation.error_code or "tool_timeout", "tool")
+            # Tool errors become explicit messages; the model may choose another action.
+            await self.step(
+                run_id,
+                context,
+                [
+                    EventDraft(
+                        type="run.running",
+                        data={
+                            "operation_id": operation_id,
+                        },
+                    )
+                ],
+                data={"active_seconds": loop.time() - started},
+            )
+        await self.step(
+            run_id, context, [EventDraft(type="run.running")], data={"pending_plan": None}
+        )
+        return True
 
     def typed(self, record: RunRecord) -> RunOutcome[Any]:
         outcome = record.state.outcome
@@ -1103,19 +1202,24 @@ class RunController:
 
     async def cancel(self, run_id: str, *, context: RunContext) -> CancelReceipt:
         self.runtime._require_open()
-        record = await self.storage.get_run(context, run_id)
+        async with self.storage.transaction() as tx:
+            record = await tx._locate_run(context, run_id)
         await self.authorize(context, self.resource(record), ("cancel",))
+        owner = self.resource(record).owner
 
         async def apply() -> CancelReceipt:
             async with self.storage.transaction() as tx:
-                record = await tx.get_run(context, run_id)
+                record = await tx.get_run(owner, run_id)
                 if record.state.status not in TERMINAL and not record.state.cancel_requested:
-                    if any(operation.effect != "read" for operation in record.state.operations):
+                    if any(
+                        operation.effect != "read" and operation.status in ("dispatched", "unknown")
+                        for operation in record.state.operations
+                    ):
                         raise ConfigurationError("Unknown effects require T-09 reconciliation")
-                    checkpoint = await tx.get_checkpoint(context, run_id)
+                    checkpoint = await tx.get_checkpoint(owner, run_id)
                     version = record.state.state_version + 1
                     await tx.save_step(
-                        context,
+                        owner,
                         state=record.state.model_copy(
                             update={
                                 "cancel_requested": True,
@@ -1130,8 +1234,8 @@ class RunController:
             if work is not None:
                 work.request_cancel()
             elif record.state.status not in TERMINAL:
-                await self.finish(run_id, context, cancelled=True)
-            current = await self.storage.get_run(context, run_id)
+                await self.finish(run_id, owner, cancelled=True)
+            current = await self.storage.get_run(owner, run_id)
             return CancelReceipt(
                 run_id=run_id,
                 state_version=current.state.state_version,
@@ -1190,7 +1294,7 @@ class RunController:
     ) -> ContextManifest:
         record = await self.visible(run_id, context, include_content)
         async with self.storage.transaction() as tx:
-            manifest = await self.context_record(tx, context, run_id, model_call_id)
+            manifest = await self.context_record(tx, record.scope, run_id, model_call_id)
         # Permissions may change while storage is being read; saved bodies grant no access.
         await self.authorize(
             context,
@@ -1208,13 +1312,14 @@ class RunController:
         limit: int = 100,
         include_content: bool = False,
     ) -> RunInspection:
-        await self.visible(run_id, context, include_content)
+        visible = await self.visible(run_id, context, include_content)
+        owner = self.resource(visible).owner
         if type(limit) is not int or not 1 <= limit <= min(500, self.runtime.limits.max_page_size):
             raise ValueError("Invalid page size")
         sequence = self.cursor(run_id, after)
         async with self.storage.transaction() as tx:
-            record = await tx.get_run(context, run_id)
-            rows = await tx.events(context, run_id, after=sequence, limit=limit)
+            record = await tx.get_run(owner, run_id)
+            rows = await tx.events(owner, run_id, after=sequence, limit=limit)
             manifests = []
             for row in rows:
                 if row.type != "context.prepared" or "context_manifest" not in row.data:

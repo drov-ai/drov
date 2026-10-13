@@ -29,6 +29,8 @@ from drov.tools.python import PythonTool
 from drov.types import (
     CancelReceipt,
     ContextManifest,
+    InteractionResponse,
+    ResponseReceipt,
     RunContext,
     RunInspection,
     RunOutcome,
@@ -237,6 +239,7 @@ class Runtime:
         self._changed = asyncio.Event()
         self._tool_dispatcher: ToolDispatcher | None = None
         self._controls: set[asyncio.Task[Any]] = set()
+        self._temporary = False
         self._runs = RunController(self)
 
     async def start(
@@ -281,6 +284,20 @@ class Runtime:
 
     async def wait(self, run_id: str, *, context: RunContext) -> RunOutcome[Any]:
         return await self._runs.wait(run_id, context=context)
+
+    async def respond(
+        self, run_id: str, *, request_id: str, response: InteractionResponse, context: RunContext
+    ) -> ResponseReceipt:
+        return await self._runs.interactions.respond(
+            run_id, request_id=request_id, response=response, context=context
+        )
+
+    async def resume(
+        self, run_id: str, *, request_id: str, response: InteractionResponse, context: RunContext
+    ) -> RunOutcome[Any]:
+        await self._runs.visible(run_id, context, True)
+        await self.respond(run_id, request_id=request_id, response=response, context=context)
+        return await self.wait(run_id, context=context)
 
     async def cancel(self, run_id: str, *, context: RunContext) -> CancelReceipt:
         return await self._runs.cancel(run_id, context=context)

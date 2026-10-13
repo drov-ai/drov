@@ -11,10 +11,17 @@ from uuid import uuid4
 
 from drov._json import StrictJson, canonical_json
 from drov.auth import Authorizer, ToolResource
-from drov.errors import CapacityExceeded, ConfigurationError, Conflict, TransientToolError
+from drov.errors import (
+    CapacityExceeded,
+    ConfigurationError,
+    Conflict,
+    InteractionExpired,
+    TransientToolError,
+)
 from drov.storage.base import Storage
 from drov.storage.records import EventDraft, RunRecord
 from drov.tools._pool import Admission, ToolPool
+from drov.tools.approvals import approval_status
 from drov.tools.operations import OperationJournal, ToolOperation
 from drov.tools.permissions import PermissionDecision, PermissionPolicy
 from drov.tools.python import PythonTool
@@ -65,6 +72,7 @@ class ToolDispatcher:
         record: RunRecord,
         operation_id: str,
         deadline: float | None = None,
+        continuation: bool = False,
     ) -> ToolExecution:
         if work.task is not asyncio.current_task():
             raise ConfigurationError("Tool dispatch belongs to the kernel execution task")
@@ -74,7 +82,9 @@ class ToolDispatcher:
             raise Conflict("This operation already has an active dispatcher")
         self._inflight.add(key)
         try:
-            return await self._execute(tool, arguments, work, record, scope, operation_id, deadline)
+            return await self._execute(
+                tool, arguments, work, record, scope, operation_id, deadline, continuation
+            )
         finally:
             self._inflight.remove(key)
 
@@ -87,6 +97,7 @@ class ToolDispatcher:
         scope: RunContext,
         operation_id: str,
         deadline: float | None,
+        continuation: bool,
     ) -> ToolExecution:
         work.checkpoint()
         run = await self.storage.get_run(scope, record.state.run_id)
@@ -137,8 +148,9 @@ class ToolDispatcher:
             if previous.request_hash != request_hash:
                 raise Conflict("Operation ID was used for a different tool call")
             # Stored operations are facts, never implicit approval/retry permission.
-            return ToolExecution(previous)
-        operation = ToolOperation(
+            if not continuation or previous.status != "prepared":
+                return ToolExecution(previous)
+        operation = previous or ToolOperation(
             run_id=run.state.run_id,
             operation_id=operation_id,
             tool_name=tool.name,
@@ -148,17 +160,18 @@ class ToolDispatcher:
             arguments=normalized,
             status="prepared",
         )
-        await journal.commit(
-            operation,
-            EventDraft(
-                type="tool.prepared",
-                data={
-                    "operation_id": operation_id,
-                    "tool_name": tool.name,
-                    "arguments": normalized,
-                },
-            ),
-        )
+        if previous is None:
+            await journal.commit(
+                operation,
+                EventDraft(
+                    type="tool.prepared",
+                    data={
+                        "operation_id": operation_id,
+                        "tool_name": tool.name,
+                        "arguments": normalized,
+                    },
+                ),
+            )
 
         async def save(
             status: str, code: str | None, *, result: StrictJson = None, has_result: bool = False
@@ -220,6 +233,14 @@ class ToolDispatcher:
                     )
             except Exception:
                 decision = PermissionDecision(decision="deny", reason="authorization_error")
+            if decision.decision != "deny":
+                async with self.storage.transaction() as tx:
+                    current = await tx.get_run(scope, run.state.run_id)
+                    grant = await approval_status(tx, current, operation)
+                if grant == "expired":
+                    raise InteractionExpired("Saved approval expired before dispatch")
+                if grant == "granted":
+                    decision = PermissionDecision(decision="allow", reason="approval")
             work.checkpoint()
             return decision
 

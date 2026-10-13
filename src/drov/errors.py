@@ -29,6 +29,14 @@ class Conflict(DrovError):
     code = "conflict"
 
 
+class InteractionExpired(Conflict):
+    code = "interaction_expired"
+
+
+class InteractionConflict(Conflict):
+    code = "interaction_conflict"
+
+
 class InvalidCursor(DrovError, ValueError):
     code = "invalid_cursor"
 

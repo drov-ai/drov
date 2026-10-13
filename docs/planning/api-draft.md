@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；审批恢复和真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
+状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；外部未知写入、verify/recover 和真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -45,7 +45,7 @@ run/wait/resume/stream/recover(wait=True) 返回正文，预检 read 与 view_co
 
 verify 需要核查响应权限及 read/view_content，以原执行者当前权限进行只读查询；同一 operation 同时至多一个 verifier 调用，占用活动容量并保留资源所有权。它不接受模型传来的新查询目标，也不执行写入。查询期间原请求被其他合法响应消费时，迟到建议不能再用于推进旧请求。
 
-T-06 已实现表中的 start/run/wait/cancel/inspect/events/stream 与 Agent.run/run_sync。T-07 已实现 get_context；respond/resume/verify/recover/sessions/session 仍未实现，不能将表中设计入口当作已有功能。当前接收含 callable 的 read 工具及配置 Memory 的 Agent；外部 write/unknown 接收前拒绝；所有 ASK 均失败为 interaction_unavailable。inspect.context_manifests 只返回本次事件页中 context.prepared 对应的摘要（sources=[]、content_visible=False），沿事件游标可遍历全部索引；get_context 返回完整来源清单，include_content=True 返回选入内容/预览，provider 正文始终不可见。旧完整轮次确定性选取，保护项无法装入时提前失败；清单预算/粗估包括协议和 schema，供应商已报告用量单独关联。查询按 context 的 tenant/user 隔离，跨归属查看和审批尚未交付。
+T-06 已实现表中的 start/run/wait/cancel/inspect/events/stream 与 Agent.run/run_sync。T-07 已实现 get_context；T-09 子范围已实现 HumanInput、respond/resume 的 approval/input 路径，见 [ADR-0014](../decisions/0014-durable-approval-input.md)。verify/recover/sessions/session 仍未实现，reconciliation 响应尚不可用。显式 Runtime 接收 callable read 工具、HumanInput 及配置 Memory 的 Agent；ASK 保存原计划并 suspended/approval。临时 Agent.run 遇到 ASK/input 仍 failed/interaction_unavailable；外部 write/unknown 接收前拒绝。inspect.context_manifests 只返回本次事件页中 context.prepared 对应的摘要（sources=[]、content_visible=False），沿事件游标可遍历全部索引；get_context 返回完整来源清单，include_content=True 返回选入内容/预览，provider 正文始终不可见。旧完整轮次确定性选取，保护项无法装入时提前失败；清单预算/粗估包括协议和 schema，供应商已报告用量单独关联。默认查询按 context 的 tenant/user 隔离；同 tenant 跨用户查看/响应须由应用 Authorizer 分别授予，工具继续使用原用户身份。跨 tenant 无法定位。
 
 Runtime 的有效限额从 Agent 默认与管理员上限取较严格值，显式 Limits 仅覆盖设置过的字段且不得放宽管理员上限；Agent.run 临时环境由应用配置限额。ScriptedModel/ScriptedStep 可从 drov.models 导入，用预定响应或事件/异常及输入检查构建离线序列，不调用外部模型。
 
@@ -161,7 +161,7 @@ RunStream 是异步上下文和异步迭代对象；result() 等待当前推进�
 交互响应分为 ApprovalDecision、InputResponse、ReconciliationDecision。控制输入须校验；模型不能替用户创建批准响应。API 支持在同一 run_id 上响应，但真正请求绑定在保存的 operation 与身份上。
 
 ```python
-# API 设计片段：authenticated_reviewer 来自应用认证/授权边界。
+# T-09 approval/input 子范围已实现；authenticated_reviewer 来自应用授权边界。
 result = await runtime.resume(
     run_id,
     request_id=request_id,
@@ -201,7 +201,7 @@ assert decision.decision == "allow"
 
 PermissionPolicy(deny={...}, ask={...}, allow={...}) 保存不可变集合，支持 set/frozenset/list。decide 返回 PermissionDecision 的 decision/reason；业务 Authorizer 使用新增 execute_tool action 与 ToolResource 检查原归属及规范参数。默认 OwnerAuthorizer 只允许本人，跨用户查看/审批仍需宿主明确授权。Runtime 接收 policy/authorizer，配置引用只读，原 authorizer 对象可反映动态业务权限；当前权限会在尝试、队列等待后、派发标记提交后再次检查，allow 不覆盖否决或 required approval。
 
-外部 Python 派发目前只有 read 可执行；外部 write/unknown 明确 not_executed/effect_not_supported，ASK 保存 prepared/approval_required 而不制造 request_id。T-06 已接通 Agent.run/Runtime.start 只读路径，ASK 在 Run 收尾为 failed/interaction_unavailable；完整审批/核查仍待 T-09。结果必须经 codec 和大小校验；非法输出不当成功，None 用内部 has_result 区分可用结果。只读瞬态错误用 `drov.errors.TransientToolError`，其他错误/超时/非法结果不自动重试。排队/线程与原子记录规则见运行契约第 4 节和 ADR-0009。
+外部 Python 派发目前只有 read 可执行；外部 write/unknown 明确 not_executed/effect_not_supported，私有派发器 ASK 返回 prepared；T-09 的显式 Runtime 持久化绑定原调用的 ApprovalRequest，批准/拒绝后处理保存的原计划。临时 Agent.run 的 ASK 仍 failed/interaction_unavailable；外部写入/核查/显式恢复仍待 T-09 剩余范围。结果必须经 codec 和大小校验；非法输出不当成功，None 用内部 has_result 区分可用结果。只读瞬态错误用 `drov.errors.TransientToolError`，其他错误/超时/非法结果不自动重试。排队/线程与原子记录规则见运行契约第 4 节和 ADR-0009。
 
 
 ```python
@@ -222,6 +222,12 @@ ToolContext 按类型注入，不放进模型 schema；传递 request_id 不会�
 Runtime 接受 dependencies 映射作为简单依赖入口，也可在后续适配受控解析器；映射中的现有客户端默认为借用。恢复时应用重新提供它们，不能反序列化旧连接。
 
 PermissionPolicy 初期提供 deny、ask、allow 的明确工具规则；高优先级的作用域校验、deny 和 required approval 不会被 allow 覆盖。补充输入通过内置 HumanInput 工具描述触发，详见下面的字段约定；不将普通工具返回文本猜成控制指令，也不恢复任意工具函数栈。
+
+### HumanInput（T-09 已实现子范围）
+
+`from drov import HumanInput`；构造 `HumanInput(name="ask_item", input_type=ItemChoice, revision="1")`，input_type 使用既有结果 schema 子集。工具只接受 prompt: str，无宿主 callable；InputResponse.value 经过注册 codec 校验成为原调用的结果。默认 read，应用 ask 会先生成审批，deny/当前业务否决仍生效。非法值/多余字段不消费请求，用户可修正；输入与批准不能混用。跨进程重建相同 Agent revision/schema 后可响应保存的请求，示例见 [审批/输入离线检查](../../examples/interactions_offline.py)。
+
+本子范围支持显式 Runtime 的内存或 SQLite 存储；跨进程事实需要 SQLite。完整未知效果恢复尚未实现，不把 respond/resume 当作通用 recover。累计预算、回执和到期语义以运行契约为准。
 
 ## 内置 Memory 与上下文
 

@@ -24,7 +24,7 @@ class MemoryDriver:
             if (
                 key.kind == query.kind
                 and key.tenant_id == query.tenant_id
-                and key.user_id == query.user_id
+                and (query.user_id is None or key.user_id == query.user_id)
                 and (query.namespace is None or key.namespace == query.namespace)
                 and (query.key is None or key.key == query.key)
                 and (query.state is None or row.state == query.state)

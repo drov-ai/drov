@@ -137,7 +137,9 @@ class Agent(Generic[T]):
         temporary_limits = Limits.model_validate(
             self.limits.model_dump() | (limits.model_dump(exclude_unset=True) if limits else {})
         )
-        async with Runtime(agents=[temporary], limits=temporary_limits) as runtime:
+        runtime = Runtime(agents=[temporary], limits=temporary_limits)
+        runtime._temporary = True
+        async with runtime:
             return await runtime.run(
                 temporary,
                 input,

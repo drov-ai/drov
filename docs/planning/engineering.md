@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：T-01 至 T-08 已本地验收，含只读 Agent 闭环、上下文选择/预览/清单和事务 Memory；真实适配器及服务仍未实现。实际范围见 [T-08 验证](../validation/t08-memory.md)。更新：2026-10-14。
+状态：T-01 至 T-08 已本地验收，含只读 Agent 闭环、上下文选择/预览/清单和事务 Memory；T-09 审批/输入子范围已实施；真实适配器及服务仍未实现。实际范围见 [T-08 验证](../validation/t08-memory.md)。更新：2026-10-14。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 
@@ -72,6 +72,8 @@ docs/                        用户文档、规划和决策
 
 T-05 @tool 返回 PythonTool，name 必填，revision 默认 "1"、effect 默认 unknown、approval 默认 policy；含参数/返回 codec 和真实 callable。同步/异步函数共用 schema 子集；生成器拒绝。只读瞬态错误用 TransientToolError，其他错误不默认重试。ToolPool 在 Runtime 打开时装配，线程只在真实提交时启动；有界等待先于派发标记，实际 Future 由内核持有。内部操作 payload schema=1，Checkpoint.data.tool_dispatch_count 保存预算预留；即使提交后撤权/取消使函数没执行也不回退，恢复不会把尝试变成免费次数。实际详情见 ADR-0009。
 
+T-09 子范围复用 RunItem：interaction.data 包含 schema_version=1、request、request_hash、config_hash；receipt.data 包含 schema_version=1、response、actor、receipt，收据索引 request_id 且不可改写。Checkpoint.data.pending_plan 引用原 model_response，approval_grants 将 operation_id 映射到已消费的请求；原 ToolOperation schema=1 不增加字段。HumanInput 从注册 input_type 生成结果 codec，与普通工具一致进入指纹。累计 model_step_count/model_attempt_count/tool_dispatch_count/active_seconds 跨人工暂停保存。没有新 DDL/依赖，旧缺少新字段的记录仍可读，通用恢复兼容待 T-09 剩余范围验收。到期/授权/继续规则见运行契约第 5–6 节，实际证据见 [T-09 验证](../validation/t09-interactions.md)。
+
 ## 4. SQLite、锁与 Memory
 
 SQLite 启动要求运行库版本至少 3.35；检测实际 `sqlite3.sqlite_version`，不能只检查 Python 版本。采用 `journal_mode=DELETE`、`synchronous=FULL`、`foreign_keys=ON`、`busy_timeout=5000`，读取验证设置结果。选择回滚日志是首期单连接下的简化；WAL、多连接及网络文件系统不在支持范围。[E-15](evidence.md) 仅解释 SQLite 机制，不能替代进程故障实验。T-03 的实际文件/进程/取消验证见 [存储记录](../validation/t03-storage.md)。
@@ -141,7 +143,7 @@ T-01 已验证锁定依赖的本地安装组合，T-02 已验证类型、工具 
 
 RunController 连接接收、模型循环、只读工具、限额、历史和正文投影；RunEvents/RunStream 以有界临时缓冲和持久事件分页读取实现 SDK 订阅。模型瞬态重试只使用 TransientModelError，固定已保存输入、每次独立 attempt_id；ScriptedModel/ScriptedStep 为无网络离线适配器，额外调用失败。T-06 未增加依赖或改变 uv.lock。
 
-Checkpoint.engine_schema=1；model_input/model_response payload 各 schema_version=1；session_sequence 在接收事务使用 Session 版本保存，避免相同时间戳的随机 ID 打乱历史。计数及活动预留保留原 Run 事实；正常返回按实耗结算，未停止调用保留预留与资源，禁止迟到结果变成成功。T-07 已替换完整历史模式为确定性组选取/预览/清单，仍对保护输入溢出前置失败。SDK 活动订阅至多 50ms 轮询提交，durable 事件不进入无界队列。所有 ASK 当前失败，外部 write/unknown 接收前拒绝；T-08 Memory 是专用事务处理器；完整细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
+Checkpoint.engine_schema=1；model_input/model_response payload 各 schema_version=1；session_sequence 在接收事务使用 Session 版本保存，避免相同时间戳的随机 ID 打乱历史。计数及活动预留保留原 Run 事实；正常返回按实耗结算，未停止调用保留预留与资源，禁止迟到结果变成成功。T-07 已替换完整历史模式为确定性组选取/预览/清单，仍对保护输入溢出前置失败。SDK 活动订阅至多 50ms 轮询提交，durable 事件不进入无界队列。显式 Runtime 的 ASK 支持审批/输入原子响应，临时入口仍失败；外部 write/unknown 接收前拒绝；T-08 Memory 是专用事务处理器；完整细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
 
 ## T-07 落地边界
 

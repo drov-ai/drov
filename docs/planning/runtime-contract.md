@@ -1,6 +1,6 @@
 # 运行行为契约 v3
 
-状态：P4 实施基线；T-03 至 T-08 已本地验证事务存储、资源/任务、只读 Agent 闭环、正文授权、SDK 订阅、上下文选择/清单及内置 Memory；交互/显式恢复、HTTP 和真实模型尚未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
+状态：P4 实施基线；T-03 至 T-08 已本地验证事务存储、资源/任务、只读 Agent 闭环、正文授权、SDK 订阅、上下文选择/清单及内置 Memory；T-09 审批/输入子范围已实现；外部未知效果/显式恢复、HTTP 和真实模型尚未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
 
 本文是 Drov 自己拟采用的行为规则，不是竞品能力声明或已通过的测试报告。关联 C-01 至 C-15、C-17 和 Q-API-01 至 Q-API-08；模块归属见 [架构](architecture.md)，用户调用见 [API](api-draft.md)，默认数值见 [工程方案](engineering.md)。子运行内容为后续 C-16 契约，v0.1 不提供该能力。
 
@@ -78,7 +78,7 @@ HTTP SSE 使用 `run_id:seq` 作为持久化事件游标，可重送，由客户
 
 ## 4. 工具执行、重试与未知结果
 
-T-05 已实现 @tool/PythonTool 和私有只读派发接点：同步工具先有界排队再派发，异步工具保留真实 Task；OperationJournal 同事务保存操作/Run 摘要、检查点、事件和 tool_dispatch_count 预算预留。每个重试只有显式 TransientToolError 才允许，超时/非法输出不重试。已有 operation_id 返回旧事实，不自动批准或重做；T-06 已接入完整计划提交与只读 Run 收尾；交互仍由 T-09 接入。外部 write/unknown 在公共入口接收前拒绝；T-08 内置 Memory 使用第 7.3 节的专用事务路径。
+T-05 已实现 @tool/PythonTool 和私有只读派发接点：同步工具先有界排队再派发，异步工具保留真实 Task；OperationJournal 同事务保存操作/Run 摘要、检查点、事件和 tool_dispatch_count 预算预留。每个重试只有显式 TransientToolError 才允许，超时/非法输出不重试。已有 operation_id 返回旧事实，不自动批准或重做；T-06 已接入完整计划提交与只读 Run 收尾；T-09 已接入审批/输入子范围；外部未知写入与显式恢复仍待该卡剩余范围。外部 write/unknown 在公共入口接收前拒绝；T-08 内置 Memory 使用第 7.3 节的专用事务路径。
 
 工具先完成 schema 校验和权限判断，再执行。参数被校验后规范化为确定性的 JSON 值：键排序、禁止 NaN/Infinity、保留值类型；首期不隐式转换 datetime 等非 JSON 类型，应用须显式转为受支持的表示。调用摘要包含工具名/版本、参数、归属和目标操作标识；不能仅 hash 提示词。
 
@@ -122,6 +122,8 @@ HITL 请求有三种可响应类型：approval、input、reconciliation。启动
 拒绝审批作为明确的 denied 工具结果进入上下文，模型可在剩余预算内解释或选择其他行动。工具授权规则保持有效，不能通过换名称绕过。补充输入校验失败允许用户修正；审批/补充输入有效期到达后以 interaction_expired 结束原运行。核查请求的 expires_at 仅为提醒期限，到期仍保留 suspended 和未知操作，继续接受合法核查证据；不能用过期自动断言外部未执行。
 
 有效期在控制操作、读取状态、恢复扫描和派发前检查；首期不声称有独立分布式定时器能在过期瞬间主动发通知。
+
+T-09 已实现 approval/input 的请求、回执及 respond/resume；原计划继续、当前权限/到期复核和两种存储证据见 [ADR-0014](../decisions/0014-durable-approval-input.md) / [验证](../validation/t09-interactions.md)。HumanInput 合法响应在消费事务内复核原用户业务权限/deny；非法输入或撤权不消费。完整 reconciliation、verify、recover 和启动扫描仍未实现，本段的相应规则继续作为剩余验收条件。新增内部数据归属见架构，记录布局见工程方案。
 
 ## 6. 身份、权限与依赖
 
@@ -193,7 +195,7 @@ forget 使对应当前记忆不再参与后续检索，不等于删除既有对�
 
 凭据不进入普通消息、操作参数和导出器；内容脱敏、授权、保留与删除规则在 [维护策略](release-policy.md)。删除恢复必需数据后明确将对应运行标记为不可恢复，不静默编造缺失内容。
 
-T-06 的正文查询按 context 的 tenant/user 作用域，包含结果投影和每次事件发送的动态复核；跨归属查看/审批及服务身份解析尚未交付。SDK 订阅只将临时增量放入有界队列，durable 事件从存储分页补读，至多 50ms 轮询活动执行的提交；追平当前暂停/终态才结束。未知事件不展示任意载荷。当前所有 ASK 均 failed/interaction_unavailable，无实际交互 ID；T-09 再提供持久交互和显式恢复。
+T-06 的正文查询按 context 的 tenant/user 作用域，包含结果投影和每次事件发送的动态复核；T-09 已接入同 tenant 经应用授权的跨用户查看/响应；服务身份解析尚未交付。SDK 订阅只将临时增量放入有界队列，durable 事件从存储分页补读，至多 50ms 轮询活动执行的提交；追平当前暂停/终态才结束。未知事件不展示任意载荷。显式 Runtime 的 ASK 保存持久审批，HumanInput 保存补充输入；临时入口仍 failed/interaction_unavailable，无实际交互 ID。T-09 的外部未知效果与显式恢复仍未实施。
 
 ## 8. 进程恢复与版本兼容
 

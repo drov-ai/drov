@@ -8,10 +8,12 @@ from uuid import uuid4
 
 from drov._json import StrictJson, canonical_json
 from drov.auth import Authorizer, ToolResource
-from drov.errors import ConfigurationError, Conflict
+from drov.errors import ConfigurationError, Conflict, InteractionExpired, PersistenceUnavailable
 from drov.memory.tools import TOOLS, Forgotten, MemoryTool, Remembered, memory_source, value
 from drov.storage.base import Storage
 from drov.storage.records import EventDraft, MemoryRecord, MemoryScope, RunRecord
+from drov.storage.transaction import Transaction
+from drov.tools.approvals import approval_status
 from drov.tools.execution import ToolExecution
 from drov.tools.operations import OperationJournal, ToolOperation
 from drov.tools.permissions import PermissionDecision, PermissionPolicy
@@ -47,6 +49,7 @@ class MemoryDispatcher:
         record: RunRecord,
         operation_id: str,
         deadline: float,
+        continuation: bool = False,
     ) -> ToolExecution:
         if work.task is not asyncio.current_task() or not any(tool is item for item in TOOLS):
             raise ConfigurationError("Memory dispatch requires a registered kernel handler")
@@ -119,8 +122,9 @@ class MemoryDispatcher:
         if previous is not None:
             if previous.request_hash != request_hash:
                 raise Conflict("Operation ID was used for another Memory call")
-            return ToolExecution(previous)
-        operation = ToolOperation(
+            if not continuation or previous.status != "prepared":
+                return ToolExecution(previous)
+        operation = previous or ToolOperation(
             run_id=run_id,
             operation_id=operation_id,
             tool_name=tool.name,
@@ -130,17 +134,18 @@ class MemoryDispatcher:
             arguments=normalized,
             status="prepared",
         )
-        await journal.commit(
-            operation,
-            EventDraft(
-                type="tool.prepared",
-                data={
-                    "operation_id": operation_id,
-                    "tool_name": tool.name,
-                    "arguments": normalized,
-                },
-            ),
-        )
+        if previous is None:
+            await journal.commit(
+                operation,
+                EventDraft(
+                    type="tool.prepared",
+                    data={
+                        "operation_id": operation_id,
+                        "tool_name": tool.name,
+                        "arguments": normalized,
+                    },
+                ),
+            )
 
         async def reject(code: str, decision: PermissionDecision | None = None) -> ToolExecution:
             rejected = operation.model_copy(
@@ -173,25 +178,41 @@ class MemoryDispatcher:
             arguments=normalized,
         ).model_dump_json()
 
-        async def permission() -> PermissionDecision:
+        async def permission(tx: Transaction | None = None) -> PermissionDecision:
             work.checkpoint()
             try:
                 async with asyncio.timeout_at(deadline):
-                    return await self.policy.decide(
+                    decision = await self.policy.decide(
                         tool,
                         actor=scope,
                         resource=ToolResource.from_json(resource),
                         authorizer=self.authorizer,
                     )
+                    if decision.decision != "deny":
+                        if tx is None:
+                            async with self.storage.transaction() as grant_tx:
+                                current = await grant_tx.get_run(scope, run_id)
+                                grant = await approval_status(grant_tx, current, operation)
+                        else:
+                            grant = await approval_status(tx, current_run, operation)
+                        if grant == "expired":
+                            raise InteractionExpired(
+                                "Saved approval expired before local execution"
+                            )
+                        if grant == "granted":
+                            return PermissionDecision(decision="allow", reason="approval")
+                    return decision
+            except (InteractionExpired, PersistenceUnavailable):
+                raise
             except Exception:
                 return PermissionDecision(decision="deny", reason="authorization_error")
 
         decision = await permission()
+        if decision.decision == "ask":
+            return ToolExecution(operation, decision)
         if decision.decision != "allow":
             return await reject(
-                "interaction_unavailable"
-                if decision.decision == "ask"
-                else "authorization_error"
+                "authorization_error"
                 if decision.reason == "authorization_error"
                 else "permission_denied",
                 decision,
@@ -205,10 +226,11 @@ class MemoryDispatcher:
                 if current.state.status != "running" or current.state.cancel_requested:
                     raise asyncio.CancelledError
                 # Recheck after waiting for the transaction gate, before touching memory.
-                decision = await permission()
+                current_run = current
+                final_decision = await permission(tx)
                 work.checkpoint()
-                if decision.decision != "allow":
-                    raise _PermissionChanged(decision)
+                if final_decision.decision != "allow":
+                    raise _PermissionChanged(final_decision)
                 result: object
                 sources = []
                 changed: MemoryRecord | None = None
@@ -298,10 +320,10 @@ class MemoryDispatcher:
                 )
             return ToolExecution(finished, decision)
         except _PermissionChanged as exc:
+            if exc.decision.decision == "ask":
+                return ToolExecution(operation, exc.decision)
             return await reject(
-                "interaction_unavailable"
-                if exc.decision.decision == "ask"
-                else "permission_denied",
+                "permission_denied",
                 exc.decision,
             )
         except TimeoutError:
