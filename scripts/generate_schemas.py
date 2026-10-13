@@ -7,11 +7,13 @@ from typing import Any
 
 from pydantic import TypeAdapter
 
-from drov.auth import Resource
+from drov.auth import Resource, ToolResource
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
 from drov.runtime import AgentRegistration
 from drov.storage.sqlite import DDL, RECORD_VERSION, SCHEMA_VERSION
+from drov.tools import PermissionPolicy
+from drov.tools.permissions import PermissionDecision
 from drov.types import (
     CancelReceipt,
     ContextManifest,
@@ -55,6 +57,9 @@ def schema_text() -> str:
         "Memory": Memory,
         "Resource": Resource,
         "AgentRegistration": AgentRegistration,
+        "PermissionPolicy": PermissionPolicy,
+        "PermissionDecision": PermissionDecision,
+        "ToolResource": ToolResource,
     }
     bundle = {
         "schema_version": 1,

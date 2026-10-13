@@ -11,6 +11,7 @@ from typing import Any, Generic, Self, TypeVar, cast
 from pydantic import TypeAdapter
 
 from drov.agent import Agent
+from drov.auth import Authorizer, OwnerAuthorizer
 from drov.config import Limits
 from drov.errors import CapacityExceeded, ConfigurationError, Conflict, ShutdownIncomplete
 from drov.models.protocol import ModelAdapter
@@ -19,6 +20,10 @@ from drov.runtime.resources import ResourceBinding
 from drov.storage import MemoryStorage
 from drov.storage.base import Storage
 from drov.storage.records import RunRecord
+from drov.tools._pool import ToolPool
+from drov.tools.execution import ToolDispatcher
+from drov.tools.permissions import PermissionPolicy
+from drov.tools.python import PythonTool
 from drov.types import ScopedIdentifier
 
 T = TypeVar("T")
@@ -166,10 +171,17 @@ class Runtime:
         dependencies: Mapping[str, object] | None = None,
         owned_models: Sequence[ModelAdapter] = (),
         limits: Limits | None = None,
+        policy: PermissionPolicy | None = None,
+        authorizer: Authorizer | None = None,
     ) -> None:
         self.limits = Limits.from_json((limits or Limits()).model_dump_json())
+        self._policy = PermissionPolicy.from_json((policy or PermissionPolicy()).model_dump_json())
+        self._authorizer = authorizer if authorizer is not None else OwnerAuthorizer()
+        if not callable(getattr(self.authorizer, "authorize", None)):
+            raise ConfigurationError("authorizer must implement Authorizer")
         self._agents: dict[tuple[str, str], Agent[Any]] = {}
         self._registered_models: dict[tuple[str, str], ModelAdapter] = {}
+        self._registered_tools: dict[tuple[str, str], tuple[object, ...]] = {}
         self._registrations: dict[tuple[str, str], AgentRegistration] = {}
         for agent in agents:
             registration = fingerprint(agent)
@@ -178,6 +190,7 @@ class Runtime:
                 raise ConfigurationError("Duplicate Agent name/revision registration")
             self._agents[key] = agent
             self._registered_models[key] = agent.model
+            self._registered_tools[key] = tuple(agent.tools)
             self._registrations[key] = registration
         self._storage_binding = (
             storage
@@ -210,6 +223,7 @@ class Runtime:
         self._slots: set[_Slot] = set()
         self._works: set[_Work[Any]] = set()
         self._changed = asyncio.Event()
+        self._tool_dispatcher: ToolDispatcher | None = None
 
     def _require_loop(self) -> asyncio.AbstractEventLoop:
         loop = asyncio.get_running_loop()
@@ -230,6 +244,14 @@ class Runtime:
         return self._storage
 
     @property
+    def policy(self) -> PermissionPolicy:
+        return self._policy
+
+    @property
+    def authorizer(self) -> Authorizer:
+        return self._authorizer
+
+    @property
     def dependencies(self) -> Mapping[str, object]:
         self._require_open()
         return self._dependencies
@@ -245,6 +267,13 @@ class Runtime:
         expected = self._registrations[key]
         if (
             self._agents[key].model is not self._registered_models[key]
+            or len(self._agents[key].tools) != len(self._registered_tools[key])
+            or any(
+                current is not expected
+                for current, expected in zip(
+                    self._agents[key].tools, self._registered_tools[key], strict=True
+                )
+            )
             or fingerprint(self._agents[key]) != expected
         ):
             raise Conflict("Registered Agent definition changed; use a new revision")
@@ -266,6 +295,14 @@ class Runtime:
     def _require_dependencies(self, agent: Agent[Any]) -> None:
         if any(self._dependencies.get(name) is None for name in agent.required_dependencies):
             raise ConfigurationError("Required Agent dependencies are not configured")
+
+    def _validate_tool(self, record: RunRecord, tool: PythonTool) -> None:
+        registration = self.validate_record(record)
+        if not isinstance(tool, PythonTool) or not any(
+            tool is item
+            for item in self._registered_tools[(registration.name, registration.revision)]
+        ):
+            raise ConfigurationError("Tool callable is not registered for this Run")
 
     def _install(
         self, value: object, binding: ResourceBinding[Any], *, exclusive: bool = False
@@ -334,6 +371,21 @@ class Runtime:
             self._dependencies = MappingProxyType(dependencies)
             for agent in self._agents.values():
                 self._require_dependencies(agent)
+            if any(
+                isinstance(tool, PythonTool)
+                for agent in self._agents.values()
+                for tool in agent.tools
+            ):
+                pool = ToolPool(self.limits.tool_threads, self.limits.tool_queue_size)
+                self._install(pool, ResourceBinding.owned(pool))
+                self._tool_dispatcher = ToolDispatcher(
+                    storage=self._storage,
+                    dependencies=self._dependencies,
+                    policy=self.policy,
+                    authorizer=self.authorizer,
+                    pool=pool,
+                    validate=self._validate_tool,
+                )
             self._state = "open"
         except BaseException:
             self._state = "failed"

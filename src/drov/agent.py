@@ -60,7 +60,7 @@ class Agent(Generic[T]):
             ):
                 raise ConfigurationError("Input budget exceeds declared model window")
         if any(not isinstance(tool, ToolDefinition) for tool in tools):
-            raise ConfigurationError("T-02 tools must be compiled ToolDefinition values")
+            raise ConfigurationError("Tools must be compiled definitions or decorated Python tools")
         if len({tool.name for tool in tools}) != len(tools):
             raise ConfigurationError("Duplicate logical tool names")
         if memory is not None:

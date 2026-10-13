@@ -266,3 +266,5 @@ S-03-E 的补充输入变体在 tools 中另注册 `HumanInput(name="ask_item", 
 P3 已指定依赖、完整夹具、模型适配器及规则断言，并把 [B-01 至 B-15](runtime-contract.md) 中首期适用项映射到质量计划和任务；B-14 属后续。代码阶段再创建实际 examples 和测试文件；当前片段未导入或运行 Drov。
 
 三类 Agent 都需通过同一 DrovApp 入口复测。X-01 使用显式 Runtime 的相同权限、存储和限额配置对照 HTTP/流式；不将临时 Agent.run 与持久化 Runtime 的配置差异判为内核差异。
+
+T-05 已验证 S-01-B 的只读瞬态重试/超时及 S-03-A/C 的权限否决、ASK、可信参数/归属和重复操作不派发部分，见 [工具验证](../validation/t05-tools.md)。完整 Agent 案例、人工审批响应和未知写入仍由后续任务完成，不能将计数夹具写成三个场景已跑通。

@@ -1498,6 +1498,78 @@
       "title": "ModelResponse",
       "type": "object"
     },
+    "PermissionDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "deny",
+            "ask",
+            "allow"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "scope",
+            "authorization",
+            "authorization_error",
+            "deny",
+            "approval",
+            "ask",
+            "allow",
+            "read",
+            "default"
+          ],
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision",
+        "reason"
+      ],
+      "title": "PermissionDecision",
+      "type": "object"
+    },
+    "PermissionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allow",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "ask": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Ask",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "deny": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Deny",
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "title": "PermissionPolicy",
+      "type": "object"
+    },
     "Resource": {
       "$defs": {
         "RunContext": {
@@ -4379,6 +4451,92 @@
         "runs"
       ],
       "title": "SessionView",
+      "type": "object"
+    },
+    "ToolResource": {
+      "$defs": {
+        "JsonValue": {},
+        "RunContext": {
+          "additionalProperties": false,
+          "properties": {
+            "tenant_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Tenant Id",
+              "type": "string"
+            },
+            "user_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tenant_id",
+            "user_id"
+          ],
+          "title": "RunContext",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "arguments": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Arguments",
+          "type": "object"
+        },
+        "operation_id": {
+          "minLength": 1,
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "owner": {
+          "$ref": "#/$defs/RunContext"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "tool_name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Tool Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "owner",
+        "tool_name",
+        "operation_id",
+        "arguments"
+      ],
+      "title": "ToolResource",
       "type": "object"
     },
     "TransientEvent": {

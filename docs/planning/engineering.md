@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：T-01 至 T-04 的类型、存储和生命周期已实现；Agent 循环和真实适配器仍未实现。实际范围见 [T-04 验证](../validation/t04-runtime.md)。更新：2026-10-13。
+状态：T-01 至 T-05 的类型、存储、生命周期和 Python 工具/权限接点已实现；Agent 循环和真实适配器仍未实现。实际范围见 [T-05 验证](../validation/t05-tools.md)。更新：2026-10-13。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 
@@ -68,7 +68,9 @@ docs/                        用户文档、规划和决策
 | Memory | 首版策略描述 + 内置事务处理器 | 不开放任意外部写入后端冒用内置原子性 |
 | 观测 | 只读事件订阅、元数据导出 | 本地查看/JSON 导出；OTel 后续，不放任回调改写状态 |
 
-模型协议首版最小归一结果含 message、tool_calls、usage、provider_items；后者是需要往返的供应商协议数据，不是可展示的内部推理。流式增量必须以完整响应事件收尾才可提交工具计划。T-02 已实现 drov.models.protocol 与离线 ScriptedAdapter，生成 [schema](../reference/schema-v1.json)。ModelRequest 包含 messages/tools/output_schema/provider_items，ModelResponse 包含 message/tool_calls/usage/provider_items/finish_reason；generate 产出 delta/complete，aclose 为异步关闭。collect_response 拒绝缺少 complete、complete 后数据、重复 call_id 或不完整工具计划；不调用真实供应商。Authorizer 为 authorize(actor, action, resource)，AuthAdapter 为 authenticate(credential)，实际权限引擎及服务认证尚未实现。
+模型协议首版最小归一结果含 message、tool_calls、usage、provider_items；后者是需要往返的供应商协议数据，不是可展示的内部推理。流式增量必须以完整响应事件收尾才可提交工具计划。T-02 已实现 drov.models.protocol 与离线 ScriptedAdapter，生成 [schema](../reference/schema-v1.json)。ModelRequest 包含 messages/tools/output_schema/provider_items，ModelResponse 包含 message/tool_calls/usage/provider_items/finish_reason；generate 产出 delta/complete，aclose 为异步关闭。collect_response 拒绝缺少 complete、complete 后数据、重复 call_id 或不完整工具计划；不调用真实供应商。Authorizer 为 authorize(actor, action, resource)，AuthAdapter 为 authenticate(credential)，T-05 已实现 PermissionPolicy/OwnerAuthorizer 及 execute_tool/ToolResource，实际服务认证仍待 T-13。
+
+T-05 @tool 返回 PythonTool，name 必填，revision 默认 "1"、effect 默认 unknown、approval 默认 policy；含参数/返回 codec 和真实 callable。同步/异步函数共用 schema 子集；生成器拒绝。只读瞬态错误用 TransientToolError，其他错误不默认重试。ToolPool 在 Runtime 打开时装配，线程只在真实提交时启动；有界等待先于派发标记，实际 Future 由内核持有。内部操作 payload schema=1，Checkpoint.data.tool_dispatch_count 保存预算预留；即使提交后撤权/取消使函数没执行也不回退，恢复不会把尝试变成免费次数。实际详情见 ADR-0009。
 
 ## 4. SQLite、锁与 Memory
 

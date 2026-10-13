@@ -1,9 +1,11 @@
 """Drov definitions, storage, and runtime lifecycle. Agent execution is still pending."""
 
 from drov.agent import Agent
+from drov.auth import OwnerAuthorizer
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.runtime import ResourceBinding, Runtime
 from drov.storage import MemoryStorage, SQLiteStorage
+from drov.tools import PermissionPolicy, tool
 from drov.tools.schema import ToolContext
 from drov.types import (
     ApprovalDecision,
@@ -30,6 +32,8 @@ __all__ = [
     "Memory",
     "MemoryStorage",
     "ModelCapabilities",
+    "OwnerAuthorizer",
+    "PermissionPolicy",
     "ReconciliationDecision",
     "ResourceBinding",
     "RunContext",
@@ -38,4 +42,5 @@ __all__ = [
     "Suspended",
     "ToolContext",
     "__version__",
+    "tool",
 ]

@@ -1,6 +1,6 @@
 # 运行行为契约 v3
 
-状态：P4 实施基线；T-03 存储原语、T-04 注册/资源与私有任务控制已验证；完整执行/持久化控制/恢复行为尚未实现。T-04 细化见 [ADR-0008](../decisions/0008-runtime-ownership.md)。更新：2026-10-13。
+状态：P4 实施基线；T-03 存储原语、T-04 注册/资源与私有任务、T-05 只读工具/权限/原子记录已验证；完整 Agent/交互/恢复行为尚未实现。T-05 细化见 [ADR-0009](../decisions/0009-python-tools.md)。更新：2026-10-13。
 
 本文是 Drov 自己拟采用的行为规则，不是竞品能力声明或已通过的测试报告。关联 C-01 至 C-15 和 Q-API-01 至 Q-API-08；模块归属见 [架构](architecture.md)，用户调用见 [API](api-draft.md)，默认数值见 [工程方案](engineering.md)。子运行内容为后续 C-16 契约，v0.1 不提供该能力。
 
@@ -78,6 +78,8 @@ HTTP SSE 使用 `run_id:seq` 作为持久化事件游标，可重送，由客户
 
 ## 4. 工具执行、重试与未知结果
 
+T-05 已实现 @tool/PythonTool 和私有只读派发接点：同步工具先有界排队再派发，异步工具保留真实 Task；OperationJournal 同事务保存操作/Run 摘要、检查点、事件和 tool_dispatch_count 预算预留。每个重试只有显式 TransientToolError 才允许，超时/非法输出不重试。已有 operation_id 返回旧事实，不自动批准或重做；完整计划提交、Run 收尾和交互仍由 T-06/T-09 接入。write/unknown 在本轮明确拒绝实际派发。
+
 工具先完成 schema 校验和权限判断，再执行。参数被校验后规范化为确定性的 JSON 值：键排序、禁止 NaN/Infinity、保留值类型；首期不隐式转换 datetime 等非 JSON 类型，应用须显式转为受支持的表示。调用摘要包含工具名/版本、参数、归属和目标操作标识；不能仅 hash 提示词。
 
 每个调用生成稳定 operation_id。保存完整调用计划后按顺序执行，执行阶段为：prepared → dispatched → succeeded / failed_known / unknown。prepared 之前或尚未 dispatched 的调用可证明没有由本次派发执行；dispatched 在真正调用外部服务前提交，二者之间崩溃会保守地视为可能执行。
@@ -131,7 +133,7 @@ Run/Session 查询必须检查 tenant_id + owner user_id；批准和管理员查
 
 显式 include_content=True 需 read 与 view_content；缺权限直接拒绝。run/wait/resume、stream 及 recover(wait=True) 会返回正文，须在创建或消费控制输入之前预检对应权限；运行中撤权后停止向该调用者提供正文，不回滚已合法接受的执行。stream/events 每次发送正文前重新授权，元数据模式不发送 token.delta。默认 authorizer 给本人读正文及本人控制权限，跨用户审批者的查看和响应权限由应用分别授予。只具响应权限者使用 respond 得到回执；审批权限不会隐式授予结果查看权。raw provider_items 仅用于协议往返，不作为可显示正文。
 
-权限判断固定顺序：作用域/业务授权否决 → 显式 deny → 工具 required approval 或显式 ask → 显式 allow → 应用注册为只读且通过动态检查的调用 → 默认 ask。allow 不能覆盖 deny 或 required approval。输入数据、工具返回和模型消息不能改写这套顺序。
+权限判断固定顺序：作用域/业务授权否决 → 显式 deny → 工具 required approval 或显式 ask → 显式 allow → 应用注册为只读且通过动态检查的调用 → 默认 ask。allow 不能覆盖 deny 或 required approval。输入数据、工具返回和模型消息不能改写这套顺序。T-05 由 Authorizer.execute_tool action 和 ToolResource 承担当前业务否决，队列等待后、派发标记提交后再检查；授权错误/超时不派发，参数快照不允许授权器修改实参。Policy 集合不可变，Runtime 配置引用只读；宿主可让原 authorizer 对象反映当前业务权限。
 
 ToolContext 由内核注入，包含已验证归属、run_id、operation_id 和经应用解析的依赖。模型能填写的 schema 中不存在这些控制字段。工具仍需遵守业务后端自己的权限校验；Drov 的检查不是沙箱或对任意工具代码的可信证明。
 

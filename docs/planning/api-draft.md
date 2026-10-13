@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 类型/协议、T-03 存储、T-04 Runtime 注册/资源生命周期已实现；Agent 执行入口仍未实现。v3 控制与查看见 [ADR-0005](../decisions/0005-control-and-observation.md)，T-04 细化见 [ADR-0008](../decisions/0008-runtime-ownership.md)。更新：2026-10-13。
+状态：P4 v3 基线；T-02 类型/协议、T-03 存储、T-04 Runtime 生命周期、T-05 Python 工具/权限与私有只读派发已实现；Agent 执行入口仍未实现。v3 控制与查看见 [ADR-0005](../decisions/0005-control-and-observation.md)，T-05 细化见 [ADR-0009](../decisions/0009-python-tools.md)。更新：2026-10-13。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -170,6 +170,36 @@ result = await runtime.resume(
 
 ## 工具与依赖
 
+T-05 的 `from drov import tool, PermissionPolicy, OwnerAuthorizer` 已实现。@tool 返回不可变 PythonTool，继承 schema-only ToolDefinition 并持有实际 callable；参数仍按 T-02 子集校验，ToolContext 按类型注入。name 必填，revision 默认 "1"，修改行为仍须更新 revision；effect 默认 unknown、approval 默认 policy。生成器与内置 Memory 名称拒绝。Agent.tools 接受装饰后的对象；compile_tool 的结果可检查但没有执行能力。
+
+```python
+# 已实现的定义/权限检查；不调用 Agent 或模型。
+from drov import PermissionPolicy, OwnerAuthorizer, RunContext, ToolContext, tool
+from drov.auth import ToolResource
+
+
+@tool(name="square", revision="1", effect="read")
+def square(value: int, ctx: ToolContext) -> int:
+    return value * value
+
+
+owner = RunContext(tenant_id="local", user_id="alice")
+decision = await PermissionPolicy().decide(
+    square,
+    actor=owner,
+    resource=ToolResource(
+        owner=owner, tool_name="square", operation_id="op", arguments={"value": 3}
+    ),
+    authorizer=OwnerAuthorizer(),
+)
+assert decision.decision == "allow"
+```
+
+PermissionPolicy(deny={...}, ask={...}, allow={...}) 保存不可变集合，支持 set/frozenset/list。decide 返回 PermissionDecision 的 decision/reason；业务 Authorizer 使用新增 execute_tool action 与 ToolResource 检查原归属及规范参数。默认 OwnerAuthorizer 只允许本人，跨用户查看/审批仍需宿主明确授权。Runtime 接收 policy/authorizer，配置引用只读，原 authorizer 对象可反映动态业务权限；当前权限会在尝试、队列等待后、派发标记提交后再次检查，allow 不覆盖否决或 required approval。
+
+真实派发目前是私有内核接点，只有 read 可执行；write/unknown 明确 not_executed/effect_not_supported，ASK 保存 prepared/approval_required 而不制造 request_id。后续 Agent.run/Runtime.start 接口尚未实现，完整审批/核查仍待 T-09。结果必须经 codec 和大小校验；非法输出不当成功，None 用内部 has_result 区分可用结果。只读瞬态错误用 `drov.errors.TransientToolError`，其他错误/超时/非法结果不自动重试。排队/线程与原子记录规则见运行契约第 4 节和 ADR-0009。
+
+
 ```python
 # API 设计片段：依赖实例由 Runtime 的应用配置提供。
 @tool(name="update_item", effect="write", approval="required")
@@ -251,7 +281,7 @@ T-02 已将下列 DTO/配置与模型协议落成 Python 类型，并生成 [sch
 
 - 文本 input 为非空 str；ID 为非空不含控制字符的字符串。用户提供的 tenant_id/user_id/session_id/name/revision/request_key 最多 128 字符，生成的 run/request/operation/model_call ID 是不透明 UUID 字符串，不编码用户名或密钥。
 - RunContext 的公共归属字段为 tenant_id、user_id；权限/依赖来自可信宿主，不能从模型或 HTTP body 覆写。Agent.run 未传 context 时只用本次临时身份，无法访问持久化 scope。
-- Agent：name/revision 在持久化注册时必填，临时定义可都省略；两者须成对提供。T-02 model 接收 ModelAdapter 实例，集成/资源描述由后续任务装配；当前 tools 接收 compile_tool 的 ToolDefinition，@tool 在 T-05 添加。instructions 默认空串、tools 默认空集合、output_type 默认 str，memory 默认 None，context_policy/limits 使用工程默认值。相同对象可在各入口复用，但同一有状态客户端的所有权不能隐式转移。
+- Agent：name/revision 在持久化注册时必填，临时定义可都省略；两者须成对提供。T-02 model 接收 ModelAdapter 实例，集成/资源描述由后续任务装配；tools 接受 ToolDefinition（仅 schema）或 @tool 产生的 PythonTool；进入执行配置时必须具备真实 callable。instructions 默认空串、tools 默认空集合、output_type 默认 str，memory 默认 None，context_policy/limits 使用工程默认值。相同对象可在各入口复用，但同一有状态客户端的所有权不能隐式转移。
 - Runtime：agents、storage、policy、authorizer、dependencies、limits；dependencies 默认空映射、policy 默认保守规则、默认 authorizer 只允许本人记录/控制。跨用户 reviewer 必须由应用 authorizer 明确允许。资源只在进入 Runtime 时打开。
 - ModelCapabilities：text、tools、structured_output、streaming 为 bool，context_window 为正整数或 None；未知能力不得默认为支持。OpenAIResponses 显式传 model 与 capabilities，密钥仅环境/借用客户端配置，不能作为可持久化 Agent 字段。
 - Limits 字段对应工程默认表；时间/大小/容量/步骤限额为正数，模型/只读重试次数为非负整数（0 表示不重试），v0.1 write_tool_retries 只允许 0，只有字段明确可选时才允许 None。NaN/Infinity、非法类型、超出管理员上限的值拒绝。服务端 `limits` 只收紧，不允许启用后端未配置的能力。

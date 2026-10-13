@@ -4,51 +4,53 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-04 本地实施验收完成；下一项 T-05 Python 工具与权限。本轮实现已推送 main，GitHub CI 通过，详情见下节。
-- 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-04 细化见 [ADR-0008](../decisions/0008-runtime-ownership.md)。历史 fingerprint JSON 不覆盖，源契约变化由 ADR 说明。
-- 已实现：包 0.1.0a0、定义/公共类型/配置/工具 schema/模型协议、内存/SQLite 事务存储及记录/CAS/去重/原子步骤/Memory 原语/锁/取消处理；Runtime 注册指纹、资源装配/所有权、私有任务/容量/取消和关闭控制。
-- 未实现：Agent 执行入口、实际 Python/Memory 工具、权限引擎、运行恢复调度、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-05 至 T-18 未开始。私有任务和实际线程测试不是 Agent 副作用恢复或模型质量验证。
+- 阶段：P1 至 P4、T-01 至 T-05 本地实施验收完成；下一项 T-06 离线运行闭环。本轮 Git/CI 状态见下节。
+- 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-05 细化见 [ADR-0009](../decisions/0009-python-tools.md)。历史 fingerprint JSON 不覆盖，源契约变化由 ADR 说明。
+- 已实现：包 0.1.0a0、定义/公共类型/配置/工具 schema/模型协议、内存/SQLite 事务存储及记录/CAS/去重/原子步骤/Memory 原语/锁/取消处理；Runtime 注册指纹/资源与任务所有权；PythonTool/@tool、PermissionPolicy/OwnerAuthorizer、私有只读工具派发、有界线程队列及事务操作记录。
+- 未实现：Agent 执行入口、Memory 工具、完整审批/核查与恢复调度、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-06 至 T-18 未开始。私有任务和实际线程测试不是 Agent 副作用恢复或模型质量验证。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
-- 本轮起点：`/Users/yanlong/projects/drov`，main / 4b8e478，工作区干净。origin 为已有公开仓库 [drov-ai/drov](https://github.com/drov-ai/drov) 的 SSH URL；T-01/T-02 检查点 478cb12、T-03 实现 751ff55、T-04 实现 45a57ea 已在 main。品牌源文件保留本地，不进入 Git。
+- 本轮起点：`/Users/yanlong/projects/drov`，main / e8588a7，工作区干净。origin 为已有公开仓库 [drov-ai/drov](https://github.com/drov-ai/drov) 的 SSH URL；T-01/T-02 检查点 478cb12、T-03 实现 751ff55、T-04 实现 45a57ea 已在 main。品牌源文件保留本地，不进入 Git。
 
 ## 已确认方向
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## T-04 本轮交付
+## T-05 本轮交付
 
 | 交付 | 实际结果 |
 | --- | --- |
-| 注册 | 按 name/revision 唯一注册；规范配置/schema 指纹 v1；拒绝缺身份、重复、注册后变更及模型对象替换 |
-| 恢复校验接点 | validate_record 验证原 revision、记录 schema、保存的 hash、必要依赖；真实 SQLite 重开验证，不派发工作 |
-| 装配与归属 | 未打开存储默认自有，已打开实例默认借用；模型/依赖默认借用；ResourceBinding 显式借用/转交/异步工厂，owned_models 转交模型 |
-| 生命周期 | 启动失败逆序清理，同对象去重关闭；等待取消不丢资源；关闭失败/超时保留任务、剩余资源栈与锁，可重试 |
-| 任务与容量 | 私有内核强引用工作与实际底层 Future；等待取消独立；槽位预留/交接/释放；取消禁新派发，未停止调用继续占资源 |
-| 文档与兼容 | ADR-0008、API/架构/运行/工程/质量/X-02 同步；生成 AgentRegistration schema；数据格式与锁依赖不变 |
+| 工具定义 | @tool 产生含真实 callable 的 PythonTool，继承 T-02 schema/codec；拒绝生成器/保留名称和注册后的对象替换 |
+| 权限 | 不可变 deny/ask/allow，scope/业务否决优先；OwnerAuthorizer 与 execute_tool/ToolResource；规范参数快照、排队/派发前当前权限复核 |
+| 实际只读派发 | 同步/异步函数共用校验；有界线程/队列和真实 Future；ASK 不造交互 ID，write/unknown 明确拒绝执行 |
+| 操作与预算 | payload schema=1；操作/Run 摘要、检查点、事件同事务；派发预算预留持久化，重试用独立 attempt ID；重复操作不自动执行 |
+| 故障 | 未授权/提交失败计数 0；输出非法/超大不成功、不重试；迟到结果不用；取消未停止调用保留槽位/锁，关闭失败可重试 |
+| 文档与依赖 | ADR-0009、API/运行/架构/工程/质量/案例同步；完整 T-05 验收的 T-03/T-04 前置补入任务卡；新增公开权限 schema，无新依赖 |
 
-新增 37 项测试，共收集 205 项；本地 Python 3.11.9/SQLite 3.45.1：204 passed、1 skipped（3.12+ 的即时任务工厂 API）；Python 3.14.3/SQLite 3.52.0：205 passed。Ruff/格式/严格 mypy/schema、构建与干净安装等实际证据见 [T-04 验证](../validation/t04-runtime.md)。没有 T-04 剩余验收子项；执行/权限/持久化控制按后续任务实施。
+新增 51 项测试，共收集 256 项；本地 Python 3.11.9/SQLite 3.45.1：255 passed、1 skipped（即时任务工厂 API）；Python 3.14.3/SQLite 3.52.0：256 passed。静态/类型/schema、构建、干净安装及故障实验见 [T-05 验证](../validation/t05-tools.md)。T-05 无剩余验收子项；完整 Agent/交互与正文授权仍按后续任务实施。T-04 历史证据见 [所有权验证](../validation/t04-runtime.md)。
 
 ## GitHub / CI
 
 - 继续使用现有 origin 和用户已有 GitHub 身份；不修改全局代理/认证、不建立新仓库。提交前检查可识别凭据模式与 Git 跟踪范围，品牌/环境/数据库排除。
 - T-04 实现提交 [45a57ea](https://github.com/drov-ai/drov/commit/45a57eab30b633889f625e2cde80b00c6b532205) 已推送 main；[CI 38387899628](https://github.com/drov-ai/drov/actions/runs/38387899628) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14 和 Python 3.15 advisory 共 10 个 job 全部 success。测试/构建/干净安装/extras 导入通过；3.11 即时任务 API 和 Windows 打开文件替换用例的适用跳过见 T-04 报告。
-- 本轮补记 CI 的后续文档提交不改变已验证代码；本地检查点、源契约和报告齐全，无 T-04 实施缺项。
+- T-05 本地验收已完成；本轮实现检查点与新 CI 同步后补记。上面的 T-04 CI 是历史证据，不用于声明 T-05 代码已通过远程验证。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
-## 下一轮：T-05 Python 工具与权限
+## 下一轮：T-06 离线运行闭环
 
-前置 T-02 已完成；按 [实施计划](implementation-plan.md) 的 T-05 卡实施，然后才能进入依赖 T-04/T-05 的 T-06 只读运行闭环。
+前置 T-04/T-05 已完整验收；按 [实施计划](implementation-plan.md) 的 T-06 卡接入 ScriptedModel，形成真实只读 Agent 闭环。
 
-1. 实现 @tool 和参数/返回校验，将已编译定义与真实可调用对象关联；可信 ToolContext 只由内核注入。
-2. 实现 PermissionPolicy/Authorizer 的固定否决、deny、required approval/ask、allow、动态 read、默认 ask 顺序；未授权工具派发数必须为 0。
-3. 实现有界线程/队列执行和操作记录接口，接入 T-04 的真实底层 Future/取消/容量所有权；不因包装任务取消把实际线程当作已停止。
-4. 用计数工具、身份/撤权、超时/非法参数和实际线程夹具验收 S-01-B、S-03-A/C、B-01/04/10 的 T-05 部分。完整审批/未知写入仍在 T-09/T-10，不提前开放假执行入口。
+1. 实现 Runtime.start/run/wait 与 Agent.run/run_sync，接收前拒绝无 callable、未支持的 write/unknown/Memory 配置；去重先于忙/容量，accepted 提交与任务/槽位交接保持所有权。
+2. 提交完整模型响应/计划后调用已实现的只读派发器，最终输出经 codec；提交历史只读一次用户输入，限额/取消的实际事实不因重启或错误重置。
+3. 实现 stream/events/inspect 和正文授权投影；等待/流退出不取消执行，当前权限决定正文，持久事件与结果一致，暂停/终态订阅追平。
+4. 用脚本模型、计数工具/存储故障/权限与取消夹具跑通 S-01-A，交付离线检索 example。临时 ASK 明确 failed/interaction_unavailable、工具计数 0；现有事件循环中 run_sync 明确失败，不嵌套循环。
+
+完成标准是一个可实际运行的只读 SDK/stream 示例及对应错误/隔离测试，不是空 run 方法或示意输出。Memory/HITL/未知写入仍依赖 T-08/T-09/T-10。
 
 ## 用户准备事项
 
 | 事项 | 当前状态 / 需要时点与配置方式 |
 | --- | --- |
-| T-05 工具与权限 | 现在无需准备资源、私有业务数据或账号；先使用合成工具/身份/计数夹具离线验收 |
+| T-06 离线闭环 | 现在无需准备 Key、私有数据或账号；用脚本模型、自有合成语料、工具/身份/计数夹具验收 |
 | GitHub 仓库 | 已提供，继续使用当前 origin；有具体同步/CI 阻碍再说明，无需重新建仓库 |
 | 模型服务、可访问 model ID、密钥和总预算 | T-11 smoke/T-16 live 前主动提出服务配置与费用估算；到时在本地环境或忽略配置中安全设置 Key，聊天不贴密钥；未授权预算前不付费调用 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
@@ -58,9 +60,9 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 ## 会话切换建议
 
-**下一轮建议继续本会话实施 T-05，无需现在换 New Chat。** 本会话第一项 T-04 已形成完整验收边界，T-05 会直接复用所有权接点。通常 T-06 验收后再交接；若运行闭环明显扩大上下文，可在 T-05 完成后单独为 T-06 开 New Chat。继续使用 `/Users/yanlong/projects/drov`；交接方法见 [handoff](../handoff.md)。
+**建议下一轮为 T-06 开启 New Chat。** 本会话已完整完成 T-04/T-05，两项相关内核任务留下明确检查点；T-06 将横跨接收、模型循环、历史、授权与事件流，适合独立上下文。新会话仍选择 Drov 项目 **Local / 当前目录 `/Users/yanlong/projects/drov`**，按 [handoff](../handoff.md) 读取 Git、进度和最新验证，不复制或重新建目录。
 
-以后默认约 3 轮实施、通常 2–3 个相关任务后交接，可延长到 5 轮；复杂任务可单独一会话。按验收或明确子阶段交接，不为换会话提前关闭任务。
+默认约 3 轮、通常 2–3 个相关任务后交接是提醒，不是硬限制；本次按完整任务边界和下一项复杂度提前交接。若用户选择继续本会话，也可以按相同证据接续；不为换会话提前关闭任务。
 
 ## 阶段记录
 
@@ -72,3 +74,4 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 | 2026-10-13 | T-02 | 公共类型/schema/适配协议、116 项离线验证完成 |
 | 2026-10-13 | T-03 | 内存/SQLite、CAS/去重/原子边界、锁/取消/真实进程验证完成 |
 | 2026-10-13 | T-04 | 注册指纹/恢复校验接点、资源/任务/真实调用所有权、取消/容量/关闭完整验收；下一项 T-05 |
+| 2026-10-13 | T-05 | Python 工具/权限、真实只读派发、有界队列/记录/重试与故障验收完成；下一项 T-06 |

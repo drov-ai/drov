@@ -59,3 +59,9 @@ class RecordNotFound(DrovError):
 
 class IncompatibleStorage(ConfigurationError):
     code = "incompatible_storage"
+
+
+class TransientToolError(DrovError):
+    """Application-declared transient read failure; never enables write retries."""
+
+    code = "transient_tool_error"

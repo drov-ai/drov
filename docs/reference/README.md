@@ -1,20 +1,21 @@
 # 已实现的定义与数据契约
 
-T-02 至 T-04 提供类型/schema、协议、事务存储与 Runtime 注册/资源生命周期，尚无 Agent 执行入口、@tool 或真实模型适配器。公共入口语义仍以 [API 草案](../planning/api-draft.md) 为准。实际边界见 [ADR-0006](../decisions/0006-python-contracts.md)。
+T-02 至 T-05 提供类型/schema、协议、事务存储、Runtime 生命周期、@tool/权限和私有只读工具派发，尚无 Agent 执行入口、完整交互或真实模型适配器。公共入口语义仍以 [API 草案](../planning/api-draft.md) 为准。实际边界见 [ADR-0006](../decisions/0006-python-contracts.md)。
 
 ## 模块入口
 
 | 入口 | 已实现内容 |
 | --- | --- |
-| drov | Agent 定义、Limits/ModelCapabilities/ContextPolicy/Memory 配置描述、RunContext/ToolContext、四类结果、三类交互响应、Runtime/ResourceBinding |
+| drov | Agent 定义、Limits/ModelCapabilities/ContextPolicy/Memory 配置描述、RunContext/ToolContext、四类结果、三类交互响应、Runtime/ResourceBinding、tool/PermissionPolicy/OwnerAuthorizer |
 | drov.runtime | Runtime open/aclose/异步上下文、registration/validate_record、storage/dependencies/active_slots；AgentRegistration/ResourceBinding；没有运行或恢复入口 |
 | drov.types | 状态/结果/交互/事件/上下文/分页 DTO、Usage、RunError、parse_outcome/parse_response/parse_event、outcome_adapter |
 | drov.models.protocol | ModelAdapter、ModelRequest/Response、消息/工具调用、delta/complete、collect_response |
 | drov.tools.schema | compile_tool、compile_type、compile_output、strict_schema、ToolDefinition/JsonCodec |
-| drov.auth / drov.errors | 异步身份/授权协议与类型化异常；不代表已有权限引擎或服务 |
+| drov.tools | @tool/不可变 PythonTool/PermissionPolicy；compile_tool 仍是 schema-only；真实派发只由私有内核接点使用 |
+| drov.auth / drov.errors | Authorizer/AuthAdapter、ToolResource/OwnerAuthorizer、错误与 TransientToolError；HTTP 认证仍未实现 |
 | drov.storage | MemoryStorage / SQLiteStorage；异步 open/aclose、start/查询、原子 transaction 接点；内部协议尚不稳定 |
 
-Memory 是配置对象，MemoryStorage 是事务内存后端；模型 Memory 工具和检索装配尚未实现；Agent 只定义行为，构造不会执行。存储描述只在 open/异步上下文进入时获取连接和锁；完整记录只能交给后续内核做授权投影，不能直接作为 API 响应。工具描述通过 compile_tool 创建，T-05 才添加装饰器与调用管理。provider_items 仅供适配器往返，不用于向用户显示内部协议数据。
+Memory 是配置对象，MemoryStorage 是事务内存后端；模型 Memory 工具和检索装配尚未实现；Agent 只定义行为，构造不会执行。存储描述只在 open/异步上下文进入时获取连接和锁；完整记录只能交给后续内核做授权投影，不能直接作为 API 响应。compile_tool 只创建描述，@tool 创建含 callable 的 PythonTool；private execution/operations 接点真实派发 read 并记录事务。write/unknown 本轮拒绝，ASK 不制造交互 ID，完整公共入口仍待后续。provider_items 仅供适配器往返，不用于向用户显示内部协议数据。
 
 ## 生成与校验
 
