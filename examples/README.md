@@ -28,3 +28,5 @@ uv run --locked python examples/memory_offline.py --stream
 ```
 
 父进程在本地临时目录创建 SQLite 路径，依次启动七个独立进程：保存、新会话读取、其他用户/租户/Agent 隔离、删除、删除后新会话读取。每个子进程重建 Agent/Runtime/模型对象，检查实际工具结果、来源版本和 memory.changed 事务事件；父进程核对不同 PID，完成后清理夹具库。资料与回答均为自有合成夹具；脚本断言正确注入与读取，不构成真实模型记忆质量证据。无需账号/Key/付费调用。
+
+首版计划在原三类参考应用中加入代码执行变体；T-10A/T-10B 将交付真实 Docker/Linux 离线示例，目前没有对应文件。预设模型代码只证明机制，T-11/T-16 的真实模型生成/实际执行结果单独评测；设计片段不能作为当前可运行例子，见 [参考应用](../docs/planning/reference-scenarios.md)。

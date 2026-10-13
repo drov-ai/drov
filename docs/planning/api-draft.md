@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；审批恢复和真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-13。
+状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；审批恢复和真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -340,3 +340,47 @@ POST responses 的字段为 request_id、response（上述判别 union）；POST
 HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；无权读取统一 404；已知资源的控制权不足 403；静态格式 400/422；会话/版本/响应冲突 409；已清理内容或失效历史游标 410；容量不足 429；存储暂不可用 503。执行失败仍通过已存在 Run 的 outcome 返回。SSE 头已发出后的错误用非 durable 控制错误结束连接，不能再改 HTTP 状态或伪造持久事件。
 
 内容清理后的 request_key、数据放弃和旧备份 barrier 以 [维护策略](release-policy.md) / 行为契约为准；恢复旧数据不是允许旧操作再次执行。
+
+## 首版代码沙箱接口草案（T-10A，尚未实现）
+
+本节是 [ADR-0013](../decisions/0013-first-release-code-sandbox.md) 的新增计划，不是当前可导入 API；不在 T-09 添加这些公共符号。执行语义唯一维护在运行契约第 13 节，默认与支持矩阵唯一维护在工程方案。
+
+| 拟议入口/对象 | 字段与责任 |
+| --- | --- |
+| drov.sandbox.PythonSandbox | backend: 宿主 dependency 名称；逻辑工具名固定 sandbox.run_python，工具 revision 随内置实现版本固定；approval 默认 policy、可设 required；effect 固定 write，不由模型声明；不接受普通 callable 或任意 Docker flags |
+| drov.sandbox.DockerSandbox | image: 必填 repository@sha256 digest；limits: SandboxLimits；宿主显式配置本地 Docker 连接引用/可信 CLI 路径；描述构造不开连接，Runtime 装配时预检，拥有资源按 ResourceBinding 关闭 |
+| drov.sandbox.SandboxLimits | execution_seconds、control_seconds、memory_bytes、cpus、pids、workspace_bytes、max_code_bytes、max_output_bytes、concurrency；均为严格有限正值，管理员上限优先；网络/挂载/凭据等固定限制没有面向模型的放宽开关 |
+| sandbox.run_python 参数 | 仅 code: str，非空；规范 JSON 与原 UTF-8 代码均校验大小，scope/operation/backend/image/限制由内核注入，不在模型或 HTTP 可填字段中 |
+| SandboxResult | execution_key、exit_code: int 或 None、termination: exited/timeout/output_limit/resource_limit/cancelled、stdout/stderr: str、stdout_truncated/stderr_truncated: bool；输出/清理不明时不构造成功结果；原因按实际后端证据确定 |
+
+```python
+# 设计片段；T-10A 尚未实现，当前版本不能导入 drov.sandbox。
+from drov import Agent, PermissionPolicy, ResourceBinding, RunContext, Runtime, SQLiteStorage
+from drov.sandbox import DockerSandbox, PythonSandbox, SandboxLimits
+
+
+async def code_example(model, image_digest):
+    agent = Agent(
+        name="calculator",
+        revision="1",
+        model=model,
+        instructions="计算时生成 Python；依据真实执行结果回答，错误不伪造成功。",
+        tools=[PythonSandbox(backend="code")],
+        required_dependencies=["code"],
+    )
+    backend = DockerSandbox(image=image_digest, limits=SandboxLimits())
+    async with Runtime(
+        agents=[agent],
+        storage=SQLiteStorage(".drov/code-example.db"),
+        dependencies={"code": ResourceBinding.owned(backend)},
+        policy=PermissionPolicy(allow={"sandbox.run_python"}),
+    ) as runtime:
+        return await runtime.run(
+            agent,
+            "合成数据为 [12, 18, 30]；用 Python 计算合计和均值，并说明依据。",
+            session_id="calculation-01",
+            context=RunContext(tenant_id="local", user_id="alice"),
+        )
+```
+
+显式 allow 只允许已经配置的隔离代码工具，不授权宿主 Python 执行、镜像变化、联网或业务写入；去掉 allow 时默认按 T-09 产生审批。临时 Agent.run/run_sync 或内存 Storage 接入此资源配置须提前 ConfigurationError。生成代码沿现有 ModelAdapter 工具调用协议，没有另一个自动代写/修复/执行循环；当前生成 schema 不预先增加未实现符号。

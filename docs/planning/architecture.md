@@ -1,6 +1,6 @@
 # 架构与模块边界
 
-状态：P4 实施基线；T-02 至 T-08 已实现定义/协议、事务存储、Runtime 注册/资源、只读 Agent、上下文选择/清单和内置事务 Memory；完整交互/恢复及服务尚未实现。更新：2026-10-13。
+状态：P4 实施基线；T-02 至 T-08 已实现定义/协议、事务存储、Runtime 注册/资源、只读 Agent、上下文选择/清单和内置事务 Memory；完整交互/恢复及服务尚未实现。更新：2026-10-14。
 
 本文定义职责、依赖和数据归属。[行为契约](runtime-contract.md) 是状态、恢复、权限和生命周期规则的唯一详细定义；[API 草案](api-draft.md) 描述用户入口，不能独立改变这些规则。
 
@@ -25,6 +25,8 @@ flowchart TD
     C --> S
     T --> S
     T --> EXT[Python 工具 / MCP 适配器]
+    T --> SB[PythonSandbox 处理器：待实现]
+    SB --> DB[显式 Docker/Linux 后端：待实现]
     E --> O[可选观测导出器]
 ```
 
@@ -109,3 +111,17 @@ P2 选定一种候选：单个父 Run 顺序委派到同一 Runtime 中注册的
 P3 已确定最低 Python、schema 子集、SQLite/Memory、首个模型与 MCP 传输、包结构、默认限额和模块任务。P4 已检查三个场景与任务的一致性；T-01/T-02 用实际依赖解析和类型定义验证选择。
 
 T-06 的 Session 消息按保存的 session_sequence（Session 版本）投影；RunRecord.input、完整模型响应与操作结果是唯一事实源。模型输入/响应 payload 版本、预算和事件读取取舍见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)，不将内部完整记录直接暴露给调用者。
+
+## 代码沙箱模块与归属（新增计划，尚未实现）
+
+C-17 的最小代码执行由 T-10A/T-10B 交付，工作决定见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。sandbox/ 保存真实 PythonSandbox 描述、DockerSandbox 后端及有界执行/控制，不接管 ModelAdapter 或另建 Agent 循环；源码目录不在本轮提前创建。
+
+| 边界 | 唯一责任 | 不能代替的边界 |
+| --- | --- | --- |
+| ModelAdapter / Agent | 产生带 code 的工具候选，消费真实执行结果后继续推理 | 不提供镜像/挂载/凭据/资源控制权限，不在宿主运行代码 |
+| Runtime / 权限 / 工具 journal | 固定参数/归属/配置、审批、计数、稳定执行键、派发/结果/清理事实、原运行恢复 | 不把 Docker 远端改变纳入 Memory 本地原子事务，不靠模型文字判断完成 |
+| DockerSandbox | 固定配置预检、单次容器/工作区、实际运行/输出/进程树停止/销毁及证据查询 | 不决定业务授权，不关闭宿主 daemon 或其他归属的资源 |
+| Storage | 持久化 scope、operation/execution_key、配置/代码 hash、后端资源句柄、限额、状态/清理证据 | 不存活连接/客户端/真实凭据，不据资源 ID 自身授权 |
+| HTTP / 工作台 | 相同 Runtime 的调用/审批/正文投影，显示实际结果与清理状态 | 不接收控制面配置，不在浏览器或服务另建执行循环，不因查看重执行 |
+
+后端通过现有 dependencies/ResourceBinding 显式装配，T-10A 增加专用预检/租约逻辑；借用后端与自有本次执行分别管理。每次执行租约归属 tenant/user/Agent/Run/operation，名额包含未确认停止/销毁的资源；Docker CLI Task 结束不解除容器租约。构造/导入无副作用。临时入口/内存存储不承担持久清理恢复保证，配置沙箱要求显式 Runtime + SQLiteStorage；数据保护/旧备份 barrier 沿现有维护职责扩展。

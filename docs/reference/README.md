@@ -51,3 +51,7 @@ assert "result" not in evidence.model_dump()
 完整 [离线检索示例](../../examples/README.md) 使用实际 Python 工具、ScriptedModel 和严格 Report 输出，支持普通与 stream 入口。run/wait/stream 返回绑定 output_type 的结果；inspect/events 默认仅元数据，正文需 read/view_content，provider_items 不展示。流退出不取消执行，显式 cancel 记录取消事实；RunStream.result 与 wait 使用同一路径。
 
 当前仅支持 context 本人的 tenant/user 查询作用域；schema-only 及外部 write/unknown 在接收前拒绝；配置 Memory 的 Agent 已可执行内置事务工具。inspect.context_manifests 返回当前事件页的有界清单索引（不带 sources），get_context 默认完整来源元数据，include_content=True 带选入内容/预览；provider 正文始终隐藏。旧历史按完整 Run 组选取，原结果不因预览改写；恢复/审批等入口没有空实现。完整 API 表中的后续条目须按状态说明使用。
+
+## 待实施的沙箱接口
+
+首版最小 Python 沙箱已纳入 C-17，T-10A/T-10B 才实施；PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult **当前不可导入**，不加入上面的已实现入口/schema 表。接口设计见 [API 草案](../planning/api-draft.md)，范围变化见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。

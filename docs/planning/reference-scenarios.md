@@ -1,8 +1,8 @@
 # 三类参考应用与跨入口案例
 
-状态：P4 案例设计；S-01-A/C 和 S-02 的 SDK/stream 离线路径已运行，审批案例及真实模型质量仍待后续验收。更新：2026-10-13。
+状态：P4 案例设计；S-01-A/C 和 S-02 的 SDK/stream 离线路径已运行，审批案例及真实模型质量仍待后续验收。更新：2026-10-14。
 
-这些案例用来检验通用框架，不限制 Drov 的业务范围。所有 `drov` 符号均来自 [API 草案](api-draft.md) 的拟议接口；本文件不提供可安装教程。模型参数在离线验证中使用 ScriptedModel，真实验证使用显式配置的 OpenAIResponses；知识检索是合成夹具或应用自己的工具，Memory 为内置事务存储。详见 [工程方案](engineering.md) / [质量计划](quality-plan.md)。所有场景遵守 [行为契约](runtime-contract.md)，不能单独放宽规则。
+这些案例用来检验通用框架，不限制 Drov 的业务范围。使用契约来自 [API 草案](api-draft.md)，各段按实际状态标注；可运行教程在 examples，本文件保留说明片段和待实施案例。模型参数在离线验证中使用 ScriptedModel，真实验证使用显式配置的 OpenAIResponses；知识检索是合成夹具或应用自己的工具，Memory 为内置事务存储。详见 [工程方案](engineering.md) / [质量计划](quality-plan.md)。所有场景遵守 [行为契约](runtime-contract.md)，不能单独放宽规则。
 
 ## S-01：资料检索与结构化报告
 
@@ -66,6 +66,7 @@ async def research_example(model, knowledge):
 | S-01-B | 检索工具超时或失败 | 运行保留工具错误；按照配置报告失败或给出明确受限结果，不伪造已检索成功 |
 | S-01-C | 工具结果超出预算 | 能查看被选入、裁剪或截断的内容来源；引用关系不因处理而静默损坏；模型摘要不属首期 |
 | S-01-D | 资料不足 | 明确说明证据不足；不能靠输出 schema 正确就判定任务成功 |
+| S-01-E | 用模型生成 Python 分析合成数字资料 | 在真实沙箱计算合计/均值，实际 stdout/退出/代码与最终报告一致，记录来源；没有执行事实或结果错误即失败，不能把预设答案当执行结果 |
 
 T-06 已交付 [离线可运行例子](../../examples/README.md) / [research_offline.py](../../examples/research_offline.py)：真实合成语料检索、ScriptedModel 工具结果检查、Report 严格输出及实际引用集合核对，SDK/stream 共用内核。该例回答为预设夹具，验收 S-01-A 离线契约。T-07 的 [context_preview_offline.py](../../examples/context_preview_offline.py) 验收 S-01-C：实际长工具结果、带引用/版本的预览、get_context 清单核对及 full_document_read=False；SDK/stream 共用内核。完整历史组选取/排除与预算失败另由 [test_context.py](../../tests/test_context.py) 验证，真实模型质量仍待 T-11/T-16。
 
@@ -85,7 +86,7 @@ T-06 已交付 [离线可运行例子](../../examples/README.md) / [research_off
 ### 使用片段
 
 ```python
-# 拟议 API，未实现。两个阶段应在测试中分别启动新的进程。
+# T-08 公共入口用法；完整跨进程离线验证见 memory_offline.py。
 from drov import Agent, Memory, PermissionPolicy, Runtime, RunContext, SQLiteStorage
 
 
@@ -125,6 +126,7 @@ async def remember_phase(model, db_path):
                 result.run_id,
                 context=caller,
                 after=cursor,
+                include_content=True,  # memory.changed.action 属正文，默认元数据不包含。
             )
             remembered = remembered or any(
                 e.type == "memory.changed" and e.data["action"] == "remember"
@@ -170,6 +172,7 @@ T-08 已交付 [memory_offline.py](../../examples/memory_offline.py)：普通/st
 | S-02-B | 记忆检索延迟 | required 超时在模型调用前失败；best_effort 超时不向当前调用补入迟到内容，manifest 标明 skipped |
 | S-02-C | Bob 查询 Alice 的偏好 | 存储查询按租户/用户/Agent 隔离；同名 session 不能混用记忆；模型不能覆盖可信归属 |
 | S-02-D | 写入失败或删除记忆 | 失败不返回成功工具结果；forget 后不再参与新检索；不把既有对话/Trace 伪称已被删除 |
+| S-02-E | 不同用户/会话的独立代码计算 | 同一框架读取各自输入并生成代码；容器/工作目录/变量不沿会话隐式共享，不读取另一用户的哨兵或旧文件；需要持久化时仍通过显式 Memory 工具 |
 
 ## S-03：带审批的操作助手
 
@@ -258,17 +261,26 @@ S-03-E 的补充输入变体在 tools 中另注册 `HumanInput(name="ask_item", 
 | S-03-D | 外部更新成功但响应丢失 | 暂停核查并保留原 operation_id；不能盲重试；有取消标志时核查后也不得重新派发 |
 | S-03-E | 缺少必要输入 | 暂停并请求补充信息；收到合法响应后继续，不混用审批响应类型 |
 
+### S-03-F：代码计算与业务审批分开（新增计划）
+
+模型先提出 sandbox.run_python 生成合成事项的计算建议，沙箱执行依据原代码/配置审批或应用显式 allow；真实结果再作为业务操作候选的依据。业务 update_item 的 required approval 独立发生：批准计算不能批准修改事项；拒绝业务审批时计算已有记录、业务写入计数 0。准备代码修改、权限撤销、控制回复丢失和取消变体；恢复仅核查/清理原 execution_key，不重跑已派发代码。该变体检验通用工具与权限组合，未新增第四个业务边界。
+
 ## 跨案例验证
 
 | ID | 验证目标 | 方式与边界 |
 | --- | --- | --- |
 | X-01 | SDK、流式、HTTP 使用同一运行规则 | 用固定模型替身驱动同一案例，比较结果状态、工具策略和事件关联；真实模型下不要求文本逐字相同 |
+| X-03 | 隔离代码执行跨入口一致（新增计划） | 同一配置/脚本工具计划经 Runtime SDK、stream、HTTP 各实际执行一次，结果/权限/持久记录等价；每个入口断连不重执行、显式取消处理实际容器；工作台显示/查看不会再执行；T-10B 验收 SDK/stream 子范围，HTTP/UI 在 T-13/T-14，T-16 汇总 |
 | X-02 | 资源生命周期一致 | 成功关闭时释放自有资源；借用资源不关闭；启动失败逆序清理；活动调用无法结束时明确 ShutdownIncomplete。T-04 验证注册/资源及私有任务与实际线程引用，见 [记录](../validation/t04-runtime.md)；跨 MCP/HTTP 入口仍待 T-12/T-13 |
 
 ## 从说明片段到可运行示例
 
-P3 已指定依赖、完整夹具、模型适配器及规则断言，并把 [B-01 至 B-15](runtime-contract.md) 中首期适用项映射到质量计划和任务；B-14 属后续。已实现的只读及 Memory examples/测试见上文；审批设计片段尚未导入或运行。
+P3/P4 已指定依赖、完整夹具、模型适配器及规则断言，本轮补充沙箱要求；已把 [B-01 至 B-17](runtime-contract.md) 中首期适用项映射到质量计划和任务；B-14 属后续。已实现的只读及 Memory examples/测试见上文；审批设计片段尚未导入或运行。
 
 三类 Agent 都需通过同一 DrovApp 入口复测。X-01 使用显式 Runtime 的相同权限、存储和限额配置对照 HTTP/流式；不将临时 Agent.run 与持久化 Runtime 的配置差异判为内核差异。
 
 T-05 已验证 S-01-B 的只读瞬态重试/超时及 S-03-A/C 的权限否决、ASK、可信参数/归属和重复操作不派发部分，见 [工具验证](../validation/t05-tools.md)。完整 Agent 案例、人工审批响应和未知写入仍由后续任务完成，不能将计数夹具写成三个场景已跑通。
+
+## 代码沙箱变体的交付边界
+
+S-01-E/S-02-E/S-03-F/X-03 为 2026-10-14 纳入首版的新增测试要求，当前无 PythonSandbox/DockerSandbox 源码或可运行示例。配置用法见 API 的沙箱草案，语义见运行契约第 13 节，T-10A/T-10B 按任务卡交付一个真实沙箱离线 example 并复用到三类应用。ScriptedModel 用固定代码验证机制；T-16 才验证真实模型生成代码、运行与使用结果，不能相互代替。

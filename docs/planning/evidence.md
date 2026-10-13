@@ -1,6 +1,6 @@
 # 证据与假设登记
 
-查阅日期：2026-10-12（Asia/Shanghai）。P1 核对竞品，P2 补充并发语义，P3 核对工程与发布官方资料；未安装依赖组合、运行竞品、调用模型或做体验实验。
+原 P1–P3 查阅日期：2026-10-12（Asia/Shanghai）；新增 Docker 官方文档于 2026-10-14 查阅。P1 核对竞品，P2 补充并发语义，P3 核对工程与发布官方资料；未安装依赖组合、运行竞品、调用模型或做体验实验。
 
 ## 来源
 
@@ -38,7 +38,8 @@
 - 用户明确希望通用框架，能力范围对标 AgentScope 2.0，并撤回特定业务优先的回答。
 - 工作目录初始只有品牌素材，没有框架代码。
 - 用户提供 GitHub 组织 drov-ai、npm 组织 drov 和域名 drop.dev；此次没有核验其账号控制权、包名可用性或 DNS 状态。
-- 当前交付是规划文档，不存在已发布 SDK、线上服务、性能分数或用户采用数据。
+- P1–P3 当时只交付规划；当前实现与验收以 progress 为准，尚无公开 SDK 发布、线上服务、竞品性能分数或用户采用数据。
+- 2026-10-14 用户明确确认首版具备“生成并执行代码”；已调整任务与设计，尚无沙箱实现或实测。
 
 ## 设计假设的证据要求
 
@@ -54,3 +55,15 @@ H-01 至 H-04 的定义在 [产品定义](product.md)。所有假设当前均为
 ## 后续新增事实的格式
 
 记录结论、来源 URL、版本或提交、查阅日期、证据类型（文档/源码/实测）和限制。修正事实时保留修正原因；不要悄悄把假设改写为已证实优势。
+
+## 2026-10-14 沙箱机制补充来源
+
+类型：官方文档；全部为滚动文档，非固定 Engine/CLI 发布版本。此次读取用于工程工作选择，没有运行容器、选定镜像 digest、复制第三方代码或作竞品沙箱实测。固定版本/平台与实际隔离效果在 T-10A/T-10B 登记，不能由网页机制推断实现通过。
+
+| 标识 | 来源与查阅日期 | 可支持的机制事实 | 使用边界 |
+| --- | --- | --- | --- |
+| E-24 | [Docker run](https://docs.docker.com/engine/containers/run/) / [CLI 参数](https://docs.docker.com/reference/cli/docker/container/run/)，2026-10-14 | 可固定 image digest，配置用户、只读文件系统、PID 限额、日志与挂载/权限 | 本机 CLI/Engine/镜像兼容性未验证；安全配置是 Drov 工作决定 |
+| E-25 | [资源限制](https://docs.docker.com/engine/containers/resource_constraints/)，2026-10-14 | 内存/swap、CPU 及内核能力会影响实际限制 | 不能只看命令参数判实际有界；须进行限额探针 |
+| E-26 | [Docker 安全](https://docs.docker.com/engine/security/) / [seccomp](https://docs.docker.com/engine/security/seccomp/)，2026-10-14 | daemon 与内核是信任边界，seccomp 依赖实际内核支持 | 不承诺容器抵抗所有漏洞/敌对多租户；Drov 固定策略需实测 |
+| E-27 | [none 网络](https://docs.docker.com/engine/network/drivers/none/)，2026-10-14 | none 模式仅配置 loopback，供网络隔离选择 | 仍检查实际配置/无端口发布，并以合成监听证明无外连 |
+| E-28 | [tmpfs](https://docs.docker.com/engine/storage/tmpfs/)，2026-10-14 | 临时内存文件系统与大小控制，存在宿主 swap 条件 | 限额、swap 与实际工作空间边界须验证；不声明物理擦除保证 |

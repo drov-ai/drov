@@ -1,22 +1,37 @@
 # 当前进度与下一轮
 
-更新：2026-10-13（Asia/Shanghai）。
+更新：2026-10-14（Asia/Shanghai）。
 
 ## 当前状态
 
 - 阶段：P1 至 P4、T-01 至 T-08 **本地实施验收完成**；下一项 T-09 审批与显式恢复。T-06/07 与 T-08 已推送 origin/main，最终验证提交 5ff654c 的 CI 38413817284 共 10 个 job 全部 success；两轮 Windows 失败与修正证据保留。
-- 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；本轮细化见 [ADR-0012](../decisions/0012-transactional-memory.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
+- 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，本轮首版沙箱范围前移见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；新增内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照。
-- 未实现：完整审批/核查/HumanInput/显式恢复、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-09 至 T-18 未开始。B-14、多 Agent、Skill/沙箱等后续能力无公共空壳。
+- 未实现：完整审批/核查/HumanInput/显式恢复、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-09 至 T-18 及新增 T-10A/T-10B 未开始。最小 Python 代码沙箱已纳入首版必交，尚未实现；B-14、多 Agent、Skill 与更深沙箱后续，无公共空壳。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
-- 本轮起点：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
-- T-08 交接后的范围澄清：核对 [C-17](capability-matrix.md) 和实施计划第 5 节，沙箱适配仍是首版之后的候选，尚无具体任务号/版本；本轮没有调整范围或启动沙箱实施，下一项仍为 T-09。修正能力表开头“Agent 运行能力均未实现”的过期状态，改为引用本文件；验证文档链接、范围映射及 diff，无源码改动，不重复 SDK 测试。
+- T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
+- 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
+- 本轮起点：同一 `/Users/yanlong/projects/drov`、main / 8f3c5e0，工作区干净且与 origin/main 同步。本轮仅修改规划、协作/开发说明与验证文档；未改 SDK 源码、测试、schema、依赖锁、DDL 或品牌，未运行/拉取容器或调用模型。文档检查点以本轮 Git 提交和下述验证记录为准。
 
 ## 已确认方向
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## T-08 本轮交付
+## 本轮交付：首版代码沙箱范围与任务（文档完成）
+
+| 交付 | 实际结果 / 限制 |
+| --- | --- |
+| 范围与依赖 | C-17 最小 Python 单次隔离执行前移为正式首版必交；保留历史编号，增加 T-10A 闭环、T-10B 隔离/故障/恢复，接在 T-10 后；T-11 至发布路径增加相应前置与门槛 |
+| 工作契约 | ADR-0013、API、运行/工程/架构同步：显式 Docker/Linux、固定可信镜像、无网络/主机挂载/凭据、有限资源；代码专用工具沿现有审批，实际执行/清理租约持久化，恢复不重跑已派发代码 |
+| 案例与质量 | 原三类应用各增加代码变体及 X-03/B-16/17；离线真实容器与故障矩阵、真实模型代码子组、安装/HTTP/工作台/维护/发布验收联动；试验量与阈值只在 quality-plan 维护 |
+| 状态与交接 | 导航、历史基线差异、开发/例子/已实现参考同步；T-08 Memory 说明片段修正正文读取参数，未改示例源码；接续 prompt 已足够，保留从 progress 选任务并补记用户 commit/push 授权 |
+| 文档验证 | 本地链接、Python 片段语法、20 张任务卡/依赖图无环及验收映射、评测算术、Git 差异与保护范围检查，见 [范围调整验证](../validation/2026-10-14-sandbox-scope.md)；只做文档检查，不把语法/历史 CI 写成新功能通过 |
+
+**已完成的是任务与源契约调整；代码生成/沙箱执行仍未实现、未运行验证。** 不建立公共空壳，不提前关闭 T-10A/T-10B。没有选择/预装实际镜像或核实 Docker daemon、版本/资源能力，平台成绩也未产生；没有真实模型质量、费用或隔离实测。历史 P4 fingerprint 保留不覆盖，旧审查成绩不能代表新增两卡。
+
+恢复顺序为 T-09 → T-10 → T-10A → T-10B → 后续集成/评测/发布。资源缺失时先交付不依赖资源的配置/协议子范围，并记录已验收子范围、真实后端缺项、环境准备与复跑步骤；无 daemon 的 skip/替身成功不能关闭沙箱任务或正式发布门槛。Skill 与更强/云/持久沙箱没有随本轮扩展。
+
+## T-08 历史交付（完整验收）
 
 | 交付 | 实际结果 |
 | --- | --- |
@@ -77,8 +92,10 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## GitHub / CI
 
+- 本轮仅文档变更，完成检查后按用户授权保存并同步到既有 origin/main；使用 `[skip ci]` 文档检查点，不重跑不变的 SDK 矩阵。实际提交/同步状态以 git log/status 为准，保护旧验证与品牌。
+
 - 继续使用现有 origin 和用户已有 GitHub 身份；不修改全局代理/认证、不建立新仓库。提交前检查可识别凭据模式与 Git 跟踪范围，品牌/环境/数据库排除。
-- 本轮：T-08 实施 [d997f17](https://github.com/drov-ai/drov/commit/d997f17f7bcf34f6ceea170b378fab956240923b)，跨平台检查修正 40160ff / [5ff654c](https://github.com/drov-ai/drov/commit/5ff654cf0ac8044125554029acae0638bc85ca6a) 已推送 main（同时包含 T-06/07 的 adc9793）。最终 [CI 38413817284](https://github.com/drov-ai/drov/actions/runs/38413817284) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success；测试、构建、核心干净安装/三个离线示例、extras 隔离导入通过。两轮失败原因、适用跳过和恢复证据见 [T-08 验证](../validation/t08-memory.md)。
+- 历史 T-08：实施 [d997f17](https://github.com/drov-ai/drov/commit/d997f17f7bcf34f6ceea170b378fab956240923b)，跨平台检查修正 40160ff / [5ff654c](https://github.com/drov-ai/drov/commit/5ff654cf0ac8044125554029acae0638bc85ca6a) 已推送 main（同时包含 T-06/07 的 adc9793）。最终 [CI 38413817284](https://github.com/drov-ai/drov/actions/runs/38413817284) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success；测试、构建、核心干净安装/三个离线示例、extras 隔离导入通过。两轮失败原因、适用跳过和恢复证据见 [T-08 验证](../validation/t08-memory.md)。
 - 最终补记为文档提交，不更改已验证代码；不再重复运行矩阵。当前无 T-08 本地缺项或远程 CI 失败，未做真实模型评测、包发布或部署。
 - T-04 实现提交 [45a57ea](https://github.com/drov-ai/drov/commit/45a57eab30b633889f625e2cde80b00c6b532205) 已推送 main；[CI 38387899628](https://github.com/drov-ai/drov/actions/runs/38387899628) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14 和 Python 3.15 advisory 共 10 个 job 全部 success。测试/构建/干净安装/extras 导入通过；3.11 即时任务 API 和 Windows 打开文件替换用例的适用跳过见 T-04 报告。
 - T-05 实现 d84c66f 与最终修正 [ecc734b](https://github.com/drov-ai/drov/commit/ecc734ba595a43579172d7631153925052962208) 已推送 main；[CI 38396712936](https://github.com/drov-ai/drov/actions/runs/38396712936) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。实际测试数量/适用跳过及构建/安装/extras 证据见 T-05 验证。
@@ -87,7 +104,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## 下一项：T-09 审批与显式恢复
 
-前置 T-08 已完整本地验收；按 [实施计划](implementation-plan.md) 的 T-09 卡推进，不再追加一般规划轮。
+前置 T-08 已完整本地验收且最终远程 CI 全部成功；新增沙箱卡排在 T-10 后，T-09 不需要 Docker、不预建沙箱公共符号。按 [实施计划](implementation-plan.md) 的 T-09 卡推进，不再追加一般规划轮。
 
 1. 持久审批请求、到期/重复响应、原参数与归属绑定、原子响应/推进；派发前动态权限复核，取消不重派发。
 2. HumanInput 以保存的原调用及 schema 消费回答，不重跑已提交工具，不开放任意函数栈恢复。
@@ -102,7 +119,8 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | --- | --- |
 | T-09 审批与显式恢复 | 现在无需新增仓库/账号/Key/私有资料；复用当前仓库、SQLite、ScriptedModel 和自有合成审批/输入/核查夹具，不接真实业务写服务 |
 | GitHub 仓库 | 已提供，继续使用当前 origin；有具体同步/CI 阻碍再说明，无需重新建仓库 |
-| 模型服务、可访问 model ID、密钥和总预算 | T-11 smoke/T-16 live 前主动提出服务配置与费用估算；到时在本地环境或忽略配置中安全设置 Key，聊天不贴密钥；未授权预算前不付费调用 |
+| T-10A/T-10B 本地沙箱环境与镜像 | 需要时点在 T-10A 真实执行前。当前只确认存在 `/usr/local/bin/docker` 命令路径，daemon/Engine/CLI 版本、镜像及资源控制未验证；准备可用 Linux 容器服务、预装可信 Python 镜像并记录 digest/平台/许可，配置留宿主，不挂控制 socket/仓库/密钥给代码；无需云沙箱账号、模型 Key 或付费预算 |
+| 模型服务、可访问 model ID、密钥和总预算 | T-11 smoke/T-16 live 前提供可访问服务/model ID 并批准共同费用上限；工程执行者先按新增代码任务量估价。Key 仅本地环境/忽略配置或凭据管理，聊天/Git 不贴密钥；未授权预算前不付费调用 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
 | Cloudflare drop.dev、账号范围、品牌来源与公开使用范围 | 官网/素材初次公开前核实；现有素材保留本地，当前不部署 |
 
@@ -110,9 +128,9 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## 会话切换建议
 
-**下一轮建议 New Chat，实施 T-09。** T-08 已完整验收，审批/核查/恢复进入新的复杂模块边界；新会话按项目文件接续，避免把本轮 Memory 的专用原子写路径误用到外部写入。
+**下一轮建议 New Chat，实施 T-09。** T-08 已完整验收，审批/核查/恢复进入新的复杂模块边界；新会话按项目文件接续，避免把 Memory 的专用原子写路径误用到外部写入；本轮已完整交付首版沙箱的任务/契约调整，没有待补文档阻塞。你的引导词 prompt 已经足够好了，可原样使用，具体任务由 progress 与依赖决定。
 
-选择 Drov 项目 **Local / 当前目录 `/Users/yanlong/projects/drov`**。阅读 AGENTS/progress/导航/handoff 及 T-08 验证，核实最新 Git/远程状态；运行锁定静态/schema/pytest 检查，再按 T-09 卡分批实施，保持 T-08 Memory 回归。无需为了新会话新建仓库或 worktree，也不要切回缺少 T-06/07/08 的旧 checkout。
+选择 Drov 项目 **Local / 当前目录 `/Users/yanlong/projects/drov`**。阅读 AGENTS/progress/导航/handoff、T-08 验证及本轮范围验证，核实最新 Git/远程状态；运行锁定静态/schema/pytest 检查，再按 T-09 卡分批实施，保持 T-08 Memory 回归。无需为了新会话新建仓库或 worktree，也不要切回缺少 T-06/07/08 的旧 checkout。
 
 ## 阶段记录
 
@@ -128,3 +146,4 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | 2026-10-13 | T-06 | 只读 Agent/固定模型计划、历史/限额、正文授权、SDK 流/取消、离线检索与安装执行本地验收完成；下一项 T-07；未推送新 CI |
 | 2026-10-13 | T-07 | 完整上下文组选取、确定性预算/预览、固定来源清单、授权查询及安装执行本地验收完成；下一项 T-08；未推送新 CI |
 | 2026-10-13 | T-08 | 内置 Memory 原子工具/CAS/墓碑、隔离/限时检索/子预算/固定快照、七进程普通/stream 示例及 400 项回归本地验收完成；10 个远程 CI job success；下一项 T-09 |
+| 2026-10-14 | 首版范围调整 | 用户确认代码生成/执行首版必交，新增 T-10A/T-10B，契约/案例/质量/发布及交接文档同步并检查；沙箱未实施，下一项仍 T-09 |

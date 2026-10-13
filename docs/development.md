@@ -78,3 +78,7 @@ uv run --locked python scripts/check_package.py --python /path/to/python
 CI 使用只读仓库权限，无发布或凭据步骤；Actions 固定到上游 commit，uv 与本地版本一致。Linux 配置 3.11–3.14，macOS/Windows 各配置 3.11/3.14；另有非阻塞 3.15 探测。T-03 的远程 CI 已运行通过；T-05 的准确提交及矩阵结果见验证记录，T-06/07 的历史本地记录保留，T-08 本轮远程状态见 progress 和 T-08 验证，不把旧 CI 用作新代码通过证据。
 
 每轮按 [协作规则](../AGENTS.md) 更新进度、受影响契约和验证记录；新会话按 [交接说明](handoff.md) 恢复工作。上游依赖与源码复用入口见 [THIRD_PARTY](../THIRD_PARTY.md)。下一项以 [progress](planning/progress.md) 为准。
+
+## 首版代码沙箱的准备时点（计划）
+
+当前没有 drov.sandbox 模块或可运行沙箱教程；普通 SDK 开发不需要 Docker。下一项 T-09 复用 SQLite/ScriptedModel 与合成审批夹具，无需新增账号/Key。T-10A/T-10B 前准备宿主显式配置的本地 Linux 容器服务、可信 Docker CLI 和预装固定 digest 的 Python 镜像，并核验资源控制/镜像许可；不把宿主凭据、工作仓库或控制 socket 挂进代码环境。实际默认值/平台范围见 [工程方案第 9 节](planning/engineering.md)，接口是 [API 草案](planning/api-draft.md) 的待实现部分。未运行真实后端的组必须留缺项，不能以 skip 完成两卡。

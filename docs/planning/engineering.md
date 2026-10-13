@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：T-01 至 T-08 已本地验收，含只读 Agent 闭环、上下文选择/预览/清单和事务 Memory；真实适配器及服务仍未实现。实际范围见 [T-08 验证](../validation/t08-memory.md)。更新：2026-10-13。
+状态：T-01 至 T-08 已本地验收，含只读 Agent 闭环、上下文选择/预览/清单和事务 Memory；真实适配器及服务仍未实现。实际范围见 [T-08 验证](../validation/t08-memory.md)。更新：2026-10-14。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 
@@ -156,3 +156,26 @@ MemoryTool 是私有 schema 描述，不带应用 callable；Agent 自定义工�
 Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串检索按此顺序每页最多 100 行扫描已经限定 tenant/user/Agent 且 live 的记录，匹配 NFKC+casefold 后的完整子串，达到 1–50 条即止。没有新查询游标 API或语义/向量检索承诺。key/content 的规范 JSON 总字节数受 max_memory_bytes 限制，工具整体结果受 max_tool_result_bytes 限制；非法输出在修改前拒绝。
 
 每次自动检索有一个内核持有的真实 Task；读取完成时间超过截止点也丢弃。取消后清理宽限固定 100ms，未结束的异常后端保留所有权并抛 PersistenceUnavailable；没有后台追补。保存输入的事务内复核/重查，Memory 消息以带 drov.memory 类型的 user 数据注入；实际 JSON 消息及协议开销计入 min(输入预算×memory_fraction, memory_max_tokens) 与全局剩余量，然后才选历史。超大记忆整条排除，不自动摘要；精确 token/模型使用质量不由此证明。最近扫描/子串和详细清单规模仍受记录量影响，尚未验收大规模检索性能。完整决定见 [ADR-0012](../decisions/0012-transactional-memory.md)。
+
+## 9. 首版代码沙箱的工作选择（计划，T-10A/T-10B）
+
+- 首个后端选择宿主显式配置的本地 Docker CLI/Engine，执行端为 Linux 容器；Drov 用 asyncio.create_subprocess_exec 的固定 argv 管理可信 CLI，代码仅作为容器内固定 Python runner 的输入，不拼进宿主 shell。核心无新增 Python Docker SDK 依赖；sandbox/ 模块在 T-10A 真实实施时建立，普通 SDK 安装/导入不需要 daemon。
+- 镜像由宿主预装并以 repository@sha256 固定，禁用执行期自动 pull/构建/安装依赖；固定非 root 用户与 Python 入口，固定覆盖 entrypoint、禁用镜像 healthcheck，拒绝镜像自动 VOLUME；镜像环境经白名单核验，不继承宿主环境/凭据。默认承诺标准库计算，自定义依赖须由宿主预构建并单独验收镜像。具体 CLI/Engine/Python patch、镜像平台/digest 和兼容性由 T-10A 实际核实记录，不编造已安装版本或示例 digest。
+- 隔离配置固定：network=none、无端口发布/host namespace、无 bind/volume/device/docker socket 挂载、只读根文件系统、有限私有 tmpfs、非 root、cap-drop=ALL、no-new-privileges、保留有效 seccomp；缺少所需能力或实际配置不一致即拒绝，不自动降级。[Docker 运行配置](https://docs.docker.com/engine/containers/run/) / [CLI 参数](https://docs.docker.com/reference/cli/docker/container/run/) / [seccomp 文档](https://docs.docker.com/engine/security/seccomp/) 支持这些机制的存在，不证明 Drov 已实现或抵抗所有内核攻击。
+- 限额必须由 daemon/内核实际执行，不能仅是 Drov 字段；内存与 swap 总额一并限定，不启用 oom-kill-disable；工作区/tmp/shm 有限，资源耗用包含 tmpfs。使用有界 stdout/stderr 管道，先按原始字节限制，显示以 UTF-8 errors=replace 增量解码，区分边界截断与非法字节替换；禁用容器持久日志（log driver none），避免日志绕开输出上限占满磁盘。序列化结果仍受 max_tool_result_bytes，超限按结果不可用收尾，不重跑代码。丢失未保存输出时按契约报告不可用，不依靠无界日志回填。依据：[资源限制](https://docs.docker.com/engine/containers/resource_constraints/) / [tmpfs](https://docs.docker.com/engine/storage/tmpfs/)。
+- 模型代码不做“AST 过滤后就安全”的承诺；隔离依赖实际后端与宿主维护。Docker daemon 是可信控制面，容器配置/内核漏洞可能破坏隔离，因此首版定位为受管理的本地应用执行，未经额外评估不承诺面向敌对公网多租户的强隔离平台。[Docker 安全文档](https://docs.docker.com/engine/security/)。更强 VM/内核隔离、远程或云后端另行进入能力表，不纳入本轮实现。
+
+以下是起始工程默认值，尚未做性能/兼容实测；在 T-10A/T-10B 以真实边界检查确定，不回写历史 P4 fingerprint：
+
+| SandboxLimits/固定控制 | 工作默认 | 规则 |
+| --- | --- | --- |
+| execution_seconds / control_seconds | 10s / 10s | 执行受工具/Run/推进剩余预算再收紧；停止/销毁用独立控制期限，超时不等于停止成功 |
+| memory_bytes / cpus / pids | 512MiB / 1.0 / 64 | 有限硬配置及实际检查；memory+swap 总额不超过 512MiB；CPU 为配额而非权重；达到限制不盲猜成功 |
+| workspace_bytes | 64MiB | 每操作新 /work tmpfs；/tmp 与 /dev/shm 另各限 16MiB，计入内存限额；不落宿主工作目录 |
+| max_code_bytes / max_output_bytes | 64KiB / 64KiB | code UTF-8 且仍受 Limits.max_arguments_bytes；stdout+stderr 合计原始字节，边读边限，达到上限停止并标截断 |
+| concurrency | 2 | 按 backend/Runtime 所有活跃与未清理租约计数；无无界队列；旧执行未核清仍占额，重启不重置为 0 |
+| 自动代码重试 / 共享状态 | 0 / 无 | 模型新代码必须新 operation；每次独立容器/工作区，无持久 Notebook |
+
+平台承诺分别核验：核心 CPython 3.11–3.14 的 Linux/macOS/Windows 矩阵不变；新增沙箱必交验收基线为 Linux Docker Engine/Linux 容器 + CPython 3.11–3.14。macOS/Windows 本地 Linux VM 后端须另外实际验证后才列入沙箱已支持平台，不从核心 SDK CI 推断；原生 Windows 容器、远程 daemon、云沙箱本轮不支持。Docker 专项 CI 明确提供 daemon 与预装镜像，环境缺失导致未验收，不能用 skip 或协议替身关闭任务。
+
+后端配置（非秘密连接引用、镜像 digest、固定控制、限额/执行入口版本）与 Agent/工具定义绑定并持久化检查，避免旧审批或恢复运行在新镜像/弱限制下。内部操作 payload 的新增执行/清理字段在 T-10A 明确版本和旧记录读取，必要 DDL/migration 在对应实现同轮处理，不对旧操作伪造执行事实。记录与保留语义见运行契约/维护策略，不在此另造状态机。

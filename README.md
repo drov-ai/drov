@@ -39,6 +39,7 @@ uv run --locked python examples/research_offline.py --stream
 - 能力范围对标 AgentScope 2.0，覆盖工具、MCP、Memory、权限、Human-in-the-loop、Tracing、持久化与应用服务。
 - 面向多种 Agent 应用；官方示例用于验证通用性，不限定产品业务范围。
 - 优先验证三项设计主张：渐进式 Python API、跨入口一致的运行机制、可检查的上下文与记忆。
+- 首版纳入 Python 代码生成与隔离执行；当前尚未实现，按 T-10A/T-10B 交付。
 - 本地工作台用于呈现上述能力；复杂集成按需安装。
 
 以上是产品目标，不代表已经实现，也不代表已证明优于其他框架。
@@ -59,7 +60,7 @@ uv run --locked python examples/research_offline.py --stream
 | [三类参考应用](docs/planning/reference-scenarios.md) | 使用片段、预期行为与验证案例 |
 | [首版工程方案](docs/planning/engineering.md) | 技术栈、包结构、依赖边界、默认限额 |
 | [质量与评估计划](docs/planning/quality-plan.md) | 离线/集成/故障/真实模型及体验验收 |
-| [分期实施任务](docs/planning/implementation-plan.md) | 18 项任务、前置依赖、交付与完成条件 |
+| [分期实施任务](docs/planning/implementation-plan.md) | 20 张任务卡（含 T-10A/T-10B）、前置依赖、交付与完成条件 |
 | [数据与维护发布](docs/planning/release-policy.md) | 数据、迁移、许可、发布、官网和准备材料 |
 | [交付与就绪标准](docs/planning/delivery-plan.md) | 规划轮次、开发里程碑与进入代码阶段的条件 |
 | [证据与假设](docs/planning/evidence.md) | 外部事实、来源、版本及待验证判断 |
