@@ -1,10 +1,10 @@
 # 本地开发
 
-T-01/T-02 已完成，包版本为 `0.1.0a0`。提供 Agent 定义、配置与数据类型、工具 schema 和模型适配协议；Runtime、Agent.run、工具执行、Memory 存取、服务与 CLI 均未实现。不要把规划中的运行片段当成可运行教程。
+T-01 至 T-03 已完成，包版本为 `0.1.0a0`。提供 Agent 定义、配置与数据类型、工具 schema、模型适配协议和内存/SQLite 存储；Runtime、Agent.run、工具执行、Memory 工具、服务与 CLI 均未实现。不要把规划中的运行片段当成可运行教程。
 
 ## 环境与安装
 
-最低 Python 3.11，`.python-version` 将开发默认值设为 3.11。包声明允许 Python 3.11 及以上；3.11–3.14 是目标支持矩阵，3.15 只有非阻塞探测，不能仅凭依赖解析成功宣称支持。准确验证范围见 [T-01 记录](validation/t01-engineering.md)。
+最低 Python 3.11，`.python-version` 将开发默认值设为 3.11。包声明允许 Python 3.11 及以上；3.11–3.14 是目标支持矩阵，3.15 只有非阻塞探测，不能仅凭依赖解析成功宣称支持。准确验证范围见 [T-03 记录](validation/t03-storage.md)。
 
 使用 uv **0.13.0**，项目配置会拒绝不同版本，升级工具须同步验证与记录。可以按 [uv 官方安装说明](https://docs.astral.sh/uv/getting-started/installation/) 安装指定版本。也可只在当前项目建立隔离工具环境，不修改系统 Python：
 
@@ -50,7 +50,7 @@ uv run --locked python scripts/generate_schemas.py
 uv run --locked python scripts/generate_schemas.py --check
 ```
 
-工具/输出类型子集和实际导出见 [定义参考](reference/README.md)。公开数据经过严格 Python 校验；schema 不能替代跨字段、授权和运行语义检查。
+工具/输出类型子集和实际导出见 [定义参考](reference/README.md)。公开数据经过严格 Python 校验；schema 不能替代跨字段、授权和运行语义检查。T-03 同时生成 storage-schema-v1.sql 供检查内部布局，初始化必须使用 SQLiteStorage.open。
 
 开发工具默认使用已锁定依赖。只有有意升级依赖时才更新 lock，并运行相关验证；不要以删除锁文件处理解析错误。
 

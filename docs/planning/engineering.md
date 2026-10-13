@@ -24,7 +24,7 @@
 
 Python 导入名使用 `drov`；PyPI 分发名暂定 `drov`，占用和控制权待发布准备核实。若不可用，变更分发名不自动变更导入名。npm 组织保留，v0.1 不为凑产品线发布 JS SDK。
 
-T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，存储实现从 T-03 开始。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。
+T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，Runtime/恢复调度尚未实现。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。
 
 以下是完整首版的目标布局。T-01 只建立元数据包、测试/构建检查和 CI，其他模块按任务创建，不以空壳占位：
 
@@ -72,9 +72,9 @@ docs/                        用户文档、规划和决策
 
 ## 4. SQLite、锁与 Memory
 
-SQLite 启动要求运行库版本至少 3.35；检测实际 `sqlite3.sqlite_version`，不能只检查 Python 版本。采用 `journal_mode=DELETE`、`synchronous=FULL`、`foreign_keys=ON`、`busy_timeout=5000`，读取验证设置结果。选择回滚日志是首期单连接下的简化；WAL、多连接及网络文件系统不在支持范围。[E-15](evidence.md) 仅解释 SQLite 机制，不能替代进程故障实验。
+SQLite 启动要求运行库版本至少 3.35；检测实际 `sqlite3.sqlite_version`，不能只检查 Python 版本。采用 `journal_mode=DELETE`、`synchronous=FULL`、`foreign_keys=ON`、`busy_timeout=5000`，读取验证设置结果。选择回滚日志是首期单连接下的简化；WAL、多连接及网络文件系统不在支持范围。[E-15](evidence.md) 仅解释 SQLite 机制，不能替代进程故障实验。T-03 的实际文件/进程/取消验证见 [存储记录](../validation/t03-storage.md)。
 
-所有 SQL 经同一连接；Runtime 事务调度锁包住完整的 BEGIN IMMEDIATE 到 COMMIT/ROLLBACK，普通查询也不得插入他人的事务中。aiosqlite 的逐条请求队列不等于业务事务隔离。取消等待提交时必须等数据库工作完成、确认提交或回滚后才释放锁；数据库状态仍不明则停止派发并保留所有权，不让另一协程继续使用不明事务。
+所有 SQL 经同一连接；Runtime 事务调度锁包住完整的 BEGIN IMMEDIATE 到 COMMIT/ROLLBACK，普通查询也不得插入他人的事务中。aiosqlite 的逐条请求队列不等于业务事务隔离。取消等待提交时必须等数据库工作完成、确认提交或回滚后才释放锁；数据库状态仍不明则停止派发并保留所有权，不让另一协程继续使用不明事务。T-03 使用共享 Transaction 操作及类型化 records 表；业务行含归属索引，Session 未结束运行和活动交互由唯一索引约束。元数据/内部全局容量查询不作为用户数据入口。完整记录与公开投影分开；具体取舍见 [ADR-0007](../decisions/0007-transactional-storage.md)。
 
 数据库路径规范化后，用同路径 sidecar 锁文件 + 同进程所有权登记阻止重复 Runtime。锁为非阻塞排他方式，失败报 StorageInUse；不按 PID 文件是否存在判断。崩溃后 OS 释放锁，残留文件不阻止重启。软链接须规范化；硬链接别名拒绝支持。首版只支持本机普通文件，文档禁止网络盘、同步盘和活跃数据库替换。此锁协调 Drov 进程，不能阻止忽略锁的外部程序直接写库。
 

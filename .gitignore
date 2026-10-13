@@ -15,3 +15,13 @@ dist/
 *.egg-info/
 node_modules/
 .drov/
+# Keep local source assets until their provenance/public-use scope is recorded.
+drov-brand/
+# Local runtime records and SQLite ownership/journal files.
+*.db
+*.sqlite
+*.sqlite3
+*.drov.lock
+*-journal
+*-wal
+*-shm

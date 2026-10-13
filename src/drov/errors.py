@@ -47,3 +47,15 @@ class CapacityExceeded(DrovError):
 
 class ShutdownIncomplete(DrovError):
     code = "shutdown_incomplete"
+
+
+class SessionBusy(Conflict):
+    code = "session_busy"
+
+
+class RecordNotFound(DrovError):
+    code = "not_found"
+
+
+class IncompatibleStorage(ConfigurationError):
+    code = "incompatible_storage"

@@ -1,6 +1,6 @@
 # 运行行为契约 v3
 
-状态：P4 实施基线，未实现；本轮澄清见 [ADR-0005](../decisions/0005-control-and-observation.md)。更新：2026-10-13。
+状态：P4 实施基线；T-03 存储原语已验证，执行/控制/恢复行为尚未实现；本轮澄清见 [ADR-0005](../decisions/0005-control-and-observation.md)。更新：2026-10-13。
 
 本文是 Drov 自己拟采用的行为规则，不是竞品能力声明或已通过的测试报告。关联 C-01 至 C-15 和 Q-API-01 至 Q-API-08；模块归属见 [架构](architecture.md)，用户调用见 [API](api-draft.md)，默认数值见 [工程方案](engineering.md)。子运行内容为后续 C-16 契约，v0.1 不提供该能力。
 
@@ -103,7 +103,7 @@ HTTP SSE 使用 `run_id:seq` 作为持久化事件游标，可重送，由客户
 
 ## 5. 审批与其他人工交互
 
-HITL 请求有三种可响应类型：approval、input、reconciliation。启动恢复产生 reason=recovery 的暂停，使用 recover 入口，不伪装成人工审批请求。单 Run 首期最多一个活动交互请求；pending 保持集合形状以支持后续扩展。
+HITL 请求有三种可响应类型：approval、input、reconciliation。启动恢复产生 reason=recovery 的暂停，使用 recover 入口，不伪装成人工审批请求。单 Run 首期最多一个活动交互请求；pending 为单个请求或 None，与 API v3 及 T-02 类型一致；集合形状需后续公共契约变更，不能假装首期支持。
 
 补充输入由注册的内置 HumanInput 工具描述触发。模型只提出 prompt，响应 schema 来自应用注册的 input_type。它无外部写入，以 read 注册并遵守完整工具权限顺序，默认直接产生 input 请求，应用配置的 deny/ask 仍生效。合法 InputResponse 持久化后成为原工具调用的结果，再继续模型循环；不重跑工具函数、也不恢复任意 Python 栈。首期普通 Python 工具返回文本/对象不会自动触发控制流。临时入口仍按 interaction_unavailable 处理。
 

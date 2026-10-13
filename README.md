@@ -2,9 +2,9 @@
 
 面向 Python 开发者的通用 Agent 框架，目标是以少量核心概念提供完整、可组合的能力，并让开发、调试和服务化使用一致的运行机制。
 
-**当前阶段：T-02 公共类型与适配协议已实现，本地开发版本 `0.1.0a0`。** 包提供 Agent 定义、配置描述、结果/事件/交互类型、工具 schema 校验及模型协议；Runtime、Agent.run、工具执行、Memory 存取与服务入口尚未实现，没有公开发布包或真实模型评测结果。
+**当前阶段：T-03 存储与原子边界已实现，本地开发版本 `0.1.0a0`。** 包提供 Agent 定义、配置描述、结果/事件/交互类型、工具 schema 校验、模型协议及内存/SQLite 事务存储；Runtime、Agent.run、工具执行、Memory 工具与服务入口尚未实现，没有公开发布包或真实模型评测结果。
 
-P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-02 验证记录](docs/validation/t02-contracts.md)。下一项任务为 T-03 存储与原子边界；换会话方法见 [交接说明](docs/handoff.md)。
+P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-03 验证记录](docs/validation/t03-storage.md)。下一项任务为 T-04 注册与资源所有权；换会话方法见 [交接说明](docs/handoff.md)。
 
 ## 本地开发
 

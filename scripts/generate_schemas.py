@@ -10,6 +10,7 @@ from pydantic import TypeAdapter
 from drov.auth import Resource
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
+from drov.storage.sqlite import DDL, RECORD_VERSION, SCHEMA_VERSION
 from drov.types import (
     CancelReceipt,
     ContextManifest,
@@ -68,14 +69,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
-    target = Path(__file__).resolve().parents[1] / "docs/reference/schema-v1.json"
-    expected = schema_text()
-    if args.check:
-        if not target.exists() or target.read_text() != expected:
-            raise SystemExit("Generated schemas are out of date")
-    else:
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(expected)
+    root = Path(__file__).resolve().parents[1] / "docs/reference"
+    sql = (
+        f"-- Generated: SQLite schema {SCHEMA_VERSION}, record schema {RECORD_VERSION}.\n"
+        "-- Reference only: SQLiteStorage.open initializes and validates private metadata.\n"
+        + ";\n\n".join(statement.strip() for statement in DDL)
+        + f";\n\nPRAGMA user_version={SCHEMA_VERSION};\n"
+    )
+    for target, expected in (
+        (root / "schema-v1.json", schema_text()),
+        (root / "storage-schema-v1.sql", sql),
+    ):
+        if args.check:
+            if not target.exists() or target.read_text() != expected:
+                raise SystemExit("Generated schemas are out of date")
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(expected)
     print("Schema check passed" if args.check else "Schemas generated")
 
 

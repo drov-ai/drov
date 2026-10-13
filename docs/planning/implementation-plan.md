@@ -1,8 +1,8 @@
 # 分期实施任务与依赖
 
-状态：T-01/T-02 已完成，下一轮 T-03；其余任务未开始。更新：2026-10-13。
+状态：T-01 至 T-03 已完成，下一轮 T-04；其余任务未开始。更新：2026-10-13。
 
-范围唯一维护在 [能力表](capability-matrix.md)，实现选择见 [工程方案](engineering.md)，验证方法见 [质量计划](quality-plan.md)，发布及准备材料见 [维护发布策略](release-policy.md)。T-01 完成证据见 [工程验证](../validation/t01-engineering.md)，T-02 证据见 [类型协议验证](../validation/t02-contracts.md)，T-03 至 T-18 未开始；任务数量不代表已完成能力。
+范围唯一维护在 [能力表](capability-matrix.md)，实现选择见 [工程方案](engineering.md)，验证方法见 [质量计划](quality-plan.md)，发布及准备材料见 [维护发布策略](release-policy.md)。T-01 完成证据见 [工程验证](../validation/t01-engineering.md)，T-02 证据见 [类型协议验证](../validation/t02-contracts.md)，T-03 证据见 [存储验证](../validation/t03-storage.md)，T-04 至 T-18 未开始；任务数量不代表已完成能力。
 
 ## 1. 实施顺序
 
