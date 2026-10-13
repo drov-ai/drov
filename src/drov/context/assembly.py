@@ -2,7 +2,7 @@
 
 import hashlib
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 from drov._json import StrictJson, canonical_json
 from drov.models.protocol import ModelMessage, ModelRequest
@@ -45,6 +45,7 @@ class MessageGroup:
     sources: list[ContextSource] = field(default_factory=list)
     preview_overflow: bool = False
     tool_refs: list[tuple[int, int, str, str]] = field(default_factory=list)
+    memory_refs: list[tuple[int, int]] = field(default_factory=list)
 
 
 def tool_result(
@@ -86,6 +87,7 @@ def preview_group(group: MessageGroup, cap: int) -> MessageGroup:
         provider_items=list(group.provider_items),
         sources=list(group.sources),
         tool_refs=group.tool_refs,
+        memory_refs=group.memory_refs,
     )
     for message_index, source_index, ref, version in group.tool_refs:
         message = group.messages[message_index]
@@ -103,6 +105,11 @@ def preview_group(group: MessageGroup, cap: int) -> MessageGroup:
             version=version,
             preview=previewed,
         )
+    for memory_index, tool_index in group.memory_refs:
+        if selected.sources[tool_index].transform == "preview":
+            selected.sources[memory_index] = group.sources[memory_index].model_copy(
+                update={"transform": "preview", "content": None}
+            )
     return selected
 
 
@@ -126,16 +133,25 @@ def assemble(
     revision: str,
     budget: int,
     preview_bytes: int,
+    memories: list[tuple[ModelMessage, ContextSource]] | None = None,
+    memory_budget: int = 0,
+    retrieval_status: str = "disabled",
+    excluded_memory: list[ContextSource] | None = None,
 ) -> tuple[ModelRequest, ContextManifest, bool]:
     raw_protected = protected
     protected = preview_group(raw_protected, preview_bytes)
     history = [preview_group(group, preview_bytes) for group in history]
+    memory_selected: list[ModelMessage] = []
 
     def request_for(selected: set[int]) -> ModelRequest:
         groups = [group for i, group in enumerate(history) if i in selected]
         return ModelRequest(
             **template.model_dump(exclude={"messages", "provider_items"}),
-            messages=[*(m for g in groups for m in g.messages), *protected.messages],
+            messages=[
+                *memory_selected,
+                *(m for g in groups for m in g.messages),
+                *protected.messages,
+            ],
             provider_items=[
                 *(p for g in groups for p in g.provider_items),
                 *protected.provider_items,
@@ -158,6 +174,36 @@ def assemble(
         protected = preview_group(raw_protected, cap)
         request = ordered(selected)
     overflow = budget <= 0 or protected.preview_overflow or estimate(request) > budget
+    memory_sources = list(excluded_memory or [])
+    memory_cost = 0
+    for message, item in memories or []:
+        memory_selected.append(message)
+        candidate = ordered(selected)
+        cost = estimate(candidate) - estimate(request)
+        included = (
+            not overflow and memory_cost + cost <= memory_budget and estimate(candidate) <= budget
+        )
+        if included:
+            request = candidate
+            memory_cost += cost
+        else:
+            memory_selected.pop()
+        memory_sources.append(
+            item.model_copy(
+                update={
+                    "included": included,
+                    "reason": "memory_budget"
+                    if not included and not overflow
+                    else "protected_overflow"
+                    if overflow
+                    else "retrieved",
+                    "transform": "none" if included else "excluded",
+                    "content": item.content if included else None,
+                }
+            )
+        )
+    if retrieval_status in ("included", "empty"):
+        retrieval_status = "included" if memory_selected else "excluded" if memories else "empty"
     if not overflow:
         for i in range(len(history) - 1, -1, -1):
             if history[i].preview_overflow:
@@ -166,7 +212,7 @@ def assemble(
             if estimate(candidate) <= budget:
                 selected.add(i)
                 request = candidate
-    sources = list(protected.sources)
+    sources = [*protected.sources, *memory_sources]
     for i, group in enumerate(history):
         included = i in selected
         sources.extend(
@@ -199,7 +245,7 @@ def assemble(
         estimator=ESTIMATOR,
         estimated_tokens=estimate(request),
         sources=sources,
-        retrieval_status="disabled",
+        retrieval_status=cast(Any, retrieval_status),
         content_visible=True,
     )
     # Revalidation also detaches nested values from callers' mutable containers.

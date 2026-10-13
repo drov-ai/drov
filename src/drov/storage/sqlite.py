@@ -96,12 +96,17 @@ class SQLiteDriver:
             clauses.append("sequence>?")
             parameters.append(query.after_sequence)
         if query.before is not None:
-            clauses.append("(created_at,key)<(?,?)")
-            parameters.extend(query.before)
+            if query.order == "memory_recent":
+                clauses.append("(created_at<? OR (created_at=? AND key>?))")
+                parameters.extend((query.before[0], *query.before))
+            else:
+                clauses.append("(created_at,key)<(?,?)")
+                parameters.extend(query.before)
         order = {
             "key": "key ASC",
             "sequence": "sequence ASC",
             "newest": "created_at DESC,key DESC",
+            "memory_recent": "created_at DESC,key ASC",
         }[query.order]
         parameters.append(query.limit)
         sql = (

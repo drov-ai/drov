@@ -44,6 +44,7 @@ def inspect_archives(wheel: Path, sdist: Path) -> None:
             "uv.lock",
             "examples/research_offline.py",
             "examples/context_preview_offline.py",
+            "examples/memory_offline.py",
             "LICENSE",
             "THIRD_PARTY.md",
         } <= names
@@ -141,7 +142,11 @@ def main() -> None:
             run([str(python), "-I", "-B", str(checker), "--installed", "--no-extras"], temporary)
             for example, example_args in (
                 (name, arguments)
-                for name in ("research_offline.py", "context_preview_offline.py")
+                for name in (
+                    "research_offline.py",
+                    "context_preview_offline.py",
+                    "memory_offline.py",
+                )
                 for arguments in ([], ["--stream"])
             ):
                 run(

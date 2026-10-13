@@ -1,6 +1,7 @@
 """Internal operation facts and atomic storage recording; never an HTTP projection."""
 
 import asyncio
+from collections.abc import Sequence
 from typing import Literal
 
 from pydantic import Field, model_validator
@@ -9,7 +10,9 @@ from drov._json import StrictJson, canonical_json
 from drov.errors import CapacityExceeded, Conflict, PersistenceUnavailable, RecordNotFound
 from drov.storage.base import Storage
 from drov.storage.records import EventDraft, RunItem
+from drov.storage.transaction import Transaction
 from drov.types import (
+    ContextSource,
     Effect,
     Identifier,
     NonNegativeInt,
@@ -38,6 +41,7 @@ class ToolOperation(WireModel):
     has_result: bool = False
     result: StrictJson = None
     error_code: Identifier | None = None
+    memory_sources: list[ContextSource] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def consistent(self) -> "ToolOperation":
@@ -91,43 +95,52 @@ class OperationJournal:
 
     async def commit(self, operation: ToolOperation, event: EventDraft) -> None:
         async with self.storage.transaction() as tx:
-            run = await tx.get_run(self.scope, operation.run_id)
-            if run.state.status != "running":
-                raise Conflict("Tools require a currently running record")
-            checkpoint = await tx.get_checkpoint(self.scope, operation.run_id)
-            data = dict(checkpoint.data)
-            if event.type == "tool.dispatched":
-                if run.state.cancel_requested:
-                    raise asyncio.CancelledError
-                count = data.get("tool_dispatch_count", 0)
-                if type(count) is not int or count < 0:
-                    raise PersistenceUnavailable("Invalid tool dispatch budget")
-                if count >= run.limits.max_tool_calls:
-                    raise CapacityExceeded("Run tool dispatch budget exhausted")
-                data["tool_dispatch_count"] = count + 1
-            summaries = [
-                item for item in run.state.operations if item.operation_id != operation.operation_id
-            ]
-            summaries.append(operation.summary())
-            version = run.state.state_version + 1
-            await tx.put_item(
-                self.scope,
-                RunItem(
-                    run_id=operation.run_id,
-                    kind="operation",
-                    item_id=operation.operation_id,
-                    version=operation.version,
-                    state=operation.status,
-                    data=operation.model_dump(mode="json"),
-                ),
-                expected_version=operation.version - 1,
-            )
-            await tx.save_step(
-                self.scope,
-                state=run.state.model_copy(
-                    update={"state_version": version, "operations": summaries}
-                ),
-                expected_version=version - 1,
-                checkpoint=checkpoint.model_copy(update={"state_version": version, "data": data}),
-                events=[event],
-            )
+            await self.commit_in(tx, operation, event)
+
+    async def commit_in(
+        self,
+        tx: Transaction,
+        operation: ToolOperation,
+        event: EventDraft,
+        *,
+        extra_events: Sequence[EventDraft] = (),
+        consume_call: bool = False,
+    ) -> None:
+        run = await tx.get_run(self.scope, operation.run_id)
+        if run.state.status != "running":
+            raise Conflict("Tools require a currently running record")
+        checkpoint = await tx.get_checkpoint(self.scope, operation.run_id)
+        data = dict(checkpoint.data)
+        if event.type == "tool.dispatched" or consume_call:
+            if run.state.cancel_requested:
+                raise asyncio.CancelledError
+            count = data.get("tool_dispatch_count", 0)
+            if type(count) is not int or count < 0:
+                raise PersistenceUnavailable("Invalid tool dispatch budget")
+            if count >= run.limits.max_tool_calls:
+                raise CapacityExceeded("Run tool dispatch budget exhausted")
+            data["tool_dispatch_count"] = count + 1
+        summaries = [
+            item for item in run.state.operations if item.operation_id != operation.operation_id
+        ]
+        summaries.append(operation.summary())
+        version = run.state.state_version + 1
+        await tx.put_item(
+            self.scope,
+            RunItem(
+                run_id=operation.run_id,
+                kind="operation",
+                item_id=operation.operation_id,
+                version=operation.version,
+                state=operation.status,
+                data=operation.model_dump(mode="json"),
+            ),
+            expected_version=operation.version - 1,
+        )
+        await tx.save_step(
+            self.scope,
+            state=run.state.model_copy(update={"state_version": version, "operations": summaries}),
+            expected_version=version - 1,
+            checkpoint=checkpoint.model_copy(update={"state_version": version, "data": data}),
+            events=[event, *extra_events],
+        )

@@ -65,6 +65,10 @@ class Agent(Generic[T]):
             raise ConfigurationError("Tools must be compiled definitions or decorated Python tools")
         if len({tool.name for tool in tools}) != len(tools):
             raise ConfigurationError("Duplicate logical tool names")
+        from drov.memory.tools import NAMES
+
+        if any(tool.name in NAMES for tool in tools):
+            raise ConfigurationError("Built-in Memory tool names are reserved")
         if memory is not None:
             Memory.model_validate(memory)
             if not capabilities.tools:
@@ -94,6 +98,12 @@ class Agent(Generic[T]):
         if len(set(required_dependencies)) != len(required_dependencies):
             raise ConfigurationError("Duplicate required dependency names")
         self.required_dependencies = tuple(required_dependencies)
+
+    @property
+    def _execution_tools(self) -> tuple[ToolDefinition, ...]:
+        from drov.memory.tools import TOOLS
+
+        return self.tools + (TOOLS if self.memory is not None else ())
 
     def require_registration_identity(self) -> tuple[str, str]:
         if self.name is None or self.revision is None:

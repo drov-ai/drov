@@ -1,8 +1,8 @@
 # 分期实施任务与依赖
 
-状态：T-01 至 T-07 已完成本地验收，下一项 T-08；其余任务未开始。更新：2026-10-13。
+状态：T-01 至 T-08 已完成本地验收，下一项 T-09；其余任务未开始。更新：2026-10-13。
 
-范围唯一维护在 [能力表](capability-matrix.md)，实现选择见 [工程方案](engineering.md)，验证方法见 [质量计划](quality-plan.md)，发布及准备材料见 [维护发布策略](release-policy.md)。T-01 完成证据见 [工程验证](../validation/t01-engineering.md)，T-02 证据见 [类型协议验证](../validation/t02-contracts.md)，T-03 证据见 [存储验证](../validation/t03-storage.md)，T-04 证据见 [注册与资源验证](../validation/t04-runtime.md)，T-05 证据见 [Python 工具验证](../validation/t05-tools.md)，T-06 证据见 [只读闭环验证](../validation/t06-agent-loop.md)，T-07 证据见 [上下文验证](../validation/t07-context.md)，T-08 至 T-18 未开始；任务数量不代表已完成能力。
+范围唯一维护在 [能力表](capability-matrix.md)，实现选择见 [工程方案](engineering.md)，验证方法见 [质量计划](quality-plan.md)，发布及准备材料见 [维护发布策略](release-policy.md)。T-01 完成证据见 [工程验证](../validation/t01-engineering.md)，T-02 证据见 [类型协议验证](../validation/t02-contracts.md)，T-03 证据见 [存储验证](../validation/t03-storage.md)，T-04 证据见 [注册与资源验证](../validation/t04-runtime.md)，T-05 证据见 [Python 工具验证](../validation/t05-tools.md)，T-06 证据见 [只读闭环验证](../validation/t06-agent-loop.md)，T-07 证据见 [上下文验证](../validation/t07-context.md)，T-08 证据见 [Memory 验证](../validation/t08-memory.md)，T-09 至 T-18 未开始；任务数量不代表已完成能力。
 
 ## 1. 实施顺序
 

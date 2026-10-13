@@ -25,6 +25,9 @@ from drov.errors import (
     SessionBusy,
     TransientModelError,
 )
+from drov.memory.execution import MemoryDispatcher
+from drov.memory.retrieval import Retrieval, retrieve
+from drov.memory.tools import MemoryTool, memory_message, memory_source
 from drov.models.protocol import (
     ModelComplete,
     ModelDelta,
@@ -36,6 +39,7 @@ from drov.models.protocol import (
 from drov.storage.base import Storage
 from drov.storage.records import (
     EventDraft,
+    MemoryScope,
     RunItem,
     RunRecord,
     SessionScope,
@@ -49,6 +53,7 @@ from drov.types import (
     CancelReceipt,
     Completed,
     ContextManifest,
+    ContextSource,
     DurableEvent,
     Failed,
     InteractionSummary,
@@ -184,8 +189,6 @@ class RunController:
         self.runtime.registration(name, revision)
         if self.runtime._agents[(name, revision)] is not agent:
             raise ConfigurationError("Use the Agent object registered in this Runtime")
-        if agent.memory is not None:
-            raise ConfigurationError("Memory execution requires T-08")
         if any(
             not isinstance(item, PythonTool) or not callable(item.function) or item.effect != "read"
             for item in agent.tools
@@ -509,6 +512,9 @@ class RunController:
                             "error_code": operation.data["error_code"],
                         }
                         version = str(operation.version)
+                        memory_sources = operation.data.get("memory_sources", [])
+                        if not isinstance(memory_sources, list):
+                            raise PersistenceUnavailable("Invalid explicit Memory sources")
                     except RecordNotFound:
                         if run.state.status not in TERMINAL:
                             raise PersistenceUnavailable(
@@ -521,6 +527,7 @@ class RunController:
                             "error_code": "run_ended_before_dispatch",
                         }
                         version = f"terminal-{run.state.state_version}"
+                        memory_sources = []
                     tool_message = ModelMessage(role="tool", call_id=call.call_id, content=result)
                     group.tool_refs.append((len(group.messages), len(group.sources), ref, version))
                     group.messages.append(tool_message)
@@ -532,6 +539,10 @@ class RunController:
                             version=version,
                         )
                     )
+                    tool_source_index = len(group.sources) - 1
+                    for memory_item in memory_sources:
+                        group.memory_refs.append((len(group.sources), tool_source_index))
+                        group.sources.append(ContextSource.model_validate(memory_item))
                 group.provider_items.extend(response.provider_items)
                 for index, provider in enumerate(response.provider_items):
                     group.sources.append(
@@ -549,9 +560,24 @@ class RunController:
         return protected, history
 
     async def prepare(
-        self, record: RunRecord, context: RunContext, model_call_id: str
+        self,
+        record: RunRecord,
+        context: RunContext,
+        model_call_id: str,
+        work: "_Work[None]",
+        end: float,
     ) -> ModelRequest:
         agent = self.runtime._agents[(record.agent_name, record.revision)]
+        retrieval = (
+            await retrieve(self.storage, record, agent.memory, work, end)
+            if agent.memory is not None
+            else Retrieval([], "disabled")
+        )
+        memory_failed = (
+            agent.memory is not None
+            and agent.memory.retrieval == "required"
+            and retrieval.status in ("failed", "timeout")
+        )
         async with self.storage.transaction() as tx:
             record = await tx.get_run(context, record.state.run_id)
             if record.state.cancel_requested:
@@ -576,12 +602,13 @@ class RunController:
                     (message_index + 1, source_index + 1, ref, version)
                     for message_index, source_index, ref, version in protected.tool_refs
                 ]
+                protected.memory_refs = [(m + 1, t + 1) for m, t in protected.memory_refs]
             template = ModelRequest(
                 model_call_id=model_call_id,
                 messages=[],
                 tools=[
                     ModelTool(name=t.name, description=t.description, parameters=t.parameters)
-                    for t in agent.tools
+                    for t in agent._execution_tools
                 ],
                 output_schema=None if agent.output_type is str else agent.output_codec.schema,
             )
@@ -612,6 +639,37 @@ class RunController:
             )
             if window is not None:
                 budget = min(budget, window - record.limits.output_reserve_tokens)
+            excluded_memory = []
+            if retrieval.records:
+                stale = []
+                for candidate in retrieval.records:
+                    current = await tx.get_memory(candidate.scope, candidate.key)
+                    if current is None or current.version != candidate.version or current.deleted:
+                        stale.append(
+                            memory_source(
+                                candidate,
+                                "memory_deleted"
+                                if current is None or current.deleted
+                                else "memory_version_changed",
+                            ).model_copy(
+                                update={
+                                    "included": False,
+                                    "transform": "excluded",
+                                    "content": None,
+                                }
+                            )
+                        )
+                if stale:
+                    excluded_memory = stale
+                    assert agent.memory is not None
+                    retrieval.records = await tx.recall_memory(
+                        MemoryScope(
+                            tenant_id=context.tenant_id,
+                            user_id=context.user_id,
+                            agent_name=record.agent_name,
+                        ),
+                        limit=agent.memory.limit,
+                    )
             request, manifest, overflow = assemble(
                 template,
                 protected,
@@ -621,8 +679,19 @@ class RunController:
                 revision=record.revision,
                 budget=budget,
                 preview_bytes=record.limits.tool_preview_bytes,
+                memories=[
+                    (memory_message(item), memory_source(item, "retrieved"))
+                    for item in retrieval.records
+                ],
+                memory_budget=min(
+                    int(max(0, budget) * agent.context_policy.memory_fraction),
+                    agent.context_policy.memory_max_tokens,
+                ),
+                retrieval_status=retrieval.status,
+                excluded_memory=excluded_memory,
             )
-            state = "rejected" if overflow else "prepared"
+            rejected = overflow or memory_failed
+            state = "rejected" if rejected else "prepared"
             for kind, payload in (
                 ("model_input", {"schema_version": 1, "request": request.model_dump(mode="json")}),
                 ("context", {"schema_version": 1, "manifest": manifest.model_dump(mode="json")}),
@@ -643,8 +712,10 @@ class RunController:
                     mode="json"
                 ),
             }
-            if overflow:
-                event_data["error_code"] = "context_overflow"
+            if rejected:
+                event_data["error_code"] = (
+                    "memory_unavailable" if memory_failed else "context_overflow"
+                )
             version = record.state.state_version + 1
             await tx.save_step(
                 context,
@@ -656,11 +727,13 @@ class RunController:
                     update={
                         "state_version": version,
                         "data": checkpoint.data
-                        | {"model_step_count": count + (not overflow), "engine_schema": 1},
+                        | {"model_step_count": count + (not rejected), "engine_schema": 1},
                     }
                 ),
                 events=[EventDraft(type="context.prepared", data=event_data)],
             )
+        if memory_failed:
+            raise _RunFailure("memory_unavailable", "memory")
         if overflow:
             raise _RunFailure("context_overflow", "context")
         return request
@@ -734,7 +807,7 @@ class RunController:
                 self.runtime.validate_record(await self.storage.get_run(context, run_id))
                 call_id = str(uuid4())
                 record = await self.storage.get_run(context, run_id)
-                request = await self.prepare(record, context, call_id)
+                request = await self.prepare(record, context, call_id, work, end)
                 response: ModelResponse | None = None
                 for attempt in range(record.limits.model_retries + 1):
                     work.checkpoint()
@@ -893,7 +966,7 @@ class RunController:
                         raise _RunFailure(end_code, "runtime")
                     await self.finish(run_id, context, output=output)
                     return
-                tools = {tool.name: tool for tool in agent.tools}
+                tools = {tool.name: tool for tool in agent._execution_tools}
                 for call, operation_id in zip(response.tool_calls, operation_ids, strict=True):
                     work.checkpoint()
                     if call.name not in tools:
@@ -919,9 +992,20 @@ class RunController:
                         data={"active_seconds": loop.time() - started + allowance},
                     )
                     work.checkpoint()
-                    assert self.runtime._tool_dispatcher is not None
-                    result = await self.runtime._tool_dispatcher.execute(
-                        cast(PythonTool, tools[call.name]),
+                    selected_tool = tools[call.name]
+                    dispatcher = (
+                        MemoryDispatcher(
+                            storage=self.storage,
+                            policy=self.runtime.policy,
+                            authorizer=self.runtime.authorizer,
+                            validate=self.runtime.validate_record,
+                        )
+                        if isinstance(selected_tool, MemoryTool)
+                        else self.runtime._tool_dispatcher
+                    )
+                    assert dispatcher is not None
+                    result = await dispatcher.execute(
+                        cast(Any, selected_tool),
                         canonical_json(call.arguments),
                         work=work,
                         record=record,

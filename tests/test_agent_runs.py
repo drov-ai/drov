@@ -344,7 +344,7 @@ async def test_provider_items_round_trip_without_body_exposure() -> None:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("unsupported", ["schema", "unknown", "write", "memory"])
+@pytest.mark.parametrize("unsupported", ["schema", "unknown", "write"])
 async def test_unsupported_configuration_rejected_before_acceptance(unsupported: str) -> None:
     def function() -> str:
         raise AssertionError("Must not execute")

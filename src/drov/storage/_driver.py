@@ -33,7 +33,7 @@ class Query:
     state: str | None = None
     after_sequence: int | None = None
     limit: int = 100
-    order: Literal["key", "sequence", "newest"] = "key"
+    order: Literal["key", "sequence", "newest", "memory_recent"] = "key"
     before: tuple[str, str] | None = None
 
 

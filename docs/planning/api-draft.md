@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 至 T-07 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取及上下文选择/清单；Memory、审批恢复和真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-13。
+状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；审批恢复和真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-13。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -45,7 +45,7 @@ run/wait/resume/stream/recover(wait=True) 返回正文，预检 read 与 view_co
 
 verify 需要核查响应权限及 read/view_content，以原执行者当前权限进行只读查询；同一 operation 同时至多一个 verifier 调用，占用活动容量并保留资源所有权。它不接受模型传来的新查询目标，也不执行写入。查询期间原请求被其他合法响应消费时，迟到建议不能再用于推进旧请求。
 
-T-06 已实现表中的 start/run/wait/cancel/inspect/events/stream 与 Agent.run/run_sync。T-07 已实现 get_context；respond/resume/verify/recover/sessions/session 仍未实现，不能将表中设计入口当作已有功能。当前只接收含 callable 的 read 工具，Memory/write/unknown 接收前拒绝；所有 ASK 均失败为 interaction_unavailable。inspect.context_manifests 只返回本次事件页中 context.prepared 对应的摘要（sources=[]、content_visible=False），沿事件游标可遍历全部索引；get_context 返回完整来源清单，include_content=True 返回选入内容/预览，provider 正文始终不可见。旧完整轮次确定性选取，保护项无法装入时提前失败；清单预算/粗估包括协议和 schema，供应商已报告用量单独关联。查询按 context 的 tenant/user 隔离，跨归属查看和审批尚未交付。
+T-06 已实现表中的 start/run/wait/cancel/inspect/events/stream 与 Agent.run/run_sync。T-07 已实现 get_context；respond/resume/verify/recover/sessions/session 仍未实现，不能将表中设计入口当作已有功能。当前接收含 callable 的 read 工具及配置 Memory 的 Agent；外部 write/unknown 接收前拒绝；所有 ASK 均失败为 interaction_unavailable。inspect.context_manifests 只返回本次事件页中 context.prepared 对应的摘要（sources=[]、content_visible=False），沿事件游标可遍历全部索引；get_context 返回完整来源清单，include_content=True 返回选入内容/预览，provider 正文始终不可见。旧完整轮次确定性选取，保护项无法装入时提前失败；清单预算/粗估包括协议和 schema，供应商已报告用量单独关联。查询按 context 的 tenant/user 隔离，跨归属查看和审批尚未交付。
 
 Runtime 的有效限额从 Agent 默认与管理员上限取较严格值，显式 Limits 仅覆盖设置过的字段且不得放宽管理员上限；Agent.run 临时环境由应用配置限额。ScriptedModel/ScriptedStep 可从 drov.models 导入，用预定响应或事件/异常及输入检查构建离线序列，不调用外部模型。
 
@@ -201,7 +201,7 @@ assert decision.decision == "allow"
 
 PermissionPolicy(deny={...}, ask={...}, allow={...}) 保存不可变集合，支持 set/frozenset/list。decide 返回 PermissionDecision 的 decision/reason；业务 Authorizer 使用新增 execute_tool action 与 ToolResource 检查原归属及规范参数。默认 OwnerAuthorizer 只允许本人，跨用户查看/审批仍需宿主明确授权。Runtime 接收 policy/authorizer，配置引用只读，原 authorizer 对象可反映动态业务权限；当前权限会在尝试、队列等待后、派发标记提交后再次检查，allow 不覆盖否决或 required approval。
 
-真实派发目前是私有内核接点，只有 read 可执行；write/unknown 明确 not_executed/effect_not_supported，ASK 保存 prepared/approval_required 而不制造 request_id。T-06 已接通 Agent.run/Runtime.start 只读路径，ASK 在 Run 收尾为 failed/interaction_unavailable；完整审批/核查仍待 T-09。结果必须经 codec 和大小校验；非法输出不当成功，None 用内部 has_result 区分可用结果。只读瞬态错误用 `drov.errors.TransientToolError`，其他错误/超时/非法结果不自动重试。排队/线程与原子记录规则见运行契约第 4 节和 ADR-0009。
+外部 Python 派发目前只有 read 可执行；外部 write/unknown 明确 not_executed/effect_not_supported，ASK 保存 prepared/approval_required 而不制造 request_id。T-06 已接通 Agent.run/Runtime.start 只读路径，ASK 在 Run 收尾为 failed/interaction_unavailable；完整审批/核查仍待 T-09。结果必须经 codec 和大小校验；非法输出不当成功，None 用内部 has_result 区分可用结果。只读瞬态错误用 `drov.errors.TransientToolError`，其他错误/超时/非法结果不自动重试。排队/线程与原子记录规则见运行契约第 4 节和 ADR-0009。
 
 
 ```python
@@ -230,7 +230,7 @@ PermissionPolicy 初期提供 deny、ask、allow 的明确工具规则；高优�
 它注册 memory.remember、memory.recall、memory.forget 三个逻辑工具名。模型供应商若限制工具名格式，适配器必须建立无冲突的导出名映射并记录映射；不能改变权限系统使用的逻辑身份。
 
 ```python
-# API 设计片段：explicit 指通过明确工具写入，不指后台自动提取。
+# T-08 已实现：explicit 指通过明确工具写入。
 agent = Agent(
     name="personal-assistant",
     revision="1",
@@ -242,7 +242,7 @@ policy = PermissionPolicy(allow={"memory.remember", "memory.forget"})
 
 Memory 工具仍受用户作用域与应用权限限制；allow 只在该配置启用时生效。工具成功意味着本地写入和操作结果共同提交；任务 completed 不保证模型调用了保存工具。通过 inspection 的 memory.changed 事件及测试数据验证记忆行为。
 
-当前 ContextPolicy 字段为 memory_fraction/memory_max_tokens；输入预算与工具预览大小使用 Limits.max_input_tokens/output_reserve_tokens/tool_preview_bytes。T-07 在 Memory 未启用时不占用 Memory 子预算；T-08 再接入实际检索。每次新的模型输入都有 ContextManifest；其选入顺序、required/best_effort 时序、删除与历史保留边界唯一规定在行为契约第 7 节。
+当前 ContextPolicy 字段为 memory_fraction/memory_max_tokens；输入预算与工具预览大小使用 Limits.max_input_tokens/output_reserve_tokens/tool_preview_bytes。Memory 未启用时不占用子预算；T-08 已接入实际检索及来源版本。每次新的模型输入都有 ContextManifest；其选入顺序、required/best_effort 时序、删除与历史保留边界唯一规定在行为契约第 7 节。
 
 ## 应用服务与资源
 
@@ -323,9 +323,9 @@ Session 列表按 created_at、session_id 降序做 keyset，会话 Run 按 crea
 | InputResponse | kind=input，value: JSON 值；必须通过原请求保存的 input_type schema，错误不消费请求 |
 | ReconciliationDecision | kind=reconciliation，resolution=applied/not_applied/unresolved，evidence: 非空说明；applied 正常继续时须有通过原返回 schema 校验的 result；取消/运行限额收尾可省略 result，以核实效果的证据结束；not_applied/unresolved 不带成功结果；省略与合法 JSON null 由字段是否存在区分 |
 | HumanInput 描述 | HumanInput(name, input_type)，input_type 为 str 或对象 schema；生成一个内置工具，模型调用参数只有 prompt: str。Runtime 保存原工具 operation 与所需 schema，合法 InputResponse 成为该调用的结果；不再调用一个外部函数 |
-| memory.remember | key/content: str，expected_version: int；新建使用 0，更新先读取版本。返回 key/version |
+| memory.remember | key/content: str，expected_version: int；新建使用 0，更新先读取版本；key 非空，expected_version 非负且不接受 bool，key/content 的规范 JSON 合计受 max_memory_bytes 限制。返回 key/version |
 | memory.recall | key/query: str 或 None（不能同时非空），limit: int（1–50，默认 5）；返回带 key/content/version/source/deleted 的列表，始终限定 scope；精确 key 查询可返回 content=None 的删除墓碑，其他模式排除墓碑 |
-| memory.forget | key: str，expected_version: int；返回 key/version/deleted；重复 operation 返回既有结果，不重新删写 |
+| memory.forget | key: str，expected_version: int；不存在、已删除或版本不匹配返回 memory_conflict；返回 key/version/deleted；重复 operation 返回既有结果，不重新删写 |
 
 HumanInput 是可选工具描述，不自动注入每个 Agent。它是 Runtime 内置交互处理器，无外部写入，以 read 注册并遵守完整工具权限顺序；默认直接产生 input 请求，应用若另设 deny/ask 则仍生效。模型不提供用户回答。首期不支持任意工具返回一个未知控制对象就中断 Python 栈。S-03-E 的 operator 变体增加 HumanInput(name="ask_item", input_type=ItemChoice)，收到合法 item_id 后模型继续提出写入工具调用，原审批规则仍生效。
 

@@ -1,6 +1,6 @@
 # 三类参考应用与跨入口案例
 
-状态：P4 案例设计；S-01-A/C 的只读 SDK/stream 离线路径已运行，Memory/审批案例及真实模型质量仍待后续验收。更新：2026-10-13。
+状态：P4 案例设计；S-01-A/C 和 S-02 的 SDK/stream 离线路径已运行，审批案例及真实模型质量仍待后续验收。更新：2026-10-13。
 
 这些案例用来检验通用框架，不限制 Drov 的业务范围。所有 `drov` 符号均来自 [API 草案](api-draft.md) 的拟议接口；本文件不提供可安装教程。模型参数在离线验证中使用 ScriptedModel，真实验证使用显式配置的 OpenAIResponses；知识检索是合成夹具或应用自己的工具，Memory 为内置事务存储。详见 [工程方案](engineering.md) / [质量计划](quality-plan.md)。所有场景遵守 [行为契约](runtime-contract.md)，不能单独放宽规则。
 
@@ -158,6 +158,8 @@ async def recall_phase(fresh_model, db_path, user_id="alice"):
 
 内置记忆工具成功时，Memory 修改、操作结果和 memory.changed 事件已经共同提交。无需 sleep，也不依赖关闭 Runtime 才触发后台写回。completed 本身不能证明保存工具被调用，示例额外检查写入事件；正式测试还必须核验保存内容及作用域。
 
+T-08 已交付 [memory_offline.py](../../examples/memory_offline.py)：普通/stream 各七个独立进程验证保存、新会话读取、三方向隔离与删除后读取；[test_memory.py](../../tests/test_memory.py) 核对工具事务、版本、检索期限、来源及固定重试快照。脚本回答只作离线断言，真实模型质量仍待 T-11/T-16。
+
 测试驱动应等待第一个进程关闭，再在新进程重建所有资源调用 recall_phase。只在同进程依次调用这两个函数，仅说明 API 用法，不算跨进程验证。读取被拒绝或写入失败都必须显式报告。
 
 ### 验收案例
@@ -265,7 +267,7 @@ S-03-E 的补充输入变体在 tools 中另注册 `HumanInput(name="ask_item", 
 
 ## 从说明片段到可运行示例
 
-P3 已指定依赖、完整夹具、模型适配器及规则断言，并把 [B-01 至 B-15](runtime-contract.md) 中首期适用项映射到质量计划和任务；B-14 属后续。已实现的只读 examples/测试见上文；含 Memory/审批的设计片段尚未导入或运行。
+P3 已指定依赖、完整夹具、模型适配器及规则断言，并把 [B-01 至 B-15](runtime-contract.md) 中首期适用项映射到质量计划和任务；B-14 属后续。已实现的只读及 Memory examples/测试见上文；审批设计片段尚未导入或运行。
 
 三类 Agent 都需通过同一 DrovApp 入口复测。X-01 使用显式 Runtime 的相同权限、存储和限额配置对照 HTTP/流式；不将临时 Agent.run 与持久化 Runtime 的配置差异判为内核差异。
 

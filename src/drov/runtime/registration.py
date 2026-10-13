@@ -37,7 +37,7 @@ def fingerprint(agent: Agent[Any]) -> AgentRegistration:
         required_dependencies=agent.required_dependencies,
     )
     tools: list[dict[str, Any]] = []
-    for tool in checked.tools:
+    for tool in checked._execution_tools:
         TypeAdapter(ScopedIdentifier).validate_python(tool.name, strict=True)
         TypeAdapter(ScopedIdentifier).validate_python(tool.revision, strict=True)
         if tool.effect not in ("read", "write", "unknown") or tool.approval not in (

@@ -29,13 +29,26 @@ class MemoryDriver:
                 and (query.key is None or key.key == query.key)
                 and (query.state is None or row.state == query.state)
                 and (query.after_sequence is None or row.sequence > query.after_sequence)
-                and (query.before is None or (row.created_at, key.key) < query.before)
+                and (
+                    query.before is None
+                    or (
+                        (
+                            row.created_at < query.before[0]
+                            or (row.created_at == query.before[0] and key.key > query.before[1])
+                        )
+                        if query.order == "memory_recent"
+                        else (row.created_at, key.key) < query.before
+                    )
+                )
             )
         ]
         if query.order == "sequence":
             rows.sort(key=lambda row: row.sequence)
         elif query.order == "newest":
             rows.sort(key=lambda row: (row.created_at, row.key.key), reverse=True)
+        elif query.order == "memory_recent":
+            rows.sort(key=lambda row: row.key.key)
+            rows.sort(key=lambda row: row.created_at, reverse=True)
         else:
             rows.sort(key=lambda row: row.key.key)
         return rows[: query.limit]

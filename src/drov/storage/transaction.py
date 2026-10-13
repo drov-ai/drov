@@ -3,6 +3,7 @@
 import asyncio
 import hashlib
 import hmac
+import unicodedata
 from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
 from functools import wraps
@@ -115,6 +116,11 @@ def _decode(model: type[M], row: Row) -> M:
                 row.version,
             ):
                 raise ValueError("Memory payload does not match its index")
+            if (row.state, row.created_at) != (
+                "deleted" if record.deleted else "live",
+                _time(record.updated_at),
+            ):
+                raise ValueError("Memory lifecycle index does not match its payload")
         elif isinstance(record, (Checkpoint, EventRecord, RunItem)):
             if record.run_id != key.namespace:
                 raise ValueError("Record belongs to a different run")
@@ -540,6 +546,56 @@ class Transaction:
     async def get_memory(self, scope: MemoryScope, key: str) -> MemoryRecord | None:
         scope = MemoryScope.model_validate(scope)
         return await self._get(MemoryRecord, "memory", scope, scope.agent_name, key)
+
+    async def recall_memory(
+        self,
+        scope: MemoryScope,
+        *,
+        key: str | None = None,
+        query: str | None = None,
+        limit: int = 5,
+    ) -> list[MemoryRecord]:
+        """Only query the supplied owner/Agent; filtering stays inside the transaction."""
+        scope = MemoryScope.model_validate(scope)
+        if type(limit) is not int or not 1 <= limit <= 50:
+            raise ValueError("Memory limit must be an integer from 1 to 50")
+        if key is not None and (type(key) is not str or not key):
+            raise ValueError("Memory key must be non-empty")
+        if query is not None and type(query) is not str:
+            raise ValueError("Memory query must be a string")
+        if key is not None and query:
+            raise ValueError("Memory key and query are mutually exclusive")
+        if key is not None:
+            record = await self.get_memory(scope, key)
+            return [record] if record is not None else []
+        needle = unicodedata.normalize("NFKC", query or "").casefold()
+        before = None
+        selected: list[MemoryRecord] = []
+        while len(selected) < limit:
+            rows = await self._select(
+                "memory",
+                scope,
+                namespace=scope.agent_name,
+                state="live",
+                order="memory_recent",
+                before=before,
+                limit=100,
+            )
+            for row in rows:
+                record = _decode(MemoryRecord, row)
+                if record.deleted:
+                    raise PersistenceUnavailable("Live memory index contains a tombstone")
+                if not needle or any(
+                    needle in unicodedata.normalize("NFKC", value).casefold()
+                    for value in (record.key, record.content or "")
+                ):
+                    selected.append(record)
+                    if len(selected) == limit:
+                        break
+            if len(rows) < 100:
+                break
+            before = (rows[-1].created_at, rows[-1].key.key)
+        return selected
 
     @_mutation
     async def put_memory(self, record: MemoryRecord, *, expected_version: int) -> None:

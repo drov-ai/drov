@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：T-01 至 T-07 已本地验收，含只读 Agent 闭环、上下文选择/预览/清单；Memory、真实适配器及服务仍未实现。实际范围见 [T-07 验证](../validation/t07-context.md)。更新：2026-10-13。
+状态：T-01 至 T-08 已本地验收，含只读 Agent 闭环、上下文选择/预览/清单和事务 Memory；真实适配器及服务仍未实现。实际范围见 [T-08 验证](../validation/t08-memory.md)。更新：2026-10-13。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 
@@ -141,10 +141,18 @@ T-01 已验证锁定依赖的本地安装组合，T-02 已验证类型、工具 
 
 RunController 连接接收、模型循环、只读工具、限额、历史和正文投影；RunEvents/RunStream 以有界临时缓冲和持久事件分页读取实现 SDK 订阅。模型瞬态重试只使用 TransientModelError，固定已保存输入、每次独立 attempt_id；ScriptedModel/ScriptedStep 为无网络离线适配器，额外调用失败。T-06 未增加依赖或改变 uv.lock。
 
-Checkpoint.engine_schema=1；model_input/model_response payload 各 schema_version=1；session_sequence 在接收事务使用 Session 版本保存，避免相同时间戳的随机 ID 打乱历史。计数及活动预留保留原 Run 事实；正常返回按实耗结算，未停止调用保留预留与资源，禁止迟到结果变成成功。T-07 已替换完整历史模式为确定性组选取/预览/清单，仍对保护输入溢出前置失败。SDK 活动订阅至多 50ms 轮询提交，durable 事件不进入无界队列。所有 ASK 当前失败，Memory/write/unknown 接收前拒绝；完整细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
+Checkpoint.engine_schema=1；model_input/model_response payload 各 schema_version=1；session_sequence 在接收事务使用 Session 版本保存，避免相同时间戳的随机 ID 打乱历史。计数及活动预留保留原 Run 事实；正常返回按实耗结算，未停止调用保留预留与资源，禁止迟到结果变成成功。T-07 已替换完整历史模式为确定性组选取/预览/清单，仍对保护输入溢出前置失败。SDK 活动订阅至多 50ms 轮询提交，durable 事件不进入无界队列。所有 ASK 当前失败，外部 write/unknown 接收前拒绝；T-08 Memory 是专用事务处理器；完整细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
 
 ## T-07 落地边界
 
 内部 context/assembly.py 是无存储/模型副作用的选择器；RunController 负责已提交数据投影及输入/清单同事务。estimator 固定 utf8-json-bytes+request256+item32-v1，全请求 JSON 含工具/输出 schema 及 provider_items。源级 estimated_tokens 仅表示各自内容的 UTF-8 JSON 字节贡献，不是总估算的可加分解；总数以清单 estimated_tokens 为准。输出预留扣完窗口时 budget=0，并保留 rejected 清单。
 
 预览上限包含完整标记/引用、UTF-8 文本和 JSON 转义；当前结果在预算不足时按契约确定性缩小，历史组不改变原事实。ContextManifest 新增带默认值的 estimated_tokens/reported_usage，公共生成 schema 同步；model_input/model_response/context payload 均为 schema_version=1，无 SQLite DDL、锁或依赖变化。旧 T-06 输入未保存清单，不回填虚假来源。API/选择/权限规则见运行契约第 7 节和 [ADR-0011](../decisions/0011-context-assembly.md)。
+
+## T-08 落地边界
+
+MemoryTool 是私有 schema 描述，不带应用 callable；Agent 自定义工具不可使用三个保留名。配置 Memory 时，模型 schema 和注册指纹包含内置工具（无 Memory 的旧指纹不变），描述构造不打开资源。MemoryDispatcher 与 OperationJournal.commit_in 共用 Runtime Storage 的事务；成功、CAS 冲突或结果超限等本地尝试消耗一次 tool_dispatch_count，不存在外部派发预留或 unknown。操作 payload schema=1 增加带默认空列表的 memory_sources，旧操作仍可读取；无新公共 DTO/schema、SQLite DDL、依赖或锁变更。
+
+Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串检索按此顺序每页最多 100 行扫描已经限定 tenant/user/Agent 且 live 的记录，匹配 NFKC+casefold 后的完整子串，达到 1–50 条即止。没有新查询游标 API或语义/向量检索承诺。key/content 的规范 JSON 总字节数受 max_memory_bytes 限制，工具整体结果受 max_tool_result_bytes 限制；非法输出在修改前拒绝。
+
+每次自动检索有一个内核持有的真实 Task；读取完成时间超过截止点也丢弃。取消后清理宽限固定 100ms，未结束的异常后端保留所有权并抛 PersistenceUnavailable；没有后台追补。保存输入的事务内复核/重查，Memory 消息以带 drov.memory 类型的 user 数据注入；实际 JSON 消息及协议开销计入 min(输入预算×memory_fraction, memory_max_tokens) 与全局剩余量，然后才选历史。超大记忆整条排除，不自动摘要；精确 token/模型使用质量不由此证明。最近扫描/子串和详细清单规模仍受记录量影响，尚未验收大规模检索性能。完整决定见 [ADR-0012](../decisions/0012-transactional-memory.md)。
