@@ -4,12 +4,12 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-08 **本地实施验收完成**；下一项 T-09 审批与显式恢复。T-06/07 与 T-08 源码已推送 origin/main（T-08 提交 d997f17）；首轮 CI 的 Windows 旧测试清理期限/示例输出编码失败已定位并修正，正在验证修正后的 CI。
+- 阶段：P1 至 P4、T-01 至 T-08 **本地实施验收完成**；下一项 T-09 审批与显式恢复。T-06/07 与 T-08 已推送 origin/main，最终验证提交 5ff654c 的 CI 38413817284 共 10 个 job 全部 success；两轮 Windows 失败与修正证据保留。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；本轮细化见 [ADR-0012](../decisions/0012-transactional-memory.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；新增内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照。
 - 未实现：完整审批/核查/HumanInput/显式恢复、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-09 至 T-18 未开始。B-14、多 Agent、Skill/沙箱等后续能力无公共空壳。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
-- 本轮起点：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。
+- 本轮起点：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 
 ## 已确认方向
 
@@ -77,6 +77,8 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 ## GitHub / CI
 
 - 继续使用现有 origin 和用户已有 GitHub 身份；不修改全局代理/认证、不建立新仓库。提交前检查可识别凭据模式与 Git 跟踪范围，品牌/环境/数据库排除。
+- 本轮：T-08 实施 [d997f17](https://github.com/drov-ai/drov/commit/d997f17f7bcf34f6ceea170b378fab956240923b)，跨平台检查修正 40160ff / [5ff654c](https://github.com/drov-ai/drov/commit/5ff654cf0ac8044125554029acae0638bc85ca6a) 已推送 main（同时包含 T-06/07 的 adc9793）。最终 [CI 38413817284](https://github.com/drov-ai/drov/actions/runs/38413817284) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success；测试、构建、核心干净安装/三个离线示例、extras 隔离导入通过。两轮失败原因、适用跳过和恢复证据见 [T-08 验证](../validation/t08-memory.md)。
+- 最终补记为文档提交，不更改已验证代码；不再重复运行矩阵。当前无 T-08 本地缺项或远程 CI 失败，未做真实模型评测、包发布或部署。
 - T-04 实现提交 [45a57ea](https://github.com/drov-ai/drov/commit/45a57eab30b633889f625e2cde80b00c6b532205) 已推送 main；[CI 38387899628](https://github.com/drov-ai/drov/actions/runs/38387899628) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14 和 Python 3.15 advisory 共 10 个 job 全部 success。测试/构建/干净安装/extras 导入通过；3.11 即时任务 API 和 Windows 打开文件替换用例的适用跳过见 T-04 报告。
 - T-05 实现 d84c66f 与最终修正 [ecc734b](https://github.com/drov-ai/drov/commit/ecc734ba595a43579172d7631153925052962208) 已推送 main；[CI 38396712936](https://github.com/drov-ai/drov/actions/runs/38396712936) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。实际测试数量/适用跳过及构建/安装/extras 证据见 T-05 验证。
 - 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
@@ -124,4 +126,4 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | 2026-10-13 | T-05 | Python 工具/权限、真实只读派发、有界队列/记录/重试与故障验收完成；下一项 T-06 |
 | 2026-10-13 | T-06 | 只读 Agent/固定模型计划、历史/限额、正文授权、SDK 流/取消、离线检索与安装执行本地验收完成；下一项 T-07；未推送新 CI |
 | 2026-10-13 | T-07 | 完整上下文组选取、确定性预算/预览、固定来源清单、授权查询及安装执行本地验收完成；下一项 T-08；未推送新 CI |
-| 2026-10-13 | T-08 | 内置 Memory 原子工具/CAS/墓碑、隔离/限时检索/子预算/固定快照、七进程普通/stream 示例及 400 项回归本地验收完成；下一项 T-09 |
+| 2026-10-13 | T-08 | 内置 Memory 原子工具/CAS/墓碑、隔离/限时检索/子预算/固定快照、七进程普通/stream 示例及 400 项回归本地验收完成；10 个远程 CI job success；下一项 T-09 |
