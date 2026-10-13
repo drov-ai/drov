@@ -4,12 +4,12 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-04 本地实施验收完成；下一项 T-05 Python 工具与权限。本轮远程同步/CI 状态见下节。
+- 阶段：P1 至 P4、T-01 至 T-04 本地实施验收完成；下一项 T-05 Python 工具与权限。本轮实现已推送 main，GitHub CI 通过，详情见下节。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-04 细化见 [ADR-0008](../decisions/0008-runtime-ownership.md)。历史 fingerprint JSON 不覆盖，源契约变化由 ADR 说明。
 - 已实现：包 0.1.0a0、定义/公共类型/配置/工具 schema/模型协议、内存/SQLite 事务存储及记录/CAS/去重/原子步骤/Memory 原语/锁/取消处理；Runtime 注册指纹、资源装配/所有权、私有任务/容量/取消和关闭控制。
 - 未实现：Agent 执行入口、实际 Python/Memory 工具、权限引擎、运行恢复调度、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-05 至 T-18 未开始。私有任务和实际线程测试不是 Agent 副作用恢复或模型质量验证。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
-- 本轮起点：`/Users/yanlong/projects/drov`，main / 4b8e478，工作区干净。origin 为已有公开仓库 [drov-ai/drov](https://github.com/drov-ai/drov) 的 SSH URL；T-01/T-02 检查点 478cb12、T-03 实现 751ff55 已在 main。品牌源文件保留本地，不进入 Git。
+- 本轮起点：`/Users/yanlong/projects/drov`，main / 4b8e478，工作区干净。origin 为已有公开仓库 [drov-ai/drov](https://github.com/drov-ai/drov) 的 SSH URL；T-01/T-02 检查点 478cb12、T-03 实现 751ff55、T-04 实现 45a57ea 已在 main。品牌源文件保留本地，不进入 Git。
 
 ## 已确认方向
 
@@ -31,7 +31,8 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 ## GitHub / CI
 
 - 继续使用现有 origin 和用户已有 GitHub 身份；不修改全局代理/认证、不建立新仓库。提交前检查可识别凭据模式与 Git 跟踪范围，品牌/环境/数据库排除。
-- T-04 本地验收完成，本轮实现检查点与新 CI 结果将在同步后补记；不能将 T-03 的成功套用于新代码。
+- T-04 实现提交 [45a57ea](https://github.com/drov-ai/drov/commit/45a57eab30b633889f625e2cde80b00c6b532205) 已推送 main；[CI 38387899628](https://github.com/drov-ai/drov/actions/runs/38387899628) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14 和 Python 3.15 advisory 共 10 个 job 全部 success。测试/构建/干净安装/extras 导入通过；3.11 即时任务 API 和 Windows 打开文件替换用例的适用跳过见 T-04 报告。
+- 本轮补记 CI 的后续文档提交不改变已验证代码；本地检查点、源契约和报告齐全，无 T-04 实施缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
 ## 下一轮：T-05 Python 工具与权限
