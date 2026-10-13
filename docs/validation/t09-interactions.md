@@ -5,7 +5,7 @@
 - 前置：阅读 AGENTS/progress/规划导航/handoff、T-08 与范围记录；复跑旧 400 项：398 passed / 2 skipped，静态/格式/严格类型/schema 通过；T-08 无剩余验收缺项
 - 环境：macOS arm64，uv 0.13.0；Python 3.11.9 / SQLite 3.45.1、Python 3.14.3 / SQLite 3.52.0
 - 契约：API/运行 v3 + [ADR-0014](../decisions/0014-durable-approval-input.md)；无新依赖、公共 DTO/schema 或 SQLite DDL，uv.lock/品牌/历史 P4 fingerprint 保留
-- 状态：审批/输入子范围本地验收；**T-09 整卡未完成**。未实现外部 write/unknown、reconciliation、verify/recover/启动扫描；无真实模型、密钥读取、付费调用、公开发布或部署
+- 状态：审批/输入子范围本地及远程 CI 验收；**T-09 整卡未完成**。未实现外部 write/unknown、reconciliation、verify/recover/启动扫描；无真实模型、密钥读取、付费调用、公开发布或部署
 
 ## 本地证据
 
@@ -49,7 +49,13 @@ UV_PROJECT_ENVIRONMENT=.drov/check-py314 .drov/tooling/bin/uv run --locked --pyt
 git diff --check
 ```
 
-两解释器均完成 wheel/sdist、从 sdist 重建 wheel 并比较 payload；各两个干净核心环境安装/兼容/隔离导入，以及检索/预览/Memory/交互四个示例普通与 stream，共四次干净安装通过。每次交互示例运行八个独立子进程，两种入口各校验批准/拒绝及重复回执；构件在 dist/ 和 .drov/dist-py314/，检查日志为 .drov/t09-package-py311.log / t09-package-py314.log；Twine 四个构件全部通过，未上传。源文档 45 文件、357 个本地链接、14 个 Python 片段 AST 检查与 Git 差异通过；受保护文件无变更、本轮差异凭据模式计数均 0，结果 .drov/t09-doc-check.json。模式检查不证明发现所有秘密，不读取环境文件/真实凭据；AST 检查不等同 SDK 运行。远程 CI 随本轮提交另记，旧 CI 不代表新代码通过。
+两解释器均完成 wheel/sdist、从 sdist 重建 wheel 并比较 payload；各两个干净核心环境安装/兼容/隔离导入，以及检索/预览/Memory/交互四个示例普通与 stream，共四次干净安装通过。每次交互示例运行八个独立子进程，两种入口各校验批准/拒绝及重复回执；构件在 dist/ 和 .drov/dist-py314/，检查日志为 .drov/t09-package-py311.log / t09-package-py314.log；Twine 四个构件全部通过，未上传。源文档 45 文件、357 个本地链接、14 个 Python 片段 AST 检查与 Git 差异通过；受保护文件无变更、本轮差异凭据模式计数均 0，结果 .drov/t09-doc-check.json。模式检查不证明发现所有秘密，不读取环境文件/真实凭据；AST 检查不等同 SDK 运行。远程 CI 的实际结果见下节；旧 CI 不代表新代码通过。
+
+## 远程提交与 CI
+
+实施提交 [9993500](https://github.com/drov-ai/drov/commit/99935000bee29a52fc93292a0dcb321657ff3187) 已推送现有 origin/main；[CI 38436332419](https://github.com/drov-ai/drov/actions/runs/38436332419) **10 个 job 全部 success**：quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14 和 Python 3.15 advisory。八个 package job 各完成全库测试、wheel/sdist/重建、两个干净核心安装、四个示例普通/stream 及 extras 隔离导入。原平台跳过保留，没有新增跳过：Linux/macOS 3.11 各 446 passed / 2 skipped，Windows 3.11 为 445 passed / 3 skipped；Linux 3.12/3.13/3.14、macOS 3.14 各 448 passed，Windows 3.14 为 447 passed / 1 skipped；Python 3.15 探测 448 passed，不扩大支持承诺。
+
+CI 状态/完整日志分别保存在 `.drov/t09-ci-status.json` / `.drov/t09-ci.log`，只将检查结论写入仓库。最后补记只改 progress/本记录，使用 skip ci 保存；不将补记视作新的代码测试，也未发布构件。实际最新 Git 与工作区状态由 git log/status 核实。
 
 ## 剩余范围与恢复步骤
 

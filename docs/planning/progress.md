@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-08 **本地实施验收完成**；T-09 审批/输入子范围已本地验收，整卡仍进行中；下一步外部未知效果、verify 与显式恢复。T-06/07 与 T-08 已推送 origin/main，最终验证提交 5ff654c 的 CI 38413817284 共 10 个 job 全部 success；两轮 Windows 失败与修正证据保留。
+- 阶段：P1 至 P4、T-01 至 T-08 **本地实施验收完成**；T-09 审批/输入子范围已本地及远程 CI 验收，整卡仍进行中；下一步外部未知效果、verify 与显式恢复。T-06/07 与 T-08 已推送 origin/main，最终验证提交 5ff654c 的 CI 38413817284 共 10 个 job 全部 success；两轮 Windows 失败与修正证据保留。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱范围前移见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；本轮新增保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执。
 - 未实现：外部 write/unknown 与 reconciliation、verify/recover/启动扫描、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-09 未完整验收，T-10 至 T-18 及新增 T-10A/T-10B 未开始。最小 Python 代码沙箱已纳入首版必交，尚未实现；B-14、多 Agent、Skill 与更深沙箱后续，无公共空壳。
@@ -107,6 +107,8 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 新增 52 项测试，共收集 257 项；本地 Python 3.11.9/SQLite 3.45.1：256 passed、1 skipped（即时任务工厂 API）；Python 3.14.3/SQLite 3.52.0：257 passed。静态/类型/schema、构建、干净安装及故障实验见 [T-05 验证](../validation/t05-tools.md)。T-05 无剩余验收子项；完整 Agent/交互与正文授权仍按后续任务实施。T-04 历史证据见 [所有权验证](../validation/t04-runtime.md)。
 
 ## GitHub / CI
+
+- 本轮 T-09 审批/输入实施 [9993500](https://github.com/drov-ai/drov/commit/99935000bee29a52fc93292a0dcb321657ff3187) 已提交并推送 origin/main；[CI 38436332419](https://github.com/drov-ai/drov/actions/runs/38436332419) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。八个 package job 的测试/构建/两套核心干净安装、四示例普通与 stream、extras 隔离导入通过；准确计数/范围见 [T-09 验证](../validation/t09-interactions.md)。本补记仅改 progress/验证文档，后续以 skip ci 保存，不重跑不变代码；实际 HEAD 与同步状态以 git log/status 为准。
 
 - 首版范围文档轮检查点（历史）7cc0fc4 已提交并推送既有 origin/main，推送后工作区干净、与远程同步；本记录随后补记该事实。两次均为 `[skip ci]` 文档提交，不重跑不变的 SDK 矩阵；实际最新提交以 git log/status 为准，保护旧验证与品牌。
 
