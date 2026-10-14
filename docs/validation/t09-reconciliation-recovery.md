@@ -9,7 +9,7 @@
 
 ## 本轮证据与整卡映射
 
-新增 [test_reconciliation.py](../../tests/test_reconciliation.py) **36 项**、[test_recovery.py](../../tests/test_recovery.py) **12 项**，共 **48 项**。撤去四个旧“不支持 write/unknown”的参数用例，保留 schema-only 接收前拒绝、deny/ask、参数/身份及计数断言；改为有真实写入与核查证据的测试。Runtime 构造仍无副作用，verify/recover 已有实际实现。全库 **492 项**；T-09 两批合计新增 96 项，第一批见 [历史记录](t09-interactions.md)。
+新增 [test_reconciliation.py](../../tests/test_reconciliation.py) **37 项**、[test_recovery.py](../../tests/test_recovery.py) **12 项**，共 **49 项**。撤去四个旧“不支持 write/unknown”的参数用例，保留 schema-only 接收前拒绝、deny/ask、参数/身份及计数断言；改为有真实写入与核查证据的测试。Runtime 构造仍无副作用，verify/recover 已有实际实现。全库 **493 项**；T-09 两批合计新增 97 项，第一批见 [历史记录](t09-interactions.md)。
 
 | 验收 / 关联 | 实际证据 |
 | --- | --- |
@@ -29,7 +29,7 @@
 | 未提交模型响应 | 按原 ModelRequest/call ID 重试，新的 attempt、模型 step 不重复计数；此前未提交工具计划写计数 0；保守活动预算耗尽不再调用模型 |
 | SDK/stream 实例 | [operations_offline.py](../../examples/operations_offline.py) 五组各一个独立服务，3/3/4/4/4 共 18 个新 SDK 进程，普通/stream 均通过；批准/输入/丢回包/取消写次数各 1，拒绝 0；重复原回执时模型 0 |
 
-最终本地 Python 3.11：**490 passed / 2 skipped**（Python 3.12+ 即时任务工厂）；Python 3.14：**492 passed**。静态/格式/严格 mypy（72 source files）/schema 检查通过。首批 48 项交互、56 项 Memory 及旧存储/线程/进程测试保留。
+最终本地 Python 3.11：**491 passed / 2 skipped**（Python 3.12+ 即时任务工厂）；Python 3.14：**493 passed**。静态/格式/严格 mypy（72 source files）/schema 检查通过。首批 48 项交互、56 项 Memory 及旧存储/线程/进程测试保留。
 
 早期发现并修复：SQLite kind CHECK 不接受新增审计类别，改为已有不可变 receipt 的带标签子记录，未改变 DDL；重开时查询旧事实应允许返回已保存操作，不能误当新派发；测试错误地把默认元数据摘要当正文请求、两个测试 lambda 缺类型标注、示例变量/格式和类型问题。补查最终响应 envelope 的 bool 标签原会被当版本 1 接受，四组先复现再修正，并对输入/交互/回执做同样的精确整数检查；新增四项全部通过。中间失败不计最终通过，也不把语法/脚本替身作为真实模型质量。
 
@@ -59,3 +59,11 @@ git diff --check
 - async-only verifier，无后台轮询、通用外部幂等/重试适配或远程工具沙箱。未停止 Python 调用保留所有权，不保证强杀；原模型响应未提交的恢复可能产生不同输出/额外用量。
 - 旧备份回退/数据清理/restore barrier/迁移仍由 T-15 实施，不能从正常 SQLite 重开推断旧备份安全。真实模型与付费 smoke 仍待 T-11/T-16；沙箱后端/镜像仍待 T-10A/T-10B，无公共空壳。
 - 下一轮核对本轮提交与最新验证，在当前 Local 仓库复用独立事项服务与屏障实施 T-10；具体资源、状态和 New Chat 建议以 [progress](../planning/progress.md) 为准。
+
+## 远程首轮失败与夹具修正
+
+[d33fb5b 的 CI 38494616943](https://github.com/drov-ai/drov/actions/runs/38494616943) 为 failure：quality、Linux 3.12/3.13/3.14、Python 3.15 advisory 成功；Windows 两组及 Linux 3.11 的短期限用例失败，macOS 两组的事项夹具启动超时，并在 port 未初始化时清理连接到 0，掩盖原超时。标准 HTTPServer.server_bind 包含不必要的反向 DNS；现采用明确 loopback 的 LocalHTTPServer/TCPServer.bind，不做 DNS，并用 mock getfqdn 拒绝调用的独立测试核对。未调整系统 DNS/网络/代理。
+
+另两项把 SQLite/权限准备也压在 30–50ms 内，导致尚未派发就正常 not_executed：旧调用保留用例改为观察真实调用 entered 屏障后显式 cancel，保持“不合作调用仍活跃、not_applied 拒绝、计数/槽位 1、最终释放”断言；预算用例把数值窗口设为 5s，仍在实际 attempt 预留后注入失败，恢复预算耗尽/模型次数 1/写入 0 断言保留；非协作 verifier 的有限期限设为 0.5s，关闭保锁断言不变。SDK 超时/权限/所有权语义没有为夹具放宽。
+
+日志保存 .drov/t09-full-ci-first.json / t09-full-ci-first-failed.log；ab241dc 同轮补严格版本拒绝，随后夹具修正的完整最终矩阵另补，不能用旧成功 job 替代新代码验收。

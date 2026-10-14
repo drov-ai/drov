@@ -10,7 +10,16 @@ import sys
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from socketserver import TCPServer
 from typing import Any
+
+
+class LocalHTTPServer(HTTPServer):
+    def server_bind(self) -> None:
+        # Literal loopback fixtures do not need reverse DNS during startup.
+        TCPServer.server_bind(self)
+        self.server_name = "localhost"
+        self.server_port = self.server_address[1]
 
 
 class ItemService:
@@ -99,7 +108,7 @@ class ItemService:
         if self.process is None:
             return
         try:
-            if self.process.returncode is None:
+            if self.process.returncode is None and self.port:
                 await self.request("stop", {})
                 async with asyncio.timeout(5):
                     await self.process.wait()
@@ -179,7 +188,7 @@ def serve(path: Path) -> None:
             except (BrokenPipeError, ConnectionResetError):
                 pass
 
-    with HTTPServer(("127.0.0.1", 0), Handler) as server:
+    with LocalHTTPServer(("127.0.0.1", 0), Handler) as server:
         server.timeout = 1
         print(json.dumps({"port": server.server_port}), flush=True)
         while not stopped:

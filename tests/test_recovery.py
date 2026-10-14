@@ -208,9 +208,7 @@ async def test_recovery_budget_never_resets(tmp_path: Path, service: ItemService
 
     path = tmp_path / "budget.db"
     model = ScriptedModel([final()])
-    agent = build(
-        model, service, limits=Limits(run_active_seconds=0.05, model_timeout_seconds=0.05)
-    )
+    agent = build(model, service, limits=Limits(run_active_seconds=5, model_timeout_seconds=5))
     async with Runtime(agents=[agent], storage=SQLiteStorage(path)) as runtime:
         with patch.object(
             runtime._runs, "model_call", side_effect=PersistenceUnavailable("interrupted")
@@ -221,7 +219,7 @@ async def test_recovery_budget_never_resets(tmp_path: Path, service: ItemService
     agent = build(
         ScriptedModel([]),
         service,
-        limits=Limits(run_active_seconds=0.05, model_timeout_seconds=0.05),
+        limits=Limits(run_active_seconds=5, model_timeout_seconds=5),
     )
     async with Runtime(agents=[agent], storage=SQLiteStorage(path)) as runtime:
         outcome = await runtime.recover(ref.run_id, context=ALICE)

@@ -386,7 +386,7 @@ async def test_verifier_timeout_retains_actual_task_slot_and_lock(
     runtime = Runtime(
         agents=[agent],
         storage=SQLiteStorage(path),
-        limits=Limits(verify_timeout_seconds=0.03, shutdown_grace_seconds=0.03),
+        limits=Limits(verify_timeout_seconds=0.5, shutdown_grace_seconds=0.03),
     )
     await runtime.open()
     try:
@@ -485,13 +485,24 @@ async def test_not_applied_cannot_repeat_while_original_call_alive(storage: Stor
         revision="1",
         model=ScriptedModel([plan()]),
         tools=[update],
-        limits=Limits(tool_timeout_seconds=0.03),
+        limits=Limits(tool_timeout_seconds=10),
     )
     runtime = Runtime(agents=[agent], storage=storage)
     await runtime.open()
     try:
-        result = await unknown(runtime, agent)
-        assert result.pending is not None and entered.is_set()
+        first = await approval(runtime, agent)
+        assert first.pending is not None
+        await runtime.respond(
+            first.run_id,
+            request_id=first.pending.request_id,
+            response=ApprovalDecision(approved=True),
+            context=ALICE,
+        )
+        async with asyncio.timeout(5):
+            await entered.wait()
+        await runtime.cancel(first.run_id, context=ALICE)
+        result = await runtime.wait(first.run_id, context=ALICE)
+        assert isinstance(result, Suspended) and isinstance(result.pending, ReconciliationRequest)
         with pytest.raises(InteractionConflict):
             await runtime.respond(
                 result.run_id,
@@ -671,3 +682,13 @@ def test_verifier_registration_is_explicit_async_and_fingerprinted() -> None:
     one: Agent[str] = Agent(name="test", revision="1", model=ScriptedModel([]), tools=[first])
     two: Agent[str] = Agent(name="test", revision="1", model=ScriptedModel([]), tools=[second])
     assert fingerprint(one).config_hash != fingerprint(two).config_hash
+
+
+def test_fixture_server_startup_never_resolves_loopback_dns() -> None:
+    from http.server import BaseHTTPRequestHandler
+
+    from examples.item_service_fixture import LocalHTTPServer
+
+    with patch("socket.getfqdn", side_effect=AssertionError("Fixture must not resolve DNS")):
+        with LocalHTTPServer(("127.0.0.1", 0), BaseHTTPRequestHandler) as server:
+            assert server.server_port > 0 and server.server_name == "localhost"
