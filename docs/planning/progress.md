@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-10 已完整验收；T-10A 进行中，第二批 Runtime 文件输入/Run 授予/去重/授权读取已验收，整卡尚未完成。本轮新增 34，全库 685；本地 3.11：683 passed / 2 skipped，3.14：685 passed；静态/类型/schema、两解释器四套干净安装及六个示例普通/stream（文件字节仅 POSIX）通过。实际证据见 [本轮验证](../validation/t10a-artifact-inputs.md)。下一步继续沙箱审批/执行/输出发布，不进入 T-10B/T-11。
+- 阶段：P1 至 P4、T-01 至 T-10 已完整验收；T-10A 进行中，第二批 Runtime 文件输入/Run 授予/去重/授权读取已验收，整卡尚未完成。本轮新增 34，全库 685；本地 3.11：683 passed / 2 skipped，3.14：685 passed；静态/类型/schema、两解释器四套干净安装及六个示例普通/stream（文件字节仅 POSIX）通过；e83d566 的远端核心 CI 10 个 job 全部 success。实际证据见 [本轮验证](../validation/t10a-artifact-inputs.md)。下一步继续沙箱审批/执行/输出发布，不进入 T-10B/T-11。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 未实现：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、真实后端预检/配置指纹、代码与文件审批/稳定执行键/清理租约、容器输入保护/安全导出/PNG 校验、输出 ready 与工具结果共同发布及恢复。文件输入的 ready/授权读取已实现，不能替代完整 CSV→Python→CSV/PNG Agent 闭环。T-10B/T-10C、T-11 至 T-18、模型/MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
@@ -191,9 +191,9 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## GitHub / CI
 
-- 本轮 GitHub SSH 连通已恢复，原两个本地检查点 f2f45c1/412e39b 已成功推送 origin/main，没有修改全局网络/认证。第二批代码/测试/契约提交 **29d225d** 已成功推送，37 文件经差异/跟踪/敏感模式检查；工作区当时干净。新 [CI 38532234182](https://github.com/drov-ai/drov/actions/runs/38532234182) 已触发，最终状态在补记记录；旧 CI 不代表输入批次或完整 Docker 专项成绩。
+- 本轮 GitHub SSH 连通已恢复，原 f2f45c1/412e39b、本批代码/测试/契约 **29d225d** 与崩溃夹具修正 ef1b0b4/**e83d566** 已成功推送 origin/main，没有修改全局网络/认证。最终 [CI 38536288876](https://github.com/drov-ai/drov/actions/runs/38536288876) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14、Python 3.15 advisory 共 **10 个 job 全部 success**；八个 package job 的构建/核心干净安装/适用示例普通与 stream/extras 隔离导入通过。POSIX 3.11 为 683+2 skip、其余 685；Windows 3.11 为 610+75 skip、3.14 为 612+73 skip，Artifact POSIX 字节层 72 项在 Windows 适用跳过，不表示 Windows 支持文件配置。前两轮 Windows 失败、控制期限与诊断修正见 [验证](../validation/t10a-artifact-inputs.md)，日志在 `.drov/t10a-input-ci-{first,second,third}*`；Docker 专项与整卡仍未验收。最终进度/证据补记仅改文档，以 skip ci 保存；实际 Git/同步状态以 git log/status 为准。
 
-- 本轮 T-10A 首批代码/镜像 recipe/测试/契约记录已本地提交 **f2f45c1**；提交前核对 30 个跟踪文件、敏感模式和差异，未跟踪 `.drov/`、品牌或真实凭据。**推送尚未成功，新代码远程 CI 未运行/未验收。** SSH 22 与 GitHub 官方 SSH 443 连接均被关闭；HTTPS 的已有本机代理 127.0.0.1:17890 不可连接，单次绕过该配置后 TLS 仍失败，gh API 也 EOF。没有更改 origin、全局代理/SSH/认证设置。当前远程跟踪仍 67ef5b2，本地完整检查点保留；恢复 GitHub 连通后同步并检查核心 CI，核心 CI 也不能替代 T-10B 的 Docker 专项。最后同步事实补记为本地文档提交，以实际 git log/status 为准。
+- T-10A 首批交付时（历史），代码/镜像 recipe/测试/契约记录已本地提交 **f2f45c1**；提交前核对 30 个跟踪文件、敏感模式和差异，未跟踪 `.drov/`、品牌或真实凭据。**当时推送未成功，新代码远程 CI 未运行/未验收。** SSH 22 与 GitHub 官方 SSH 443 连接均被关闭；HTTPS 的已有本机代理 127.0.0.1:17890 不可连接，单次绕过该配置后 TLS 仍失败，gh API 也 EOF。没有更改 origin、全局代理/SSH/认证设置。当时远程跟踪仍 67ef5b2，本地完整检查点保留；本轮已恢复连通并同步，最新 CI 见上条，核心 CI 也不能替代 T-10B 的 Docker 专项。最后同步事实补记为本地文档提交，以实际 git log/status 为准。
 
 - 本轮文件/产物与可选 E2B 规划检查点 6feae84 已提交并推送 origin/main，包含 ADR-0016、26 份 Markdown 与本轮验证/交接；未改源码，以 `[skip ci]` 保存，不重跑未变的 SDK 矩阵。同步事实补记仍只改文档；实际最终 HEAD 与工作区状态以 git log/status 为准。T-10A/T-10B/T-10C 均未实施，不从该提交宣称运行验收。
 
