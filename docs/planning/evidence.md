@@ -1,6 +1,6 @@
 # 证据与假设登记
 
-原 P1–P3 查阅日期：2026-10-12（Asia/Shanghai）；新增 Docker 官方文档于 2026-10-14 查阅。P1 核对竞品，P2 补充并发语义，P3 核对工程与发布官方资料；未安装依赖组合、运行竞品、调用模型或做体验实验。
+原 P1–P3 查阅日期：2026-10-12（Asia/Shanghai）；新增 Docker、AgentScope Workspace 与 E2B 官方资料于 2026-10-14 查阅。P1 核对竞品，P2 补充并发语义，P3 核对工程与发布官方资料；本页文档审查不代表安装/运行竞品、调用模型或体验实验。
 
 ## 来源
 
@@ -39,7 +39,7 @@
 - 工作目录初始只有品牌素材，没有框架代码。
 - 用户提供 GitHub 组织 drov-ai、npm 组织 drov 和域名 drop.dev；此次没有核验其账号控制权、包名可用性或 DNS 状态。
 - P1–P3 当时只交付规划；当前实现与验收以 progress 为准，尚无公开 SDK 发布、线上服务、竞品性能分数或用户采用数据。
-- 2026-10-14 用户明确确认首版具备“生成并执行代码”；已调整任务与设计，尚无沙箱实现或实测。
+- 2026-10-14 用户明确确认首版具备“生成并执行代码”；沙箱 SDK 尚未实现，实际基础容器资源准备见 [记录](../validation/sandbox-environment-preparation.md)，不等于 T-10A/T-10B 验收。
 
 ## 设计假设的证据要求
 
@@ -67,3 +67,15 @@ H-01 至 H-04 的定义在 [产品定义](product.md)。所有假设当前均为
 | E-26 | [Docker 安全](https://docs.docker.com/engine/security/) / [seccomp](https://docs.docker.com/engine/security/seccomp/)，2026-10-14 | daemon 与内核是信任边界，seccomp 依赖实际内核支持 | 不承诺容器抵抗所有漏洞/敌对多租户；Drov 固定策略需实测 |
 | E-27 | [none 网络](https://docs.docker.com/engine/network/drivers/none/)，2026-10-14 | none 模式仅配置 loopback，供网络隔离选择 | 仍检查实际配置/无端口发布，并以合成监听证明无外连 |
 | E-28 | [tmpfs](https://docs.docker.com/engine/storage/tmpfs/)，2026-10-14 | 临时内存文件系统与大小控制，存在宿主 swap 条件 | 限额、swap 与实际工作空间边界须验证；不声明物理擦除保证 |
+
+## 2026-10-14 首期沙箱范围审查补充
+
+由用户在 T-10A 前提出范围/E2B 问题后核对，见 [范围审查](../validation/sandbox-scope-review.md)。只补外部事实和建议依据，没有改变已确认 C-17 或任务/发布门槛，未创建云资源或调用模型。以下来源查阅日期均为 2026-10-14。
+
+| 标识 | 来源与版本 | 可支持的事实 | 使用边界 |
+| --- | --- | --- | --- |
+| E-29 | AgentScope Python **v2.0.9** 的 [Workspace 概览](https://docs.agentscope.io/en/versions/2.0.9/building-blocks/workspace/overview)、[使用](https://docs.agentscope.io/en/versions/2.0.9/building-blocks/workspace/run-workspace)；固定 commit `2e706a6fa66813646e0d267e13757b5dbe912359` 的 [E2BBackend](https://github.com/agentscope-ai/agentscope/blob/2e706a6fa66813646e0d267e13757b5dbe912359/src/agentscope/workspace/_e2b/_e2b_backend.py) / [E2BWorkspace](https://github.com/agentscope-ai/agentscope/blob/2e706a6fa66813646e0d267e13757b5dbe912359/src/agentscope/workspace/_e2b/_e2b_workspace.py) | Workspace 包含多后端、文件/命令工具、MCP/Skill 与上下文卸载；E2B 通过 metadata 重连，关闭采用 pause 保留工作区 | GitHub tag/commit 实际核对；不混用 Java/main/独立 Runtime。未运行，不比较隔离强度、任务质量或所有恢复保证 |
+| E-30 | E2B [概览](https://docs.e2b.dev/)、[代码分析](https://docs.e2b.dev/code-interpreting/analyze-data-with-ai)、[Code contexts](https://docs.e2b.dev/code-interpreting/contexts)，滚动官方文档 | 托管 Linux VM、文件输入和代码执行的文本/图表等结果、可管理代码上下文 | 未锁 SDK/模板/构建版本或安装；云机制不等于 Drov 的权限/产物持久化已支持 |
+| E-31 | E2B [网络](https://docs.e2b.dev/network/internet-access) / [限制公共访问](https://docs.e2b.dev/network/restrict-public-access)，滚动官方文档 | 外连默认开启，可配置关闭/规则；公共访问与代码解释器访问须按 API 收紧 | Drov 若接入要显式配置并实测，不能从“用了 E2B”推断满足现有禁联网/授权边界 |
+| E-32 | E2B [生命周期](https://docs.e2b.dev/sandbox)、[pause/resume](https://docs.e2b.dev/sandbox/persistence)、[metadata](https://docs.e2b.dev/sandbox/metadata)，滚动官方文档 | ID/元数据查询、kill、暂停/恢复文件系统与内存状态等机制 | metadata 不证明唯一创建，客户端超时不证明已停止；是否满足原执行键/丢应答/取消恢复必须独立验收 |
+| E-33 | E2B [计费/额度](https://docs.e2b.dev/billing)，滚动官方文档 | 用量计费、计划/账户限制、可设支出上限 | 不假设用户享有赠额或批准支出；真实接入先核实账户/模板/实际价格及独立沙箱预算，本轮无费用实验 |
