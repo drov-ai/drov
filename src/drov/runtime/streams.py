@@ -2,9 +2,11 @@
 
 import asyncio
 from collections import deque
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, Self
 
 from drov.agent import Agent
+from drov.artifacts.types import ArtifactInput, ArtifactRef
 from drov.config import Limits
 from drov.errors import ConfigurationError
 from drov.types import (
@@ -140,10 +142,12 @@ class RunStream(RunEvents):
         context: RunContext,
         request_key: str | None = None,
         limits: Limits | None = None,
+        artifacts: Sequence[ArtifactInput | ArtifactRef] = (),
     ) -> None:
         super().__init__(controller, "unaccepted", context=context, include_content=True)
         self.agent, self.input, self.session_id = agent, input, session_id
         self.request_key, self.limits = request_key, limits
+        self.artifacts = tuple(artifacts)
 
     async def __aenter__(self) -> Self:
         if self._opened or self._closed:
@@ -156,6 +160,7 @@ class RunStream(RunEvents):
             request_key=self.request_key,
             limits=self.limits,
             content=True,
+            artifacts=self.artifacts,
         )
         self.run_id = ref.run_id
         return await super().__aenter__()

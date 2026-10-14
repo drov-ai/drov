@@ -8,7 +8,8 @@ from typing import Any
 from pydantic import TypeAdapter
 
 from drov.artifacts import ArtifactInfo, ArtifactLimits, ArtifactRef
-from drov.auth import Resource, ToolResource
+from drov.artifacts.records import ARTIFACT_DDL
+from drov.auth import ArtifactResource, Resource, ToolResource
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
 from drov.runtime import AgentRegistration
@@ -64,6 +65,7 @@ def schema_text() -> str:
         "ArtifactRef": ArtifactRef,
         "ArtifactInfo": ArtifactInfo,
         "ArtifactLimits": ArtifactLimits,
+        "ArtifactResource": ArtifactResource,
     }
     bundle = {
         "schema_version": 1,
@@ -90,6 +92,12 @@ def main() -> None:
     for target, expected in (
         (root / "schema-v1.json", schema_text()),
         (root / "storage-schema-v1.sql", sql),
+        (
+            root / "storage-artifacts-schema-v1.sql",
+            "-- Explicit ArtifactStore extension v1; core records/user_version remain 1.\n"
+            + ";\n\n".join(statement.strip() for statement in ARTIFACT_DDL)
+            + ";\n",
+        ),
     ):
         if args.check:
             if not target.exists() or target.read_text() != expected:

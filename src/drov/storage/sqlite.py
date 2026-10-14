@@ -225,10 +225,16 @@ class SQLiteStorage(Storage):
                         "Database schema is unsupported; no automatic migration"
                     )
                 if schema_version == SCHEMA_VERSION:
-                    if names != {"metadata", "records"}:
-                        raise IncompatibleStorage("Database tables do not match its schema version")
                     metadata, _ = await self._sql("SELECT key,value FROM metadata")
                     values = dict(metadata)
+                    expected_names = {"metadata", "records"}
+                    if "artifact_schema" in values:
+                        if values["artifact_schema"] != "1":
+                            raise IncompatibleStorage("Artifact storage extension is unsupported")
+                        expected_names |= {"artifact_records", "artifact_grants"}
+                        await self._validate_artifact_schema()
+                    if names != expected_names:
+                        raise IncompatibleStorage("Database tables do not match its schema version")
                     if values.get("format") != "drov.sqlite" or values.get("record_schema") != str(
                         RECORD_VERSION
                     ):
@@ -322,10 +328,30 @@ class SQLiteStorage(Storage):
                     await self._sql(
                         "INSERT INTO metadata VALUES ('artifact_store_id',?)", (store_id,)
                     )
+                extension, _ = await self._sql(
+                    "SELECT value FROM metadata WHERE key='artifact_schema'"
+                )
+                if not extension:
+                    from drov.artifacts.records import ARTIFACT_DDL
+
+                    for statement in ARTIFACT_DDL:
+                        await self._sql(statement)
+                    await self._sql("INSERT INTO metadata VALUES ('artifact_schema','1')")
+                await self._validate_artifact_schema()
                 await self._finish(True)
             except BaseException:
                 await self._finish(False)
                 raise
+
+    async def _validate_artifact_schema(self) -> None:
+        from drov.artifacts.records import ARTIFACT_DDL
+
+        for name, statement in zip(
+            ("artifact_records", "artifact_owners", "artifact_grants"), ARTIFACT_DDL, strict=True
+        ):
+            rows, _ = await self._sql("SELECT sql FROM sqlite_master WHERE name=?", (name,))
+            if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(statement.split()):
+                raise IncompatibleStorage("Artifact extension tables/index are invalid")
 
     async def _finish(self, commit: bool) -> None:
         if not self._in_transaction:

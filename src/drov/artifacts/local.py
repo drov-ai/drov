@@ -224,6 +224,11 @@ class LocalArtifacts:
             raise ConfigurationError("Artifact store is not paired/open")
         self._storage._require_open()
 
+    def _require_pair(self, storage: SQLiteStorage) -> None:
+        self._require_open()
+        if self._storage is not storage:
+            raise ConfigurationError("Artifact store is paired to a different open storage")
+
     def _child(self, stage_id: str) -> int:
         # Validate before using an identifier as a path component.
         import re
@@ -425,7 +430,9 @@ class LocalArtifacts:
         async with self._gate:
             return await _io(write)
 
-    async def _read_staged(self, owner: MemoryScope, stage_id: str, ref: ArtifactRef) -> bytes:
+    async def _read_staged(
+        self, owner: MemoryScope, stage_id: str, ref: ArtifactRef, *, name: str | None = None
+    ) -> bytes:
         self._require_open()
 
         def read() -> bytes:
@@ -433,7 +440,9 @@ class LocalArtifacts:
             if (
                 stage.state != "staged"
                 or stage.owner != owner
-                or not any(item.ref == ref for item in stage.files)
+                or not any(
+                    item.ref == ref and (name is None or item.name == name) for item in stage.files
+                )
             ):
                 raise RecordNotFound("Artifact bytes are unavailable")
             bound = (

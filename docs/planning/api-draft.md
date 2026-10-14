@@ -357,7 +357,7 @@ HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；�
 
 ## 首版文件与代码沙箱接口（T-10A，部分实施）
 
-本节按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 扩展 ADR-0013。T-10A 首批已实现 ArtifactInput/Ref/Info/Limits 值类型与 LocalArtifacts 私有字节层，见 [ADR-0017](../decisions/0017-private-artifact-staging.md)；可显式 open(storage=已打开的 SQLiteStorage)/aclose，但暂存不是 ready 产物。下表的 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、Runtime artifacts 参数、get/read_artifact、授权与结果共同发布均仍未实现。执行/恢复规则唯一在运行契约第 13 节，默认、镜像与支持矩阵唯一在工程方案；已有 start/run/stream 签名继续按无文件版本使用。
+本节按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 扩展 ADR-0013。T-10A 第二批已实现值类型/私有字节层、Runtime store 装配、start/run/stream 文件接收与 Run 授予/去重、ready 输入元数据、get/read_artifact 动态授权、上下文文件描述，见 [ADR-0018](../decisions/0018-artifact-input-admission.md) 和 [可运行文件通道示例](../../examples/artifact_inputs_offline.py)。私有 stage 仍不是 ready；输入接收不执行代码。下表的 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、输入只读容器副本、输出导出/销毁/原工具结果共同发布仍未实现。执行/恢复规则唯一在运行契约第 13 节，默认、镜像与支持矩阵唯一在工程方案。
 
 | 拟议入口/对象 | 字段与责任 |
 | --- | --- |
@@ -370,14 +370,14 @@ HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；�
 | ArtifactLimits | max_input_files、max_input_bytes、max_output_files、max_artifact_bytes、max_export_bytes、max_owner_bytes、max_store_bytes；有界输入/单文件/总输出/持久容量，不与 stdout 上限混用；均由宿主配置 |
 | runtime.start/run/stream(..., artifacts=()) | 新增默认空的宿主参数 Sequence[ArtifactInput 或 ArtifactRef]；接收时保存不可变输入并将引用明确授予本 Run；旧输出作为新输入须再次授权并保留其原内容/hash，不继承旧容器状态；相同 request_key 的规范输入包含有序文件名/字节 hash/类型或原引用 |
 | runtime.get_artifact(artifact_id, *, context, include_content=False) | 返回授权 ArtifactInfo；正文模式可见逻辑文件名；不返回字节。当前 read/view_content 动态复核；知道 ID 不代表有权限 |
-| runtime.read_artifact(artifact_id, *, context) | 返回有界 bytes（至少 read + view_content）；读取前后复核并验证文件大小/hash；缺失、已清理或未 ready 不返回成功内容 |
+| runtime.read_artifact(ref_or_id, *, context) | 已实现：接受 ID 或 ArtifactRef（含 ArtifactInfo），返回有界 bytes（read + view_content）；传 Ref 额外核对其 hash/大小/类型；读前后复核，缺失/损坏提交 unavailable，不返回成功内容或重算 |
 | sandbox.run_python 参数 | code: 非空 str；inputs: list[str]（Artifact ID，默认 []）；outputs: list[str]（/work/outputs 下相对文件名，默认 []）；拒绝额外字段。输入只能选本 Run 已获准引用，模型不能提交归属/hash/主机路径或改变 limits/后端 |
 | SandboxResult | execution_key、exit_code: int 或 None、termination: exited/timeout/output_limit/resource_limit/cancelled、有界 stdout/stderr、两种 truncated 标记；artifact_status: not_requested/complete/rejected、artifacts: list[ArtifactRef]、artifact_error: 可空结构化错误码；字节不进工具 JSON。清理不明不能构造成功结果 |
 
 模型只看到本 Run 获准的输入描述（ID、逻辑名、hash/大小/类型和固定输入位置 /work/inputs/<artifact_id>/<name>），不能枚举存储。审批展示原代码、所选输入与输出声明；批准绑定服务器解析的不可变清单，不相信模型填写的元数据。没有 artifacts 参数的旧调用保持原语义；临时 Agent.run/run_sync、内存 Storage 或缺配套 ArtifactStore 的文件/沙箱配置接收前 ConfigurationError。Artifact Authorizer 资源使用原 tenant/user/Agent 与来源 Run/operation、artifact_id；新输入授权也核对目标 Run，复用 read/view_content，工具派发仍检查 execute_tool。
 
 ```python
-# 设计片段；T-10A 尚未实现，当前不能导入 drov.sandbox/drov.artifacts。
+# 设计片段：文件通道已实现，但 drov.sandbox 与完整代码闭环仍未实现。
 from drov import Agent, PermissionPolicy, ResourceBinding, RunContext, Runtime, SQLiteStorage
 from drov.artifacts import ArtifactInput, LocalArtifacts
 from drov.sandbox import DockerSandbox, PythonSandbox, SandboxLimits

@@ -5,6 +5,7 @@ from typing import Literal, Self
 from pydantic import Field, model_validator
 
 from drov._json import StrictJson
+from drov.artifacts.types import ArtifactRef
 from drov.config import Limits, validate_input
 from drov.types import (
     DurableEventType,
@@ -43,6 +44,7 @@ class StartRequest(WireModel):
     request_key: ScopedIdentifier | None = None
     limits: Limits = Field(default_factory=Limits)
     requested_limits: Limits | None = None
+    canonical_artifacts: list[dict[str, StrictJson]] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def valid_input(self) -> Self:
@@ -96,6 +98,8 @@ class RunRecord(WireModel):
     updated_at: UtcTime
     state: RunState
     last_seq: PositiveInt
+    artifact_inputs: list[ArtifactRef] = Field(default_factory=list)
+    artifact_binding: dict[str, StrictJson] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def consistent(self) -> Self:

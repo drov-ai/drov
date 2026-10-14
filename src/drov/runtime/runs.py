@@ -1,7 +1,7 @@
 """Agent execution, explicit controls and authorized observation of committed facts."""
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, TypeVar, cast
@@ -9,6 +9,7 @@ from uuid import uuid4
 
 from drov._json import StrictJson, canonical_json
 from drov.agent import Agent
+from drov.artifacts.types import ArtifactInput, ArtifactRef
 from drov.auth import Action, Resource
 from drov.config import Limits, validate_input
 from drov.context.assembly import MessageGroup, assemble, digest, project, source
@@ -179,6 +180,8 @@ class RunController:
         await self.authorize(
             context, self.resource(current), ("read", "view_content") if content else ("read",)
         )
+        if content:
+            await self.runtime._files.validate(current, actor=context)
         return current
 
     def effective_limits(self, agent: Agent[Any], requested: Limits | None) -> Limits:
@@ -223,9 +226,11 @@ class RunController:
         request_key: str | None = None,
         limits: Limits | None = None,
         content: bool = False,
+        artifacts: Sequence[ArtifactInput | ArtifactRef] = (),
     ) -> RunRef:
         self.runtime._require_open()
         self.executable(agent)
+        inputs, declarations = self.runtime._files.normalize(artifacts)
         context = RunContext.model_validate(context)
         selected = self.effective_limits(agent, limits)
         validate_input(input, selected)
@@ -239,6 +244,7 @@ class RunController:
             request_key=request_key,
             limits=selected,
             requested_limits=limits,
+            canonical_artifacts=declarations,
         )
         resource = Resource(owner=context, session_id=session_id)
         await self.authorize(
@@ -252,6 +258,8 @@ class RunController:
                 async with self.storage.transaction() as tx:
                     previous = await tx.lookup_start(request)
                     if previous is not None:
+                        original = await tx.get_run(context, previous.run_id)
+                        await self.runtime._files.validate(original, actor=context, tx=tx)
                         return previous
                     try:
                         session = await tx.get_session(request.scope)
@@ -262,9 +270,27 @@ class RunController:
                             raise Conflict("Session belongs to a different Agent")
                         if session.active_run_id is not None:
                             raise SessionBusy("Session already has an unfinished run")
+                    if await tx._driver.unfinished_count() >= self.runtime.limits.unfinished_runs:
+                        raise CapacityExceeded("Unfinished run capacity reached")
                     slot = self.runtime._reserve()
+                    new_run_id = str(uuid4())
+                    file_records = await self.runtime._files.admit(
+                        tx,
+                        inputs=inputs,
+                        actor=context,
+                        agent_name=identity.name,
+                        session_id=session_id,
+                        run_id=new_run_id,
+                    )
                     ref = await tx.start(
-                        request, max_unfinished=self.runtime.limits.unfinished_runs
+                        request,
+                        max_unfinished=self.runtime.limits.unfinished_runs,
+                        _run_id=new_run_id,
+                        _artifact_refs=[item.ref for item in file_records],
+                        _artifact_binding=self.runtime._files.binding() if file_records else None,
+                    )
+                    await self.runtime._files.publish_inputs(
+                        tx, await tx.get_run(context, ref.run_id), file_records
                     )
                 assert slot is not None
                 try:
@@ -648,6 +674,32 @@ class RunController:
             if count >= record.limits.max_model_steps:
                 raise _RunFailure("limit_exceeded", "model")
             protected, history = await self.history(record, tx)
+            grants = await self.runtime._files.validate(record, tx=tx, check_bytes=True)
+            if grants:
+                descriptors: list[StrictJson] = [
+                    {
+                        **grant.ref.model_dump(mode="json"),
+                        "name": grant.name,
+                        "sandbox_path": f"/work/inputs/{grant.ref.artifact_id}/{grant.name}",
+                    }
+                    for grant in grants
+                ]
+                protected.messages.append(
+                    ModelMessage(
+                        role="user",
+                        content="Granted artifact descriptors (file data): "
+                        + canonical_json(descriptors),
+                    )
+                )
+                for grant, descriptor in zip(grants, descriptors, strict=True):
+                    protected.sources.append(
+                        source(
+                            "artifact:" + grant.ref.artifact_id,
+                            "artifact",
+                            descriptor,
+                            version=grant.ref.sha256,
+                        )
+                    )
             if agent.instructions:
                 message = ModelMessage(role="system", content=agent.instructions)
                 protected.messages.insert(0, message)
@@ -814,8 +866,11 @@ class RunController:
         request: ModelRequest,
         work: "_Work[None]",
         allowed_seconds: float,
+        *,
+        record: RunRecord,
     ) -> ModelResponse:
         async def collect() -> ModelResponse:
+            await self.runtime._files.validate(record, check_bytes=True)
             response = None
             async for event in agent.model.generate(
                 ModelRequest.from_json(request.model_dump_json())
@@ -960,7 +1015,7 @@ class RunController:
                     work.checkpoint()
                     try:
                         response = await self.model_call(
-                            agent, request, work, min(allowance, end - loop.time())
+                            agent, request, work, min(allowance, end - loop.time()), record=record
                         )
                     except TransientModelError:
                         attempt_count += 1

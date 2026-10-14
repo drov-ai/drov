@@ -26,8 +26,22 @@ class ToolResource(Resource):
     arguments: dict[str, StrictJson]
 
 
+class ArtifactResource(Resource):
+    artifact_id: Identifier
+    agent_name: ScopedIdentifier
+    operation_id: Identifier | None = None
+    target_run_id: Identifier | None = None
+    target_agent_name: ScopedIdentifier | None = None
+    target_session_id: ScopedIdentifier | None = None
+
+
 class OwnerAuthorizer:
     async def authorize(self, actor: RunContext, action: Action, resource: Resource) -> bool:
+        if isinstance(resource, ArtifactResource) and resource.target_agent_name not in (
+            None,
+            resource.agent_name,
+        ):
+            return False
         return actor == resource.owner
 
 

@@ -13,6 +13,7 @@ from uuid import uuid4
 from pydantic import TypeAdapter
 
 from drov._json import canonical_json
+from drov.artifacts.types import ArtifactRef
 from drov.errors import (
     CapacityExceeded,
     ConfigurationError,
@@ -328,6 +329,11 @@ class Transaction:
                     if request.requested_limits is not None
                     else {}
                 ),
+                **(
+                    {"artifacts": request.canonical_artifacts}
+                    if request.canonical_artifacts
+                    else {}
+                ),
             }
         )
         return key_hash, fingerprint
@@ -348,7 +354,15 @@ class Transaction:
         return None
 
     @_mutation
-    async def start(self, request: StartRequest, *, max_unfinished: int = 1000) -> RunRef:
+    async def start(
+        self,
+        request: StartRequest,
+        *,
+        max_unfinished: int = 1000,
+        _run_id: str | None = None,
+        _artifact_refs: Sequence[ArtifactRef] = (),
+        _artifact_binding: dict[str, Any] | None = None,
+    ) -> RunRef:
         self._check()
         request = StartRequest.model_validate(request)
         TypeAdapter(PositiveInt).validate_python(max_unfinished, strict=True)
@@ -369,7 +383,7 @@ class Transaction:
         if await self._driver.unfinished_count() >= max_unfinished:
             raise CapacityExceeded("Unfinished run capacity reached")
         now = self._now()
-        run_id = str(uuid4())
+        run_id = str(uuid4()) if _run_id is None else _run_id
         ref = RunRef(run_id=run_id, state_version=1)
         record = RunRecord(
             scope=scope,
@@ -382,6 +396,8 @@ class Transaction:
             updated_at=now,
             state=RunState(**ref.model_dump(), status="accepted"),
             last_seq=1,
+            artifact_inputs=list(_artifact_refs),
+            artifact_binding=_artifact_binding or {},
         )
         new_session = SessionRecord(
             scope=scope,

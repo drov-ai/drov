@@ -37,7 +37,7 @@ uv run --locked python scripts/check_analysis_image.py \
 
 ## 私有字节层
 
-`from drov.artifacts import ArtifactInput, ArtifactRef, ArtifactInfo, ArtifactLimits, LocalArtifacts` 已实现值类型及存储。LocalArtifacts 目前需显式 `await store.open(storage=已打开的 SQLiteStorage)`，关闭用 `aclose()`；`_reserve/_stage/_read_staged/_pending` 是内核接点，应用不得把它们包装成绕过授权的上传/下载 API。它们不会产生 ready 元数据，Runtime 的 artifacts 参数仍不可用。
+`from drov.artifacts import ArtifactInput, ArtifactRef, ArtifactInfo, ArtifactLimits, LocalArtifacts` 已实现。第二批由 Runtime(artifacts=store 或 ResourceBinding) 装配，start/run/stream 接收输入，get/read_artifact 授权返回 ready 输入与字节，见 [可运行示例](../examples/artifact_inputs_offline.py) 和 [验证](../docs/validation/t10a-artifact-inputs.md)。独立字节层仍可显式 open(storage=已打开的 SQLiteStorage)/aclose；私有阶段方法不产生 ready 元数据，应用不得用它们绕过授权。代码/输出安全导出与销毁后结果共同发布尚未实现。
 
 当前字节层仅在 POSIX 控制下可打开；构造/导入在其他平台仍无 I/O。文件目录、store.json、stage.json 与原始 ID 字节共同构成配对数据；不能在尚未完成 T-15 备份 barrier 时声称有完整 Artifact 备份。无清单目录、临时清单或其他未知项使 open fail closed，保留证据，不手工删除/改写后假装恢复已验收。调小容量不会清空旧预留；容量不足明确拒绝。
 

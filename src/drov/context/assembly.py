@@ -245,6 +245,7 @@ def assemble(
         estimator=ESTIMATOR,
         estimated_tokens=estimate(request),
         sources=sources,
+        schema_version=2 if any(item.kind == "artifact" for item in sources) else 1,
         retrieval_status=cast(Any, retrieval_status),
         content_visible=True,
     )

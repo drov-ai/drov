@@ -38,6 +38,8 @@ view_content 覆盖 SDK 结果、HTTP 快照、持久化事件、临时 token、
 
 ## 3. 版本与兼容
 
+T-10A 第二批的实际增量见 ADR-0018：core records/user_version=1 不改，显式 ArtifactStore 配对启用 artifact_schema=1 与两张扩展表；新版读旧库，旧 SDK 会拒绝扩展库，不能混用或仅复制 SQLite/字节之一。Artifact 来源枚举进入 ContextManifest v2，无文件仍 v1，新版兼容 v1/v2，未知版本/boolean 拒绝。完整扩展/字节/台账备份与回收仍待 T-15，不从单个输入重开测试推断完整备份安全。
+
 Python 发布使用 0.1.0aN → 0.1.0bN → 0.1.0rcN → 0.1.0 的预发布路径；Git tag 使用 v 前缀。预发布可以只覆盖已完成能力，必须附支持表；正式 v0.1.0 需要能力表中全部必交项和质量门槛通过。实验性工作台仍需功能验收，但不承诺 UI 扩展接口稳定。
 
 0.x 内按以下项目约定维护，不以“还没 1.0”为由无提示破坏用户：

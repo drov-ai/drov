@@ -15,7 +15,7 @@ T-02 至 T-08 提供类型/schema、协议、事务存储、Runtime 生命周期
 | drov.tools | @tool/不可变 PythonTool/PermissionPolicy；compile_tool 仍是 schema-only；真实派发只由私有内核接点使用 |
 | drov.auth / drov.errors | Authorizer/AuthAdapter、ToolResource/OwnerAuthorizer、错误与 TransientToolError；HTTP 认证仍未实现 |
 | drov.storage | MemoryStorage / SQLiteStorage；异步 open/aclose、start/查询、原子 transaction 接点；内部协议尚不稳定 |
-| drov.artifacts | T-10A 首批：ArtifactInput/Ref/Info/Limits 值类型与 LocalArtifacts POSIX 私有字节层；显式 open(storage=已打开 SQLiteStorage)/aclose；内核暂存不提供 ready 引用或授权下载，Runtime 文件参数尚未接入 |
+| drov.artifacts | ArtifactInput/Ref/Info/Limits 与 LocalArtifacts POSIX 私有字节层；Runtime owned/borrowed/factory 装配、文件接收/Run 授予/去重、ready 输入与 get/read_artifact 动态授权；私有 stage 仍不可读，输出沙箱链未接入 |
 
 Memory 是配置对象，MemoryStorage 是事务内存后端；配置 Memory 的注册 Agent 自动导出三个内置工具，实际检索/事务执行见 [ADR-0012](../decisions/0012-transactional-memory.md)；Agent 只定义行为，构造不会执行。存储描述只在 open/异步上下文进入时获取连接和锁；完整记录由内核做授权投影，不能直接作为 API 响应。compile_tool 只创建描述，@tool 创建含 callable 的 PythonTool；private execution/operations 接点真实派发 Python 工具并保存操作事实。外部 Python write/unknown 支持审批、单次派发及 unknown 核查，显式 Runtime 的 ASK 已保存审批并支持原子响应；临时入口 ASK 仍 failed/interaction_unavailable。完整未知效果/恢复已接入 T-09，硬崩溃专项留到 T-10。provider_items 仅供适配器往返，不用于向用户显示内部协议数据。
 
@@ -34,7 +34,7 @@ uv run --locked python scripts/generate_schemas.py --check
 
 JSON 输入使用 WireModel.from_json 或 parse_*；工具使用 codec.parse/bind_arguments。这些入口拒绝重复键、非有限数字和类型强转。直接调用继承的 Pydantic 解析接口不承担 Drov 的重复键拒绝保证。
 
-ArtifactRef/Info/Limits 已加入生成 schema；ArtifactInput 是宿主 bytes 输入，data 不序列化进 JSON/repr，没有 JSON 上传接口。LocalArtifacts 的私有阶段方法不可作为应用 API 使用；配对、逻辑配额和真实限制见 [ADR-0017](../decisions/0017-private-artifact-staging.md) 与 [本轮验证](../validation/t10a-artifact-staging.md)。
+ArtifactResource/Ref/Info/Limits 已加入生成 schema；ArtifactInput 是宿主 bytes，data 不进入 JSON/repr，没有 HTTP 上传。LocalArtifacts 私有阶段方法不可作为应用 API。Artifact SQL 扩展参考见 [storage-artifacts-schema-v1.sql](storage-artifacts-schema-v1.sql)，由显式 store 配对启用；上下文有文件用 v2、无文件 v1，新版兼容旧记录。实际入口/授权/兼容与限制见 [ADR-0018](../decisions/0018-artifact-input-admission.md) 和 [文件通道示例](../../examples/artifact_inputs_offline.py)。
 
 ```python
 from drov import ApprovalDecision, Limits
@@ -57,7 +57,7 @@ assert "result" not in evidence.model_dump()
 
 ## 待实施的沙箱接口
 
-C-17 的 Docker Python/受控文件/持久产物在 T-10A/T-10B 实施，E2B 独立可选 T-10C；PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、ArtifactInput/Ref/Limits/LocalArtifacts 与 E2BSandbox **当前不可导入**。不加入已实现入口/schema 表、不提前修改 schema-v1/DDL/依赖；接口见 [API 草案](../planning/api-draft.md)，范围决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。
+C-17 的 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult **仍不可导入**，安全导出/输出结果共同发布与清理租约未接入；文件接收/授予/读取已实现，见上表。E2B 独立可选 T-10C，无 E2BSandbox 空壳。最终接口见 [API](../planning/api-draft.md)，状态统一见 progress，不用输入通道验收替代沙箱整卡。
 
 ## 可运行审批与输入子范围
 

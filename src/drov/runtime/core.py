@@ -11,6 +11,9 @@ from typing import Any, Generic, Self, TypeVar, cast
 from pydantic import TypeAdapter
 
 from drov.agent import Agent
+from drov.artifacts.controller import ArtifactController
+from drov.artifacts.local import LocalArtifacts
+from drov.artifacts.types import ArtifactInfo, ArtifactInput, ArtifactRef
 from drov.auth import Authorizer, OwnerAuthorizer
 from drov.config import Limits
 from drov.errors import CapacityExceeded, ConfigurationError, Conflict, ShutdownIncomplete
@@ -22,6 +25,7 @@ from drov.runtime.streams import RunEvents, RunStream
 from drov.storage import MemoryStorage
 from drov.storage.base import Storage
 from drov.storage.records import RunRecord
+from drov.storage.sqlite import SQLiteStorage
 from drov.tools._pool import ToolPool
 from drov.tools.execution import ToolDispatcher
 from drov.tools.permissions import PermissionPolicy
@@ -191,6 +195,7 @@ class Runtime:
         limits: Limits | None = None,
         policy: PermissionPolicy | None = None,
         authorizer: Authorizer | None = None,
+        artifacts: LocalArtifacts | ResourceBinding[LocalArtifacts] | None = None,
     ) -> None:
         self.limits = Limits.from_json((limits or Limits()).model_dump_json())
         self._policy = PermissionPolicy.from_json((policy or PermissionPolicy()).model_dump_json())
@@ -220,6 +225,17 @@ class Runtime:
             )
         )
         self._dependency_bindings = dict(dependencies or {})
+        self._artifact_binding = (
+            artifacts
+            if isinstance(artifacts, ResourceBinding)
+            else ResourceBinding.borrowed(artifacts)
+            if artifacts is not None and artifacts.is_open
+            else ResourceBinding.owned(artifacts)
+            if artifacts is not None
+            else None
+        )
+        self._artifacts: LocalArtifacts | None = None
+        self._files = ArtifactController(self)
         for dependency_name in self._dependency_bindings:
             TypeAdapter(ScopedIdentifier).validate_python(dependency_name, strict=True)
         models = {id(agent.model): agent.model for agent in self._agents.values()}
@@ -255,6 +271,7 @@ class Runtime:
         context: RunContext,
         request_key: str | None = None,
         limits: Limits | None = None,
+        artifacts: Sequence[ArtifactInput | ArtifactRef] = (),
     ) -> RunRef:
         return await self._runs.start(
             agent,
@@ -263,6 +280,7 @@ class Runtime:
             context=context,
             request_key=request_key,
             limits=limits,
+            artifacts=artifacts,
         )
 
     async def run(
@@ -274,6 +292,7 @@ class Runtime:
         context: RunContext,
         request_key: str | None = None,
         limits: Limits | None = None,
+        artifacts: Sequence[ArtifactInput | ArtifactRef] = (),
     ) -> RunOutcome[T]:
         ref = await self._runs.start(
             agent,
@@ -282,6 +301,7 @@ class Runtime:
             context=context,
             request_key=request_key,
             limits=limits,
+            artifacts=artifacts,
             content=True,
         )
         return await self.wait(ref.run_id, context=context)
@@ -352,6 +372,7 @@ class Runtime:
         context: RunContext,
         request_key: str | None = None,
         limits: Limits | None = None,
+        artifacts: Sequence[ArtifactInput | ArtifactRef] = (),
     ) -> RunStream:
         return RunStream(
             self._runs,
@@ -361,7 +382,16 @@ class Runtime:
             context=context,
             request_key=request_key,
             limits=limits,
+            artifacts=artifacts,
         )
+
+    async def get_artifact(
+        self, artifact_id: str, *, context: RunContext, include_content: bool = False
+    ) -> ArtifactInfo:
+        return await self._files.get(artifact_id, context=context, include_content=include_content)
+
+    async def read_artifact(self, ref: ArtifactRef | str, *, context: RunContext) -> bytes:
+        return await self._files.read(ref, context=context)
 
     async def get_context(
         self,
@@ -439,6 +469,8 @@ class Runtime:
         registration = self.registration(*key)
         if registration.config_hash != valid.config_hash:
             raise Conflict("Saved Agent configuration/schema fingerprint differs")
+        if valid.artifact_inputs and valid.artifact_binding != self._files.binding():
+            raise Conflict("Saved ArtifactStore configuration differs")
         self._require_dependencies(self._agents[key])
         return registration
 
@@ -510,6 +542,24 @@ class Runtime:
             for agent_key in self._agents:
                 self.registration(*agent_key)
             self._storage = await self._acquire(self._storage_binding, storage=True)
+            if self._artifact_binding is not None:
+                if not isinstance(self._storage, SQLiteStorage):
+                    raise ConfigurationError("Runtime files require SQLiteStorage")
+                file_binding = self._artifact_binding
+                file_store = (
+                    await file_binding.create()
+                    if file_binding.create is not None
+                    else file_binding.value
+                )
+                self._install(file_store, file_binding, exclusive=True)
+                if not isinstance(file_store, LocalArtifacts):
+                    raise ConfigurationError("Runtime artifacts must be a LocalArtifacts store")
+                if file_binding.mode == "borrowed":
+                    file_store._require_pair(self._storage)
+                elif not file_store.is_open:
+                    await file_store.open(storage=self._storage)
+                file_store._require_pair(self._storage)
+                self._artifacts = file_store
             for model_binding in self._model_bindings:
                 await self._acquire(model_binding)
             dependencies: dict[str, object] = {}

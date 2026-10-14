@@ -8,6 +8,7 @@ from uuid import uuid4
 from pydantic import TypeAdapter
 
 from drov._json import StrictJson, canonical_json, load_json
+from drov.artifacts.types import ArtifactInput, ArtifactRef
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.errors import ConfigurationError
 from drov.models.protocol import ModelAdapter
@@ -116,9 +117,12 @@ class Agent(Generic[T]):
         *,
         context: RunContext | None = None,
         limits: Limits | None = None,
+        artifacts: Sequence[ArtifactInput | ArtifactRef] = (),
     ) -> RunOutcome[T]:
         from drov.runtime.core import Runtime
 
+        if artifacts:
+            raise ConfigurationError("Temporary Agent.run cannot accept persistent files")
         if self.memory is not None:
             raise ConfigurationError("Temporary Agent.run cannot use persistent Memory")
         # Clone identity only; never mutate a definition borrowed by an existing Runtime.
@@ -154,9 +158,10 @@ class Agent(Generic[T]):
         *,
         context: RunContext | None = None,
         limits: Limits | None = None,
+        artifacts: Sequence[ArtifactInput | ArtifactRef] = (),
     ) -> RunOutcome[T]:
         try:
             asyncio.get_running_loop()
         except RuntimeError:
-            return asyncio.run(self.run(input, context=context, limits=limits))
+            return asyncio.run(self.run(input, context=context, limits=limits, artifacts=artifacts))
         raise ConfigurationError("An event loop is running; use await agent.run(...) instead")

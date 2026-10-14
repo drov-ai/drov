@@ -21,6 +21,10 @@ class PersistenceUnavailable(DrovError):
     code = "persistence_unavailable"
 
 
+class ArtifactUnavailable(DrovError):
+    code = "artifact_unavailable"
+
+
 class StorageInUse(DrovError):
     code = "storage_in_use"
 

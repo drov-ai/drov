@@ -6,7 +6,10 @@ import os
 import tempfile
 from pathlib import Path
 
+from drov import Agent, RunContext, Runtime
 from drov.artifacts import ArtifactInput, LocalArtifacts
+from drov.models import ScriptedModel
+from drov.models.protocol import ModelResponse
 from drov.storage import SQLiteStorage
 from drov.storage.records import MemoryScope
 
@@ -36,6 +39,25 @@ async def check(path: Path) -> None:
         finally:
             await files.aclose()
 
+    actor = RunContext(tenant_id=owner.tenant_id, user_id=owner.user_id)
+    model = ScriptedModel([ModelResponse(message="metadata", finish_reason="completed")])
+    agent: Agent[str] = Agent(name=owner.agent_name, revision="1", model=model)
+    async with Runtime(
+        agents=[agent],
+        storage=SQLiteStorage(path / "state.db"),
+        artifacts=LocalArtifacts(directory=path / "private"),
+    ) as runtime:
+        result = await runtime.run(
+            agent,
+            "describe file",
+            session_id="s",
+            context=actor,
+            artifacts=[ArtifactInput(name="numbers.csv", data=b"v\n1\n")],
+        )
+        assert result.status == "completed"
+        record = await runtime.storage.get_run(actor, result.run_id)
+        assert await runtime.read_artifact(record.artifact_inputs[0], context=actor) == b"v\n1\n"
+
 
 if __name__ == "__main__":
     if os.name != "posix":
@@ -43,5 +65,10 @@ if __name__ == "__main__":
     with tempfile.TemporaryDirectory(prefix="drov-artifact-install-") as temporary:
         asyncio.run(check(Path(temporary).resolve()))
     print(
-        json.dumps({"scope": "private byte staging, not a ready Artifact API", "checks": "passed"})
+        json.dumps(
+            {
+                "scope": "private staging and Runtime input/read, no sandbox execution",
+                "checks": "passed",
+            }
+        )
     )

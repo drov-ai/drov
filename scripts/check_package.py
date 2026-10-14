@@ -156,6 +156,7 @@ def main() -> None:
                     "memory_offline.py",
                     "interactions_offline.py",
                     "operations_offline.py",
+                    *(("artifact_inputs_offline.py",) if os.name == "posix" else ()),
                 )
                 for arguments in ([], ["--stream"])
             ):

@@ -136,6 +136,6 @@ C-17 的 Docker 代码/受控文件/产物由 T-10A/T-10B 交付，可选 E2B �
 
 后端通过现有 dependencies/ResourceBinding 显式装配，T-10A 增加专用预检/租约逻辑；借用后端与自有本次执行分别管理。每次执行租约归属 tenant/user/Agent/Run/operation，名额包含未确认停止/销毁的资源；Docker CLI Task 结束不解除容器租约。构造/导入无副作用。临时入口/内存存储不承担持久清理恢复保证，配置沙箱要求显式 Runtime + SQLiteStorage；数据保护/旧备份 barrier 沿现有维护职责扩展。
 
-Artifact 字节保存在显式私有本地目录，SQLite 是元数据、引用关系与权限/容量事实源；不在操作 JSON/上下文塞二进制，不存真实凭据。存储与 blob 目录有持久配对标识，Runtime 同一排他所有权覆盖两者，不能让另一个库同时管理同一目录。物理路径只由不透明 ID 和受控 namespace 生成，逻辑文件名不作为宿主寻址；不跨作用域暴露去重或目录枚举。输入/产物是不可变记录，本次 Run 的 grant 与原来源分别记录。
+Artifact 字节保存在显式私有本地目录，SQLite 负责 ready 元数据/引用关系与 Run 授予，私有文件阶段负责字节/容量预留台账；两者由 Runtime 协调，不能声称跨介质原子。不在操作 JSON/上下文塞二进制或凭据。第二批已实现 Artifact SQL 扩展 v1（artifact_records/artifact_grants），不伪装为旧 RunItem kind、不改 records DDL；显式配对启用，普通核心库不启用。Runtime 同一排他所有权覆盖配对 store/SQLite，原归属与目标 Run grant 分别保存。物理路径只用 ID，逻辑名仅正文；不跨作用域暴露去重/目录枚举，未发布阶段不可读取。
 
 输入接收、执行租约、输出暂存、ready 发布和维护回收由 Runtime 协调；LocalArtifacts 负责字节可靠保存/校验/删除，Storage 负责对应事务/CAS。必须保留“文件存在但未发布”与“资源销毁但结果未提交”的恢复阶段；外部资源或磁盘写入不能冒用 Memory 的同库事务。HTTP/UI 只适配上传/下载与权限投影，T-15 的备份/恢复/清理包含 blobs 及引用/租约，不复制活的执行环境。

@@ -392,7 +392,9 @@ TransientEvent: TypeAlias = Annotated[
 class ContextSource(WireModel):
     id: Identifier
     version: NonEmpty
-    kind: Literal["instructions", "input", "history", "memory", "tool", "schema", "provider"]
+    kind: Literal[
+        "instructions", "input", "history", "memory", "tool", "schema", "provider", "artifact"
+    ]
     included: bool
     reason: NonEmpty
     transform: Literal["none", "preview", "excluded"] = "none"
@@ -401,7 +403,7 @@ class ContextSource(WireModel):
 
 
 class ContextManifest(WireModel):
-    schema_version: Literal[1] = 1
+    schema_version: Literal[1, 2] = 1
     model_call_id: Identifier
     run_id: Identifier
     agent_name: ScopedIdentifier
@@ -416,8 +418,21 @@ class ContextManifest(WireModel):
     retrieval_status: Literal["disabled", "included", "empty", "timeout", "failed", "excluded"]
     content_visible: bool = False
 
+    @model_validator(mode="before")
+    @classmethod
+    def strict_version(cls, value: Any) -> Any:
+        if (
+            isinstance(value, dict)
+            and "schema_version" in value
+            and type(value["schema_version"]) is not int
+        ):
+            raise ValueError("Context schema version requires an integer")
+        return value
+
     @model_validator(mode="after")
     def valid_content(self) -> ContextManifest:
+        if self.schema_version == 1 and any(item.kind == "artifact" for item in self.sources):
+            raise ValueError("Artifact sources require context schema 2")
         for source in self.sources:
             if source.content is not None and (
                 not self.content_visible or source.kind == "provider"

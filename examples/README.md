@@ -1,5 +1,7 @@
 # 离线检索、上下文与 Memory 检查
 
+T-10A 新增 [artifact_inputs_offline.py](artifact_inputs_offline.py)：真实 SDK 文件接收、上下文引用、关闭后以新 Runtime 授权读取并校验 hash，模型是 ScriptedModel，仅描述元数据，不执行 Python 分析/导出。POSIX 下可运行 `uv run --locked python examples/artifact_inputs_offline.py` 及 `--stream`；Windows 文件字节控制尚未验收，原五个核心示例不受影响。
+
 在仓库根目录完成 `uv sync --locked` 后运行，不需要账号、API Key 或私有资料：
 
 ```sh

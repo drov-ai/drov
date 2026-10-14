@@ -191,7 +191,7 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 
 ### 9.1 受控文件与私有产物存储
 
-采用显式 LocalArtifacts + SQLite 元数据。T-10A 首批已实现 POSIX 私有字节层：构造不读写，open(storage=已打开的 SQLiteStorage) 检查目录、双向配对及排他所有权；metadata 增量 artifact_store_id，不改 records DDL/版本。私有目录 POSIX 0700、文件 0600，其他平台的等效访问控制尚未实施，不承诺已加密。不以逻辑文件名生成宿主路径，不跟随 symlink；root/权限/配对不满足即拒绝。私有预留/清单和字节 fsync/目录同步已验证；SQLite Artifact 元数据、Run 授予、Runtime 装配与 ready 共同发布仍待接入。最终链仍为字节可靠暂存 → 确认销毁 → 同事务发布 ready/结果，不能把阶段台账当 ready 或把进程崩溃测试写成物理断电保证。
+采用显式 LocalArtifacts + SQLite 元数据。T-10A 第二批已装配 Runtime 的 owned/borrowed/factory 字节资源与 ready 输入/Run 授予；构造不读写，open(storage=已打开的 SQLiteStorage) 检查目录、双向配对及排他所有权。显式配对事务初始化 Artifact 扩展 v1 的两表/索引，metadata 增量 artifact_store_id/artifact_schema；records DDL/user_version=1 保持，已存在扩展的完整 DDL 必须匹配，普通核心库不启用该扩展。私有目录 POSIX 0700、文件 0600，其他平台控制仍未实施；不承诺已加密。不以逻辑文件名寻址宿主，不跟随链接。接收事务共同保存 ready 输入、Run/授予/去重/检查点；私有预留/阶段不等于 ready。输出最终链仍是可靠暂存 → 确认销毁 → 同事务发布 ready/工具结果，尚未实施，不能把进程崩溃测试写成物理断电保证。
 
 字节层每批额外预留 16KiB 清单逻辑配额（清单编码硬上限同值），计入下表 owner/store 容量，空批也占额；原始字节与未完成预留跨重开保留。配额不等于底层文件系统 block/inode 物理限额。缺清单/未知项 fail closed；已开始写入的批次不自动重写或删除，受控恢复/回收仍待后续接入，见 ADR-0017。
 
@@ -205,7 +205,7 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 
 输出导出不能跟随 symlink/hardlink、设备/FIFO 或有活动写者；可信控制确认主代码退出，并冻结环境/遗留写者、确认文件稳定后，保持环境可读以校验导出；随后停止整个进程树并销毁。冻结不满足最终清理条件，不能以 pause 冒充销毁；若无法有界阻止替换竞态，就拒绝该文件集合。Docker 文件传输采用固定 argv/受控流；若读取 Docker tar，只按限制解析允许的普通文件条目，不在宿主 extractall，不导入档案中的路径/权限。PNG 校验真实格式/大小/可解码，预览设置像素上限 16M；MIME 与后缀不可信，HTML/SVG 默认附件、禁止自动内联执行。下载安全 Content-Disposition 与无脚本预览在 T-13/T-14 验收。
 
-输入/输出清单与 hash、artifact schema/存储配对、限额/镜像及 runner 版本纳入保存的运行/审批绑定。文件字节不占工具 JSON 的正文额度，但引用/元数据仍计 Limits.max_tool_result_bytes 和上下文预算；过大引用不能用不完整 JSON 冒充结果。ArtifactRef/ArtifactInfo、输入清单与 SandboxResult 的新记录版本在 T-10A 同轮生成 schema/兼容 fixture；本次不修改当前 schema=1/DDL。T-15 根据实际记录/表演进落实离线迁移、备份与回收。
+输入/输出清单与 hash、artifact schema/存储配对、限额/镜像及 runner 版本纳入保存的运行/审批绑定。第二批已保存输入 store ID/扩展版本/限额 hash，原 Run 继续须复核；审批与 runner 绑定待真实后端。字节不占工具 JSON 正文额度，引用/元数据仍进入结果/上下文预算；不能返回不完整 JSON。ArtifactResource/Ref/Info/Limits 与 Artifact 扩展 DDL 已生成；有文件的 ContextManifest 用 v2，新版兼容旧 v1，无文件保持 v1，v1 不接受 artifact 枚举。T-15 根据实际扩展/记录落实迁移、完整备份与回收。
 
 HTTP 未消费上传暂存的起始 TTL 为 1h（T-13 实施），包含在 store/owner 容量中；只由持有排他锁的显式维护清理回收，不默认后台删除。已消费/活动租约/共享引用不按 TTL 删除。T-10A 的 SDK 文件随 start 接收，不创建独立公共上传服务或孤立 ready 输入。
 

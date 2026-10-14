@@ -210,6 +210,137 @@
       "title": "ArtifactRef",
       "type": "object"
     },
+    "ArtifactResource": {
+      "$defs": {
+        "RunContext": {
+          "additionalProperties": false,
+          "properties": {
+            "tenant_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Tenant Id",
+              "type": "string"
+            },
+            "user_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tenant_id",
+            "user_id"
+          ],
+          "title": "RunContext",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "agent_name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Agent Name",
+          "type": "string"
+        },
+        "artifact_id": {
+          "minLength": 1,
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation Id"
+        },
+        "owner": {
+          "$ref": "#/$defs/RunContext"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session Id"
+        },
+        "target_agent_name": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Agent Name"
+        },
+        "target_run_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Run Id"
+        },
+        "target_session_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Session Id"
+        }
+      },
+      "required": [
+        "owner",
+        "artifact_id",
+        "agent_name"
+      ],
+      "title": "ArtifactResource",
+      "type": "object"
+    },
     "CancelReceipt": {
       "additionalProperties": false,
       "properties": {
@@ -280,7 +411,8 @@
                 "memory",
                 "tool",
                 "schema",
-                "provider"
+                "provider",
+                "artifact"
               ],
               "title": "Kind",
               "type": "string"
@@ -480,8 +612,11 @@
           "type": "string"
         },
         "schema_version": {
-          "const": 1,
           "default": 1,
+          "enum": [
+            1,
+            2
+          ],
           "title": "Schema Version",
           "type": "integer"
         },
@@ -2181,8 +2316,11 @@
               "type": "string"
             },
             "schema_version": {
-              "const": 1,
               "default": 1,
+              "enum": [
+                1,
+                2
+              ],
               "title": "Schema Version",
               "type": "integer"
             },
@@ -2238,7 +2376,8 @@
                 "memory",
                 "tool",
                 "schema",
-                "provider"
+                "provider",
+                "artifact"
               ],
               "title": "Kind",
               "type": "string"
