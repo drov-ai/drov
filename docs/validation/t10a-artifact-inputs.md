@@ -56,3 +56,5 @@ UV_OFFLINE=true .drov/tooling/bin/uv run --offline --locked python scripts/check
 原 f2f45c1/412e39b 与本批 **29d225d** 已成功推送 origin/main；37 个跟踪文件经保护/敏感模式与差异检查，无 uv.lock/品牌/P4/模型凭据或 `.drov/` 数据变更。远程核心 [CI 38532234182](https://github.com/drov-ai/drov/actions/runs/38532234182) 正在验收，最终状态补记；不代表尚未实现的 Docker 专项。
 
 首轮远程 29d225d：Windows 3.11 为 607 passed / 75 skipped / 3 failed（641.85s），plan-after-stream 的服务计数为 0，两个 kill 非协作夹具未发 live_call 而等待超时；其他平台结果保留 CI JSON。普通 fixture 的 model/tool 期限原 2s，脚本 final 接受工具错误的路径仍可能 completed；本轮将普通期限改 10s，专项 attempt/time 预算仍 2s、非协作 tool=30s/shutdown=0.2s 不改，并加入未进入实际调用的即时 outcome 诊断和断言上下文。SDK 默认/规则与计数、锁、硬终止断言均不放宽。本地对应 97 项矩阵复跑通过；新的 Windows 结果待实际 CI，不把首轮失败当成功。
+
+第二轮 ef1b0b4 / [CI 38534476974](https://github.com/drov-ai/drov/actions/runs/38534476974)：Windows 3.11 全流程 success；Windows 3.14 两个 SDK 部分成功屏障超时，610 passed / 73 skipped / 2 failed（641.74s），其他 8 job success。异常发生在父进程的启动到屏障 20s 等待，未拿到结果事实，不能据此判定 SDK 重做或错误成功。控制进程等待包括解释器启动、SQLite fsync 和多次审批，与模型/工具期限分开，现调整为有界 45s；子进程超过 15s 在 stderr 输出实际 Task 栈，父进程超时终止并收集 stdout/stderr，避免丢失诊断。SDK 默认、model/tool 10s 和专项预算 2s 不变；服务次数、原计划两调用/锁/硬终止断言不改、不跳过。新结果以第三轮实际 CI 为准。

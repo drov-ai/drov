@@ -71,8 +71,17 @@ async def launch(path: Path, service: ItemService, **options: str) -> asyncio.su
 
 async def read_signal(process: asyncio.subprocess.Process) -> dict[str, Any]:
     assert process.stdout is not None
-    async with asyncio.timeout(20):
-        line = await process.stdout.readline()
+    try:
+        # This includes interpreter startup, SQLite fsync and multiple approvals.
+        # SDK model/tool and deliberate budget deadlines are measured separately.
+        async with asyncio.timeout(45):
+            line = await process.stdout.readline()
+    except TimeoutError:
+        if process.returncode is None:
+            process.kill()
+        async with asyncio.timeout(10):
+            output, errors = await process.communicate()
+        pytest.fail("SDK barrier timed out: " + (output + errors).decode(errors="replace"))
     if not line:
         assert process.stderr is not None
         pytest.fail("SDK exited before its barrier: " + (await process.stderr.read()).decode())

@@ -401,6 +401,15 @@ async def main(args: argparse.Namespace) -> None:
 
 
 async def run(args: argparse.Namespace) -> None:
+    async def diagnose_slow_barrier() -> None:
+        await asyncio.sleep(15)
+        print("SDK fixture still waiting; live task stacks:", file=sys.stderr, flush=True)
+        for task in asyncio.all_tasks():
+            if task is not asyncio.current_task():
+                task.print_stack(file=sys.stderr)
+        sys.stderr.flush()
+
+    diagnostic = asyncio.create_task(diagnose_slow_barrier())
     try:
         await main(args)
     except PersistenceUnavailable as exc:
@@ -413,6 +422,9 @@ async def run(args: argparse.Namespace) -> None:
                 "sqlite_error": getattr(exc.__cause__, "sqlite_errorname", None),
             }
         )
+    finally:
+        diagnostic.cancel()
+        await asyncio.gather(diagnostic, return_exceptions=True)
 
 
 if __name__ == "__main__":
