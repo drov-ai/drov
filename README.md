@@ -2,7 +2,7 @@
 
 面向 Python 开发者的通用 Agent 框架，目标是以少量核心概念提供完整、可组合的能力，并让开发、调试和服务化使用一致的运行机制。
 
-**当前阶段：T-01 至 T-10 已验收，开发版本 `0.1.0a0`；下一项 T-10A 代码与文件沙箱尚未实施。** 包提供类型/schema、模型协议、事务存储、Runtime 注册/资源、Python 工具/权限、只读 Agent 执行、授权结果/事件读取、上下文选择/预览/来源清单和事务 Memory。HumanInput 与 respond/resume 的审批/输入路径已可运行；外部未知效果、verify/recover 已可运行，真实模型与服务尚未实现；尚未公开发布包或获得真实模型评测结果。
+**当前阶段：T-01 至 T-10 已验收，开发版本 `0.1.0a0`；T-10A 分批实施中。** 已有文件输入/授权读取与内部 Docker 控制预检，Runtime 代码审批/执行和输出文件闭环仍待接入。包提供类型/schema、模型协议、事务存储、Runtime 注册/资源、Python 工具/权限、只读 Agent 执行、授权结果/事件读取、上下文选择/预览/来源清单和事务 Memory。HumanInput 与 respond/resume 的审批/输入路径已可运行；外部未知效果、verify/recover 已可运行，真实模型与服务尚未实现；尚未公开发布包或获得真实模型评测结果。
 
 P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-08 验证记录](docs/validation/t08-memory.md)。本轮证据见 [T-09 子范围验证](docs/validation/t09-interactions.md)，完整证据见 [核查/恢复验证](docs/validation/t09-reconciliation-recovery.md)，T-10 已验收，见 [专项验证](docs/validation/t10-faults-cancellation.md)；下一项及资源准备见 progress；换会话方法见 [交接说明](docs/handoff.md)。
 
@@ -39,7 +39,7 @@ uv run --locked python examples/research_offline.py --stream
 - 能力范围对标 AgentScope 2.0，覆盖工具、MCP、Memory、权限、Human-in-the-loop、Tracing、持久化与应用服务。
 - 面向多种 Agent 应用；官方示例用于验证通用性，不限定产品业务范围。
 - 优先验证三项设计主张：渐进式 Python API、跨入口一致的运行机制、可检查的上下文与记忆。
-- 首版必交 Docker Python 执行、受控文件输入与持久产物；可选 E2B 单列 T-10C。均尚未实现，范围见 [ADR-0016](docs/decisions/0016-sandbox-artifacts-and-backends.md)。
+- 首版必交 Docker Python 执行、受控文件输入与持久产物；文件输入与内部控制预检已分批验收，代码执行/输出闭环尚未实现。可选 E2B 单列 T-10C，尚未实现；范围见 [ADR-0016](docs/decisions/0016-sandbox-artifacts-and-backends.md)，当前状态见 [progress](docs/planning/progress.md)。
 - 本地工作台用于呈现上述能力；复杂集成按需安装。
 
 以上是产品目标，不代表已经实现，也不代表已证明优于其他框架。

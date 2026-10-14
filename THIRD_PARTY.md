@@ -81,5 +81,9 @@ Copied, unmodified source: Moby **v27.0.3**
 Apache-2.0, destination `sandbox/docker/seccomp-v27.0.3.json`, SHA-256
 `9c1025c88ccaa517b648da571961838744ea2137f176bfe6a48b21294cae9c76`.
 The original upstream LICENSE is preserved as `sandbox/docker/LICENSE.moby`.
-The file appears in source/sdist preparation resources, not in the SDK wheel. Docker
+An additional unmodified copy of the profile and LICENSE is distributed at
+`src/drov/sandbox/seccomp-v27.0.3.json` and `src/drov/sandbox/LICENSE.moby` (wheel paths
+`drov/sandbox/`). The private T-10A control preflight checks the pinned profile bytes
+and copies them into its explicit CLI configuration. Package checks require both
+copies to match; `.gitattributes` preserves upstream bytes on every checkout. Docker
 mechanisms and upstream analysis libraries are not claimed as Drov inventions.

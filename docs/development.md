@@ -81,7 +81,7 @@ CI 使用只读仓库权限，无发布或凭据步骤；Actions 固定到上游
 
 ## 首版代码沙箱的准备时点（计划）
 
-drov.artifacts 文件通道已实现，当前没有 drov.sandbox 或 E2B adapter；普通 SDK 与文件通道不连接 Docker。按 ADR-0016/0018，T-10A/T-10B 完成 Docker Python/持久 CSV/PNG 输出，T-10C 独立可选。当前 Local 已有固定标准库/分析镜像、显式 seccomp 和私有字节存储，见 [准备与限制](../sandbox/README.md)，保持 Desktop 运行；换机器按 recipe 重建并核实实际 ID，不从基础探针推断完整 SDK 隔离。
+drov.artifacts 文件通道已实现；drov.sandbox 当前只有内部控制/预检（ADR-0019），没有公共 PythonSandbox 或 E2B adapter；普通 SDK 与文件通道不连接 Docker。按 ADR-0016/0018，T-10A/T-10B 完成 Docker Python/持久 CSV/PNG 输出，T-10C 独立可选。当前 Local 已有固定标准库/分析镜像、显式 seccomp 和私有字节存储，见 [准备与限制](../sandbox/README.md)，保持 Desktop 运行；换机器按 recipe 重建并核实实际 ID，不从固定可信探针推断完整 SDK 隔离。
 
 不挂宿主凭据/仓库/socket，不在执行时拉镜像/安装，不用宿主回退。默认/平台/文件控制见 [工程方案第 9 节](planning/engineering.md)，接口在 [API 草案](planning/api-draft.md)，未跑真实组不能 skip 关闭两卡。下一项以 progress 为准，New Chat 交接见 handoff；忽略目录的准备文件仅当前 Local 存在。
 

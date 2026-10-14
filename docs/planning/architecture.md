@@ -120,9 +120,9 @@ P3 已确定最低 Python、schema 子集、SQLite/Memory、首个模型与 MCP 
 
 T-06 的 Session 消息按保存的 session_sequence（Session 版本）投影；RunRecord.input、完整模型响应与操作结果是唯一事实源。模型输入/响应 payload 版本、预算和事件读取取舍见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)，不将内部完整记录直接暴露给调用者。
 
-## 代码沙箱模块与归属（新增计划，尚未实现）
+## 代码沙箱模块与归属（T-10A 部分实施）
 
-C-17 的 Docker 代码/受控文件/产物由 T-10A/T-10B 交付，可选 E2B 由 T-10C 交付，见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。sandbox/ 保存真实 PythonSandbox、执行/传输/查证/销毁协议与 Docker 后端；artifacts/ 管理私有持久字节，integrations/e2b 在 T-10C 实际适配时建立。不接管 ModelAdapter 或另建 Agent 循环，不在本轮创建源码目录。
+C-17 的 Docker 代码/受控文件/产物由 T-10A/T-10B 交付，可选 E2B 由 T-10C 交付，见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。sandbox/ 已交付内部本地控制/预检、固定 profile 与实际控制检查（ADR-0019），专用 PythonSandbox、执行/传输/查证/销毁及持久租约仍待接通；artifacts/ 已管理私有字节与 ready 输入/Run 授予/授权读取。integrations/e2b 在 T-10C 实际适配时建立。不接管 ModelAdapter 或另建 Agent 循环。
 
 | 边界 | 唯一责任 | 不能代替的边界 |
 | --- | --- | --- |

@@ -291,6 +291,8 @@ T-10A 第二批已接入 POSIX 字节层/Runtime 装配、文件接收、ready �
 
 ### 13.1 控制与隔离
 
+第三批内部 Docker preflight/control 与 profile 校验已实现（[ADR-0019](../decisions/0019-docker-control-preflight.md)），open 不创建代码容器。实际可信探针核对了固定控制，尚无 Runtime 的代码工具、审批/Run 指纹接点、持久执行租约或输出发布；以下执行契约仍待接通，不能据本批检查提前宣称支持任意模型代码。
+
 - 模型通过固定逻辑工具 sandbox.run_python 提供 code、获准输入 ID 列表和相对输出声明；语言模型产出代码，执行器执行原参数快照并把实际结果返回同一工具/模型循环。模型不得选择后端、镜像、命令行 flags、宿主目录、网络模式、环境变量或限额。代码不在宿主 exec/eval/shell 中执行。
 - PythonSandbox 是 Runtime 专用工具描述，按 effect=write、approval=policy 进入既有权限顺序，默认 ask；应用可显式 allow 此工具，或设置 required approval，但不能放宽工程方案的固定隔离配置。审批绑定规范参数/code hash、服务器解析的输入 ID/hash/逻辑名/授权清单、输出声明、Agent/工具 revision、原归属、后端配置指纹和期限；代码/输入/输出声明/镜像或模板/限制/归属改变使旧批准失效。批准沙箱计算不批准另一业务写工具。
 - 配置需要显式 Runtime、SQLiteStorage、配套私有 ArtifactStore 和宿主依赖绑定；没有已验证后端、固定镜像或模板/构建、所需能力或真实资源绑定时接收前拒绝，模型/代码资源创建计数 0。Docker 是默认必交后端，E2B 仅在可选 T-10C 实际验收后使用。不能退回宿主 Python、普通线程、无隔离子进程或更弱配置来维持示例成功。

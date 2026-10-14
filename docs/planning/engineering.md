@@ -164,7 +164,9 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 
 每次自动检索有一个内核持有的真实 Task；读取完成时间超过截止点也丢弃。取消后清理宽限固定 100ms，未结束的异常后端保留所有权并抛 PersistenceUnavailable；没有后台追补。保存输入的事务内复核/重查，Memory 消息以带 drov.memory 类型的 user 数据注入；实际 JSON 消息及协议开销计入 min(输入预算×memory_fraction, memory_max_tokens) 与全局剩余量，然后才选历史。超大记忆整条排除，不自动摘要；精确 token/模型使用质量不由此证明。最近扫描/子串和详细清单规模仍受记录量影响，尚未验收大规模检索性能。完整决定见 [ADR-0012](../decisions/0012-transactional-memory.md)。
 
-## 9. 首版 Docker 代码与文件沙箱（计划，T-10A/T-10B）
+## 9. 首版 Docker 代码与文件沙箱（T-10A 部分实施）
+
+第三批内部控制/预检已按 [ADR-0019](../decisions/0019-docker-control-preflight.md) 实施：本地 POSIX Unix socket、Linux Engine/cgroup v2/API ≥ 1.41、同架构 ARM64/AMD64 固定 CPython 3.11 镜像与资源能力查询；构造无 I/O，open 不创建容器。内部 binding v1 包含实际 Engine/CLI/image/profile/限额与控制版本，不含随机配置目录。尚未绑定 Runtime 审批/Run 或开放 PythonSandbox；实际创建后/有效控制检查由固定可信探针验证，证据见 [本轮验证](../validation/t10a-docker-controls.md)。这不是任意代码或完整平台支持验收。
 
 - 首个后端选择宿主显式配置的本地 Docker CLI/Engine，执行端为 Linux 容器；Drov 用 asyncio.create_subprocess_exec 的固定 argv 管理可信 CLI，代码仅作为容器内固定 Python runner 的输入，不拼进宿主 shell。核心无新增 Python Docker SDK 依赖；sandbox/ 模块在 T-10A 真实实施时建立，普通 SDK 安装/导入不需要 daemon。
 - 镜像由宿主预装并以 repository@sha256 manifest 或显式本地 sha256:image-config-id 固定（ADR-0017），禁用可变 tag、执行期自动 pull/构建/安装依赖；固定非 root 用户与 Python 入口，固定覆盖 entrypoint、禁用镜像 healthcheck，拒绝镜像自动 VOLUME；镜像环境经白名单核验，不继承宿主环境/凭据。必交标准库计算及一个固定数据分析镜像（numpy/pandas/matplotlib，用于 CSV/PNG 案例）；依赖由宿主预构建并验收，执行期间不安装。T-10A 首批已有本地 ARM64 分析镜像、wheel 锁/许可与可信探针，见 [验证](../validation/t10a-artifact-staging.md) 和 [实际 recipe](../../sandbox/README.md)；这不是 SDK 任意代码后端/完整平台验收，标准库镜像保持原样。具体版本与三种 digest 区分按真实记录，不把本地 config ID 伪装为 registry manifest。
@@ -172,7 +174,7 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 - 限额必须由 daemon/内核实际执行，不能仅是 Drov 字段；内存与 swap 总额一并限定，不启用 oom-kill-disable；工作区/tmp/shm 有限，资源耗用包含 tmpfs。使用有界 stdout/stderr 管道，先按原始字节限制，显示以 UTF-8 errors=replace 增量解码，区分边界截断与非法字节替换；禁用容器持久日志（log driver none），避免日志绕开输出上限占满磁盘。序列化结果仍受 max_tool_result_bytes，超限按结果不可用收尾，不重跑代码。丢失未保存输出时按契约报告不可用，不依靠无界日志回填。依据：[资源限制](https://docs.docker.com/engine/containers/resource_constraints/) / [tmpfs](https://docs.docker.com/engine/storage/tmpfs/)。
 - 模型代码不做“AST 过滤后就安全”的承诺；隔离依赖实际后端与宿主维护。Docker daemon 是可信控制面，容器配置/内核漏洞可能破坏隔离，因此首版定位为受管理的本地应用执行，未经额外评估不承诺面向敌对公网多租户的强隔离平台。[Docker 安全文档](https://docs.docker.com/engine/security/)。其他更深隔离后端仍后续；可选 E2B 已按 ADR-0016 单列 T-10C，其保证不从 Docker 参数推断。本轮仅文档调整，没有创建远端资源。
 
-以下是起始工程默认值，尚未做性能/兼容实测；在 T-10A/T-10B 以真实边界检查确定，不回写历史 P4 fingerprint：
+以下起始默认值已通过本机固定可信控制探针，尚未做性能、恶意超限或完整平台兼容实测；在 T-10A/T-10B 以真实边界检查继续确定，不回写历史 P4 fingerprint。内部 DockerLimits 严格有限，CPU 要求能表示为 100000µs period 下至少 1000µs 的整数 quota，memory 至少 6MiB；这不是运行并发/期限已接通的声明：
 
 | SandboxLimits/固定控制 | 工作默认 | 规则 |
 | --- | --- | --- |

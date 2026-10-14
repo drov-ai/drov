@@ -2,6 +2,18 @@
 
 这里包含分析镜像 recipe 与可信镜像探针，**不是可调用的 PythonSandbox，也不是任意模型代码执行器**。T-10A 尚未完整验收；状态与剩余项见 [progress](../docs/planning/progress.md)，实际结果见 [本轮验证](../docs/validation/t10a-artifact-staging.md)。
 
+第三批已新增 SDK 内部 Docker 控制/预检和固定控制检查，见 [ADR-0019](../docs/decisions/0019-docker-control-preflight.md) 与 [实际验证](../docs/validation/t10a-docker-controls.md)。open 仅查 info/version/image，不创建代码容器。显式可信探针 `scripts/check_docker_backend.py` 检查标准库计算/有效控制/两次独立目录及归属清理；脚本不接收用户代码，不做 Runtime 审批/执行或文件导出。
+
+```sh
+uv run --locked python scripts/check_docker_backend.py \
+  --docker /usr/local/bin/docker \
+  --host unix:///Users/yanlong/.docker/run/docker.sock \
+  --image sha256:90b64b063ac57fd1399adb4447f77718ef839d9a1cb61a0bb1df93dadaf29f45 \
+  --work-directory .drov/my-control-probe
+```
+
+上面的 image ID 仅为本 checkout 的实际记录；换机器用自己已固定且预装的同架构镜像，目录必须新建。probe 创建前保存独立 fixture 台账，应答失败只查/清理原名称和标签，不创建替代资源；中断后保留台账并按记录恢复，不能选共享镜像批量清理。它不是生产执行租约或 SDK 崩溃恢复验收。
+
 ## 镜像锁与构建
 
 [wheel 清单](analysis/wheels-linux-arm64.json) 和 [require-hashes 锁](analysis/requirements-linux-arm64.lock) 由 Linux ARM64 / CPython 3.11 实际解析生成，两者必须一致。这个平台锁不能用于 AMD64；Linux Docker CI 的其他架构镜像尚待 T-10B。SDK 的 uv.lock 不含这些分析依赖，它们只在显式准备的镜像内安装。

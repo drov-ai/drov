@@ -4,10 +4,10 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-10 已完整验收；T-10A 进行中，第二批 Runtime 文件输入/Run 授予/去重/授权读取已验收，整卡尚未完成。本轮新增 34，全库 685；本地 3.11：683 passed / 2 skipped，3.14：685 passed；静态/类型/schema、两解释器四套干净安装及六个示例普通/stream（文件字节仅 POSIX）通过；e83d566 的远端核心 CI 10 个 job 全部 success。实际证据见 [本轮验证](../validation/t10a-artifact-inputs.md)。下一步继续沙箱审批/执行/输出发布，不进入 T-10B/T-11。
+- 阶段：P1 至 P4、T-01 至 T-10 已完整验收；T-10A 进行中，文件输入/授权已验收，第三批内部 Docker 控制/预检子范围本地通过，整卡尚未完成。新增 74，全库 759；3.11：757 passed / 2 skipped，3.14：759 passed，Ruff/格式/mypy 92 文件/schema 通过；标准库/分析镜像各两次真实固定控制探针并确认销毁。实际证据见 [本轮验证](../validation/t10a-docker-controls.md)。本批新远程 CI 尚未验收，旧 e83d566 成绩只属于前批。继续代码审批/执行归属/输出发布，不进入 T-10B/T-11。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
-- 未实现：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、真实后端预检/配置指纹、代码与文件审批/稳定执行键/清理租约、容器输入保护/安全导出/PNG 校验、输出 ready 与工具结果共同发布及恢复。文件输入的 ready/授权读取已实现，不能替代完整 CSV→Python→CSV/PNG Agent 闭环。T-10B/T-10C、T-11 至 T-18、模型/MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
+- 未实现：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult 公共入口、内部后端指纹到 Run/审批/恢复的绑定、代码与文件审批/稳定执行键/清理租约、容器输入保护/安全导出/PNG 校验、输出 ready 与工具结果共同发布及恢复。内部预检/固定可信控制检查与 ready 输入/授权读取已实现，不能替代完整 CSV→Python→CSV/PNG Agent 闭环。T-10B/T-10C、T-11 至 T-18、模型/MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 - 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
@@ -16,6 +16,14 @@
 ## 已确认方向
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
+
+## 本轮检查点：T-10A 内部 Docker 控制与预检
+
+起点 Local `/Users/yanlong/projects/drov`、main / d45bd24，干净。复跑前批 683+2 skip 后实施私有 Docker 控制/预检、不可变限额/profile/配置 hash、固定创建 argv/实际配置与有效控制检查；74 项新增和两套全库本地通过，标准库/分析镜像各两次 sum=5050、独立目录与实际销毁，决定见 [ADR-0019](../decisions/0019-docker-control-preflight.md)，失败修正/范围见 [验证](../validation/t10a-docker-controls.md)。源码模块是真实内部实现，没有导出尚未接通的公共沙箱工具，CLI 结束不冒充容器已停止。
+
+**仅验收预检/控制子范围，T-10A 不关闭。** 代码审批、持久租约、任意代码真实结果/输入保护/安全导出与最终发布仍缺。用户在本轮要求继续未完成部分，因此保存本检查点后继续本会话接通 Runtime；保持 Docker Desktop 运行，无新仓库/账号/Key/模型 ID/预算。新远程状态仅凭实际 CI 追加，旧 CI 不代表本批。
+
+本地检查点构件：两解释器 wheel/sdist/重建与四套干净核心安装、六示例普通/stream、Twine strict 通过；独立 3.14 core-only wheel 安装再执行两次真实控制探针且确认销毁。公开 schema/DDL/uv.lock/品牌未改；文档 59/483 链接/14 AST 错误 0，实际源码与本机日志以本轮验证为准。
 
 ## 本轮交付：T-10A Runtime 文件输入与授权读取（第二批）
 
@@ -215,7 +223,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 输入/授权已验收，不重复开展一般规划或重新准备分析库。先读任务卡/API/运行第 13 节/工程、ADR-0016/0017/0018 与本轮验证，再核实 checkout、当前 Local `.drov/sandbox-environment.json`、分析 image.json 及 Docker。
 
-1. 建立实际 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult 与专用派发器；固定逻辑工具/effect=write/default ask，实际 Docker 能力/镜像/有效 seccomp/控制配置预检并绑定指纹。标准库真实单次运行先验收，缺控制不能退回宿主 Python。
+1. 内部 Docker 控制/预检与 profile 检查已本地验收（ADR-0019）；接通实际 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult 与专用派发器，固定工具/effect=write/default ask，将真实预检 hash 绑定 Run/审批/恢复。标准库实际代码闭环先验收，缺控制不能退回宿主 Python。
 2. 将原代码/解析输入 hash/输出声明/归属/限额绑定审批；派发前同事务保存稳定执行键/预算/持久租约，审批前创建 0，批准后只执行原计划。客户端结束不等于容器停止，原已派发操作恢复不得重跑。
 3. 同卡接受保护容器输入、标准库/分析镜像安全导出、CSV/PNG 文件校验与有界文本；销毁前可靠暂存、确认整个环境销毁后共同发布 output ready/原工具结果。实际 CSV→Python→CSV/PNG→同一 Agent 最终输出、销毁后授权/hash 下载、两次独立调用、非法/超限无悬空成功引用与安装验证齐全才关闭 T-10A。
 4. 完整后才进入 T-10B 的隔离/超限/取消/租约/输入与输出边界故障、SDK 硬终止重启及 Linux Docker 专项 CI。T-10C 可选，不预建 E2B 空模块、不索取云 Key。
@@ -236,7 +244,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## 会话切换建议
 
-**建议下一轮 New Chat，继续 T-10A 的真实 PythonSandbox 审批/执行与租约。** 当前同一会话已完成私有字节/镜像及输入/授权两个存储批次，已有清晰验收检查点；下一模块转为 Docker 控制/执行所有权与安全导出，适合独立上下文。仍选 Local `/Users/yanlong/projects/drov`，按 handoff 核实实际 Git/源码/最新验证，读 ADR-0018 与完整沙箱契约，不把文件 ready 输入或可信镜像探针当作完整执行器。无需新仓库/worktree/账号/Key；`.drov/` 只在此 checkout。
+**继续本会话，接通 T-10A 的真实 PythonSandbox 审批/执行与租约。** 用户本轮明确要求继续未完成部分；内部 Docker 控制/预检已形成检查点，尚未完成 Runtime 接点。若之后更换会话，仍选 Local `/Users/yanlong/projects/drov`，按 handoff 核实实际 Git/源码/最新验证，读 ADR-0018/0019 与完整沙箱契约，不把 ready 输入或可信控制探针当作完整执行器。无需新仓库/worktree/账号/Key；`.drov/` 只在此 checkout。
 
 ## 阶段记录
 

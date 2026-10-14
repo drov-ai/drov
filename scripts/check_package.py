@@ -32,6 +32,15 @@ def inspect_archives(wheel: Path, sdist: Path) -> None:
     with zipfile.ZipFile(wheel) as archive:
         names = set(archive.namelist())
         assert {"drov/__init__.py", "drov/py.typed"} <= names
+        assert {"drov/sandbox/seccomp-v27.0.3.json", "drov/sandbox/LICENSE.moby"} <= names
+        assert (
+            archive.read("drov/sandbox/seccomp-v27.0.3.json")
+            == (ROOT / "sandbox/docker/seccomp-v27.0.3.json").read_bytes()
+        )
+        assert (
+            archive.read("drov/sandbox/LICENSE.moby")
+            == (ROOT / "sandbox/docker/LICENSE.moby").read_bytes()
+        )
         for suffix in ("/licenses/LICENSE", "/licenses/THIRD_PARTY.md", "/METADATA"):
             assert any(name.endswith(suffix) for name in names), suffix
         assert all(name.startswith(("drov/", "drov-")) for name in names)

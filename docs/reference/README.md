@@ -4,6 +4,8 @@ T-02 至 T-08 提供类型/schema、协议、事务存储、Runtime 生命周期
 
 ## 模块入口
 
+T-10A 文件通道已实现；第三批在 `drov.sandbox._docker` / `_profile` 交付私有控制/预检与固定 profile 校验，见 [ADR-0019](../decisions/0019-docker-control-preflight.md)。它们不是公共工具入口，尚无 PythonSandbox/Runtime 审批执行或 SandboxResult，故不加入下方公共入口表。
+
 | 入口 | 已实现内容 |
 | --- | --- |
 | drov | Agent 定义、Limits/ModelCapabilities/ContextPolicy/Memory 配置描述、RunContext/ToolContext、四类结果、三类交互响应、Runtime/ResourceBinding、HumanInput、tool/PermissionPolicy/OwnerAuthorizer |

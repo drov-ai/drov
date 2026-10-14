@@ -357,6 +357,8 @@ HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；�
 
 ## 首版文件与代码沙箱接口（T-10A，部分实施）
 
+第三批仅交付私有 Docker 控制/预检与 profile 检查（[ADR-0019](../decisions/0019-docker-control-preflight.md)）；没有新增公共调用入口或 Sandbox DTO。`drov.sandbox` 暂不导出下表对象，不能用内部可信探针替代 Runtime 工具。公共字段和返回语义保持以下契约。
+
 本节按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 扩展 ADR-0013。T-10A 第二批已实现值类型/私有字节层、Runtime store 装配、start/run/stream 文件接收与 Run 授予/去重、ready 输入元数据、get/read_artifact 动态授权、上下文文件描述，见 [ADR-0018](../decisions/0018-artifact-input-admission.md) 和 [可运行文件通道示例](../../examples/artifact_inputs_offline.py)。私有 stage 仍不是 ready；输入接收不执行代码。下表的 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、输入只读容器副本、输出导出/销毁/原工具结果共同发布仍未实现。执行/恢复规则唯一在运行契约第 13 节，默认、镜像与支持矩阵唯一在工程方案。
 
 | 拟议入口/对象 | 字段与责任 |

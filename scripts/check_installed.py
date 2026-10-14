@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import importlib.abc
 import importlib.metadata
 import importlib.resources
@@ -81,14 +82,30 @@ def main() -> None:
     ):
         import drov
         import drov.artifacts
+        from drov.sandbox._docker import DockerPreflight
+        from drov.sandbox._profile import PROFILE_SHA256, DockerLimits
 
         assert "LocalArtifacts" in drov.artifacts.__all__
+        # Even private backend construction is inert in a core-only installation.
+        preflight = DockerPreflight(
+            image="sha256:" + "a" * 64,
+            docker=Path(sys.executable),
+            host="unix:///synthetic/not-running.sock",
+            limits=DockerLimits(),
+        )
+        assert not preflight.is_open
 
     metadata = importlib.metadata.metadata("drov")
     assert metadata["Name"] == "drov"
     assert metadata["Version"] == drov.__version__
     assert metadata["License-Expression"] == "Apache-2.0"
     assert importlib.resources.files("drov").joinpath("py.typed").is_file()
+    sandbox_resources = importlib.resources.files("drov.sandbox")
+    assert (
+        hashlib.sha256(sandbox_resources.joinpath("seccomp-v27.0.3.json").read_bytes()).hexdigest()
+        == PROFILE_SHA256
+    )
+    assert sandbox_resources.joinpath("LICENSE.moby").is_file()
     assert drov.__file__ is not None
     module_path = Path(drov.__file__).resolve()
     if options.installed:
