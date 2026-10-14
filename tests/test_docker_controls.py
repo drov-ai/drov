@@ -63,7 +63,13 @@ def info() -> dict[str, Any]:
 
 
 def version() -> dict[str, Any]:
-    return {"Os": "linux", "Arch": "arm64", "Version": "27.0.3", "ApiVersion": "1.46"}
+    return {
+        "Os": "linux",
+        "Arch": "arm64",
+        "Version": "27.0.3",
+        "ApiVersion": "1.46",
+        "MinAPIVersion": "1.24",
+    }
 
 
 def created() -> dict[str, Any]:
@@ -518,3 +524,10 @@ async def test_untrusted_cli_permissions_reject_before_any_command(
 def test_remote_endpoint_is_not_an_implicit_fallback(host: str) -> None:
     with pytest.raises(ConfigurationError):
         DockerPreflight(image=IMAGE_ID, docker=Path(sys.executable), host=host)
+
+
+@pytest.mark.parametrize("minimum", [None, "invalid", "1.44", "1.99", "2.0"])
+def test_daemon_must_accept_the_actual_exec_api_subset(minimum: str | None) -> None:
+    with pytest.raises(ConfigurationError, match="API"):
+        daemon_profile(info(), version() | {"MinAPIVersion": minimum})
+    assert daemon_profile(info(), version() | {"MinAPIVersion": "1.41"})["api_version"] == "1.46"

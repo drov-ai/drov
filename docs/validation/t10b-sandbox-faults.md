@@ -4,7 +4,7 @@
 
 ## 实际交付与当前验收边界
 
-决定见 [ADR-0021](../decisions/0021-sandbox-fault-boundaries.md)。新增真实 Docker 隔离/资源、故障和独立 SDK/stream 硬终止测试；修复监督程序启动竞态、恢复成功事件缺 result、恢复绕过原结果字节限额及文件接收 OS I/O 异常映射四个问题。未改公共 schema、SQLite DDL/扩展版本、uv.lock、固定 runner/hash、P4 fingerprint 或品牌。
+决定见 [ADR-0021](../decisions/0021-sandbox-fault-boundaries.md)。新增真实 Docker 隔离/资源、故障和独立 SDK/stream 硬终止测试；修复监督程序启动竞态、恢复成功事件缺 result、恢复绕过原结果字节限额及文件接收 OS I/O 异常映射四个问题，并补齐固定API1.41的服务端最低版本预检。未改公共 schema、SQLite DDL/扩展版本、uv.lock、固定 runner/hash、P4 fingerprint 或品牌。
 
 Linux AMD64 wheel 与许可清单已经实际下载/核验，新增显式双平台准备参数、Docker 专项工作流和 core-only wheel 实际安装检查。**整卡状态仍以 progress 为准：本地检查和远程专项/安装全部完成后才能关闭。** 本记录的后续结果按实际证据补记，不用此前普通核心 CI 或无 daemon skip 替代本轮专项。
 
@@ -68,3 +68,5 @@ DROV_DOCKER_TEST_CONFIG="$PWD/.drov/sandbox-environment.json" \
 
 11. 最后3.11全库的低 CPU 试验因10s包含容器/监督/wrapper启动而得到真实timeout（1 failed/885 passed/2 skip），不是CPU配额失效；节流验证保留0.1CPU，执行期限明确25s，独立2s超时/进程树用例仍保留。
 12. 追加丢文件/hash损坏与输入清单ENOSPC/接收SQL拒绝：首次发现公开文件接收传出了原始OSError，按ADR-0021在接收边界映射PersistenceUnavailable；私有阶段异常契约保持。修正后真实文件/资源/故障与接收相关 **64 passed /37.66s**（`.drov/t10b-file-resource-final.log`）。输入失败Run/ready/容器/模型0，损坏暂存恢复failed_known且原代码不重做。
+
+13. 官方API版本矩阵显示部分Engine最高API虽≥1.41却不接受1.41；执行器仍固定该子集。预检补查MinAPIVersion，缺失/非法/高于1.41启动前拒绝，新增5项无daemon契约测试；本机实际Min=1.24，已有支持配置/hash不变。不宣称支持所有更高Engine版本。

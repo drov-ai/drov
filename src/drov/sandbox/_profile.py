@@ -83,6 +83,15 @@ def daemon_profile(info: dict[str, Any], version: dict[str, Any]) -> dict[str, A
     )
     api = cast(str, api)
     require(tuple(map(int, api.split("."))) >= (1, 41), "Docker API 1.41 or newer required")
+    minimum = version.get("MinAPIVersion")
+    require(
+        isinstance(minimum, str) and re.fullmatch(r"[0-9]{1,3}\.[0-9]{1,3}", minimum) is not None,
+        "Minimum Docker API version is required",
+    )
+    require(
+        tuple(map(int, cast(str, minimum).split("."))) <= (1, 41),
+        "Engine must accept the fixed Docker API 1.41 subset",
+    )
     architecture = {"aarch64": "arm64", "arm64": "arm64", "x86_64": "amd64", "amd64": "amd64"}
     arch = architecture.get(str(info.get("Architecture")))
     require(arch is not None and version.get("Arch") == arch, "Unsupported Engine architecture")
