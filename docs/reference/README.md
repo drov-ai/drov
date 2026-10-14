@@ -20,7 +20,7 @@ T-10A 的文件通道、公共沙箱定义与 Runtime 专用执行路径已实�
 | drov.artifacts | ArtifactInput/Ref/Info/Limits 与 LocalArtifacts POSIX 私有字节层；Runtime 资源装配、文件接收/Run 授予/去重、ready 输入/产物与 get/read_artifact 动态授权；私有 stage 不可读 |
 | drov.sandbox | PythonSandbox、DockerSandbox、SandboxLimits、SandboxResult；固定 sandbox.run_python 专用派发、审批/绑定、实际 Docker 单次执行、有界文件导出/PNG 校验、销毁后共同发布与原阶段恢复 |
 
-Memory 是配置对象，MemoryStorage 是事务内存后端；配置 Memory 的注册 Agent 自动导出三个内置工具，实际检索/事务执行见 [ADR-0012](../decisions/0012-transactional-memory.md)；Agent 只定义行为，构造不会执行。存储描述只在 open/异步上下文进入时获取连接和锁；完整记录由内核做授权投影，不能直接作为 API 响应。compile_tool 只创建描述，@tool 创建含 callable 的 PythonTool；private execution/operations 接点真实派发 Python 工具并保存操作事实。外部 Python write/unknown 支持审批、单次派发及 unknown 核查，显式 Runtime 的 ASK 已保存审批并支持原子响应；临时入口 ASK 仍 failed/interaction_unavailable。完整未知效果/恢复已接入 T-09，硬崩溃专项留到 T-10。provider_items 仅供适配器往返，不用于向用户显示内部协议数据。
+Memory 是配置对象，MemoryStorage 是事务内存后端；配置 Memory 的注册 Agent 自动导出三个内置工具，实际检索/事务执行见 [ADR-0012](../decisions/0012-transactional-memory.md)；Agent 只定义行为，构造不会执行。存储描述只在 open/异步上下文进入时获取连接和锁；完整记录由内核做授权投影，不能直接作为 API 响应。compile_tool 只创建描述，@tool 创建含 callable 的 PythonTool；private execution/operations 接点真实派发 Python 工具并保存操作事实。外部 Python write/unknown 支持审批、单次派发及 unknown 核查，显式 Runtime 的 ASK 已保存审批并支持原子响应；临时入口 ASK 仍 failed/interaction_unavailable。完整未知效果/恢复已接入 T-09，通用硬崩溃专项已由 T-10 验收，沙箱深入专项由 T-10B 验收。provider_items 仅供适配器往返，不用于向用户显示内部协议数据。
 
 ## 生成与校验
 

@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-10 已完整验收；T-10A 真实 Runtime Python/文件闭环已本地通过，最终独立环境矩阵/四套包安装/安装后 8 次真实 Docker 示例已通过，核查审计修正的新远程 CI 待核验，暂不关闭整卡。新增 45，全库 804；含真实 Docker：3.11 802 passed / 2 skipped，3.14 804 passed。实际证据见 [本轮验证](../validation/t10a-runtime-sandbox.md) 与 ADR-0020。T-10B 深度隔离/故障专项尚未开始，不以核心 skip 代替。
+- 阶段：P1 至 P4、T-01 至 T-10、T-10A 已完整验收。T-10A 新增45、全库804；最终含真实 Docker：3.11 802 passed /2 skipped，3.14 804 passed；静态/schema、四套构件安装、两套 core-only wheel 安装后8次真实 Docker normal/stream、最终 [CI 38572351467](https://github.com/drov-ai/drov/actions/runs/38572351467) 10 jobs success。实际范围/限制见 [本轮验证](../validation/t10a-runtime-sandbox.md) 与 ADR-0020。下一项 T-10B，尚未开始；不把普通核心 Docker skip 当专项通过。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。未验收：T-10B 完整隔离/资源/逐边界硬终止、Linux Docker 专项 CI/AMD64 分析镜像；T-10C、T-11 至 T-18、模型/MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
@@ -19,7 +19,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 ## 本轮交付：T-10A Runtime 实际执行与持久产物
 
-接续已保存的 main / 0780093 控制预检检查点；前批 [CI 38553661046](https://github.com/drov-ai/drov/actions/runs/38553661046) 10 jobs success 已复核。首个 Runtime 提交 cbce832 的 [CI 38570634938](https://github.com/drov-ai/drov/actions/runs/38570634938) 10 jobs success；之后核查审计/恢复前权限修正已重新通过本地全库/安装，最终修正 CI 待验收。本批实际代码见 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md)，全部验证/失败修正/限制见 [本轮记录](../validation/t10a-runtime-sandbox.md)。没有更换 checkout、重新规划或修改品牌/uv.lock/P4 指纹。
+接续已保存的 main / 0780093 控制预检检查点；前批 [CI 38553661046](https://github.com/drov-ai/drov/actions/runs/38553661046) 10 jobs success 已复核。首个 Runtime 提交 cbce832 的 [CI 38570634938](https://github.com/drov-ai/drov/actions/runs/38570634938) 10 jobs success；之后核查审计/恢复前权限修正已重新通过本地全库/安装，最终修正 [2d768f7](https://github.com/drov-ai/drov/commit/2d768f791a4c3ee754426c8a8245d11c8778d921) 的 [CI 38572351467](https://github.com/drov-ai/drov/actions/runs/38572351467) 10 jobs 全部 success。本批实际代码见 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md)，全部验证/失败修正/限制见 [本轮记录](../validation/t10a-runtime-sandbox.md)。没有更换 checkout、重新规划或修改品牌/uv.lock/P4 指纹。
 
 | 交付 | 实际结果 / 限制 |
 | --- | --- |
@@ -29,9 +29,9 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 | 发布/恢复 | 真实观察与字节可靠暂存→确认整个容器销毁→同事务 ready/原结果/event/checkpoint/释放租约；SQLite trigger 全回滚后 recover 原阶段，execute 计数不增；verify 共用权限/限时/真实调用所有权和核查审计，recover 清理前动态授权/终态复核；人工核查不能伪造资源事实 |
 | 真实 SDK | 标准库 CSV 与分析 numpy/pandas/matplotlib 的 CSV/400×300 PNG，普通/stream、同一 Agent 最终输出、关闭后新 Runtime 授权/hash 下载通过；实际两次独立调用/显式 Ref 复用、已启动后取消清理通过 |
 | 本地测试 | 45 新增，总804；含真实 Docker：3.11 802+2 skip /3.14 804；核心无配置：793+11 skip/795+9 skip，9 个 Docker 未跑不能当通过；静态/schema/包安装最终汇总见验证 |
-| 待核验与未做 | 本批四套包安装、两套 core-only wheel 安装后 8 次真实 Docker normal/stream 已通过；新远程 CI 待核验；T-10B 全深度隔离/资源/逐边界硬终止与 Linux Docker CI、T-15 完整维护/备份、T-16 真实模型仍未验收 |
+| 验收与未做 | 本批四套包安装、两套 core-only wheel 安装后 8 次真实 Docker normal/stream、最终修正10项远程核心CI均通过；T-10B 全深度隔离/资源/逐边界硬终止与 Linux Docker CI、T-15 完整维护/备份、T-16 真实模型仍未验收 |
 
-**当前已实现真实闭环，本轮本地安装/实际闭环已完整验收，新 CI 通过后才关闭 T-10A。** 不将基础矩阵当作 T-10B 整卡；未知应答/销毁保留租约/容量，原 SDK 输出丢失不能重算。仅合成数据与确定性模型夹具，无新 Key/账号/预算、云调用、镜像推送、包发布或部署。
+**T-10A 整卡已完整验收并关闭，下一项 T-10B。** 不将基础矩阵当作 T-10B 整卡；未知应答/销毁保留租约/容量，原 SDK 输出丢失不能重算。仅合成数据与确定性模型夹具，无新 Key/账号/预算、云调用、镜像推送、包发布或部署。
 
 ## 历史检查点：T-10A 内部 Docker 控制与预检
 
@@ -41,7 +41,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 本地检查点构件：两解释器 wheel/sdist/重建与四套干净核心安装、六示例普通/stream、Twine strict 通过；独立 3.14 core-only wheel 安装再执行两次真实控制探针且确认销毁。公开 schema/DDL/uv.lock/品牌未改；文档 59/483 链接/14 AST 错误 0，实际源码与本机日志以本轮验证为准。
 
-## 本轮交付：T-10A Runtime 文件输入与授权读取（第二批）
+## 历史第二批：T-10A Runtime 文件输入与授权读取
 
 起点 Local `/Users/yanlong/projects/drov`、main / 412e39b，干净；复跑首批 649 passed / 2 skipped 后实施。决定见 [ADR-0018](../decisions/0018-artifact-input-admission.md)，详细证据与失败修正见 [本轮验证](../validation/t10a-artifact-inputs.md)。
 
@@ -102,7 +102,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 **T-10 任务卡本地与远程已完整验收，无剩余缺项。** 测试/夹具 52f70e3 已推送，远程状态/日志保存在 .drov/t10-final-ci.json / t10-final-ci.log；最后进度/验证补记单独提交同步，不改已验证测试。模型、token/金额是脚本合成值；独立事项服务写入计数是真实本地事实，不能由此宣称真实模型质量、通用 exactly-once 或断电/设备故障安全。HTTP/MCP 生命周期由 T-12/T-13 验收；旧备份 barrier 待 T-15。
 
-## 本轮接续：T-10A 前的环境准备
+## 历史接续：T-10A 前的环境准备
 
 用户开启 Docker Desktop 后本轮资源已可连接；执行者完成官方固定 ARM64 镜像下载、来源/许可与指纹记录，真实小型容器执行及 cgroup/非 root/只读根目录/工作区/显式 seccomp 检查。默认 seccomp=unconfined 是实际发现，已用独立官方 profile 对自建探针容器启用，未改 daemon 全局设置。全部本轮探针已停止并删除，详情见 [环境准备验证](../validation/sandbox-environment-preparation.md)。
 
@@ -215,7 +215,9 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## GitHub / CI
 
-- 本轮 GitHub SSH 连通已恢复，原 f2f45c1/412e39b、本批代码/测试/契约 **29d225d** 与崩溃夹具修正 ef1b0b4/**e83d566** 已成功推送 origin/main，没有修改全局网络/认证。最终 [CI 38536288876](https://github.com/drov-ai/drov/actions/runs/38536288876) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14、Python 3.15 advisory 共 **10 个 job 全部 success**；八个 package job 的构建/核心干净安装/适用示例普通与 stream/extras 隔离导入通过。POSIX 3.11 为 683+2 skip、其余 685；Windows 3.11 为 610+75 skip、3.14 为 612+73 skip，Artifact POSIX 字节层 72 项在 Windows 适用跳过，不表示 Windows 支持文件配置。前两轮 Windows 失败、控制期限与诊断修正见 [验证](../validation/t10a-artifact-inputs.md)，日志在 `.drov/t10a-input-ci-{first,second,third}*`；Docker 专项与整卡仍未验收。最终进度/证据补记仅改文档，以 skip ci 保存；实际 Git/同步状态以 git log/status 为准。
+- T-10A 本轮完整闭环：源码 cbce832、核查/恢复修正 [2d768f7](https://github.com/drov-ai/drov/commit/2d768f791a4c3ee754426c8a8245d11c8778d921) 已推送 origin/main；最终 [CI 38572351467](https://github.com/drov-ai/drov/actions/runs/38572351467) 10 jobs 全部 success。本地两套独立解释器含真实 Docker 802+2/804、四套构件安装与两套 wheel 安装后8次真实 Docker已通过。最终验收/交接补记只改文档，以 skip ci 同步，不改已验证源码；当前 HEAD/同步以 git log/status 为准。品牌/uv.lock/历史 fingerprint/core records DDL 未改，忽略环境/私有数据未提交；CI 普通核心的 Docker skip 不算 T-10B 专项。
+
+- T-10A 第二批（历史）：GitHub SSH 连通已恢复，原 f2f45c1/412e39b、本批代码/测试/契约 **29d225d** 与崩溃夹具修正 ef1b0b4/**e83d566** 已成功推送 origin/main，没有修改全局网络/认证。最终 [CI 38536288876](https://github.com/drov-ai/drov/actions/runs/38536288876) 的 quality、Linux 3.11–3.14、macOS/Windows 3.11/3.14、Python 3.15 advisory 共 **10 个 job 全部 success**；八个 package job 的构建/核心干净安装/适用示例普通与 stream/extras 隔离导入通过。POSIX 3.11 为 683+2 skip、其余 685；Windows 3.11 为 610+75 skip、3.14 为 612+73 skip，Artifact POSIX 字节层 72 项在 Windows 适用跳过，不表示 Windows 支持文件配置。前两轮 Windows 失败、控制期限与诊断修正见 [验证](../validation/t10a-artifact-inputs.md)，日志在 `.drov/t10a-input-ci-{first,second,third}*`；Docker 专项与整卡仍未验收。最终进度/证据补记仅改文档，以 skip ci 保存；实际 Git/同步状态以 git log/status 为准。
 
 - T-10A 首批交付时（历史），代码/镜像 recipe/测试/契约记录已本地提交 **f2f45c1**；提交前核对 30 个跟踪文件、敏感模式和差异，未跟踪 `.drov/`、品牌或真实凭据。**当时推送未成功，新代码远程 CI 未运行/未验收。** SSH 22 与 GitHub 官方 SSH 443 连接均被关闭；HTTPS 的已有本机代理 127.0.0.1:17890 不可连接，单次绕过该配置后 TLS 仍失败，gh API 也 EOF。没有更改 origin、全局代理/SSH/认证设置。当时远程跟踪仍 67ef5b2，本地完整检查点保留；本轮已恢复连通并同步，最新 CI 见上条，核心 CI 也不能替代 T-10B 的 Docker 专项。最后同步事实补记为本地文档提交，以实际 git log/status 为准。
 
@@ -235,9 +237,9 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 - 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
-## 下一项：T-10A 最终核验后进入 T-10B
+## 下一项：T-10B 文件隔离、资源、故障与恢复
 
-先完成本批干净安装后的真实标准库/分析镜像普通/stream 示例、静态/文档/构件和新代码远程核心 CI，更新整卡结论。任何失败继续修复 T-10A，不跳依赖。验收齐全后的具体下一卡为 **T-10B 文件隔离、资源、故障与恢复**，按 implementation-plan 与质量第 8 节分批：
+前置 T-10A 已完整验收，无待补缺项。先读 ADR-0016/0018/0019/0020、本轮验证、运行第 13 节/工程第 9 节、implementation-plan 与质量第 8 节；核实同一 checkout 的 Docker/固定镜像、配对 SQLite/bytes/租约，不重复一般规划。按以下顺序分批，未全矩阵通过不提前关闭：
 
 1. 真实哨兵验证输入只读/祖先/路径链接竞态、跨归属/授权/网络/宿主边界，实际 CPU/OOM/PID/tmpfs/文本/文件限额；只操作测试独占资源，不关闭共享 daemon。
 2. 实际取消/遗留子进程/创建与 exec 丢应答、查询/销毁失败；未确认停止保留 lease/容量与 SQLite 所有权，显式恢复原执行，不自动重建/重跑。
@@ -251,8 +253,8 @@ T-10C 独立可选，T-11 等仍依赖 T-10B；不预建后续空模块。
 | 事项 | 当前状态 / 需要时点与配置方式 |
 | --- | --- |
 | T-10 故障与取消 | 本轮矩阵不需要新增仓库/账号/Key/私有资料；独立合成服务/真实 SDK 屏障、SQLite 错误与恢复已本地与远程验收并推送，无需用户新增资源 |
-| GitHub 仓库 | 继续现有 origin/身份；本轮连接已恢复，原检查点已同步，不需新仓库/账号/Key。第二批/CI 的实际状态见上方 GitHub 记录；无需用户改变全局配置 |
-| T-10A/T-10B Docker/镜像/文件存储 | 保持 Docker Desktop 开启；标准库镜像不变，T-10A 首批已实际构建固定分析镜像并验证私有暂存，见 [本轮验证](../validation/t10a-artifact-staging.md)。不需新仓库/账号/Key/预算；Runtime/执行/输出闭环已本地通过，执行者补完最终核验后准备 T-10B 完整故障与 Linux 专项 CI。`.drov/sandbox-environment.json`、分析 image.json 与台账是本 checkout 非秘密快照/数据，换机器需重查，不能从探针推断整卡验收 |
+| GitHub 仓库 | 继续现有 origin/身份；本轮连接已恢复，原检查点已同步，不需新仓库/账号/Key。完整闭环最终修正与 CI 的实际状态见上方 GitHub 记录；无需用户改变全局配置 |
+| T-10A/T-10B Docker/镜像/文件存储 | 保持 Docker Desktop 开启；标准库镜像不变，T-10A 首批已实际构建固定分析镜像并验证私有暂存，见 [本轮验证](../validation/t10a-artifact-staging.md)。不需新仓库/账号/Key/预算；Runtime/执行/输出闭环已整卡验收，执行者准备 T-10B 完整故障与 Linux 专项 CI；AMD64 分析镜像/锁由执行者实际准备。`.drov/sandbox-environment.json`、分析 image.json 与台账是本 checkout 非秘密快照/数据，换机器需重查，不能从探针推断整卡验收 |
 | T-10C 可选 E2B | 现在无需准备、不阻塞 Docker。进入远端验收前提供可用账号/区域权限、固定 template/build、E2B_API_KEY 的本地安全引用、合成代码/文件上传许可、并发/寿命与独立沙箱总预算及收尾预留；执行者先完成离线 adapter/契约，提出实际验收批次与估价。Key 不贴聊天/Git、不传模型或沙箱；无资源只记录已验收子范围 |
 | 模型服务、可访问 model ID、密钥和总预算 | T-11 smoke/T-16 live 前提供可访问服务/model ID 并批准共同费用上限；工程执行者先按新增代码任务量估价。Key 仅本地环境/忽略配置或凭据管理，聊天/Git 不贴密钥；未授权预算前不付费调用 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
@@ -262,7 +264,7 @@ T-10C 独立可选，T-11 等仍依赖 T-10B；不预建后续空模块。
 
 ## 会话切换建议
 
-**本轮先在当前会话完成 T-10A 最终核验；验收/提交后建议下一轮 New Chat 开始 T-10B。** 沙箱闭环已形成完整模块检查点，下一卡转向深度真实故障/CI，适合独立会话。仍选 Local `/Users/yanlong/projects/drov`，先核实 Git/progress/最新验证、ADR-0018/0019/0020 与完整沙箱契约；保留原 SQLite/bytes/lease/image 配对事实，不能由模型夹具或可信探针推断完整隔离。无需新仓库/worktree/账号/Key；`.drov/` 仅在此 checkout。
+**建议下一轮 New Chat 开始 T-10B。** T-10A 已验收/提交，沙箱闭环已形成完整模块检查点，下一卡转向深度真实故障/CI，适合独立会话。仍选 Local `/Users/yanlong/projects/drov`，先核实 Git/progress/最新验证、ADR-0018/0019/0020 与完整沙箱契约；保留原 SQLite/bytes/lease/image 配对事实，不能由模型夹具或可信探针推断完整隔离。无需新仓库/worktree/账号/Key；`.drov/` 仅在此 checkout。
 
 ## 阶段记录
 
@@ -288,4 +290,4 @@ T-10C 独立可选，T-11 等仍依赖 T-10B；不预建后续空模块。
 | 2026-10-14 | T-10A 首批实施 | 私有 POSIX 字节层、38 项存储测试、固定 ARM64 分析镜像/许可锁及可信 CSV/PNG/销毁后重开字节探针；整卡进行中，下一轮继续输入接收/Run 授予/授权，不进入 T-10B |
 | 2026-10-14 | T-10A 第二批实施 | Runtime 文件输入/授予/去重/动态授权读取、34 项新增与上下文 v2/Artifact 扩展兼容、六示例/安装；整卡仍进行中，建议 New Chat 实施真实沙箱审批/执行/租约 |
 | 2026-10-14 | T-10A 第三批检查点 | 私有 Docker 控制/预检、74 项新增与两种镜像两次控制探针、四套安装；0780093 的 10 个远程 CI job success，整卡尚未关闭 |
-| 2026-10-14 | T-10A Runtime 闭环 | 45 项新增、真实审批/代码/输入/CSV/PNG/下载/两次独立与取消、原发布恢复，本地804用例；本批包/安装后8次Docker已通过；新远程检查待验收，完成后进入 T-10B |
+| 2026-10-14 | T-10A Runtime 闭环 | 45 项新增、真实审批/代码/输入/CSV/PNG/下载/两次独立与取消、原发布恢复，本地804用例；最终独立两解释器/包/安装后8次Docker及2d768f7的10项远程CI通过，整卡关闭；下一项T-10B |

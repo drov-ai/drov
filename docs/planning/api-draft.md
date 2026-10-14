@@ -355,7 +355,7 @@ HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；�
 
 内容清理后的 request_key、数据放弃和旧备份 barrier 以 [维护策略](release-policy.md) / 行为契约为准；恢复旧数据不是允许旧操作再次执行。
 
-## 首版文件与代码沙箱接口（T-10A，部分实施）
+## 首版文件与代码沙箱接口（T-10A）
 
 公共沙箱入口、审批/执行/销毁/输出发布已接通，决定见 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md)，可运行离线示例见 [sandbox_offline.py](../../examples/sandbox_offline.py)。模型为确定性 fixture，真实模型质量仍未验证；T-10B 故障/隔离矩阵另验收。
 

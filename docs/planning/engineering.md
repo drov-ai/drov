@@ -189,13 +189,13 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 
 后端配置（非秘密连接引用、镜像 digest、固定控制、限额/执行入口版本）与 Agent/工具定义绑定并持久化检查，避免旧审批或恢复运行在新镜像/弱限制下。内部操作 payload 的新增执行/清理字段在 T-10A 明确版本和旧记录读取，必要 DDL/migration 在对应实现同轮处理，不对旧操作伪造执行事实。记录与保留语义见运行契约/维护策略，不在此另造状态机。
 
-2026-10-14 本地资源准备证据见 [Docker/镜像准备验证](../validation/sandbox-environment-preparation.md)。当前 macOS Linux VM 的基础探针可运行，但不代表 SDK/完整隔离平台验收。该 daemon 默认 seccomp=unconfined；实际执行须显式使用固定可信 profile 并核实有效，profile 内容 hash 纳入既定安全控制指纹。控制 CLI 不应继承用户配置中的容器代理/环境注入，准备探针使用独立空 auths/proxies 配置；SDK 已按 ADR-0020 落地，不改变以上固定边界。
+2026-10-14 本地资源准备证据见 [Docker/镜像准备验证](../validation/sandbox-environment-preparation.md)。该历史准备记录的基础探针不能替代 SDK 验收；当前本机 macOS Linux ARM64 VM 的 SDK/CSV/PNG/安装闭环已实际通过，完整隔离/资源/故障平台矩阵仍待 T-10B。该 daemon 默认 seccomp=unconfined；实际执行须显式使用固定可信 profile 并核实有效，profile 内容 hash 纳入既定安全控制指纹。控制 CLI 不应继承用户配置中的容器代理/环境注入，准备探针使用独立空 auths/proxies 配置；SDK 已按 ADR-0020 落地，不改变以上固定边界。
 
 ### 9.1 受控文件与私有产物存储
 
 采用显式 LocalArtifacts + SQLite 元数据。T-10A 第二批已装配 Runtime 的 owned/borrowed/factory 字节资源与 ready 输入/Run 授予；构造不读写，open(storage=已打开的 SQLiteStorage) 检查目录、双向配对及排他所有权。显式配对事务初始化 Artifact 扩展 v1 的两表/索引，metadata 增量 artifact_store_id/artifact_schema；records DDL/user_version=1 保持，已存在扩展的完整 DDL 必须匹配，普通核心库不启用该扩展。私有目录 POSIX 0700、文件 0600，其他平台控制仍未实施；不承诺已加密。不以逻辑文件名寻址宿主，不跟随链接。接收事务共同保存 ready 输入、Run/授予/去重/检查点；私有预留/阶段不等于 ready。输出最终链已接通可靠暂存 → 确认销毁 → 同事务发布 ready/工具结果与原阶段恢复，不能把进程崩溃测试写成物理断电保证。
 
-字节层每批额外预留 16KiB 清单逻辑配额（清单编码硬上限同值），计入下表 owner/store 容量，空批也占额；原始字节与未完成预留跨重开保留。配额不等于底层文件系统 block/inode 物理限额。缺清单/未知项 fail closed；已开始写入的批次不自动重写或删除，受控恢复/回收仍待后续接入，见 ADR-0017。
+字节层每批额外预留 16KiB 清单逻辑配额（清单编码硬上限同值），计入下表 owner/store 容量，空批也占额；原始字节与未完成预留跨重开保留。配额不等于底层文件系统 block/inode 物理限额。缺清单/未知项 fail closed；已开始写入的批次不自动重写或删除。原完整暂存的发布恢复已按 ADR-0020 接通，缺失/损坏/未完成阶段不重算；完整受控回收仍由 T-15 实施，见 ADR-0017/0020。
 
 | ArtifactLimits | 工作默认 | 约束 |
 | --- | --- | --- |

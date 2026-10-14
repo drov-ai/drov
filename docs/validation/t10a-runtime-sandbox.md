@@ -8,7 +8,7 @@
 
 容器内不同非 root UID 分隔可信控制和代码；输入位置保持 `/work/inputs/<id>/<name>`，受保护祖先/只读文件；有界真实 stdout/stderr/退出，声明集合安全导出与 PNG 解码 profile。原观察/字节可靠暂存，确认整个容器销毁后同事务发布 ready、原工具结果/event/checkpoint 与释放 lease。SQLite 显式 sandbox extension v1 不改旧 records/user_version；旧 SDK 拒绝扩展库，新 SDK 读旧普通库。verify 只读，recover 查/清原资源并复用原阶段；人工 reconciliation response 不能伪造清理。
 
-**T-10A 的本地真实闭环已通过；最终安装/远程状态在下文追加，整卡状态以 progress 为准。** 不提前宣称 T-10B、Linux Docker 专项 CI、全部恶意隔离/资源/硬终止边界、HTTP/UI、维护备份、E2B 或真实模型质量通过。
+**T-10A 本地实际闭环、安装及最终修正远程核心 CI 已全部通过，整卡验收完成；下一项 T-10B。** 不提前宣称 T-10B、Linux Docker 专项 CI、全部恶意隔离/资源/硬终止边界、HTTP/UI、维护备份、E2B 或真实模型质量通过。
 
 ## 环境与来源
 
@@ -67,11 +67,11 @@ DROV_DOCKER_TEST_CONFIG="$PWD/.drov/sandbox-environment.json" \
 
 本批 Ruff、格式（167 files）、mypy（105 source files）、生成 schema check 全部通过；62 Markdown / 510 相对链接 / 14 Python AST 错误 0（AST 仅说明片段语法）。工具名称错误信息最后改为通用 Built-in tool；相关两组 73 passed /1.14s，不改变完整矩阵的行为或数量。一次错写 tests/test_tools.py 路径未收集测试，已改为实际 test_tools_schema.py / test_tool_execution.py；未把无测试算通过。
 
-两解释器各完成 wheel/sdist、sdist 重建逐文件比对、两套全新 core-only 安装（共四套）、依赖/import/许可与构造无 I/O 检查、六个核心离线例子 normal/stream；Twine strict 四构件通过。记录 `.drov/t10a-runtime-verified-package-py311.log` / `t10a-runtime-verified-package-py314.log` 与对应 package-check.json：wheel SHA-256 `4030293d2e4a45aee1c1be98ce54d42fd7db4c6fcb1ebb479ee3bc3f029ad454`，sdist `4b8816e639b8a1ed6747946689520e03a9d35dca964b8e316e8c19a6cbadbbd0`；两解释器一致。此构件在最终验收文档补记之前构建；不把之后的文档时间戳/报告更新写成同一 sdist，源码/SDK payload 已检查。
+两解释器各完成 wheel/sdist、sdist 重建逐文件比对、两套全新 core-only 安装（共四套）、依赖/import/许可与构造无 I/O 检查、六个核心离线例子 normal/stream；Twine strict 四构件通过。记录 `.drov/t10a-runtime-verified-package-py311.log` / `t10a-runtime-verified-package-py314.log` 与对应 package-check.json：wheel SHA-256 `4030293d2e4a45aee1c1be98ce54d42fd7db4c6fcb1ebb479ee3bc3f029ad454`，sdist `4b8816e639b8a1ed6747946689520e03a9d35dca964b8e316e8c19a6cbadbbd0`；两解释器一致。此构件在最终验收文档补记之前构建；不把之后的文档时间戳/报告更新写成同一 sdist，最终 wheel 所有 drov/ 文件逐字节等于提交的 src/drov，实际解释器3.11.9/3.14.3及源码路径在 .drov/t10a-runtime-interpreters.json；最后补记只改文档，不重跑已通过的矩阵。
 
 另外两套全新 3.11/3.14 **非 editable、core-only wheel** 环境，从仓库外 -I/-B 检查真实 site-packages 路径/import/无 extras，然后各执行标准库/分析镜像 × normal/stream（共 **8 次实际 Docker SDK 示例**）。八份 report.json 全部 completed /2 次确定性模型请求；CSV/hash 与分析 PNG400×300 均正确，下载 Runtime 没有 backend。日志 `.drov/t10a-runtime-confirmed-installed-py311.log` / `t10a-runtime-confirmed-installed-py314.log`，配置源为当前非秘密环境和实际 image_id。包不附带云后端空壳或入口点，正常包检查不隐式运行 Docker。
 
-安装示例之后按独占 name=drov-python 查询无容器残留；只查询本轮名称，不清用户其他资源。Git diff --check 通过，品牌/uv.lock/P4 fingerprint/core DDL 不变；源码/新文件/文档跟踪范围检查后提交。首个 Runtime 实施提交 [cbce832](https://github.com/drov-ai/drov/commit/cbce8327437c03c17a72c95033e2fcd2584b8f3b) 已推送，其 [CI 38570634938](https://github.com/drov-ai/drov/actions/runs/38570634938) 10 jobs 全部 success；之后核查/恢复修正单独提交，最终修正 CI 尚待核验，不能沿用首轮成绩。前批 078009337ffda2d4205d587e03c48e11a4438427 的 [CI 38553661046](https://github.com/drov-ai/drov/actions/runs/38553661046) 10 jobs success，仅证明前批；不得用它冒充本批 Runtime 新代码。
+安装示例之后按独占 name=drov-python 查询无容器残留；只查询本轮名称，不清用户其他资源。Git diff --check 通过，品牌/uv.lock/P4 fingerprint/core DDL 不变；源码/新文件/文档跟踪范围检查后提交。首个 Runtime 实施提交 [cbce832](https://github.com/drov-ai/drov/commit/cbce8327437c03c17a72c95033e2fcd2584b8f3b) 已推送，其 [CI 38570634938](https://github.com/drov-ai/drov/actions/runs/38570634938) 10 jobs 全部 success；之后核查/恢复修正 [2d768f7](https://github.com/drov-ai/drov/commit/2d768f791a4c3ee754426c8a8245d11c8778d921) 已推送，最终 [CI 38572351467](https://github.com/drov-ai/drov/actions/runs/38572351467) quality、Linux3.11–3.14、macOS/Windows3.11/3.14 与3.15 advisory 共10 jobs全部success。实际状态在 .drov/t10a-runtime-final-run.json / final-jobs.json / final-ci.json，网络 EOF 期间状态不作失败/成功判断，恢复后以实际API确认。普通核心CI未配置Docker，9个真实用例跳过；不能称为T-10B Docker专项CI。前批 078009337ffda2d4205d587e03c48e11a4438427 的 [CI 38553661046](https://github.com/drov-ai/drov/actions/runs/38553661046) 10 jobs success，仅证明前批；不得用它冒充本批 Runtime 新代码。
 
 保留 SQLite、配对 bytes/store/stage 清单、原租约和非秘密镜像配置以恢复。发布失败先解除具体存储故障，再用原 Agent/revision、backend 与 ArtifactStore 调用 recover；只查/清/发布原事实，不删除租约或新建替代容器。未知创建且无可靠原身份时保持未清理/容量/关闭失败，不猜执行未发生。后续 T-10B 使用独占测试资源/受控故障，不停止用户共享 daemon。
 
