@@ -265,3 +265,62 @@ async def test_startup_scan_pages_all_owners_without_executing(
             assert not model.calls and runtime.active_slots == 0
     finally:
         await storage.aclose()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("field", ["engine", "response"])
+@pytest.mark.parametrize("version", [True, 2])
+async def test_incompatible_saved_versions_do_not_guess(
+    tmp_path: Path,
+    service: ItemService,
+    field: str,
+    version: Any,
+) -> None:
+    path = tmp_path / "version.db"
+    agent = build(ScriptedModel([final()]), service)
+    async with Runtime(agents=[agent], storage=SQLiteStorage(path)) as runtime:
+        with patch.object(
+            runtime._runs, "finish_response", side_effect=PersistenceUnavailable("boundary")
+        ):
+            ref = await runtime.start(agent, "one", session_id="s", context=ALICE)
+            with pytest.raises(PersistenceUnavailable):
+                await runtime.wait(ref.run_id, context=ALICE)
+        async with runtime.storage.transaction() as tx:
+            if field == "engine":
+                record = await tx.get_run(ALICE, ref.run_id)
+                checkpoint = await tx.get_checkpoint(ALICE, ref.run_id)
+                new_version = record.state.state_version + 1
+                from drov.storage.records import EventDraft
+
+                await tx.save_step(
+                    ALICE,
+                    state=record.state.model_copy(update={"state_version": new_version}),
+                    expected_version=new_version - 1,
+                    checkpoint=checkpoint.model_copy(
+                        update={
+                            "state_version": new_version,
+                            "data": checkpoint.data | {"engine_schema": version},
+                        }
+                    ),
+                    events=[EventDraft(type="run.running")],
+                )
+            else:
+                responses = await tx.items(ALICE, ref.run_id, "model_response")
+                item = responses[-1]
+                await tx.put_item(
+                    ALICE,
+                    item.model_copy(
+                        update={
+                            "version": item.version + 1,
+                            "data": item.data | {"schema_version": version},
+                        }
+                    ),
+                    expected_version=item.version,
+                )
+    model = ScriptedModel([])
+    agent = build(model, service)
+    async with Runtime(agents=[agent], storage=SQLiteStorage(path)) as runtime:
+        with pytest.raises(Conflict):
+            await runtime.recover(ref.run_id, context=ALICE)
+        assert (await runtime.inspect(ref.run_id, context=ALICE)).snapshot.reason == "recovery"
+        assert not model.calls and (await service.stats())["writes"] == 0

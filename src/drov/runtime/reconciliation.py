@@ -234,6 +234,7 @@ class ReconciliationController:
         operation = await operation_in(tx, record, request.operation_id)
         if (
             item.state != "pending"
+            or type(item.data.get("schema_version")) is not int
             or item.data.get("schema_version") != 1
             or canonical_json(item.data["request"])
             != canonical_json(request.model_dump(mode="json"))
@@ -293,7 +294,11 @@ class ReconciliationController:
                     except RecordNotFound:
                         prior = None
                     if prior is not None:
-                        if prior.data.get("schema_version") != 1 or prior.state != "accepted":
+                        if (
+                            type(prior.data.get("schema_version")) is not int
+                            or prior.data.get("schema_version") != 1
+                            or prior.state != "accepted"
+                        ):
                             raise PersistenceUnavailable("Unsupported response receipt")
                         if canonical_json(prior.data["response"]) != canonical_json(payload):
                             raise InteractionConflict("Request already has a different response")

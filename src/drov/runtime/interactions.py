@@ -191,7 +191,11 @@ class InteractionController:
                     except RecordNotFound:
                         prior = None
                     if prior is not None:
-                        if prior.data.get("schema_version") != 1 or prior.state != "accepted":
+                        if (
+                            type(prior.data.get("schema_version")) is not int
+                            or prior.data.get("schema_version") != 1
+                            or prior.state != "accepted"
+                        ):
                             raise PersistenceUnavailable("Unsupported response receipt")
                         if canonical_json(prior.data["response"]) != canonical_json(response_data):
                             raise InteractionConflict("Request already has a different response")
@@ -216,6 +220,7 @@ class InteractionController:
                         operation = ToolOperation.from_json(canonical_json(operation_item.data))
                         if (
                             item.state != "pending"
+                            or type(item.data.get("schema_version")) is not int
                             or item.data.get("schema_version") != 1
                             or canonical_json(item.data["request"])
                             != canonical_json(request.model_dump(mode="json"))

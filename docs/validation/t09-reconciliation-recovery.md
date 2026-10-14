@@ -9,12 +9,12 @@
 
 ## 本轮证据与整卡映射
 
-新增 [test_reconciliation.py](../../tests/test_reconciliation.py) **36 项**、[test_recovery.py](../../tests/test_recovery.py) **8 项**，共 **44 项**。撤去四个旧“不支持 write/unknown”的参数用例，保留 schema-only 接收前拒绝、deny/ask、参数/身份及计数断言；改为有真实写入与核查证据的测试。Runtime 构造仍无副作用，verify/recover 已有实际实现。全库 **488 项**；T-09 两批合计新增 92 项，第一批见 [历史记录](t09-interactions.md)。
+新增 [test_reconciliation.py](../../tests/test_reconciliation.py) **36 项**、[test_recovery.py](../../tests/test_recovery.py) **12 项**，共 **48 项**。撤去四个旧“不支持 write/unknown”的参数用例，保留 schema-only 接收前拒绝、deny/ask、参数/身份及计数断言；改为有真实写入与核查证据的测试。Runtime 构造仍无副作用，verify/recover 已有实际实现。全库 **492 项**；T-09 两批合计新增 96 项，第一批见 [历史记录](t09-interactions.md)。
 
 | 验收 / 关联 | 实际证据 |
 | --- | --- |
 | S-03-A、B-01/04 | 独立进程非幂等事项服务计数：审批前 0，批准 1，拒绝 0；两后端并发 20 次重复批准不多写；临时入口 ASK 仍无 request_id |
-| S-03-B、B-07 | 每个示例阶段新 SDK 进程重建同 Agent/依赖并响应原审批；扫描不自动执行；104 条跨 tenant/user 未结束记录分页转换；缺 revision/容量不推进，recover 不绕过原请求、不复活终态 |
+| S-03-B、B-07 | 每个示例阶段新 SDK 进程重建同 Agent/依赖并响应原审批；扫描不自动执行；104 条跨 tenant/user 未结束记录分页转换；缺 revision/容量不推进；engine/response 的错误版本及 bool 标签四组均拒绝、原恢复状态保持；recover 不绕过原请求、不复活终态 |
 | S-03-C、C-08 | 首批参数/身份/tenant/配置绑定及撤权测试保留；本轮 query 原用户权限、错误控制者、async verifier/版本指纹验证；not_applied 清除旧批准，使用同 operation/new request/新 attempt，次数不回退 |
 | S-03-D、B-05 | 服务真实写成功后关闭连接；工具记录 unknown/暂停，verify 按原 ID 取得独立证据；正常继续需正确结果，不再执行原写入；取消时无可用输出也能凭效果证据收尾，写入保持 1 |
 | S-03-E、C-09 | 五组示例的 input 路径：HumanInput 原 schema 回答 → 固定写入候选 → 新审批 → 实际修改；首批非法回答修正/注入/权限与计数断言保持 |
@@ -29,9 +29,9 @@
 | 未提交模型响应 | 按原 ModelRequest/call ID 重试，新的 attempt、模型 step 不重复计数；此前未提交工具计划写计数 0；保守活动预算耗尽不再调用模型 |
 | SDK/stream 实例 | [operations_offline.py](../../examples/operations_offline.py) 五组各一个独立服务，3/3/4/4/4 共 18 个新 SDK 进程，普通/stream 均通过；批准/输入/丢回包/取消写次数各 1，拒绝 0；重复原回执时模型 0 |
 
-最终本地 Python 3.11：**486 passed / 2 skipped**（Python 3.12+ 即时任务工厂）；Python 3.14：**488 passed**。静态/格式/严格 mypy（72 source files）/schema 检查通过。首批 48 项交互、56 项 Memory 及旧存储/线程/进程测试保留。
+最终本地 Python 3.11：**490 passed / 2 skipped**（Python 3.12+ 即时任务工厂）；Python 3.14：**492 passed**。静态/格式/严格 mypy（72 source files）/schema 检查通过。首批 48 项交互、56 项 Memory 及旧存储/线程/进程测试保留。
 
-早期发现并修复：SQLite kind CHECK 不接受新增审计类别，改为已有不可变 receipt 的带标签子记录，未改变 DDL；重开时查询旧事实应允许返回已保存操作，不能误当新派发；测试错误地把默认元数据摘要当正文请求、两个测试 lambda 缺类型标注、示例变量/格式和类型问题。中间失败不计最终通过，也不把语法/脚本替身作为真实模型质量。
+早期发现并修复：SQLite kind CHECK 不接受新增审计类别，改为已有不可变 receipt 的带标签子记录，未改变 DDL；重开时查询旧事实应允许返回已保存操作，不能误当新派发；测试错误地把默认元数据摘要当正文请求、两个测试 lambda 缺类型标注、示例变量/格式和类型问题。补查最终响应 envelope 的 bool 标签原会被当版本 1 接受，四组先复现再修正，并对输入/交互/回执做同样的精确整数检查；新增四项全部通过。中间失败不计最终通过，也不把语法/脚本替身作为真实模型质量。
 
 ## 本轮命令与构件
 
@@ -50,7 +50,7 @@ UV_PROJECT_ENVIRONMENT=.drov/check-py314 .drov/tooling/bin/uv run --locked --pyt
 git diff --check
 ```
 
-两解释器均完成 wheel/sdist、从 sdist 重建并比较 payload、各两个干净核心安装/兼容/隔离导入及五个示例普通/stream，共四次干净安装。operations 每入口各 18 个独立 SDK 进程和五个独立服务均按独立计数通过；源与服务已加入 sdist 检查。日志在 .drov/t09-full-package-py311.log / t09-full-package-py314.log，构件在 dist/ 与 .drov/dist-py314/，Twine 四个构件通过、未上传。文档 47 文件、382 本地链接、14 Python 片段 AST 及 Git 差异检查通过，保护文件无变更、差异凭据模式计数 0，结果 .drov/t09-full-doc-check.json；不读取环境/真实凭据，模式检查不证明找到所有秘密，AST 不等同 SDK 运行。随后源文件只修正已经过期的只读/未恢复 docstring，远程 CI 对最终提交重新构建；不使用旧 CI 代表新代码。
+两解释器均完成 wheel/sdist、从 sdist 重建并比较 payload、各两个干净核心安装/兼容/隔离导入及五个示例普通/stream，共四次干净安装。operations 每入口各 18 个独立 SDK 进程和五个独立服务均按独立计数通过；源与服务已加入 sdist 检查。日志在 .drov/t09-full-package-py311.log / t09-full-package-py314.log，构件在 dist/ 与 .drov/dist-py314/，Twine 四个构件通过、未上传。文档 47 文件、382 本地链接、14 Python 片段 AST 及 Git 差异检查通过，保护文件无变更、差异凭据模式计数 0，结果 .drov/t09-full-doc-check.json；不读取环境/真实凭据，模式检查不证明找到所有秘密，AST 不等同 SDK 运行。随后源文件修正过期 docstring/恢复提示，并补查严格版本拒绝（见下文），远程 CI 对最终提交重新构建；不使用旧 CI 代表新代码。
 
 ## 完成界限与下一步
 

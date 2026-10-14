@@ -93,7 +93,11 @@ class RecoveryController:
             if not isinstance(latest_input, str):
                 raise PersistenceUnavailable("Invalid interrupted model input")
             item = await tx.get_item(record.scope, record.state.run_id, "model_input", latest_input)
-            if item.state != "prepared" or item.data.get("schema_version") != 1:
+            if (
+                item.state != "prepared"
+                or type(item.data.get("schema_version")) is not int
+                or item.data.get("schema_version") != 1
+            ):
                 raise Conflict("Saved model input is incompatible")
             ModelRequest.from_json(canonical_json(item.data["request"]))
             await self.runs.context_record(tx, record.scope, record.state.run_id, latest_input)
@@ -102,7 +106,10 @@ class RecoveryController:
         elif ids:
             last = cast(str, ids[-1])
             saved = await tx.get_item(record.scope, record.state.run_id, "model_response", last)
-            if saved.data.get("schema_version") != 1:
+            if (
+                type(saved.data.get("schema_version")) is not int
+                or saved.data.get("schema_version") != 1
+            ):
                 raise Conflict("Saved model response is incompatible")
             response = ModelResponse.model_validate(saved.data["response"])
             plan = saved.data.get("operation_ids")
