@@ -176,6 +176,8 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## GitHub / CI
 
+- 本轮 T-10A 首批代码/镜像 recipe/测试/契约记录已本地提交 **f2f45c1**；提交前核对 30 个跟踪文件、敏感模式和差异，未跟踪 `.drov/`、品牌或真实凭据。**推送尚未成功，新代码远程 CI 未运行/未验收。** SSH 22 与 GitHub 官方 SSH 443 连接均被关闭；HTTPS 的已有本机代理 127.0.0.1:17890 不可连接，单次绕过该配置后 TLS 仍失败，gh API 也 EOF。没有更改 origin、全局代理/SSH/认证设置。当前远程跟踪仍 67ef5b2，本地完整检查点保留；恢复 GitHub 连通后同步并检查核心 CI，核心 CI 也不能替代 T-10B 的 Docker 专项。最后同步事实补记为本地文档提交，以实际 git log/status 为准。
+
 - 本轮文件/产物与可选 E2B 规划检查点 6feae84 已提交并推送 origin/main，包含 ADR-0016、26 份 Markdown 与本轮验证/交接；未改源码，以 `[skip ci]` 保存，不重跑未变的 SDK 矩阵。同步事实补记仍只改文档；实际最终 HEAD 与工作区状态以 git log/status 为准。T-10A/T-10B/T-10C 均未实施，不从该提交宣称运行验收。
 
 - 本轮 T-09 完整实施 d33fb5b、严格版本拒绝 ab241dc、跨平台夹具修正 fd3d7d5/[413fa1b](https://github.com/drov-ai/drov/commit/413fa1b35b9f4b7d3f967b83a46631a2ed0662d4) 已提交并推送 origin/main；最终 [CI 38497287077](https://github.com/drov-ai/drov/actions/runs/38497287077) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。八个 package job 的完整测试/构建、两套核心干净安装、五个示例普通/stream、extras 隔离导入通过；准确计数/三轮失败与修正见 [完整验证](../validation/t09-reconciliation-recovery.md)。最终证据补记只改文档，以 skip ci 保存；实际 HEAD 与同步状态以 git log/status 为准，无真实模型、包发布或部署。
@@ -208,7 +210,7 @@ T-10A 完整后进入 T-10B 的真实隔离/资源/取消/暂存与发布故障/
 | 事项 | 当前状态 / 需要时点与配置方式 |
 | --- | --- |
 | T-10 故障与取消 | 本轮矩阵不需要新增仓库/账号/Key/私有资料；独立合成服务/真实 SDK 屏障、SQLite 错误与恢复已本地与远程验收并推送，无需用户新增资源 |
-| GitHub 仓库 | 已提供，继续使用当前 origin；有具体同步/CI 阻碍再说明，无需重新建仓库 |
+| GitHub 仓库 | 已提供，继续使用当前 origin/身份；本轮推送网络受阻，本地 f2f45c1 保留。若下一輪同时同步/跑远程 CI，需要恢复已有本机代理服务或 GitHub 网络连通；不需新仓库/账号/Key，不修改全局配置来掩盖故障。输入/授权实施不依赖此次推送成功 |
 | T-10A/T-10B Docker/镜像/文件存储 | 保持 Docker Desktop 开启；标准库镜像不变，T-10A 首批已实际构建固定分析镜像并验证私有暂存，见 [本轮验证](../validation/t10a-artifact-staging.md)。不需新仓库/账号/Key/预算；执行者继续装配 Runtime/授权/执行/发布。`.drov/sandbox-environment.json`、分析 image.json 与台账是本 checkout 非秘密快照/数据，换机器需重查，不能从探针推断整卡验收 |
 | T-10C 可选 E2B | 现在无需准备、不阻塞 Docker。进入远端验收前提供可用账号/区域权限、固定 template/build、E2B_API_KEY 的本地安全引用、合成代码/文件上传许可、并发/寿命与独立沙箱总预算及收尾预留；执行者先完成离线 adapter/契约，提出实际验收批次与估价。Key 不贴聊天/Git、不传模型或沙箱；无资源只记录已验收子范围 |
 | 模型服务、可访问 model ID、密钥和总预算 | T-11 smoke/T-16 live 前提供可访问服务/model ID 并批准共同费用上限；工程执行者先按新增代码任务量估价。Key 仅本地环境/忽略配置或凭据管理，聊天/Git 不贴密钥；未授权预算前不付费调用 |
