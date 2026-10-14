@@ -5,7 +5,7 @@
 - 前置复跑：首批 448 项中 446 passed / 2 skipped，Ruff/严格类型/schema 通过；按 progress 完成 T-09 剩余范围，未开始 T-10
 - 环境：macOS arm64、uv 0.13.0；Python 3.11.9 / SQLite 3.45.1、Python 3.14.3 / SQLite 3.52.0
 - 契约：API/运行 v3 + [ADR-0015](../decisions/0015-external-effects-recovery.md)；新增两个 verification 事件类型并生成 schema，ToolOperation 可缺省核实字段；无新依赖/uv.lock/DDL/品牌/历史 P4 指纹变化
-- 状态：本轮功能/本地测试与干净安装已验收，远程状态在下文补记；真实模型、硬崩溃完整专项、沙箱、HTTP、维护/旧备份恢复均不由此证明
+- 状态：T-09 整卡本地/远程 CI 已验收，最终代码 413fa1b 的 10 个 job 全部 success；真实模型、硬崩溃完整专项、沙箱、HTTP、维护/旧备份恢复均不由此证明
 
 ## 本轮证据与整卡映射
 
@@ -50,7 +50,7 @@ UV_PROJECT_ENVIRONMENT=.drov/check-py314 .drov/tooling/bin/uv run --locked --pyt
 git diff --check
 ```
 
-两解释器均完成 wheel/sdist、从 sdist 重建并比较 payload、各两个干净核心安装/兼容/隔离导入及五个示例普通/stream，共四次干净安装。operations 每入口各 18 个独立 SDK 进程和五个独立服务均按独立计数通过；源与服务已加入 sdist 检查。日志在 .drov/t09-full-package-py311.log / t09-full-package-py314.log，构件在 dist/ 与 .drov/dist-py314/，Twine 四个构件通过、未上传。文档 47 文件、382 本地链接、14 Python 片段 AST 及 Git 差异检查通过，保护文件无变更、差异凭据模式计数 0，结果 .drov/t09-full-doc-check.json；不读取环境/真实凭据，模式检查不证明找到所有秘密，AST 不等同 SDK 运行。随后源文件修正过期 docstring/恢复提示，并补查严格版本拒绝（见下文），远程 CI 对最终提交重新构建；不使用旧 CI 代表新代码。
+两解释器均完成 wheel/sdist、从 sdist 重建并比较 payload、各两个干净核心安装/兼容/隔离导入及五个示例普通/stream，共四次干净安装。operations 每入口各 18 个独立 SDK 进程和五个独立服务均按独立计数通过；源与服务已加入 sdist 检查。最终本地构建日志在 .drov/t09-full-final-package-py311.log / t09-full-final-package-py314.log（fd3d7d5 源码；随后只修改旧 Memory 测试期限与说明文档），构件在 dist/ 与 .drov/dist-py314/，Twine 四个构件通过、未上传。文档 47 文件、383 本地链接、14 Python 片段 AST 及 Git 差异检查通过，保护文件无变更、差异凭据模式计数 0，结果 .drov/t09-full-doc-check.json；不读取环境/真实凭据，模式检查不证明找到所有秘密，AST 不等同 SDK 运行。上述最终本地构建包含过期 docstring/恢复提示修正与严格版本拒绝；最后测试期限修正后完整本地回归日志为 .drov/t09-full-memory-final-py311.log / t09-full-memory-final-py314.log，远程 CI 对最终提交重新构建，不使用旧 CI 代表新代码。
 
 ## 完成界限与下一步
 
@@ -69,3 +69,20 @@ git diff --check
 日志保存 .drov/t09-full-ci-first.json / t09-full-ci-first-failed.log；[ab241dc 的 CI 38495447901](https://github.com/drov-ai/drov/actions/runs/38495447901) 同轮补严格版本拒绝，仍因上述夹具问题失败。
 
 [fd3d7d5 的 CI 38496446663](https://github.com/drov-ai/drov/actions/runs/38496446663) 共九个 job success，Windows 3.11 唯一失败是旧 T-08 Memory 用例：即时异常分类也要求在 10ms 内完成，系统调度较慢时合法 timeout 被当作 failed 断言错误。该 job 的全部 37 项核查/12 项恢复测试通过。现只将 exception 夹具期限设为 1s，timeout/late 设为 0.1s，仍在等待屏障的 1s 前过期；保留异常/超时状态、迟到结果不可用、取消和调用计数断言，没有改 Memory 实现。修正后本地两解释器各 56 项 Memory 通过，完整矩阵重新运行；旧成功 job 不能代替最终代码验收。状态保存 .drov/t09-full-ci-third.json，失败日志 .drov/t09-full-ci-third-win311-failed.log。
+
+
+## 最终远程矩阵与 Git 交接
+
+最终代码 [413fa1b](https://github.com/drov-ai/drov/commit/413fa1b35b9f4b7d3f967b83a46631a2ed0662d4) 的 [CI 38497287077](https://github.com/drov-ai/drov/actions/runs/38497287077) 为 **success，10/10 job success**。quality 的静态/格式/mypy/schema 通过；八个 package job 均完成完整测试、wheel/sdist 与重建、各两个干净核心安装、五个示例的普通/stream 入口、Twine 与 extras 隔离导入。没有上传构件。
+
+| 平台 / Python | 实际 pytest 结果 |
+| --- | --- |
+| Linux / macOS 3.11 | 各 491 passed / 2 skipped |
+| Linux 3.12、3.13、3.14；macOS 3.14 | 各 493 passed |
+| Windows 3.11 | 490 passed / 3 skipped |
+| Windows 3.14 | 492 passed / 1 skipped |
+| Linux 3.15 advisory | 493 passed；仍不属于承诺支持矩阵 |
+
+3.11 的两项跳过为 Python 3.12+ 即时任务工厂 API；Windows 另跳过“替换打开的 SQLite 文件”边界，操作系统不允许该测试动作，未新增跳过 T-09 的用例。状态/完整日志保存 .drov/t09-full-final-ci.json / t09-full-final-ci.log，实际 headSha 为 413fa1b35b9f4b7d3f967b83a46631a2ed0662d4；不混用旧成功 job。最终补记只更新进度、验证和开发/导航/参考说明，以文档 skip-ci 提交保存并同步现有 origin/main，不改已验证 SDK/测试。
+
+T-09 无剩余任务卡缺项；真实硬终止专项仍属尚未开始的 T-10。本轮未创建新仓库/worktree、未修改认证/全局代理、未读取真实密钥或调用付费模型、未发布包/版本/站点。下一轮建议 New Chat，使用同 Local checkout，先核实最新文档提交、工作区及上述代码验证，再按 progress 的 T-10 验收实施。

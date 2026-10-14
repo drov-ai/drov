@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-08 **本地实施验收完成**；T-09 审批/输入/外部核查/显式恢复已完成本地验收；下一项 T-10 故障与取消验证。首批远程 CI 已成功，本轮新代码远程状态见下文。T-06/07 与 T-08 已推送 origin/main，最终验证提交 5ff654c 的 CI 38413817284 共 10 个 job 全部 success；两轮 Windows 失败与修正证据保留。
+- 阶段：P1 至 P4、T-01 至 T-09 **实施验收完成**；T-09 审批/输入/外部核查/显式恢复的本地与远程矩阵均通过。最终代码 413fa1b 已推送 origin/main，[CI 38497287077](https://github.com/drov-ai/drov/actions/runs/38497287077) 共 10 个 job 全部 success；三轮失败与修正证据保留。下一项 T-10 故障与取消验证，尚未开始；各历史任务的准确证据见下文。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱范围前移见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；本轮新增外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 未实现：T-10 完整硬崩溃/竞争矩阵、真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-10 至 T-18 及新增 T-10A/T-10B 未开始。最小 Python 代码沙箱已纳入首版必交，尚未实现；B-14、多 Agent、Skill 与更深沙箱后续，无公共空壳。
@@ -17,7 +17,7 @@
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 本轮交付：T-09 外部核查与恢复（整卡本地验收）
+## 本轮交付：T-09 外部核查与恢复（整卡验收）
 
 起点 main / 7809192，干净且与 origin/main 同步。复跑首批 446 passed / 2 skipped、静态/类型/schema 后补完 T-09；决定见 [ADR-0015](../decisions/0015-external-effects-recovery.md)，完整证据与限制见 [本轮验证](../validation/t09-reconciliation-recovery.md)。
 
@@ -28,10 +28,10 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 | verify | 原用户/operation/依赖只读查询，权限/正文复核、独立期限、一个真实 Task/槽位；超时保留调用/锁，迟到建议不能消费旧请求；终态后审计不改终态 |
 | recover/扫描 | 分页 104 条跨归属遗留记录，扫描不执行；原 revision/engine/input/plan/预算复核；已提交输入/结果/最终响应直接复用，未提交响应只按原输入与剩余次数重试 |
 | S-03/例子 | 独立非幂等事项进程和实际计数；五组正常/拒绝/输入/丢回包/取消各 3–4 个 SDK 新进程，普通/stream 均通过，拒绝 0、其他 1 次写入；第一批参数/身份/撤权与重复回执回归保留 |
-| 验证 | 新增 49 项、撤去四个过期不支持写入断言，全库 493；本地 3.11：491 passed / 2 skipped，3.14：493 passed；静态/格式/mypy 72 files/schema 通过，两解释器各两套干净核心安装、五示例普通/stream、wheel/sdist/重建/Twine 通过，远程以验证记录为准 |
+| 验证 | 新增 49 项、撤去四个过期不支持写入断言，全库 493；本地 3.11：491 passed / 2 skipped，3.14：493 passed；静态/格式/mypy 72 files/schema 通过，两解释器各两套干净核心安装、五示例普通/stream、wheel/sdist/重建/Twine 通过；413fa1b 的 10 个远程 CI job 全部 success，准确平台计数见验证记录 |
 | 保护/兼容 | 两个 verification 事件增量已生成 schema；旧操作可读，无 verifier 定义不增加指纹键；无新依赖/uv.lock/DDL/品牌/历史基线修改；无 Key、付费调用、公开发布或部署 |
 
-**T-09 任务卡的五个 S-03 离线路径及 B-01/04/05/07 功能条件已本地验收，未将 T-10 的硬崩溃专项写成完成。** 模型是 ScriptedModel，计数是实际外部合成服务事实；不代表真实模型质量或外部通用 exactly-once。原调用不协作仍可能 ShutdownIncomplete；旧备份 barrier/维护仍待 T-15。
+**T-09 任务卡的五个 S-03 离线路径及 B-01/04/05/07 功能条件已本地与远程验收，未将 T-10 的硬崩溃专项写成完成。** 模型是 ScriptedModel，计数是实际外部合成服务事实；不代表真实模型质量或外部通用 exactly-once。原调用不协作仍可能 ShutdownIncomplete；旧备份 barrier/维护仍待 T-15。
 
 ## T-09 首批审批/输入交付（历史子范围）
 
@@ -124,7 +124,9 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## GitHub / CI
 
-- 本轮 T-09 审批/输入实施 [9993500](https://github.com/drov-ai/drov/commit/99935000bee29a52fc93292a0dcb321657ff3187) 已提交并推送 origin/main；[CI 38436332419](https://github.com/drov-ai/drov/actions/runs/38436332419) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。八个 package job 的测试/构建/两套核心干净安装、四示例普通与 stream、extras 隔离导入通过；准确计数/范围见 [T-09 验证](../validation/t09-interactions.md)。本补记仅改 progress/验证文档，后续以 skip ci 保存，不重跑不变代码；实际 HEAD 与同步状态以 git log/status 为准。
+- 本轮 T-09 完整实施 d33fb5b、严格版本拒绝 ab241dc、跨平台夹具修正 fd3d7d5/[413fa1b](https://github.com/drov-ai/drov/commit/413fa1b35b9f4b7d3f967b83a46631a2ed0662d4) 已提交并推送 origin/main；最终 [CI 38497287077](https://github.com/drov-ai/drov/actions/runs/38497287077) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。八个 package job 的完整测试/构建、两套核心干净安装、五个示例普通/stream、extras 隔离导入通过；准确计数/三轮失败与修正见 [完整验证](../validation/t09-reconciliation-recovery.md)。最终证据补记只改文档，以 skip ci 保存；实际 HEAD 与同步状态以 git log/status 为准，无真实模型、包发布或部署。
+
+- 历史 T-09 首批审批/输入实施 [9993500](https://github.com/drov-ai/drov/commit/99935000bee29a52fc93292a0dcb321657ff3187) 已提交并推送 origin/main；[CI 38436332419](https://github.com/drov-ai/drov/actions/runs/38436332419) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。八个 package job 的测试/构建/两套核心干净安装、四示例普通与 stream、extras 隔离导入通过；准确计数/范围见 [T-09 验证](../validation/t09-interactions.md)。本补记仅改 progress/验证文档，后续以 skip ci 保存，不重跑不变代码；实际 HEAD 与同步状态以 git log/status 为准。
 
 - 首版范围文档轮检查点（历史）7cc0fc4 已提交并推送既有 origin/main，推送后工作区干净、与远程同步；本记录随后补记该事实。两次均为 `[skip ci]` 文档提交，不重跑不变的 SDK 矩阵；实际最新提交以 git log/status 为准，保护旧验证与品牌。
 
@@ -138,7 +140,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## 下一项：T-10 故障与取消验证
 
-T-09 已完整本地验收，T-10 尚未开始。复用原独立事项服务、真实调用与 SQLite，按 [任务卡](implementation-plan.md) 和质量计划完成：
+T-09 已完整本地与远程验收，T-10 尚未开始。复用原独立事项服务、真实调用与 SQLite，按 [任务卡](implementation-plan.md) 和质量计划完成：
 
 1. 独立 SDK 进程在 prepared/dispatched、写成功回包前、结果/终态提交前后硬终止，另一个进程核对独立服务计数并恢复；非幂等写无额外派发，预算不重置。
 2. 真实提交失败/响应丢失与取消完成竞争组合；已消费回执/原计划/部分成功与用量如实保留，无虚假 completed/未执行。
@@ -162,7 +164,7 @@ T-09 已完整本地验收，T-10 尚未开始。复用原独立事项服务、�
 
 ## 会话切换建议
 
-**下一轮建议 New Chat，实施 T-10。** T-09 的审批、核查、恢复是一个复杂模块且已形成本地完整验收；硬崩溃专项进入新的夹具/平台边界，适合从已保存证据重新核对。继续选择 Local `/Users/yanlong/projects/drov`，读 AGENTS/progress/导航/handoff、ADR-0014/0015、本轮验证，再运行锁定检查。无需新仓库或 worktree，无需模型 Key；不要切回缺少完整 T-09 的旧 checkout。
+**下一轮建议 New Chat，实施 T-10。** T-09 的审批、核查、恢复是一个复杂模块且已形成完整本地与远程验收；硬崩溃专项进入新的夹具/平台边界，适合从已保存证据重新核对。继续选择 Local `/Users/yanlong/projects/drov`，读 AGENTS/progress/导航/handoff、ADR-0014/0015、本轮验证，再运行锁定检查。无需新仓库或 worktree，无需模型 Key；不要切回缺少完整 T-09 的旧 checkout。
 
 ## 阶段记录
 
@@ -180,4 +182,4 @@ T-09 已完整本地验收，T-10 尚未开始。复用原独立事项服务、�
 | 2026-10-13 | T-08 | 内置 Memory 原子工具/CAS/墓碑、隔离/限时检索/子预算/固定快照、七进程普通/stream 示例及 400 项回归本地验收完成；10 个远程 CI job success；下一项 T-09 |
 | 2026-10-14 | 首版范围调整 | 用户确认代码生成/执行首版必交，新增 T-10A/T-10B，契约/案例/质量/发布及交接文档同步并检查；沙箱未实施，下一项仍 T-09 |
 | 2026-10-14 | T-09 子范围 | 审批/输入、原子 respond/resume、原计划/预算与回执、同 tenant 授权及四进程示例本地验收；外部未知效果/verify/recover 未实施，整卡进行中 |
-| 2026-10-14 | T-09 完整本地验收 | 外部单次写入/unknown、verify/核查响应、启动扫描/显式步骤恢复、五组独立服务/多进程 SDK 与 stream 示例及 493 项回归；T-10 硬崩溃专项尚未开始 |
+| 2026-10-14 | T-09 整卡验收 | 外部单次写入/unknown、verify/核查响应、启动扫描/显式步骤恢复、五组独立服务/多进程 SDK 与 stream 示例及 493 项回归；413fa1b 的 10 个远程 CI job success；T-10 硬崩溃专项尚未开始 |
