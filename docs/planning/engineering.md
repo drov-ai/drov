@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：工程选择与默认值由本页维护；当前任务状态统一见 [progress](progress.md)，T-10 完整证据见 [专项验证](../validation/t10-faults-cancellation.md)。文件/代码沙箱闭环已按 ADR-0020 实现；T-10B 完整专项、E2B、真实适配器和服务尚未验收。更新：2026-10-14。
+状态：工程选择与默认值由本页维护；当前任务状态统一见 [progress](progress.md)，T-10 完整证据见 [专项验证](../validation/t10-faults-cancellation.md)。文件/代码沙箱闭环已按 ADR-0020 实现；T-10B 受测专项证据见 [验证](../validation/t10b-sandbox-faults.md)；E2B、真实适配器和服务仍未验收。更新：2026-10-15。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 
@@ -171,7 +171,7 @@ T-10B 补充实际边界与恢复限额/事件修正见 [ADR-0021](../decisions/
 第三批内部控制/预检已按 [ADR-0019](../decisions/0019-docker-control-preflight.md) 实施：本地 POSIX Unix socket、Linux Engine/cgroup v2/服务端 API 范围必须包含执行器固定的1.41、同架构 ARM64/AMD64 固定 CPython 3.11 镜像与资源能力查询；构造无 I/O，open 不创建容器。内部 binding v1 包含实际 Engine/CLI/image/profile/限额与控制版本，不含随机配置目录。后续已按 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md) 绑定 Runtime 审批/Run 并接通执行与发布；实际 SDK/代码证据见 [本轮验证](../validation/t10a-runtime-sandbox.md)，不代表 T-10B 全平台/恶意故障或真实模型质量。
 
 - 首个后端选择宿主显式配置的本地 Docker CLI/Engine，执行端为 Linux 容器；Drov 用 asyncio.create_subprocess_exec 的固定 argv 管理可信 CLI，并用有界本地 Unix Engine API v1.41 分开 exec-create/start/inspect；代码仅作为容器内固定 Python runner 的输入，不拼进宿主 shell。核心无新增 Python Docker SDK 依赖；sandbox/ 模块在 T-10A 真实实施时建立，普通 SDK 安装/导入不需要 daemon。
-- 镜像由宿主预装并以 repository@sha256 manifest 或显式本地 sha256:image-config-id 固定（ADR-0017），禁用可变 tag、执行期自动 pull/构建/安装依赖；固定非 root 用户与 Python 入口，固定覆盖 entrypoint、禁用镜像 healthcheck，拒绝镜像自动 VOLUME；镜像环境经白名单核验，不继承宿主环境/凭据。必交标准库计算及一个固定数据分析镜像（numpy/pandas/matplotlib，用于 CSV/PNG 案例）；依赖由宿主预构建并验收，执行期间不安装。T-10A 首批已有本地 ARM64 分析镜像、wheel 锁/许可与可信探针，见 [验证](../validation/t10a-artifact-staging.md) 和 [实际 recipe](../../sandbox/README.md)；当前 SDK 文件/代码闭环见本轮验证，完整平台/故障验收仍在 T-10B，标准库镜像保持原样。具体版本与三种 digest 区分按真实记录，不把本地 config ID 伪装为 registry manifest。
+- 镜像由宿主预装并以 repository@sha256 manifest 或显式本地 sha256:image-config-id 固定（ADR-0017），禁用可变 tag、执行期自动 pull/构建/安装依赖；固定非 root 用户与 Python 入口，固定覆盖 entrypoint、禁用镜像 healthcheck，拒绝镜像自动 VOLUME；镜像环境经白名单核验，不继承宿主环境/凭据。必交标准库计算及一个固定数据分析镜像（numpy/pandas/matplotlib，用于 CSV/PNG 案例）；依赖由宿主预构建并验收，执行期间不安装。T-10A 首批已有本地 ARM64 分析镜像、wheel 锁/许可与可信探针，见 [验证](../validation/t10a-artifact-staging.md) 和 [实际 recipe](../../sandbox/README.md)；当前 SDK 文件/代码闭环见本轮验证，受测平台/故障证据见 T-10B 专项，其他平台不从此推断，标准库镜像保持原样。具体版本与三种 digest 区分按真实记录，不把本地 config ID 伪装为 registry manifest。
 - 隔离配置固定：network=none、无端口发布/host namespace、无 bind/volume/device/docker socket 挂载、只读根文件系统、有限私有 tmpfs、非 root、cap-drop=ALL、no-new-privileges、保留有效 seccomp；缺少所需能力或实际配置不一致即拒绝，不自动降级。[Docker 运行配置](https://docs.docker.com/engine/containers/run/) / [CLI 参数](https://docs.docker.com/reference/cli/docker/container/run/) / [seccomp 文档](https://docs.docker.com/engine/security/seccomp/) 支持这些机制的存在，不证明 Drov 已实现或抵抗所有内核攻击。
 - 限额必须由 daemon/内核实际执行，不能仅是 Drov 字段；内存与 swap 总额一并限定，不启用 oom-kill-disable；工作区/tmp/shm 有限，资源耗用包含 tmpfs。使用有界 stdout/stderr 管道，先按原始字节限制，显示以 UTF-8 errors=replace 增量解码，区分边界截断与非法字节替换；禁用容器持久日志（log driver none），避免日志绕开输出上限占满磁盘。序列化结果仍受 max_tool_result_bytes，超限按结果不可用收尾，不重跑代码。丢失未保存输出时按契约报告不可用，不依靠无界日志回填。依据：[资源限制](https://docs.docker.com/engine/containers/resource_constraints/) / [tmpfs](https://docs.docker.com/engine/storage/tmpfs/)。
 - 模型代码不做“AST 过滤后就安全”的承诺；隔离依赖实际后端与宿主维护。Docker daemon 是可信控制面，容器配置/内核漏洞可能破坏隔离，因此首版定位为受管理的本地应用执行，未经额外评估不承诺面向敌对公网多租户的强隔离平台。[Docker 安全文档](https://docs.docker.com/engine/security/)。其他更深隔离后端仍后续；可选 E2B 已按 ADR-0016 单列 T-10C，其保证不从 Docker 参数推断。未创建 E2B 远端资源。
@@ -191,7 +191,7 @@ T-10B 补充实际边界与恢复限额/事件修正见 [ADR-0021](../decisions/
 
 后端配置（非秘密连接引用、镜像 digest、固定控制、限额/执行入口版本）与 Agent/工具定义绑定并持久化检查，避免旧审批或恢复运行在新镜像/弱限制下。内部操作 payload 的新增执行/清理字段在 T-10A 明确版本和旧记录读取，必要 DDL/migration 在对应实现同轮处理，不对旧操作伪造执行事实。记录与保留语义见运行契约/维护策略，不在此另造状态机。
 
-2026-10-14 本地资源准备证据见 [Docker/镜像准备验证](../validation/sandbox-environment-preparation.md)。该历史准备记录的基础探针不能替代 SDK 验收；当前本机 macOS Linux ARM64 VM 的 SDK/CSV/PNG/安装闭环已实际通过，完整隔离/资源/故障平台矩阵仍待 T-10B。该 daemon 默认 seccomp=unconfined；实际执行须显式使用固定可信 profile 并核实有效，profile 内容 hash 纳入既定安全控制指纹。控制 CLI 不应继承用户配置中的容器代理/环境注入，准备探针使用独立空 auths/proxies 配置；SDK 已按 ADR-0020 落地，不改变以上固定边界。
+2026-10-14 本地资源准备证据见 [Docker/镜像准备验证](../validation/sandbox-environment-preparation.md)。该历史准备记录的基础探针不能替代 SDK 验收；当前本机 macOS Linux ARM64 VM 的 SDK/CSV/PNG/安装闭环已实际通过，受测隔离/资源/故障与原生AMD64 CI矩阵见T-10B专项；不扩成其他平台保证。该 daemon 默认 seccomp=unconfined；实际执行须显式使用固定可信 profile 并核实有效，profile 内容 hash 纳入既定安全控制指纹。控制 CLI 不应继承用户配置中的容器代理/环境注入，准备探针使用独立空 auths/proxies 配置；SDK 已按 ADR-0020 落地，不改变以上固定边界。
 
 ### 9.1 受控文件与私有产物存储
 

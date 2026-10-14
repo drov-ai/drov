@@ -45,7 +45,7 @@ uv run --locked python scripts/check_analysis_image.py \
 
 固定执行者源码读取合成 CSV，实际运行 numpy/pandas/matplotlib，生成并解码检查 CSV/PNG；固定非 root、no-network、有限 cgroup/tmpfs、只读 root、显式 seccomp 等配置，并核对有效值。只清理具有本轮唯一身份与标签的容器；不停止用户 daemon。容器销毁后用字节层暂存输出、关闭并重新打开 SQLite/store 后按 hash 读回。
 
-这个探针使用可信固定代码和测试传输，不是安全导出器：没有 Run 授予、输入只读保护、审批、工具结果、动态 Authorizer、ready 发布或授权下载。不得用它代替任务卡闭环，也不得用它执行任意模型代码。恶意代码隔离、资源超限、遗留子进程、RPC 应答丢失及 SDK 硬终止恢复仍待实际后端与 T-10B。
+这个探针使用可信固定代码和测试传输，不是安全导出器：没有 Run 授予、输入只读保护、审批、工具结果、动态 Authorizer、ready 发布或授权下载。不得用它代替任务卡闭环，也不得用它执行任意模型代码。这些隔离/资源/子进程/RPC/SDK硬终止的实际后端证据由T-10B专项给出；不能归到这个独立探针。
 
 ## 私有字节层
 
@@ -63,7 +63,7 @@ uv run --locked python examples/sandbox_offline.py \
   --directory .drov/my-sdk-analysis --chart
 ```
 
-加 --stream 检查流入口；不加 --chart 可用预装固定标准库镜像。示例自己通过默认审批后检查工具真实结果，模型是确定性夹具，不能作为真实模型质量。默认输入/输出额、PNG 有界解码 profile 与 POSIX 限制见工程方案第 9 节；合法但超出 PNG profile 的文件也会被拒绝。尚未交付 Linux Docker 专项 CI、全恶意/资源/硬崩溃矩阵或完整维护备份，不用于敌对公网多租户部署承诺。
+加 --stream 检查流入口；不加 --chart 可用预装固定标准库镜像。示例自己通过默认审批后检查工具真实结果，模型是确定性夹具，不能作为真实模型质量。默认输入/输出额、PNG 有界解码 profile 与 POSIX 限制见工程方案第 9 节；合法但超出 PNG profile 的文件也会被拒绝。T-10B 的受测隔离/资源/硬终止与 Linux3.11–3.14原生AMD64专项CI/安装已完整通过，见专项验证；完整维护/备份仍T-15，不用于敌对公网多租户部署承诺。
 
 当前字节层仅在 POSIX 控制下可打开；构造/导入在其他平台仍无 I/O。文件目录、store.json、stage.json 与原始 ID 字节共同构成配对数据；不能在尚未完成 T-15 备份 barrier 时声称有完整 Artifact 备份。无清单目录、临时清单或其他未知项使 open fail closed，保留证据，不手工删除/改写后假装恢复已验收。调小容量不会清空旧预留；容量不足明确拒绝。
 

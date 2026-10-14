@@ -60,7 +60,7 @@ assert "result" not in evidence.model_dump()
 
 ## 可运行的沙箱接口
 
-`from drov.sandbox import PythonSandbox, DockerSandbox, SandboxLimits, SandboxResult` 已可用，构造无 I/O；显式 Runtime 需要 SQLiteStorage、配对 LocalArtifacts 和固定本地 Docker dependency。默认审批，临时 Agent.run 拒绝。运行教程见 [实际 CSV/PNG 示例](../../examples/sandbox_offline.py) 与 [准备说明](../../sandbox/README.md)。SandboxLimits/Result 已加入生成 schema；显式 sandbox SQL 扩展 v1 的实际 DDL 见 [storage-sandbox-schema-v1.sql](storage-sandbox-schema-v1.sql)，旧核心库不自动启用，旧 SDK 拒绝扩展库。verify 只读，recover 查询/销毁原环境并使用原暂存，不重跑代码，人工核查 response 不能替代清理事实。T-10B 专项尚未验收，E2B 独立可选 T-10C，无空壳。接口见 [API](../planning/api-draft.md)，任务状态统一见 progress。
+`from drov.sandbox import PythonSandbox, DockerSandbox, SandboxLimits, SandboxResult` 已可用，构造无 I/O；显式 Runtime 需要 SQLiteStorage、配对 LocalArtifacts 和固定本地 Docker dependency。默认审批，临时 Agent.run 拒绝。运行教程见 [实际 CSV/PNG 示例](../../examples/sandbox_offline.py) 与 [准备说明](../../sandbox/README.md)。SandboxLimits/Result 已加入生成 schema；显式 sandbox SQL 扩展 v1 的实际 DDL 见 [storage-sandbox-schema-v1.sql](storage-sandbox-schema-v1.sql)，旧核心库不自动启用，旧 SDK 拒绝扩展库。verify 只读，recover 查询/销毁原环境并使用原暂存，不重跑代码，人工核查 response 不能替代清理事实。T-10B 受测专项证据见 [验证](../validation/t10b-sandbox-faults.md) 与 ADR-0021；当前状态只见progress。E2B 独立可选 T-10C，无空壳。接口见 [API](../planning/api-draft.md)，任务状态统一见 progress。
 
 ## 可运行审批与输入子范围
 
