@@ -34,6 +34,8 @@ git diff --check
 - 26 个 Markdown 变更（含新增 ADR/本记录）；src/tests/品牌未变，pyproject/uv.lock、schema-v1、storage-schema-v1.sql、P4 fingerprint 与起点逐字节一致。implementation-baseline 仅追加新差异，原审查正文未改。没有 sandbox/artifacts 公共空壳。可识别密钥模式 4 组匹配均为 0；不读取任何真实凭据文件/环境。
 - git diff --check 通过；完整结果保存在本地忽略文件 .drov/sandbox-artifacts-plan-check.json。历史检查 JSON 不覆盖；本轮只改文档，保存检查点使用 skip ci，不重跑未变源码矩阵。
 
+规划检查点 6feae84 已提交并推送既有 origin/main（26 份 Markdown）；本补记仅记录实际同步结果，仍以 skip ci 保存。最终 HEAD/干净与远程同步状态以结束前 git log/status 核实，不将提交或跳过 CI 当运行测试。
+
 ## 未运行与限制
 
 没有更改 src、tests、schema-v1、SQLite DDL、pyproject/uv.lock、品牌或 P4 fingerprint；没有创建 SDK 空壳、安装新库、构建/拉取镜像、启动容器、调用模型/E2B、读取真实凭据或公开发布/部署。本轮文档的 Python 片段只做 AST 检查，不可在当前版本导入。

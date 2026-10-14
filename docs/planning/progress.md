@@ -159,6 +159,8 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## GitHub / CI
 
+- 本轮文件/产物与可选 E2B 规划检查点 6feae84 已提交并推送 origin/main，包含 ADR-0016、26 份 Markdown 与本轮验证/交接；未改源码，以 `[skip ci]` 保存，不重跑未变的 SDK 矩阵。同步事实补记仍只改文档；实际最终 HEAD 与工作区状态以 git log/status 为准。T-10A/T-10B/T-10C 均未实施，不从该提交宣称运行验收。
+
 - 本轮 T-09 完整实施 d33fb5b、严格版本拒绝 ab241dc、跨平台夹具修正 fd3d7d5/[413fa1b](https://github.com/drov-ai/drov/commit/413fa1b35b9f4b7d3f967b83a46631a2ed0662d4) 已提交并推送 origin/main；最终 [CI 38497287077](https://github.com/drov-ai/drov/actions/runs/38497287077) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。八个 package job 的完整测试/构建、两套核心干净安装、五个示例普通/stream、extras 隔离导入通过；准确计数/三轮失败与修正见 [完整验证](../validation/t09-reconciliation-recovery.md)。最终证据补记只改文档，以 skip ci 保存；实际 HEAD 与同步状态以 git log/status 为准，无真实模型、包发布或部署。
 
 - 历史 T-09 首批审批/输入实施 [9993500](https://github.com/drov-ai/drov/commit/99935000bee29a52fc93292a0dcb321657ff3187) 已提交并推送 origin/main；[CI 38436332419](https://github.com/drov-ai/drov/actions/runs/38436332419) 的 quality、Linux 3.11–3.14、macOS/Windows 各 3.11/3.14、Python 3.15 advisory 共 10 个 job 全部 success。八个 package job 的测试/构建/两套核心干净安装、四示例普通与 stream、extras 隔离导入通过；准确计数/范围见 [T-09 验证](../validation/t09-interactions.md)。本补记仅改 progress/验证文档，后续以 skip ci 保存，不重跑不变代码；实际 HEAD 与同步状态以 git log/status 为准。
