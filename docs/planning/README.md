@@ -1,6 +1,6 @@
 # 实施前规划导航
 
-实施状态、下一项与用户准备统一见 [progress](progress.md)。T-09 全路径证据与 T-10 硬终止/故障矩阵分别维护，首版新增 Python 代码沙箱见 ADR-0013 与 T-10A/T-10B。日期：2026-10-14（Asia/Shanghai）。
+实施状态、下一项与用户准备统一见 [progress](progress.md)。T-09 全路径证据与 T-10 硬终止/故障矩阵分别维护，首版代码/受控文件/产物与可选 E2B 见 ADR-0016、必交 T-10A/T-10B 和独立可选 T-10C。日期：2026-10-14（Asia/Shanghai）。
 
 ## 当前共识
 
@@ -33,7 +33,9 @@ Drov 面向通用 Agent 应用，以 Python 为主要语言、AgentScope 2.0 为
 | 20 | [只读闭环决定](../decisions/0010-read-only-agent-loop.md) | 接收、模型循环、历史、预算和授权事件如何落地？ |
 | 21 | [上下文装配决定](../decisions/0011-context-assembly.md) | 完整轮次、预览、清单与授权查询怎样落地？ |
 | 22 | [事务 Memory 决定](../decisions/0012-transactional-memory.md) | 内置工具、作用域、限时检索与快照怎样落地？ |
-| 23 | [首版代码沙箱决定](../decisions/0013-first-release-code-sandbox.md) | 新增首版范围、后端/权限/清理边界与任务怎样安排（计划）？ |
+| 23 | [首版代码沙箱决定](../decisions/0013-first-release-code-sandbox.md) | 首次前移的历史决定及继续有效的派发/清理义务 |
+| 24 | [审批输入决定](../decisions/0014-durable-approval-input.md) / [外部效果恢复决定](../decisions/0015-external-effects-recovery.md) | 已实现的原计划、回执和核查/恢复边界 |
+| 25 | [文件与后端决定](../decisions/0016-sandbox-artifacts-and-backends.md) | 受控文件/持久产物必交、E2B 可选及分工怎样落地（计划）？ |
 
 ## 状态词约定
 
@@ -55,7 +57,7 @@ P1 至 P4 文档完成只表示设计和实施准备通过审查，不表示 API
        外部证据 E / 差异化假设 H
 ```
 
-G、C、S、X、B、E、H 标识在对应源文档定义。B-01 至 B-17 是运行测试要求，按对应任务逐项验收；B-14 已延后。T-01 至 T-18 及 T-10A/T-10B 共 20 张卡在实施任务中定义，当前 T-01 至 T-08 本地验收完成、T-09 完整验收；状态在 progress，实际证据见 [T-09 核查/恢复验证](../validation/t09-reconciliation-recovery.md) 与 [T-10 故障验证](../validation/t10-faults-cancellation.md)。新会话方法见 [交接说明](../handoff.md)。质量计划建立映射，不另改需求含义。
+G、C、S、X、B、E、H 标识在对应源文档定义。B-01 至 B-18 是运行测试要求，按对应任务逐项验收；B-14 已延后。T-01 至 T-18 及 T-10A/T-10B/T-10C 共 21 张卡在实施任务中定义，T-10C 独立可选；状态只在 progress，实际证据见 [T-09 核查/恢复验证](../validation/t09-reconciliation-recovery.md) 与 [T-10 故障验证](../validation/t10-faults-cancellation.md)。新会话方法见 [交接说明](../handoff.md)。质量计划建立映射，不另改需求含义。
 
 ## 规划边界
 
@@ -72,3 +74,5 @@ T-09 的审批/输入子范围决定见 [ADR-0014](../decisions/0014-durable-app
 T-09 外部路径的决定见 [ADR-0015](../decisions/0015-external-effects-recovery.md)，完整离线证据见 [本轮验证](../validation/t09-reconciliation-recovery.md)；T-10 硬崩溃专项单独验收。
 
 T-10 的真实 SDK 硬终止、SQLite 提交/只读/页数耗尽故障、部分成功、取消竞争及所有权矩阵见 [专项验证](../validation/t10-faults-cancellation.md)，不覆盖沙箱/真实模型/MCP/HTTP 或旧备份维护。
+
+2026-10-14 用户采纳范围审查建议后，按 ADR-0016 将文件输入/持久产物纳入两张 Docker 必交卡，并添加可选 E2B 卡；源码、依赖和公共 schema 未变。同步/检查与未验证范围见 [本轮记录](../validation/2026-10-14-sandbox-artifacts-scope.md)；不重新开启 P4，也不以旧 CI 宣称新增能力通过。

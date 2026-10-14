@@ -4,10 +4,10 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-10 **实施验收完成**；本轮 T-10 新增 120 项，全库 613 项，本地两解释器及远程跨平台均通过。测试/夹具提交 52f70e3 已推送 origin/main，[CI 38510903650](https://github.com/drov-ai/drov/actions/runs/38510903650) 为 success，10/10 job success。下一项 T-10A 尚未开始；准确结果见下文与 [T-10 验证](../validation/t10-faults-cancellation.md)。
-- 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱范围前移见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
+- 阶段：P1 至 P4、T-01 至 T-10 **实施验收完成**；本轮 T-10 新增 120 项，全库 613 项，本地两解释器及远程跨平台均通过。测试/夹具提交 52f70e3 已推送 origin/main，[CI 38510903650](https://github.com/drov-ai/drov/actions/runs/38510903650) 为 success，10/10 job success。下一项 T-10A 尚未开始；本轮已采纳文件/产物与可选 E2B 规划，准确结果见下文与 [T-10 验证](../validation/t10-faults-cancellation.md)。
+- 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
-- 未实现：真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-11 至 T-18 及 T-10A/T-10B 未开始。最小 Python 代码沙箱已纳入首版必交，尚未实现；B-14、多 Agent、Skill 与更深沙箱后续，无公共空壳。T-10 的真实 SDK 硬终止/故障/取消矩阵已本地验证，不代表 HTTP/MCP 或沙箱专项已验收。
+- 未实现：真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-11 至 T-18 及 T-10A/T-10B/T-10C 未开始。Docker Python/受控文件/持久产物是首版必交，E2B 是独立可选；均尚未实现。B-14、多 Agent、Skill、持久 Notebook/共享工作区及其他更深后端仍后续，无公共空壳。T-10 的真实 SDK 硬终止/故障/取消矩阵已本地验证，不代表 HTTP/MCP 或沙箱专项已验收。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 - 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
@@ -17,7 +17,21 @@
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 本轮交付：T-10 故障与取消矩阵
+## 本轮交付：文件/产物必交与 E2B 可选规划同步
+
+起点 Local `/Users/yanlong/projects/drov`、main / fa2b671，干净且与 origin/main 同步；先核对 AGENTS、progress、导航/handoff、已有源码/最新 T-10 与准备/范围审查证据。用户本轮采纳推荐范围，工作决定见 ADR-0016，完整文档检查与未跑项见 [本轮验证](../validation/2026-10-14-sandbox-artifacts-scope.md)。
+
+| 交付 | 实际结果 / 限制 |
+| --- | --- |
+| 必交范围 | T-10A/T-10B 加受控文件输入、固定分析镜像、持久 CSV/PNG 等产物与授权读取；仍单次执行，不共享变量/工作区，不挂主机目录/联网安装 |
+| 可选适配 | 新增 T-10C E2B，依赖 T-10B，独立实验性 extra；不阻塞 Docker 必交链，真实远端未验收不能声称支持或关闭整卡 |
+| 契约与验收 | 输入/hash/授予/审批、私有有界字节、导出暂存/ready/销毁/结果一致性、B-18、原三个代码案例/X-03、HTTP/UI/维护备份/安装发布同步；正式模型任务数量未变，E2B 费用单独授权 |
+| 导航与交接 | 产品/能力/API/运行/架构/工程/质量/任务/发布、AGENTS/开发/例子/reference/导航/handoff 同步；新会话 prompt 加入新的 T-10A 边界与镜像准备责任 |
+| 验证与保护 | 53 个 Markdown/436 链接/14 Python AST/86 表格错误 0；21 卡/31 边与图一致、无环，可选卡不阻塞必交；映射/算术、差异与敏感模式通过。源码/测试/schema/DDL/uv.lock/品牌/历史 fingerprint 不改，不跑容器/安装/模型/E2B |
+
+**完成的是规划同步，T-10A/T-10B/T-10C 都未实施、未验收。** 当前 Docker 基础准备仍有效但需要下一轮复查；原标准库镜像没有分析库，数据镜像在 T-10A 由执行者准备，不能从旧探针/CI 推断文件或云能力。无需用户此刻开云账号、找 digest 或提供 Key。
+
+## T-10 故障与取消矩阵（历史整卡验收）
 
 起点 Local `/Users/yanlong/projects/drov`、main / 53cee41，干净且与 origin/main 同步；复跑 T-09 的 491 passed / 2 skipped 及全部静态/类型/schema 后实施。完整矩阵、命令、失败调查与适用限制见 [本轮验证](../validation/t10-faults-cancellation.md)。
 
@@ -159,18 +173,16 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 - 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
-## 下一项：T-10A Python 代码沙箱闭环
+## 下一项：T-10A Python 与文件沙箱闭环
 
-2026-10-14 用户在实施前提出首期范围/E2B 审查。本轮核对 AgentScope Python v2.0.9 固定源码与 E2B 官方文档，见 [审查建议](../validation/sandbox-scope-review.md) / E-29 至 E-33。建议首期补受控文件输入/产物输出、保持后端分离、E2B 作为独立可选适配目标，持久交互工作区后续；**尚未采纳为新范围**，C-17/ADR-0013/任务卡与发布条件没有改动。若采纳，先在本会话同步 ADR 与源契约/案例/质量/任务/维护，再 New Chat 实施；保留原范围则按以下现有卡接续。本轮只做具体缺项审查，无 SDK/E2B 资源/密钥/付费调用。
+T-10 已完整验收；范围审查建议本轮已被用户采纳并同步，不再等待选择。按 [任务卡](implementation-plan.md)、C-17、ADR-0016、API 文件接口、运行第 13 节、工程第 9 节及质量专项实施：
 
-T-10 本地与远程矩阵均已通过，按 [任务卡](implementation-plan.md)、C-17、ADR-0013 与运行契约第 13 节实施 T-10A：
+1. 复查当前 Local Docker/标准库镜像/显式 seccomp 与非秘密配置；由执行者准备并固定实际数据分析镜像/依赖版本/许可，装配私有 ArtifactStore、校验容量与权限。不要求用户手工求 digest，不在代码执行时下载/安装。
+2. 落实真实 PythonSandbox/DockerSandbox/结果与 Artifact 输入/引用/限额/存储；输入接收/Run 授予/去重、授权读取、代码与文件清单审批、稳定执行键/预算、后端预检/配置指纹。模型仅提交代码/获准输入 ID/相对输出声明。
+3. 真实单次环境执行、有界文本与文件导出、可靠暂存、销毁确认后原子 ready 引用/结果；旧调用/记录兼容，异常/非法/缺失/超限文件无悬空成功引用，原操作不重跑。
+4. 实际 CSV → Python 统计 → summary.csv/chart.png → 同一循环最终输出；环境销毁后下载并校验内容/hash；两次调用无隐式共享，旧产物仅显式授权复用。完成静态/类型/schema/安装和实际 T-10A 闭环证据才关闭整卡；较大工作可分批记录已验收子范围。
 
-1. 复核本轮已经准备的 Docker/Linux 后端、固定 Python 镜像与非秘密配置（见准备验证），在 SDK 中落实预检与所需资源控制。配置/协议先完成；无可用后端也不创建空壳或宿主执行回退。
-2. 落地 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、依赖注入与接收前预检、code-only schema、控制配置指纹；宿主配置不能来自模型或用户输入。
-3. 沿原审批保存代码/hash/稳定执行键/预算后才执行；真实逐调用容器、有界 stdout/stderr/退出事实；原操作不重复执行，同进程两次调用不共享工作目录/变量。
-4. 提交实际 code → 容器计算 → 工具结果 → 类型化最终输出的离线示例与完整 T-10A 证据，再进入 T-10B 隔离/资源/清理故障。无 daemon/镜像时仅记已验收配置子范围，不关闭整卡。
-
-硬终止测试的恢复步骤已固化在本轮夹具；核查使用 verify 后 respond/resume，取消标志提交而未收尾时重复显式 cancel，普通 recovery 用 recover。没有要求重跑模型/旧写入来代替已提交结果。
+T-10A 完整后进入 T-10B 的真实隔离/资源/取消/暂存与发布故障/重启/专项 CI；无 daemon/分析镜像时先验收独立配置/协议子范围，记录缺项和复跑，不能提前关闭。T-10C 不在本卡预建 E2B 模块。T-10 的核查恢复步骤仍适用：原操作不重新执行，verify 后 respond/resume，取消未收尾重复显式 cancel，普通恢复用 recover。
 
 ## 用户准备事项
 
@@ -178,7 +190,8 @@ T-10 本地与远程矩阵均已通过，按 [任务卡](implementation-plan.md)
 | --- | --- |
 | T-10 故障与取消 | 本轮矩阵不需要新增仓库/账号/Key/私有资料；独立合成服务/真实 SDK 屏障、SQLite 错误与恢复已本地与远程验收并推送，无需用户新增资源 |
 | GitHub 仓库 | 已提供，继续使用当前 origin；有具体同步/CI 阻碍再说明，无需重新建仓库 |
-| T-10A/T-10B 本地沙箱环境与镜像 | 2026-10-14 用户开启 Docker Desktop 后已可连接：Desktop 4.32.0、CLI/Engine 27.0.3、Linux ARM64；已预装官方 Python 3.11.17-slim-bookworm 的固定平台 digest，并完成基础受限容器探针，见 [准备验证](../validation/sandbox-environment-preparation.md)。用户保持 Docker Desktop 开启即可，无需自行求 digest/新账号/Key/付费预算。daemon 默认 seccomp=unconfined，准备时已用固定 Moby v27.0.3 官方 profile 显式启用并核实 Seccomp=2；T-10A 必须维持该控制与独立 CLI 配置。非秘密快照在 .drov/sandbox-environment.json，环境/镜像需复查；尚未验收完整隔离/资源压力/恢复，未改其他容器或全局设置 |
+| T-10A/T-10B Docker/镜像/文件存储 | Docker Desktop 已开启；固定官方标准库镜像与显式 seccomp 基础探针见 [准备验证](../validation/sandbox-environment-preparation.md)。用户保持开启即可，不需新仓库/账号/Key/预算；执行者在 T-10A 准备固定分析镜像、依赖锁/许可和私有存储，当前镜像只有标准库。.drov/sandbox-environment.json 是本 checkout 的非秘密快照，复查实际环境，不从基础探针声称完整隔离/文件验收 |
+| T-10C 可选 E2B | 现在无需准备、不阻塞 Docker。进入远端验收前提供可用账号/区域权限、固定 template/build、E2B_API_KEY 的本地安全引用、合成代码/文件上传许可、并发/寿命与独立沙箱总预算及收尾预留；执行者先完成离线 adapter/契约，提出实际验收批次与估价。Key 不贴聊天/Git、不传模型或沙箱；无资源只记录已验收子范围 |
 | 模型服务、可访问 model ID、密钥和总预算 | T-11 smoke/T-16 live 前提供可访问服务/model ID 并批准共同费用上限；工程执行者先按新增代码任务量估价。Key 仅本地环境/忽略配置或凭据管理，聊天/Git 不贴密钥；未授权预算前不付费调用 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
 | Cloudflare drop.dev、账号范围、品牌来源与公开使用范围 | 官网/素材初次公开前核实；现有素材保留本地，当前不部署 |
@@ -187,7 +200,7 @@ T-10 本地与远程矩阵均已通过，按 [任务卡](implementation-plan.md)
 
 ## 会话切换建议
 
-**下一轮建议 New Chat，实施 T-10A。** T-10 已完整验收并推送检查点；沙箱引入实际容器后端、隔离与清理语义，适合独立会话。继续选择 Local `/Users/yanlong/projects/drov`，读 AGENTS/progress/导航/handoff、本轮验证及 ADR-0013、运行第 13 节/工程方案，再核实 Git 和实际容器条件。无需新仓库/worktree 或模型 Key；环境缺失时先完成独立配置子范围，保留真实后端缺项。
+**规划已调整，下一轮建议 New Chat，实施 T-10A。** T-10 完整验收与新范围有明确文档检查点，文件/产物引入存储和真实后端，适合独立会话。选择 Local `/Users/yanlong/projects/drov`，使用 [handoff 的 prompt](../handoff.md)，读 ADR-0016/API 文件接口/运行第 13 节/工程/质量/任务，再核实 Git/源码与 Docker。无需新仓库/worktree、云账号或模型 Key；忽略目录准备文件只在当前 checkout，缺资源时分批完成并留下真实缺项。
 
 ## 阶段记录
 
@@ -208,4 +221,5 @@ T-10 本地与远程矩阵均已通过，按 [任务卡](implementation-plan.md)
 | 2026-10-14 | T-09 整卡验收 | 外部单次写入/unknown、verify/核查响应、启动扫描/显式步骤恢复、五组独立服务/多进程 SDK 与 stream 示例及 493 项回归；413fa1b 的 10 个远程 CI job success；T-10 硬崩溃专项尚未开始 |
 | 2026-10-14 | T-10 整卡验收 | 120 项硬终止/真实 SQLite 故障/取消竞争新增；全库 613、两解释器/构建/安装及 52f70e3 的 10 个远程 CI job success；下一项 T-10A 尚未开始 |
 | 2026-10-14 | 沙箱环境准备 | Docker 已连接、官方 ARM64 固定镜像预装、基础受限容器与显式 seccomp 生效；资源就绪，T-10A/T-10B 尚未实施 |
-| 2026-10-14 | 首期沙箱范围审查 | 用户要求核对 T-10A/T-10B 与 E2B；固定竞品/官方来源与具体建议已记录，未改变已确认范围，待选择是否采纳 |
+| 2026-10-14 | 首期沙箱范围审查（历史） | 用户要求核对 T-10A/T-10B 与 E2B；当时记录固定来源与建议、未改范围；其后已采纳，见下一行 |
+| 2026-10-14 | 文件/产物与可选 E2B 范围采纳 | 用户采纳 ADR-0016，必交 T-10A/T-10B 加受控输入/持久产物，新增独立可选 T-10C；源文档与验收/交接同步检查，三卡均未实施；建议 New Chat 实施 T-10A |

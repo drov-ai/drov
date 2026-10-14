@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：T-01 至 T-08 已本地验收，含只读 Agent 闭环、上下文选择/预览/清单和事务 Memory；T-09 审批/输入子范围已实施；真实适配器及服务仍未实现。实际范围见 [T-08 验证](../validation/t08-memory.md)。更新：2026-10-14。
+状态：工程选择与默认值由本页维护；当前任务状态统一见 [progress](progress.md)，T-10 完整证据见 [专项验证](../validation/t10-faults-cancellation.md)。文件/代码沙箱、E2B、真实适配器和服务仍未实现。更新：2026-10-14。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 
@@ -24,7 +24,7 @@
 
 Python 导入名使用 `drov`；PyPI 分发名暂定 `drov`，占用和控制权待发布准备核实。若不可用，变更分发名不自动变更导入名。npm 组织保留，v0.1 不为凑产品线发布 JS SDK。
 
-T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；T-09 已实现显式恢复调度。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。
+T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；T-09 已实现显式恢复调度。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。E2B experimental extra e2b 只在 T-10C 真实适配时新增，当前并未声明或安装。
 
 以下是完整首版的目标布局。T-01 只建立元数据包、测试/构建检查和 CI，其他模块按任务创建，不以空壳占位：
 
@@ -38,7 +38,10 @@ src/drov/
   context/ / memory/          输入清单和事务记忆
   storage/                    协议、内存/SQLite、版本迁移
   models/                     协议、脚本替身、OpenAI 适配器
+  sandbox/                    T-10A：Python 工具/后端协议/Docker 执行
+  artifacts/                  T-10A：私有字节、暂存与引用存储
   integrations/mcp/           可选 MCP 客户端
+  integrations/e2b/           T-10C：可选 adapter，当前不创建
   server/                     可选 HTTP、认证边界、静态资源
   cli.py                      轻量启动/诊断/离线维护入口
 workbench/                    前端源码和独立锁文件
@@ -53,9 +56,9 @@ docs/                        用户文档、规划和决策
 
 ## 3. 类型与扩展接口
 
-应用输入首版为非空文本；多模态和任意消息列表入口留到后续。工具参数支持 JSON 标量、有限枚举、list、嵌套 dataclass/Pydantic BaseModel、可空类型；拒绝 Any、位置专用参数、变长参数、未解析引用和任意 Python 对象。ToolContext 按类型注入，不能出现在模型 schema。
+应用对话输入首版为非空文本；T-10A 增加独立 artifacts 宿主参数，作为受控文件工具数据，不是多模态模型消息入口。多模态和任意消息列表仍后续。工具参数支持 JSON 标量、有限枚举、list、嵌套 dataclass/Pydantic BaseModel、可空类型；拒绝 Any、位置专用参数、变长参数、未解析引用和任意 Python 对象。ToolContext 按类型注入，不能出现在模型 schema。
 
-工具返回可以是可序列化的上述类型及字符串键 dict；返回 schema 与调用参数 schema 分开。`output_type` 首版支持 str 或根为对象的 dataclass/BaseModel；嵌套类型遵循上述子集，不承诺任意 Pydantic schema 都能发给供应商。解析后本地校验，拒绝多余字段与 NaN/Infinity；不静默把字符串转为数字。首版拒绝 datetime/bytes/文件句柄等非 JSON 类型，应用自行显式转换。T-02 明确拒绝递归、RootModel、alias、自定义 validator/serializer/构造钩子、自定义 schema 和嵌套 Annotated 约束；常见 Field 数值/长度/字符串正则约束会保留并验证。普通对象额外字段一律拒绝。详见 [ADR-0006](../decisions/0006-python-contracts.md)，复杂类型不得静默降级。
+工具返回可以是可序列化的上述类型及字符串键 dict；返回 schema 与调用参数 schema 分开。`output_type` 首版支持 str 或根为对象的 dataclass/BaseModel；嵌套类型遵循上述子集，不承诺任意 Pydantic schema 都能发给供应商。解析后本地校验，拒绝多余字段与 NaN/Infinity；不静默把字符串转为数字。模型参数/工具 JSON/最终输出拒绝 datetime/bytes/文件句柄等非 JSON 类型，应用自行显式转换；ArtifactInput.data 和授权下载的 bytes 是独立有界文件通道，不进入这个 codec。T-02 明确拒绝递归、RootModel、alias、自定义 validator/serializer/构造钩子、自定义 schema 和嵌套 Annotated 约束；常见 Field 数值/长度/字符串正则约束会保留并验证。普通对象额外字段一律拒绝。详见 [ADR-0006](../decisions/0006-python-contracts.md)，复杂类型不得静默降级。
 
 注册时生成并校验 schema。供应商严格模式导出时拒绝不支持的结构，不降级成宽松 JSON；可将有默认值的参数导出为必须显式提供的字段，并在说明中展示默认值，但不能把 null 偷换成默认值。Nullable 才接受 null。供应商拒绝、输出截断、结构不合法分别报告，不自动调用另一模型“修复”。
 
@@ -161,13 +164,13 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 
 每次自动检索有一个内核持有的真实 Task；读取完成时间超过截止点也丢弃。取消后清理宽限固定 100ms，未结束的异常后端保留所有权并抛 PersistenceUnavailable；没有后台追补。保存输入的事务内复核/重查，Memory 消息以带 drov.memory 类型的 user 数据注入；实际 JSON 消息及协议开销计入 min(输入预算×memory_fraction, memory_max_tokens) 与全局剩余量，然后才选历史。超大记忆整条排除，不自动摘要；精确 token/模型使用质量不由此证明。最近扫描/子串和详细清单规模仍受记录量影响，尚未验收大规模检索性能。完整决定见 [ADR-0012](../decisions/0012-transactional-memory.md)。
 
-## 9. 首版代码沙箱的工作选择（计划，T-10A/T-10B）
+## 9. 首版 Docker 代码与文件沙箱（计划，T-10A/T-10B）
 
 - 首个后端选择宿主显式配置的本地 Docker CLI/Engine，执行端为 Linux 容器；Drov 用 asyncio.create_subprocess_exec 的固定 argv 管理可信 CLI，代码仅作为容器内固定 Python runner 的输入，不拼进宿主 shell。核心无新增 Python Docker SDK 依赖；sandbox/ 模块在 T-10A 真实实施时建立，普通 SDK 安装/导入不需要 daemon。
-- 镜像由宿主预装并以 repository@sha256 固定，禁用执行期自动 pull/构建/安装依赖；固定非 root 用户与 Python 入口，固定覆盖 entrypoint、禁用镜像 healthcheck，拒绝镜像自动 VOLUME；镜像环境经白名单核验，不继承宿主环境/凭据。默认承诺标准库计算，自定义依赖须由宿主预构建并单独验收镜像。具体 CLI/Engine/Python patch、镜像平台/digest 和兼容性由 T-10A 实际核实记录，不编造已安装版本或示例 digest。
+- 镜像由宿主预装并以 repository@sha256 固定，禁用执行期自动 pull/构建/安装依赖；固定非 root 用户与 Python 入口，固定覆盖 entrypoint、禁用镜像 healthcheck，拒绝镜像自动 VOLUME；镜像环境经白名单核验，不继承宿主环境/凭据。必交标准库计算及一个固定数据分析镜像（numpy/pandas/matplotlib，用于 CSV/PNG 案例）；依赖由宿主预构建并验收，执行期间不安装。当前已准备的官方镜像只有标准库，不承诺已含分析库；数据镜像由 T-10A 执行者实际构建、锁版本/许可、记录 digest 和复跑。具体 CLI/Engine/Python patch、镜像平台/digest 和兼容性由 T-10A 实际核实记录，不编造已安装版本或示例 digest。
 - 隔离配置固定：network=none、无端口发布/host namespace、无 bind/volume/device/docker socket 挂载、只读根文件系统、有限私有 tmpfs、非 root、cap-drop=ALL、no-new-privileges、保留有效 seccomp；缺少所需能力或实际配置不一致即拒绝，不自动降级。[Docker 运行配置](https://docs.docker.com/engine/containers/run/) / [CLI 参数](https://docs.docker.com/reference/cli/docker/container/run/) / [seccomp 文档](https://docs.docker.com/engine/security/seccomp/) 支持这些机制的存在，不证明 Drov 已实现或抵抗所有内核攻击。
 - 限额必须由 daemon/内核实际执行，不能仅是 Drov 字段；内存与 swap 总额一并限定，不启用 oom-kill-disable；工作区/tmp/shm 有限，资源耗用包含 tmpfs。使用有界 stdout/stderr 管道，先按原始字节限制，显示以 UTF-8 errors=replace 增量解码，区分边界截断与非法字节替换；禁用容器持久日志（log driver none），避免日志绕开输出上限占满磁盘。序列化结果仍受 max_tool_result_bytes，超限按结果不可用收尾，不重跑代码。丢失未保存输出时按契约报告不可用，不依靠无界日志回填。依据：[资源限制](https://docs.docker.com/engine/containers/resource_constraints/) / [tmpfs](https://docs.docker.com/engine/storage/tmpfs/)。
-- 模型代码不做“AST 过滤后就安全”的承诺；隔离依赖实际后端与宿主维护。Docker daemon 是可信控制面，容器配置/内核漏洞可能破坏隔离，因此首版定位为受管理的本地应用执行，未经额外评估不承诺面向敌对公网多租户的强隔离平台。[Docker 安全文档](https://docs.docker.com/engine/security/)。更强 VM/内核隔离、远程或云后端另行进入能力表，不纳入本轮实现。
+- 模型代码不做“AST 过滤后就安全”的承诺；隔离依赖实际后端与宿主维护。Docker daemon 是可信控制面，容器配置/内核漏洞可能破坏隔离，因此首版定位为受管理的本地应用执行，未经额外评估不承诺面向敌对公网多租户的强隔离平台。[Docker 安全文档](https://docs.docker.com/engine/security/)。其他更深隔离后端仍后续；可选 E2B 已按 ADR-0016 单列 T-10C，其保证不从 Docker 参数推断。本轮仅文档调整，没有创建远端资源。
 
 以下是起始工程默认值，尚未做性能/兼容实测；在 T-10A/T-10B 以真实边界检查确定，不回写历史 P4 fingerprint：
 
@@ -180,8 +183,36 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 | concurrency | 2 | 按 backend/Runtime 所有活跃与未清理租约计数；无无界队列；旧执行未核清仍占额，重启不重置为 0 |
 | 自动代码重试 / 共享状态 | 0 / 无 | 模型新代码必须新 operation；每次独立容器/工作区，无持久 Notebook |
 
-平台承诺分别核验：核心 CPython 3.11–3.14 的 Linux/macOS/Windows 矩阵不变；新增沙箱必交验收基线为 Linux Docker Engine/Linux 容器 + CPython 3.11–3.14。macOS/Windows 本地 Linux VM 后端须另外实际验证后才列入沙箱已支持平台，不从核心 SDK CI 推断；原生 Windows 容器、远程 daemon、云沙箱本轮不支持。Docker 专项 CI 明确提供 daemon 与预装镜像，环境缺失导致未验收，不能用 skip 或协议替身关闭任务。
+平台承诺分别核验：核心 CPython 3.11–3.14 的 Linux/macOS/Windows 矩阵不变；新增沙箱必交验收基线为 Linux Docker Engine/Linux 容器 + CPython 3.11–3.14。macOS/Windows 本地 Linux VM 后端须另外实际验证后才列入沙箱已支持平台，不从核心 SDK CI 推断；原生 Windows 容器、远程 Docker daemon 不在首期支持范围；E2B 可选范围独立见第 10 节，当前尚未实现。Docker 专项 CI 明确提供 daemon 与预装镜像，环境缺失导致未验收，不能用 skip 或协议替身关闭任务。
 
 后端配置（非秘密连接引用、镜像 digest、固定控制、限额/执行入口版本）与 Agent/工具定义绑定并持久化检查，避免旧审批或恢复运行在新镜像/弱限制下。内部操作 payload 的新增执行/清理字段在 T-10A 明确版本和旧记录读取，必要 DDL/migration 在对应实现同轮处理，不对旧操作伪造执行事实。记录与保留语义见运行契约/维护策略，不在此另造状态机。
 
 2026-10-14 本地资源准备证据见 [Docker/镜像准备验证](../validation/sandbox-environment-preparation.md)。当前 macOS Linux VM 的基础探针可运行，但不代表 SDK/完整隔离平台验收。该 daemon 默认 seccomp=unconfined；实际执行须显式使用固定可信 profile 并核实有效，profile 内容 hash 纳入既定安全控制指纹。控制 CLI 不应继承用户配置中的容器代理/环境注入，准备探针使用独立空 auths/proxies 配置；具体 SDK 落地由 T-10A 实施，不改变以上固定边界或提前创建 API。
+
+### 9.1 受控文件与私有产物存储
+
+采用显式 LocalArtifacts + SQLite 元数据，新增符号只在 T-10A 实现。构造不读写；open 检查目录/配对标识及排他所有权。私有目录 POSIX 0700、文件 0600，在其他平台核对等效访问控制；不承诺该存储已加密。不以逻辑文件名生成宿主路径，不跟随 symlink；root/权限/配对不满足即拒绝。字节写入受控暂存 → 校验大小/hash → 文件同步/原子 rename 与目录持久性 → 记录私有清单 → SQLite 发布 ready；实现阶段确定可支持平台上的实际持久性边界，不能把进程崩溃测试写成物理断电保证。
+
+| ArtifactLimits | 工作默认 | 约束 |
+| --- | --- | --- |
+| max_input_files / max_input_bytes | 8 / 合计 8MiB | start 与本次执行所选输入分别检查；按实际字节限，不先无限读取；已有引用也占本次输入额 |
+| max_output_files / max_artifact_bytes / max_export_bytes | 8 / 单文件 8MiB / 合计 16MiB | 声明/实际文件数及传输均校验；先超限拒绝，不把文件缩成貌似完整结果；stdout 限额独立 |
+| max_owner_bytes / max_store_bytes | 64MiB / 1GiB | 每 tenant/user/Agent 与整个 store 的持久容量；包含暂存/预留/ready，事务预留，拒绝无界积累；宿主可在有限管理员上限内显式调整 |
+
+逻辑输入名是单个 POSIX 文件名；输出是 /work/outputs 下相对 POSIX 路径：每段 UTF-8 最多 255 bytes、总长最多 1024 bytes/8 段，NFC 规范化；拒绝空段、.、..、绝对路径、反斜杠、控制字符与规范化后的重复。宿主文件实际路径始终使用 ID，与 OS 文件名大小写无关。批准后复制到 /work/inputs/<artifact_id>/<name>，目录/文件及受保护祖先由可信控制方管理，代码用户不能改写/删除/chmod 或替换输入根目录；仅 outputs/scratch 等指定子区可写，不使用 bind mount。可信 bootstrap 可按固定入口复制字节并降权，但模型代码全程非 root、固定隔离与资源控制有效；只读实际效果须测试，普通 chmod 0444 而仍归代码用户或可替换父目录不算保证。
+
+输出导出不能跟随 symlink/hardlink、设备/FIFO 或有活动写者；可信控制确认主代码退出，并冻结环境/遗留写者、确认文件稳定后，保持环境可读以校验导出；随后停止整个进程树并销毁。冻结不满足最终清理条件，不能以 pause 冒充销毁；若无法有界阻止替换竞态，就拒绝该文件集合。Docker 文件传输采用固定 argv/受控流；若读取 Docker tar，只按限制解析允许的普通文件条目，不在宿主 extractall，不导入档案中的路径/权限。PNG 校验真实格式/大小/可解码，预览设置像素上限 16M；MIME 与后缀不可信，HTML/SVG 默认附件、禁止自动内联执行。下载安全 Content-Disposition 与无脚本预览在 T-13/T-14 验收。
+
+输入/输出清单与 hash、artifact schema/存储配对、限额/镜像及 runner 版本纳入保存的运行/审批绑定。文件字节不占工具 JSON 的正文额度，但引用/元数据仍计 Limits.max_tool_result_bytes 和上下文预算；过大引用不能用不完整 JSON 冒充结果。ArtifactRef/ArtifactInfo、输入清单与 SandboxResult 的新记录版本在 T-10A 同轮生成 schema/兼容 fixture；本次不修改当前 schema=1/DDL。T-15 根据实际记录/表演进落实离线迁移、备份与回收。
+
+HTTP 未消费上传暂存的起始 TTL 为 1h（T-13 实施），包含在 store/owner 容量中；只由持有排他锁的显式维护清理回收，不默认后台删除。已消费/活动租约/共享引用不按 TTL 删除。T-10A 的 SDK 文件随 start 接收，不创建独立公共上传服务或孤立 ready 输入。
+
+## 10. 可选 E2B 后端（计划，T-10C）
+
+按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 独立实现 experimental extra e2b，核心不导入供应商 SDK，不要求云账号。SDK 精确版本/许可和模板 build、可用区域/资源规格在真实适配时核验并锁定；官方滚动文档 E-30 至 E-33 不是兼容性验收。当前没有该依赖、模板、账号或远端实验。
+
+Backend 的通用责任是持久执行键/归属匹配、能力预检、单次执行、输入复制/有界输出传输、状态查询、停止/销毁证据；Docker SandboxLimits 的 seccomp/PID/tmpfs 等控制属于 Docker profile。E2B 使用明确的 provider profile（有限 timeout、memory/vCPU、文件/输出容量、并发等）与 capability 声明，逐项验证可用保证；任何要求的硬保证不能提供则启动前拒绝该 profile，不把仅轮询的软件限制冒充内核限额。T-10C 以符合已选安全 profile 的真实模板为验收条件；不能为了上线放宽文件/授权/派发/清理规则。
+
+宿主显式配置 credential_ref、template/build、region、cloud_data_policy、有限并发/寿命和费用上限；凭据仅宿主解析，不传入环境/文件/模型，不读取或输出密钥值。默认 profile 禁代码外连、限制公共服务访问，实际选定 SDK 对应设置和黑盒测试均要有证据，不能继承供应商默认。用户明确准许上传的合成代码/文件才经 provider 控制 API 传输；费用包括创建/运行/清理/失败与剩余活动资源，单独账本，不挪用模型预算。
+
+每 operation 新资源，模板预装 Python/分析依赖；不提供 persistent context、pause/fork 或 Shell API。持久 metadata 匹配 execution_key 与归属，实际 resource ID 仅内部保存；创建应答丢失不再次 create，查询/kill/期限/已过期资源的证据按运行契约处理。费用未知或预算不足停止新付费派发，并保留已有资源必要收尾的预算/义务；不能以停止收费请求代替已销毁。公开提供 adapter 前必须有真实远端单次执行/文件/网络/权限/应答丢失/取消/崩溃恢复/最终资源无残留及安装证据。缺资源只关闭已验收子范围，Docker 必交链继续。

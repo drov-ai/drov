@@ -54,7 +54,7 @@ assert "result" not in evidence.model_dump()
 
 ## 待实施的沙箱接口
 
-首版最小 Python 沙箱已纳入 C-17，T-10A/T-10B 才实施；PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult **当前不可导入**，不加入上面的已实现入口/schema 表。接口设计见 [API 草案](../planning/api-draft.md)，范围变化见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。
+C-17 的 Docker Python/受控文件/持久产物在 T-10A/T-10B 实施，E2B 独立可选 T-10C；PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、ArtifactInput/Ref/Limits/LocalArtifacts 与 E2BSandbox **当前不可导入**。不加入已实现入口/schema 表、不提前修改 schema-v1/DDL/依赖；接口见 [API 草案](../planning/api-draft.md)，范围决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。
 
 ## 可运行审批与输入子范围
 

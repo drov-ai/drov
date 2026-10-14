@@ -30,7 +30,11 @@ flowchart TD
     T --> S
     T --> EXT[Python 工具 / MCP 适配器]
     T --> SB[PythonSandbox 处理器：待实现]
-    SB --> DB[显式 Docker/Linux 后端：待实现]
+    SB --> BP[执行/传输/查证/销毁协议：随真实实现建立]
+    BP --> DB[Docker/Linux 默认必交：待实现]
+    BP --> CB[E2B 可选 T-10C：待实现]
+    SB --> AS[私有 ArtifactStore：待实现]
+    AS --> S
     E --> O[可选观测导出器]
 ```
 
@@ -118,14 +122,20 @@ T-06 的 Session 消息按保存的 session_sequence（Session 版本）投影�
 
 ## 代码沙箱模块与归属（新增计划，尚未实现）
 
-C-17 的最小代码执行由 T-10A/T-10B 交付，工作决定见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。sandbox/ 保存真实 PythonSandbox 描述、DockerSandbox 后端及有界执行/控制，不接管 ModelAdapter 或另建 Agent 循环；源码目录不在本轮提前创建。
+C-17 的 Docker 代码/受控文件/产物由 T-10A/T-10B 交付，可选 E2B 由 T-10C 交付，见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。sandbox/ 保存真实 PythonSandbox、执行/传输/查证/销毁协议与 Docker 后端；artifacts/ 管理私有持久字节，integrations/e2b 在 T-10C 实际适配时建立。不接管 ModelAdapter 或另建 Agent 循环，不在本轮创建源码目录。
 
 | 边界 | 唯一责任 | 不能代替的边界 |
 | --- | --- | --- |
 | ModelAdapter / Agent | 产生带 code 的工具候选，消费真实执行结果后继续推理 | 不提供镜像/挂载/凭据/资源控制权限，不在宿主运行代码 |
 | Runtime / 权限 / 工具 journal | 固定参数/归属/配置、审批、计数、稳定执行键、派发/结果/清理事实、原运行恢复 | 不把 Docker 远端改变纳入 Memory 本地原子事务，不靠模型文字判断完成 |
-| DockerSandbox | 固定配置预检、单次容器/工作区、实际运行/输出/进程树停止/销毁及证据查询 | 不决定业务授权，不关闭宿主 daemon 或其他归属的资源 |
-| Storage | 持久化 scope、operation/execution_key、配置/代码 hash、后端资源句柄、限额、状态/清理证据 | 不存活连接/客户端/真实凭据，不据资源 ID 自身授权 |
+| PythonSandbox / Backend 协议 | 统一 code/输入 ID/输出声明、能力预检与有界结果；后端负责单次环境、只读复制/安全导出、执行/查证/停止/销毁 | 模型不可挑控制配置；内部协议随真实实现落地，不预建空后端 |
+| DockerSandbox / 可选 E2BSandbox | 验证各自固定配置和实际资源能力、原执行身份与清理证据；E2B 单独处理远端应答/期限/费用 | 不决定业务授权，不关闭宿主 daemon/他人资源；云默认机制不等于 Docker 保证 |
+| ArtifactStore + Runtime | 私有有界字节/hash、可靠暂存与发布；Runtime 协调授权、容量预留、Run 授予、输入清单及 ready 引用/结果事务 | 不执行文件、解压档案或按模型路径写宿主；不把磁盘与 SQLite 当一个事务 |
+| Storage | 持久化 scope、operation/execution_key、配置/代码/文件 hash、Run 授予、Artifact 元数据、阶段/容量租约、后端资源句柄、结果/清理证据 | 不存活连接/客户端/真实凭据，不据资源 ID 自身授权 |
 | HTTP / 工作台 | 相同 Runtime 的调用/审批/正文投影，显示实际结果与清理状态 | 不接收控制面配置，不在浏览器或服务另建执行循环，不因查看重执行 |
 
 后端通过现有 dependencies/ResourceBinding 显式装配，T-10A 增加专用预检/租约逻辑；借用后端与自有本次执行分别管理。每次执行租约归属 tenant/user/Agent/Run/operation，名额包含未确认停止/销毁的资源；Docker CLI Task 结束不解除容器租约。构造/导入无副作用。临时入口/内存存储不承担持久清理恢复保证，配置沙箱要求显式 Runtime + SQLiteStorage；数据保护/旧备份 barrier 沿现有维护职责扩展。
+
+Artifact 字节保存在显式私有本地目录，SQLite 是元数据、引用关系与权限/容量事实源；不在操作 JSON/上下文塞二进制，不存真实凭据。存储与 blob 目录有持久配对标识，Runtime 同一排他所有权覆盖两者，不能让另一个库同时管理同一目录。物理路径只由不透明 ID 和受控 namespace 生成，逻辑文件名不作为宿主寻址；不跨作用域暴露去重或目录枚举。输入/产物是不可变记录，本次 Run 的 grant 与原来源分别记录。
+
+输入接收、执行租约、输出暂存、ready 发布和维护回收由 Runtime 协调；LocalArtifacts 负责字节可靠保存/校验/删除，Storage 负责对应事务/CAS。必须保留“文件存在但未发布”与“资源销毁但结果未提交”的恢复阶段；外部资源或磁盘写入不能冒用 Memory 的同库事务。HTTP/UI 只适配上传/下载与权限投影，T-15 的备份/恢复/清理包含 blobs 及引用/租约，不复制活的执行环境。

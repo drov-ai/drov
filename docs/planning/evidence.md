@@ -79,3 +79,5 @@ H-01 至 H-04 的定义在 [产品定义](product.md)。所有假设当前均为
 | E-31 | E2B [网络](https://docs.e2b.dev/network/internet-access) / [限制公共访问](https://docs.e2b.dev/network/restrict-public-access)，滚动官方文档 | 外连默认开启，可配置关闭/规则；公共访问与代码解释器访问须按 API 收紧 | Drov 若接入要显式配置并实测，不能从“用了 E2B”推断满足现有禁联网/授权边界 |
 | E-32 | E2B [生命周期](https://docs.e2b.dev/sandbox)、[pause/resume](https://docs.e2b.dev/sandbox/persistence)、[metadata](https://docs.e2b.dev/sandbox/metadata)，滚动官方文档 | ID/元数据查询、kill、暂停/恢复文件系统与内存状态等机制 | metadata 不证明唯一创建，客户端超时不证明已停止；是否满足原执行键/丢应答/取消恢复必须独立验收 |
 | E-33 | E2B [计费/额度](https://docs.e2b.dev/billing)，滚动官方文档 | 用量计费、计划/账户限制、可设支出上限 | 不假设用户享有赠额或批准支出；真实接入先核实账户/模板/实际价格及独立沙箱预算，本轮无费用实验 |
+
+2026-10-14 范围采纳补记：用户采纳 E-29 至 E-33 支撑的具体审查建议，形成 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。受控文件必交/E2B 可选是 Drov 的工作决定，不是官方来源证明的 Drov 已支持能力；本次不追加未经验证的 SDK 版本、模板/digest 或远端实验。

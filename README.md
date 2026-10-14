@@ -2,9 +2,9 @@
 
 面向 Python 开发者的通用 Agent 框架，目标是以少量核心概念提供完整、可组合的能力，并让开发、调试和服务化使用一致的运行机制。
 
-**当前阶段：T-01 至 T-08 已验收，T-09 审批/核查/恢复已实施，开发版本 `0.1.0a0`。** 包提供类型/schema、模型协议、事务存储、Runtime 注册/资源、Python 工具/权限、只读 Agent 执行、授权结果/事件读取、上下文选择/预览/来源清单和事务 Memory。HumanInput 与 respond/resume 的审批/输入路径已可运行；外部未知效果、verify/recover 已可运行，真实模型与服务尚未实现；尚未公开发布包或获得真实模型评测结果。
+**当前阶段：T-01 至 T-10 已验收，开发版本 `0.1.0a0`；下一项 T-10A 代码与文件沙箱尚未实施。** 包提供类型/schema、模型协议、事务存储、Runtime 注册/资源、Python 工具/权限、只读 Agent 执行、授权结果/事件读取、上下文选择/预览/来源清单和事务 Memory。HumanInput 与 respond/resume 的审批/输入路径已可运行；外部未知效果、verify/recover 已可运行，真实模型与服务尚未实现；尚未公开发布包或获得真实模型评测结果。
 
-P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-08 验证记录](docs/validation/t08-memory.md)。本轮证据见 [T-09 子范围验证](docs/validation/t09-interactions.md)，完整证据见 [核查/恢复验证](docs/validation/t09-reconciliation-recovery.md)，下一项 T-10 故障与取消矩阵；换会话方法见 [交接说明](docs/handoff.md)。
+P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-08 验证记录](docs/validation/t08-memory.md)。本轮证据见 [T-09 子范围验证](docs/validation/t09-interactions.md)，完整证据见 [核查/恢复验证](docs/validation/t09-reconciliation-recovery.md)，T-10 已验收，见 [专项验证](docs/validation/t10-faults-cancellation.md)；下一项及资源准备见 progress；换会话方法见 [交接说明](docs/handoff.md)。
 
 ## 本地开发
 
@@ -30,7 +30,7 @@ uv run --locked python examples/research_offline.py
 uv run --locked python examples/research_offline.py --stream
 ```
 
-预设回答只验证运行契约，不证明模型推理质量。外部工具当前仅支持 read；内置 Memory 使用专用事务工具与限时检索。显式 Runtime 的 ASK 保存审批并支持原子响应，临时 Agent.run 仍 failed/interaction_unavailable；外部 write/unknown 单次派发，未知效果须显式核查，不承诺外部 exactly-once。上下文/记忆来源可由 get_context 核对。
+预设回答只验证运行契约，不证明模型推理质量。外部 Python 工具已支持 read/write/unknown；内置 Memory 使用专用事务工具与限时检索。显式 Runtime 的 ASK 保存审批并支持原子响应，临时 Agent.run 仍 failed/interaction_unavailable；外部 write/unknown 单次派发，未知效果须显式核查，不承诺外部 exactly-once。上下文/记忆来源可由 get_context 核对。
 
 这些操作不需要 API Key。构件生成在本地 `dist/`，不会发布到 PyPI。extras 当前仅声明依赖，尚无对应适配器实现。
 
@@ -39,7 +39,7 @@ uv run --locked python examples/research_offline.py --stream
 - 能力范围对标 AgentScope 2.0，覆盖工具、MCP、Memory、权限、Human-in-the-loop、Tracing、持久化与应用服务。
 - 面向多种 Agent 应用；官方示例用于验证通用性，不限定产品业务范围。
 - 优先验证三项设计主张：渐进式 Python API、跨入口一致的运行机制、可检查的上下文与记忆。
-- 首版纳入 Python 代码生成与隔离执行；当前尚未实现，按 T-10A/T-10B 交付。
+- 首版必交 Docker Python 执行、受控文件输入与持久产物；可选 E2B 单列 T-10C。均尚未实现，范围见 [ADR-0016](docs/decisions/0016-sandbox-artifacts-and-backends.md)。
 - 本地工作台用于呈现上述能力；复杂集成按需安装。
 
 以上是产品目标，不代表已经实现，也不代表已证明优于其他框架。
@@ -60,7 +60,7 @@ uv run --locked python examples/research_offline.py --stream
 | [三类参考应用](docs/planning/reference-scenarios.md) | 使用片段、预期行为与验证案例 |
 | [首版工程方案](docs/planning/engineering.md) | 技术栈、包结构、依赖边界、默认限额 |
 | [质量与评估计划](docs/planning/quality-plan.md) | 离线/集成/故障/真实模型及体验验收 |
-| [分期实施任务](docs/planning/implementation-plan.md) | 20 张任务卡（含 T-10A/T-10B）、前置依赖、交付与完成条件 |
+| [分期实施任务](docs/planning/implementation-plan.md) | 21 张任务卡（含必交 T-10A/T-10B、可选 T-10C）、前置依赖、交付与完成条件 |
 | [数据与维护发布](docs/planning/release-policy.md) | 数据、迁移、许可、发布、官网和准备材料 |
 | [交付与就绪标准](docs/planning/delivery-plan.md) | 规划轮次、开发里程碑与进入代码阶段的条件 |
 | [证据与假设](docs/planning/evidence.md) | 外部事实、来源、版本及待验证判断 |

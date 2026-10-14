@@ -54,3 +54,5 @@ docker pull --platform linux/arm64/v8 docker.io/library/python@sha256:dabc8c628e
 这次只确认简单代码可在指定限制下运行与基础配置实际生效；尚未验证 OOM/CPU 压力/PID 风暴、磁盘/输出上限、宿主/用户隔离攻击、取消/进程树清理、丢应答/硬崩溃/恢复，也未完成 Linux CI 或 macOS 平台支持承诺。上述分别按 T-10A/T-10B 验收，不把本次准备当成沙箱完成。
 
 本轮文档检查：50 个 Markdown、401 个本地链接、14 个 Python 片段 AST，错误 0；Git 差异检查通过。仅更新工程说明、progress 与本验证记录，以文档提交保存并同步；无 SDK/测试/依赖/品牌变更，未调用模型或发布/部署。
+
+2026-10-14 后续范围补记：用户按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 纳入受控文件/持久 CSV/PNG 产物。上面的实际标准库镜像与探针成绩保持不变；该镜像没有 numpy/pandas/matplotlib，不能用于证明新增分析/产物验收。T-10A 执行者按工程方案另行构建并固定数据分析镜像、核实文件/私有存储与真实闭环；本准备记录不关闭任何沙箱任务。

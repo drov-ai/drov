@@ -75,10 +75,14 @@ uv run --locked python scripts/check_package.py --python /path/to/python
 
 ## CI 与变更记录
 
-CI 使用只读仓库权限，无发布或凭据步骤；Actions 固定到上游 commit，uv 与本地版本一致。Linux 配置 3.11–3.14，macOS/Windows 各配置 3.11/3.14；另有非阻塞 3.15 探测。各任务的准确提交及矩阵结果见验证记录；T-09 最新远程状态见 progress 和核查/恢复验证，不把旧 CI 用作新代码通过证据。
+CI 使用只读仓库权限，无发布或凭据步骤；Actions 固定到上游 commit，uv 与本地版本一致。Linux 配置 3.11–3.14，macOS/Windows 各配置 3.11/3.14；另有非阻塞 3.15 探测。各任务的准确提交及矩阵结果见验证记录；T-10 最新远程状态见 progress 和故障/取消验证，不把旧 CI 用作新代码通过证据。
 
 每轮按 [协作规则](../AGENTS.md) 更新进度、受影响契约和验证记录；新会话按 [交接说明](handoff.md) 恢复工作。上游依赖与源码复用入口见 [THIRD_PARTY](../THIRD_PARTY.md)。下一项以 [progress](planning/progress.md) 为准。
 
 ## 首版代码沙箱的准备时点（计划）
 
-当前没有 drov.sandbox 模块或可运行沙箱教程；普通 SDK 开发不需要 Docker。下一项 T-10 复用 SQLite/ScriptedModel 与独立合成事项服务，补真实硬终止及提交/取消竞争矩阵，无需新增账号/Key。T-10A/T-10B 前准备宿主显式配置的本地 Linux 容器服务、可信 Docker CLI 和预装固定 digest 的 Python 镜像，并核验资源控制/镜像许可；不把宿主凭据、工作仓库或控制 socket 挂进代码环境。实际默认值/平台范围见 [工程方案第 9 节](planning/engineering.md)，接口是 [API 草案](planning/api-draft.md) 的待实现部分。未运行真实后端的组必须留缺项，不能以 skip 完成两卡。
+当前没有 drov.sandbox/drov.artifacts 或 E2B adapter；普通 SDK 开发不需要 Docker。按 [ADR-0016](decisions/0016-sandbox-artifacts-and-backends.md)，T-10A/T-10B 实施 Docker Python、受控文件与持久 CSV/PNG 产物，T-10C 独立可选 E2B。Docker Desktop/官方标准库镜像与显式 seccomp 已做基础准备，见 [环境记录](validation/sandbox-environment-preparation.md)，用户保持 Desktop 运行即可；数据分析镜像和私有存储由执行者在 T-10A 准备、锁实际版本/digest，当前标准库镜像没有分析库。
+
+不挂宿主凭据/仓库/socket，不在执行时拉镜像/安装，不用宿主回退。默认/平台/文件控制见 [工程方案第 9 节](planning/engineering.md)，接口在 [API 草案](planning/api-draft.md)，未跑真实组不能 skip 关闭两卡。下一项以 progress 为准，New Chat 交接见 handoff；忽略目录的准备文件仅当前 Local 存在。
+
+E2B 账号/固定 template-build/区域权限、本地 E2B_API_KEY 凭据引用、合成数据上传许可与单独沙箱预算只在 T-10C 远端验收前需要；模型服务/model ID/Key/共同模型预算只在 T-11/T-16 live 前需要。当前不创建这些资源或调用付费 API；无 E2B 资源不阻塞 Docker 首版，细则见工程第 10 节和维护发布策略。

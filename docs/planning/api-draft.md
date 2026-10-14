@@ -347,7 +347,7 @@ Memory 模型导出名映射、JSON schema 可空/默认转换遵守工程方案
 
 ### HTTP 请求与错误
 
-POST /v1/runs 的 JSON 字段为 agent_name、revision、session_id、input，以及可选 request_key/limits；服务从已注册定义选择 Agent，拒绝上传工具代码/模型凭据/Agent 定义。缺失 session_id 不自动创建匿名持久会话。响应与事件读取分离。
+POST /v1/runs 的基础 JSON 字段为 agent_name、revision、session_id、input，以及可选 request_key/limits；T-13 的 artifact_ids/upload_ids 扩展见下文文件接口草案，当前服务尚未实现；服务从已注册定义选择 Agent，拒绝上传工具代码/模型凭据/Agent 定义。缺失 session_id 不自动创建匿名持久会话。响应与事件读取分离。
 
 POST responses 的字段为 request_id、response（上述判别 union）；POST verify 只收 request_id 并执行已注册的只读 verifier；cancel/recover 不接受新执行身份或工具参数。会话由首次 start 原子创建；GET /v1/sessions 与 GET /v1/sessions/{session_id} 提供分页查看；GET /v1/runs/{id}/contexts/{model_call_id} 提供授权的清单查看。维护清理/迁移不开放普通 HTTP 路由。
 
@@ -355,46 +355,64 @@ HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；�
 
 内容清理后的 request_key、数据放弃和旧备份 barrier 以 [维护策略](release-policy.md) / 行为契约为准；恢复旧数据不是允许旧操作再次执行。
 
-## 首版代码沙箱接口草案（T-10A，尚未实现）
+## 首版文件与代码沙箱接口草案（T-10A，尚未实现）
 
-本节是 [ADR-0013](../decisions/0013-first-release-code-sandbox.md) 的新增计划，不是当前可导入 API；不在 T-09 添加这些公共符号。执行语义唯一维护在运行契约第 13 节，默认与支持矩阵唯一维护在工程方案。
+本节按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 扩展 ADR-0013，不是当前可导入 API。执行/恢复规则唯一在运行契约第 13 节，默认、镜像与支持矩阵唯一在工程方案；本轮不创建符号/schema/DDL。已有 start/run/stream 签名仍按已实现版本使用，下列 artifacts 参数与 Artifact API 在 T-10A 一并实现。
 
 | 拟议入口/对象 | 字段与责任 |
 | --- | --- |
-| drov.sandbox.PythonSandbox | backend: 宿主 dependency 名称；逻辑工具名固定 sandbox.run_python，工具 revision 随内置实现版本固定；approval 默认 policy、可设 required；effect 固定 write，不由模型声明；不接受普通 callable 或任意 Docker flags |
-| drov.sandbox.DockerSandbox | image: 必填 repository@sha256 digest；limits: SandboxLimits；宿主显式配置本地 Docker 连接引用/可信 CLI 路径；描述构造不开连接，Runtime 装配时预检，拥有资源按 ResourceBinding 关闭 |
-| drov.sandbox.SandboxLimits | execution_seconds、control_seconds、memory_bytes、cpus、pids、workspace_bytes、max_code_bytes、max_output_bytes、concurrency；均为严格有限正值，管理员上限优先；网络/挂载/凭据等固定限制没有面向模型的放宽开关 |
-| sandbox.run_python 参数 | 仅 code: str，非空；规范 JSON 与原 UTF-8 代码均校验大小，scope/operation/backend/image/限制由内核注入，不在模型或 HTTP 可填字段中 |
-| SandboxResult | execution_key、exit_code: int 或 None、termination: exited/timeout/output_limit/resource_limit/cancelled、stdout/stderr: str、stdout_truncated/stderr_truncated: bool；输出/清理不明时不构造成功结果；原因按实际后端证据确定 |
+| drov.sandbox.PythonSandbox | backend: 宿主 dependency 名称；逻辑工具固定 sandbox.run_python，revision 随内置版本固定；approval 默认 policy、可设 required；effect 固定 write；不接受普通 callable 或任意后端 flags |
+| drov.sandbox.DockerSandbox | image: 必填 repository@sha256；limits: SandboxLimits；宿主显式本地连接引用/可信 CLI；构造不连接，Runtime 装配时预检，ResourceBinding 管理所有权 |
+| drov.sandbox.SandboxLimits | execution_seconds、control_seconds、memory_bytes、cpus、pids、workspace_bytes、max_code_bytes、max_output_bytes、concurrency；严格有限正值；Docker 专属配置不作为云能力的默认保证 |
+| drov.artifacts.ArtifactInput | name: 单个安全文件名；data: bytes；media_type: str（默认 application/octet-stream）；宿主 SDK 提交有界字节，框架不接受主机路径/URL，不解压档案；不是模型工具参数 |
+| ArtifactRef / ArtifactInfo | Ref：artifact_id（内核生成不透明 ID）、sha256、size_bytes、media_type；Info 另有 schema_version、来源 Run/operation、状态与正文可见标记；name 属正文，不出现在默认元数据投影；引用不可变，不包含主机/容器路径、云 URL 或凭据 |
+| drov.artifacts.LocalArtifacts | directory: 宿主私有目录；limits: ArtifactLimits；通过 Runtime(artifacts=ResourceBinding.owned(store)) 显式装配，字节与 SQLite 记录配对；构造/导入不读写，open 时核对目录、权限和存储绑定 |
+| ArtifactLimits | max_input_files、max_input_bytes、max_output_files、max_artifact_bytes、max_export_bytes、max_owner_bytes、max_store_bytes；有界输入/单文件/总输出/持久容量，不与 stdout 上限混用；均由宿主配置 |
+| runtime.start/run/stream(..., artifacts=()) | 新增默认空的宿主参数 Sequence[ArtifactInput 或 ArtifactRef]；接收时保存不可变输入并将引用明确授予本 Run；旧输出作为新输入须再次授权并保留其原内容/hash，不继承旧容器状态；相同 request_key 的规范输入包含有序文件名/字节 hash/类型或原引用 |
+| runtime.get_artifact(artifact_id, *, context, include_content=False) | 返回授权 ArtifactInfo；正文模式可见逻辑文件名；不返回字节。当前 read/view_content 动态复核；知道 ID 不代表有权限 |
+| runtime.read_artifact(artifact_id, *, context) | 返回有界 bytes（至少 read + view_content）；读取前后复核并验证文件大小/hash；缺失、已清理或未 ready 不返回成功内容 |
+| sandbox.run_python 参数 | code: 非空 str；inputs: list[str]（Artifact ID，默认 []）；outputs: list[str]（/work/outputs 下相对文件名，默认 []）；拒绝额外字段。输入只能选本 Run 已获准引用，模型不能提交归属/hash/主机路径或改变 limits/后端 |
+| SandboxResult | execution_key、exit_code: int 或 None、termination: exited/timeout/output_limit/resource_limit/cancelled、有界 stdout/stderr、两种 truncated 标记；artifact_status: not_requested/complete/rejected、artifacts: list[ArtifactRef]、artifact_error: 可空结构化错误码；字节不进工具 JSON。清理不明不能构造成功结果 |
+
+模型只看到本 Run 获准的输入描述（ID、逻辑名、hash/大小/类型和固定输入位置 /work/inputs/<artifact_id>/<name>），不能枚举存储。审批展示原代码、所选输入与输出声明；批准绑定服务器解析的不可变清单，不相信模型填写的元数据。没有 artifacts 参数的旧调用保持原语义；临时 Agent.run/run_sync、内存 Storage 或缺配套 ArtifactStore 的文件/沙箱配置接收前 ConfigurationError。Artifact Authorizer 资源使用原 tenant/user/Agent 与来源 Run/operation、artifact_id；新输入授权也核对目标 Run，复用 read/view_content，工具派发仍检查 execute_tool。
 
 ```python
-# 设计片段；T-10A 尚未实现，当前版本不能导入 drov.sandbox。
+# 设计片段；T-10A 尚未实现，当前不能导入 drov.sandbox/drov.artifacts。
 from drov import Agent, PermissionPolicy, ResourceBinding, RunContext, Runtime, SQLiteStorage
+from drov.artifacts import ArtifactInput, LocalArtifacts
 from drov.sandbox import DockerSandbox, PythonSandbox, SandboxLimits
 
 
-async def code_example(model, image_digest):
+async def file_analysis_example(model, analysis_image_digest):
     agent = Agent(
-        name="calculator",
+        name="analyst",
         revision="1",
         model=model,
-        instructions="计算时生成 Python；依据真实执行结果回答，错误不伪造成功。",
+        instructions="读取获准 CSV，生成 Python 分析，输出 summary.csv 和 chart.png；依据实际结果回答。",
         tools=[PythonSandbox(backend="code")],
         required_dependencies=["code"],
     )
-    backend = DockerSandbox(image=image_digest, limits=SandboxLimits())
+    backend = DockerSandbox(image=analysis_image_digest, limits=SandboxLimits())
     async with Runtime(
         agents=[agent],
-        storage=SQLiteStorage(".drov/code-example.db"),
+        storage=SQLiteStorage(".drov/file-example.db"),
+        artifacts=ResourceBinding.owned(LocalArtifacts(directory=".drov/file-example-artifacts")),
         dependencies={"code": ResourceBinding.owned(backend)},
         policy=PermissionPolicy(allow={"sandbox.run_python"}),
     ) as runtime:
         return await runtime.run(
             agent,
-            "合成数据为 [12, 18, 30]；用 Python 计算合计和均值，并说明依据。",
-            session_id="calculation-01",
+            "分析本次 CSV 的合计/均值，交付汇总表和图表；给出工具实际返回的产物 ID。",
+            artifacts=[ArtifactInput(name="numbers.csv", data=b"value\n12\n18\n30\n", media_type="text/csv")],
+            session_id="analysis-01",
             context=RunContext(tenant_id="local", user_id="alice"),
         )
 ```
 
-显式 allow 只允许已经配置的隔离代码工具，不授权宿主 Python 执行、镜像变化、联网或业务写入；去掉 allow 时默认按 T-09 产生审批。临时 Agent.run/run_sync 或内存 Storage 接入此资源配置须提前 ConfigurationError。生成代码沿现有 ModelAdapter 工具调用协议，没有另一个自动代写/修复/执行循环；当前生成 schema 不预先增加未实现符号。
+实际工具计划须选择该输入 ID，并声明 outputs=["summary.csv", "chart.png"]；应用从 SandboxResult 的真实引用调用 read_artifact，不能相信模型自述的路径/ID。返回引用保持规范 outputs 的顺序；ArtifactInfo.name 为文件名末段，完整相对输出路径只留在有正文权限的操作清单中，不成为宿主路径。所有声明文件通过校验并可持久读取才是 artifact_status=complete；缺失/非法/超限/导出不可用时 artifacts=[]、artifact_status=rejected 并保留真实代码退出事实。非正常退出/取消不发布部分文件；清理/提交未知按运行契约核查，不能以 rejected 掩盖未知资源。
+
+T-13 的 HTTP 同一入口扩展：POST /v1/runs 新增可选 artifact_ids，仅引用本身份/Agent 可授权的 ready 输入；POST /v1/artifacts 以有界流上传单文件并明确 agent_name/revision/session_id 目标，得到短期暂存 upload ID（不是 ready 引用），只可由同作用域 start 原子消费。上传控制与总量沿 ArtifactLimits，未消费暂存按维护规则回收。GET /v1/artifacts/{id} 返回相同元数据；GET /v1/artifacts/{id}/content 授权后流式附件下载，不接受宿主路径/后端 URL。JSON Run 输入可以使用 upload_ids，不能上传代码工具/配置或把 bytes 隐式编码成模型输入；HTTP 上传是 T-13 的传输适配，不在 T-10A 预建服务。权限/错误码沿现有 HTTP 约定，内容不可用 410，猜 ID 无权读取统一 404。
+
+T-10C 才新增拟议 drov.integrations.e2b.E2BSandbox（可选 extra 名 e2b）：宿主显式提供非秘密 credential_ref、固定 template/build、region、后端限额与 cloud_data_policy；密钥由宿主解析，模型参数和 ArtifactStore 不接触密钥。实际 SDK 接口/版本与可验证能力在 T-10C 锁定，不能写入不存在的已支持配置；构造无远端副作用。使用相同 PythonSandbox/Artifact DTO，禁止缺能力时切换到弱配置，详见工程方案第 10 节。
+
+显式 allow 只授权已配置的代码工具；业务写入仍单独审批。代码生成/消费结果沿现有 ModelAdapter，没有自动代写/修复/执行循环。当前生成 schema 不提前增加上述未实现符号。
