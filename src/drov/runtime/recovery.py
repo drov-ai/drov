@@ -153,7 +153,15 @@ class RecoveryController:
             slot = None
             try:
                 if runs.runtime._sandboxes is not None:
-                    latest = await runs.storage.get_run(owner, run_id)
+                    async with runs.storage.transaction() as tx:
+                        latest = await tx.get_run(owner, run_id)
+                        await runs.authorize(
+                            context,
+                            runs.resource(latest),
+                            ("read", "view_content", "recover") if wait else ("read", "recover"),
+                        )
+                        if latest.state.status in ("completed", "failed", "cancelled"):
+                            raise Conflict("Terminal run cannot be recovered")
                     runs.runtime.validate_record(latest)
                     local = runs.works.get(run_id)
                     if local is None or local.task.done():

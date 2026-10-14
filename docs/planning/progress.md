@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-10 已完整验收；T-10A 真实 Runtime Python/文件闭环已本地通过，安装后 8 次真实 Docker 示例已通过，新远程 CI 待核验，暂不关闭整卡。新增 45，全库 804；含真实 Docker：3.11 802 passed / 2 skipped，3.14 804 passed。实际证据见 [本轮验证](../validation/t10a-runtime-sandbox.md) 与 ADR-0020。T-10B 深度隔离/故障专项尚未开始，不以核心 skip 代替。
+- 阶段：P1 至 P4、T-01 至 T-10 已完整验收；T-10A 真实 Runtime Python/文件闭环已本地通过，最终独立环境矩阵/四套包安装/安装后 8 次真实 Docker 示例已通过，核查审计修正的新远程 CI 待核验，暂不关闭整卡。新增 45，全库 804；含真实 Docker：3.11 802 passed / 2 skipped，3.14 804 passed。实际证据见 [本轮验证](../validation/t10a-runtime-sandbox.md) 与 ADR-0020。T-10B 深度隔离/故障专项尚未开始，不以核心 skip 代替。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。未验收：T-10B 完整隔离/资源/逐边界硬终止、Linux Docker 专项 CI/AMD64 分析镜像；T-10C、T-11 至 T-18、模型/MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
@@ -19,14 +19,14 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 ## 本轮交付：T-10A Runtime 实际执行与持久产物
 
-接续已保存的 main / 0780093 控制预检检查点；前批 [CI 38553661046](https://github.com/drov-ai/drov/actions/runs/38553661046) 10 jobs success 已复核。本批实际代码见 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md)，全部验证/失败修正/限制见 [本轮记录](../validation/t10a-runtime-sandbox.md)。没有更换 checkout、重新规划或修改品牌/uv.lock/P4 指纹。
+接续已保存的 main / 0780093 控制预检检查点；前批 [CI 38553661046](https://github.com/drov-ai/drov/actions/runs/38553661046) 10 jobs success 已复核。首个 Runtime 提交 cbce832 的 [CI 38570634938](https://github.com/drov-ai/drov/actions/runs/38570634938) 10 jobs success；之后核查审计/恢复前权限修正已重新通过本地全库/安装，最终修正 CI 待验收。本批实际代码见 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md)，全部验证/失败修正/限制见 [本轮记录](../validation/t10a-runtime-sandbox.md)。没有更换 checkout、重新规划或修改品牌/uv.lock/P4 指纹。
 
 | 交付 | 实际结果 / 限制 |
 | --- | --- |
 | 公共入口/绑定 | 构造无 I/O；Runtime owned/borrowed/factory、SQLite/LocalArtifacts 要求、不可变实际 backend hash，无沙箱旧摘要/payload 保持；普通核心导入不需 Docker |
 | 审批/执行 | 专用 write/default ask、代码/服务器解析输入/输出/归属绑定；同事务预算/active/create intent；原 container/exec ID/start intent 持久化，实际执行单次，无宿主回退/自动代码重试 |
 | 输入/导出 | 保持 /work/inputs/<id>/<name>；可信/代码不同非 root UID、保护输入祖先；安全声明集合导出/有界 PNG profile；缺失/链接/FIFO/超限/畸形 PNG 无引用，保留真实 exit |
-| 发布/恢复 | 真实观察与字节可靠暂存→确认整个容器销毁→同事务 ready/原结果/event/checkpoint/释放租约；SQLite trigger 全回滚后 recover 原阶段，execute 计数不增；verify 只读，人工核查不能伪造资源事实 |
+| 发布/恢复 | 真实观察与字节可靠暂存→确认整个容器销毁→同事务 ready/原结果/event/checkpoint/释放租约；SQLite trigger 全回滚后 recover 原阶段，execute 计数不增；verify 共用权限/限时/真实调用所有权和核查审计，recover 清理前动态授权/终态复核；人工核查不能伪造资源事实 |
 | 真实 SDK | 标准库 CSV 与分析 numpy/pandas/matplotlib 的 CSV/400×300 PNG，普通/stream、同一 Agent 最终输出、关闭后新 Runtime 授权/hash 下载通过；实际两次独立调用/显式 Ref 复用、已启动后取消清理通过 |
 | 本地测试 | 45 新增，总804；含真实 Docker：3.11 802+2 skip /3.14 804；核心无配置：793+11 skip/795+9 skip，9 个 Docker 未跑不能当通过；静态/schema/包安装最终汇总见验证 |
 | 待核验与未做 | 本批四套包安装、两套 core-only wheel 安装后 8 次真实 Docker normal/stream 已通过；新远程 CI 待核验；T-10B 全深度隔离/资源/逐边界硬终止与 Linux Docker CI、T-15 完整维护/备份、T-16 真实模型仍未验收 |

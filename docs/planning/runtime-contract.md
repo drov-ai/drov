@@ -334,4 +334,4 @@ E2B 的模板/构建、凭据引用、数据上传许可、网络/公开访问�
 
 云资源保证与 Docker 配置不同；T-10C 需逐条声明/实测选定后端能力，拒绝不支持的强制要求。适配完成但没有真实远端验收只算子范围；不新增持久上下文、任意 Shell/联网安装或独立执行循环。
 
-沙箱核查人工 response 不得替代销毁/原结果证据，返回 InteractionConflict 并指向 recover；其他外部写工具的 T-09 人工核查不变。
+沙箱 verify 复用既有权限、限时/调用所有权与 verification.started/completed 审计；recover 清理前复核当前权限和非终态。沙箱核查人工 response 不得替代销毁/原结果证据，返回 InteractionConflict 并指向 recover；其他外部写工具的 T-09 人工核查不变。

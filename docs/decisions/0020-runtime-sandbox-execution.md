@@ -26,7 +26,7 @@ Docker 27.0.3 的 cp 不能完成这里的只读根/tmpfs 输入与控制文件�
 
 原观察先持久保存，导出全集合可靠暂存再确认整个容器销毁。同事务发布 ready ArtifactRecord、原 SandboxResult/operation/event/检查点及释放 active lease；任何提交错误保留阶段并要求显式 recover，不把已执行代码重跑。tool.succeeded 表示有效观察及销毁/发布确认；正常代码还需 termination=exited / exit_code=0，文件成功还需 artifact_status=complete。
 
-超时/输出超限/取消都由独立 control_seconds 总期限销毁原容器；CLI/stream Task 结束不作销毁证据。未知创建应答且查询不存在不能清租约；未确认资源或未发布结果仍占额，关闭可 ShutdownIncomplete 并保留存储所有权。recover 只查询/销毁原资源、校验原阶段并发布或记录 output_unavailable；不新建/启动原代码。verify 只读、返回有界证据建议；沙箱核查的人工 response 不能用自述结果取代销毁/原字节，使用 recover。其他 Python 写工具的 T-09 人工核查契约不变。
+超时/输出超限/取消都由独立 control_seconds 总期限销毁原容器；CLI/stream Task 结束不作销毁证据。未知创建应答且查询不存在不能清租约；未确认资源或未发布结果仍占额，关闭可 ShutdownIncomplete 并保留存储所有权。recover 只查询/销毁原资源、校验原阶段并发布或记录 output_unavailable；不新建/启动原代码。verify 只读、返回有界证据建议，并复用既有原用户工具权限、真实调用所有权/限时与 verification.started/completed 审计；recover 清理前复核当前调用者权限/终态；沙箱核查的人工 response 不能用自述结果取代销毁/原字节，使用 recover。其他 Python 写工具的 T-09 人工核查契约不变。
 
 ## 代价、替代与来源
 

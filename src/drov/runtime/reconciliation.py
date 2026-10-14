@@ -15,6 +15,7 @@ from drov.errors import (
     PersistenceUnavailable,
     RecordNotFound,
 )
+from drov.sandbox.tools import PythonSandbox
 from drov.storage.records import EventDraft, RunItem, RunRecord
 from drov.storage.transaction import Transaction
 from drov.tools.operations import ToolOperation
@@ -248,7 +249,9 @@ class ReconciliationController:
             raise InteractionConflict("Reconciliation differs from the original operation")
         return record, request, item, operation
 
-    def original_tool(self, record: RunRecord, operation: ToolOperation) -> PythonTool:
+    def original_tool(
+        self, record: RunRecord, operation: ToolOperation
+    ) -> PythonTool | PythonSandbox:
         self.runs.runtime.validate_record(record)
         tools = self.runs.runtime._agents[(record.agent_name, record.revision)].tools
         tool = next(
@@ -259,7 +262,7 @@ class ReconciliationController:
             ),
             None,
         )
-        if not isinstance(tool, PythonTool):
+        if not isinstance(tool, (PythonTool, PythonSandbox)):
             raise ConfigurationError("Original executable tool is unavailable")
         return tool
 
@@ -503,37 +506,6 @@ class ReconciliationController:
         owner = runs.resource(record).owner
         key: tuple[str, str]
 
-        async with runs.storage.transaction() as tx:
-            current, _, _, operation = await self.pending_in(tx, owner, run_id, request_id)
-        if operation.tool_name == "sandbox.run_python":
-            runs.runtime.validate_record(current)
-            controller = runs.runtime._sandboxes
-            if controller is None:
-                raise ConfigurationError("Original sandbox backend is not configured")
-            key = (run_id, operation.operation_id)
-            prior = self.verifying.get(key)
-            if prior is not None and not prior.task.done():
-                raise CapacityExceeded("This operation has an active verifier")
-            slot = runs.runtime._reserve()
-
-            async def observe(work: "_Work[ReconciliationDecision]") -> ReconciliationDecision:
-                result = await controller.verify(current, operation.operation_id)
-                async with runs.storage.transaction() as tx:
-                    latest, _, _, _ = await self.pending_in(tx, owner, run_id, request_id)
-                    await runs.authorize(
-                        context,
-                        runs.resource(latest),
-                        ("read", "view_content", "respond", "verify"),
-                    )
-                return result
-
-            work = runs.runtime._spawn(slot, observe)
-            work.kind = "verify"
-            work.run_id = run_id
-            self.verifying[key] = work
-            work.task.add_done_callback(lambda _: self.verifying.pop(key, None))
-            return await work.wait()
-
         async def schedule() -> "_Work[ReconciliationDecision]":
             nonlocal key
             slot = None
@@ -546,7 +518,7 @@ class ReconciliationController:
                         ("read", "view_content", "respond", "verify"),
                     )
                     tool = self.original_tool(current, operation)
-                    if tool.verifier is None:
+                    if isinstance(tool, PythonTool) and tool.verifier is None:
                         raise ConfigurationError("Original tool has no registered verifier")
                     key = (run_id, operation.operation_id)
                     prior = self.verifying.get(key)
@@ -637,7 +609,7 @@ class ReconciliationController:
         self,
         work: "_Work[ReconciliationDecision]",
         record: RunRecord,
-        tool: PythonTool,
+        tool: PythonTool | PythonSandbox,
         operation: ToolOperation,
         request_id: str,
         verification_id: str,
@@ -645,10 +617,8 @@ class ReconciliationController:
     ) -> ReconciliationDecision:
         from drov.runtime.core import _owned_task
 
-        assert tool.verifier is not None
         work.checkpoint()
         owner = self.runs.resource(record).owner
-        callback = tool.verifier
 
         async def invoke() -> ReconciliationDecision:
             work.checkpoint()
@@ -676,7 +646,13 @@ class ReconciliationController:
             if decision.decision == "deny":
                 raise PermissionDenied("Query permission changed")
             work.checkpoint()
-            return await callback(
+            if isinstance(tool, PythonSandbox):
+                controller = self.runs.runtime._sandboxes
+                if controller is None:
+                    raise ConfigurationError("Original sandbox backend is not configured")
+                return await controller.verify(current, operation.operation_id)
+            assert tool.verifier is not None
+            return await tool.verifier(
                 ToolContext(
                     **owner.model_dump(),
                     run_id=record.state.run_id,

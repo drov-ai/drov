@@ -12,6 +12,7 @@ from drov import Agent, ApprovalDecision, PermissionPolicy, ResourceBinding, Run
 from drov.artifacts import ArtifactInput, LocalArtifacts
 from drov.errors import (
     ConfigurationError,
+    Conflict,
     InteractionConflict,
     PersistenceUnavailable,
     RecordNotFound,
@@ -317,6 +318,18 @@ async def test_unknown_cleanup_cannot_be_replaced_by_human_result_and_verify_is_
         )
         assert verified.resolution == "unresolved" and backend.destroyed == set()
         assert len(backend.executions) == 1 and len(model.calls) == 1
+        inspection = await runtime.inspect(pending.run_id, context=CONTEXT, include_content=True)
+        audit = [event for event in inspection.events if event.type.startswith("verification.")]
+        assert [event.type for event in audit] == [
+            "verification.started",
+            "verification.completed",
+        ]
+        assert audit[0].data["verification_id"] == audit[1].data["verification_id"]
+        decision = audit[1].data["decision"]
+        assert isinstance(decision, dict) and decision["resolution"] == "unresolved"
         backend.fail_cleanup = False
         final = await runtime.recover(pending.run_id, context=CONTEXT)
         assert final.status == "completed" and len(backend.executions) == 1
+        with pytest.raises(Conflict, match="Terminal"):
+            await runtime.recover(pending.run_id, context=CONTEXT)
+        assert len(backend.executions) == 1
