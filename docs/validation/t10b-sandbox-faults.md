@@ -54,6 +54,10 @@ DROV_DOCKER_TEST_CONFIG="$PWD/.drov/sandbox-environment.json" \
 6. stream 夹具初稿未进入 subscription/未迭代，修正后所有对应屏障通过。父进程有45s到屏障/独立结束期限；只操作测试归属资源，不停止共享 daemon。
 7. PyPI TLS曾中断，保留失败，按固定 URL/hash 重试成功；没有关闭 TLS、变更依赖版本或读取凭据。本机默认 uv 为0.11.30，包检查先明确拒绝；找到并使用前批 `.drov/tooling/bin/uv` 0.13.0，未升级用户全局工具。
 
+8. 未确认创建补验首次在3.14退出时发现原生 SQLite 查询夹具未关闭（2项断言通过但进程失败），改为显式 closing 后2 passed；不是 SDK存储失败，也未忽略警告。
+9. 两套最新全库并行时，3.11 的旧控制夹具0.5s把非法JSON分类提前变成deadline（1 failed/885 passed/2 skip）；3.14完整888通过。该用例检验错误分类而非解释器启动速度，改为即时错误5s、故意hang仍0.5s，保留有限控制/真实超时断言；重跑对应组和3.11全库。
+10. 补強 cancel：先由真实 Engine inspect确认原exec Running，并用可信只读探针确认wrapper/原child/脱离组child至少3个，再cancel；两套解释器均实际通过，无后续模型调用。
+
 ## AMD64 来源与安装/远程（按实际结果补记）
 
 实际从 PyPI 每个固定版本 JSON 选择 Linux AMD64/CPython3.11 wheel，下载核验全部12项；版本与 ARM64 相同，平台 wheel/hash/许可文件单独保存。来源是各包官方 PyPI 发布对象，记录在 [AMD64 清单](../../sandbox/analysis/wheels-linux-amd64.json)、[锁](../../sandbox/analysis/requirements-linux-amd64.lock)、[许可](../../sandbox/analysis/license-inventory-linux-amd64.json)。同一固定官方 Python index 0a310eee…实际解析的 AMD64 manifest 为 `sha256:8a00ecb83ed9d0864dfd102a1bdb2067fda907ceb30bb86d09da9ee558b19590`；ARM64 dabc8c…不冒充 AMD64。下载/许可不等于镜像或原生执行已经通过。

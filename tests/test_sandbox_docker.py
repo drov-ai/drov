@@ -22,6 +22,7 @@ from drov.artifacts import ArtifactLimits, LocalArtifacts
 from drov.models import ScriptedModel
 from drov.models.protocol import ModelResponse, ToolCall
 from drov.sandbox import DockerSandbox, PythonSandbox, SandboxLimits, SandboxResult
+from drov.sandbox._engine import UnixEngine
 from drov.sandbox._leases import LeaseTransaction
 from drov.storage import SQLiteStorage
 from drov.storage.records import MemoryScope
@@ -259,7 +260,10 @@ async def test_real_code_exception_and_output_limit_are_actual_results(
 async def test_real_cancel_destroys_original_environment_without_final_model(
     tmp_path: Path, config: dict[str, str]
 ) -> None:
-    model = model_for("import time;print('started',flush=True);time.sleep(30)", [])
+    model = model_for(
+        "import os,time;\nif os.fork()==0: os.setsid()\nprint('started',flush=True);time.sleep(30)",
+        [],
+    )
     runtime, agent, backend = create_runtime(tmp_path, model, config)
     async with runtime:
         ref = await runtime.start(agent, "cancel actual code", session_id="s", context=CONTEXT)
@@ -273,10 +277,32 @@ async def test_real_cancel_destroys_original_environment_without_final_model(
                         ref.run_id,
                         run.state.operations[0].operation_id,
                     )
-            if lease is not None and lease.exec_start_intent:
-                break
+            if lease is not None and lease.exec_start_intent and lease.exec_id is not None:
+                state = await UnixEngine(config["host"], control_seconds=5).inspect_exec(
+                    lease.exec_id
+                )
+                if state["Running"] is True:
+                    break
             await asyncio.sleep(0.01)
         assert lease is not None and lease.exec_start_intent
+        assert lease.container_id is not None
+        engine = UnixEngine(config["host"], control_seconds=5)
+        program = (
+            "import pathlib\ncount=0\n"
+            "for path in pathlib.Path('/proc').glob('[0-9]*/status'):\n"
+            "    try: rows=path.read_text().splitlines()\n"
+            "    except FileNotFoundError: continue\n"
+            "    uid=next(row for row in rows if row.startswith('Uid:')).split()[1]\n"
+            "    if uid=='65533': count+=1\n"
+            "print(count)"
+        )
+        async with asyncio.timeout(5):
+            while True:
+                probe = await engine.create_exec(lease.container_id, program, control=True)
+                response = await engine.start_exec(probe, seconds=2, max_bytes=32)
+                if int(response.stdout) >= 3:  # wrapper, original child and detached child
+                    break
+                await asyncio.sleep(0.01)
         await runtime.cancel(ref.run_id, context=CONTEXT)
         final = await runtime.wait(ref.run_id, context=CONTEXT)
         assert final.status == "cancelled" and len(model.calls) == 1

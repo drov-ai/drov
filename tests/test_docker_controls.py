@@ -442,7 +442,9 @@ async def test_control_is_bounded_and_does_not_expose_cli_diagnostics(
 ) -> None:
     executable, host = local_cli
     responses(executable, mode)
-    control = DockerControl(executable, host, executable.parent, 0.5)
+    # Immediate response classification does not assert interpreter startup
+    # latency. Keep the short ceiling only for the deliberate hang case.
+    control = DockerControl(executable, host, executable.parent, 0.5 if mode.get("sleep") else 5.0)
     with pytest.raises(ControlError, match=message) as caught:
         await control.object(["system", "info"])
     assert "synthetic-private-diagnostic" not in str(caught.value)
