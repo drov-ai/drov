@@ -1,8 +1,8 @@
 # 分期实施任务与依赖
 
-状态：T-01 至 T-08 已完成本地验收，T-09 外部核查/恢复已实施，完整状态以 progress 为准；T-10 及后续未开始。更新：2026-10-14。
+任务状态统一以 [progress](progress.md) 为准；本页维护前置依赖与验收条件。更新：2026-10-14。
 
-范围唯一维护在 [能力表](capability-matrix.md)，实现选择见 [工程方案](engineering.md)，验证方法见 [质量计划](quality-plan.md)，发布及准备材料见 [维护发布策略](release-policy.md)。T-01 完成证据见 [工程验证](../validation/t01-engineering.md)，T-02 证据见 [类型协议验证](../validation/t02-contracts.md)，T-03 证据见 [存储验证](../validation/t03-storage.md)，T-04 证据见 [注册与资源验证](../validation/t04-runtime.md)，T-05 证据见 [Python 工具验证](../validation/t05-tools.md)，T-06 证据见 [只读闭环验证](../validation/t06-agent-loop.md)，T-07 证据见 [上下文验证](../validation/t07-context.md)，T-08 证据见 [Memory 验证](../validation/t08-memory.md)，T-09 审批/输入子范围证据见 [交互验证](../validation/t09-interactions.md)，该卡完整核查/恢复证据见 [本轮记录](../validation/t09-reconciliation-recovery.md)；T-10 至 T-18 及新增 T-10A/T-10B 均未开始；首版共 20 张任务卡，任务数量不代表已完成能力。
+范围唯一维护在 [能力表](capability-matrix.md)，实现选择见 [工程方案](engineering.md)，验证方法见 [质量计划](quality-plan.md)，发布及准备材料见 [维护发布策略](release-policy.md)。T-01 完成证据见 [工程验证](../validation/t01-engineering.md)，T-02 证据见 [类型协议验证](../validation/t02-contracts.md)，T-03 证据见 [存储验证](../validation/t03-storage.md)，T-04 证据见 [注册与资源验证](../validation/t04-runtime.md)，T-05 证据见 [Python 工具验证](../validation/t05-tools.md)，T-06 证据见 [只读闭环验证](../validation/t06-agent-loop.md)，T-07 证据见 [上下文验证](../validation/t07-context.md)，T-08 证据见 [Memory 验证](../validation/t08-memory.md)，T-09 审批/输入子范围证据见 [交互验证](../validation/t09-interactions.md)，该卡完整核查/恢复证据见 [本轮记录](../validation/t09-reconciliation-recovery.md)；T-10 故障矩阵证据见 [专项记录](../validation/t10-faults-cancellation.md)；首版共 20 张任务卡，任务数量不代表已完成能力。
 
 ## 1. 实施顺序
 
@@ -50,7 +50,7 @@ flowchart LR
     T10B --> T17
 ```
 
-图是阅读辅助；下表前置依赖是执行依据，不因工具允许并发就同时修改尚未稳定的公共协议。2026-10-14 保留 T-01 至 T-18 的历史编号，在 T-10 后插入 T-10A/T-10B；字母后缀不是后续版本或可跳过任务。当前顺序为 T-09 → T-10 → T-10A → T-10B → T-11…T-18，T-09 完整状态见 progress，下一项 T-10。
+图是阅读辅助；下表前置依赖是执行依据，不因工具允许并发就同时修改尚未稳定的公共协议。2026-10-14 保留 T-01 至 T-18 的历史编号，在 T-10 后插入 T-10A/T-10B；字母后缀不是后续版本或可跳过任务。执行顺序为 T-09 → T-10 → T-10A → T-10B → T-11…T-18；当前状态与下一项见 progress。
 
 ## 2. 任务卡
 

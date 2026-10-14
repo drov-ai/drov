@@ -41,6 +41,7 @@ class ItemService:
             str(self.script),
             "--state",
             str(self.directory / "items.json"),
+            stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
@@ -156,6 +157,13 @@ def serve(path: Path) -> None:
                         "result": response,
                     }
                 path.write_text(json.dumps(state), encoding="utf-8")
+                if payload["mode"] == "barrier_reply":
+                    # Test-only barrier: the independent write is durable before the SDK reply.
+                    print(
+                        json.dumps({"boundary": "write_before_reply", "writes": state["writes"]}),
+                        flush=True,
+                    )
+                    sys.stdin.readline()
                 if payload["mode"] == "reply_lost":
                     self.close_connection = True
                     self.connection.shutdown(socket.SHUT_RDWR)

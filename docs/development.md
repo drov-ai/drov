@@ -1,10 +1,10 @@
 # 本地开发
 
-T-01 至 T-08 已本地验收，包版本为 `0.1.0a0`。提供定义/类型/schema、模型协议、事务存储、Runtime 生命周期、只读 Agent 执行、Python 工具/权限、上下文选择/预览/清单及事务 Memory；T-09 已交付审批/输入与 respond/resume 子范围；T-09 已实现外部未知效果/verify/recover；服务与 CLI 尚未实现。不要把规划中的运行片段当成可运行教程。
+包版本为 `0.1.0a0`。提供定义/类型/schema、模型协议、事务存储、Runtime 生命周期、Agent 执行、Python 工具/权限、上下文预览/清单、事务 Memory，以及审批/输入、外部未知效果、verify/recover。实际验收状态以 [progress](planning/progress.md) 为准，T-10 故障矩阵见 [验证](validation/t10-faults-cancellation.md)；沙箱、真实模型适配与服务/CLI 尚未实现。不要把规划片段当成可运行教程。
 
 ## 环境与安装
 
-最低 Python 3.11，`.python-version` 将开发默认值设为 3.11。包声明允许 Python 3.11 及以上；3.11–3.14 是目标支持矩阵，3.15 只有非阻塞探测，不能仅凭依赖解析成功宣称支持。准确验证范围见 [T-08 记录](validation/t08-memory.md)。
+最低 Python 3.11，`.python-version` 将开发默认值设为 3.11。包声明允许 Python 3.11 及以上；3.11–3.14 是目标支持矩阵，3.15 只有非阻塞探测，不能仅凭依赖解析成功宣称支持。准确平台与跳过范围见 [T-10 记录](validation/t10-faults-cancellation.md)。
 
 使用 uv **0.13.0**，项目配置会拒绝不同版本，升级工具须同步验证与记录。可以按 [uv 官方安装说明](https://docs.astral.sh/uv/getting-started/installation/) 安装指定版本。也可只在当前项目建立隔离工具环境，不修改系统 Python：
 

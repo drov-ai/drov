@@ -1,6 +1,6 @@
 # 实施前规划导航
 
-状态：P1 至 P4、T-01 至 T-08 本地验收完成，含只读 Agent、可检查上下文和内置事务 Memory；T-09 全路径已本地与远程 CI 验收；下一项按 progress 选择 T-10 故障矩阵。首版新增 Python 代码沙箱必交范围，T-10A/T-10B 尚未实施；外部未知效果/显式恢复已实现；真实模型和服务尚未实现。日期：2026-10-14（Asia/Shanghai）。
+实施状态、下一项与用户准备统一见 [progress](progress.md)。T-09 全路径证据与 T-10 硬终止/故障矩阵分别维护，首版新增 Python 代码沙箱见 ADR-0013 与 T-10A/T-10B。日期：2026-10-14（Asia/Shanghai）。
 
 ## 当前共识
 
@@ -55,7 +55,7 @@ P1 至 P4 文档完成只表示设计和实施准备通过审查，不表示 API
        外部证据 E / 差异化假设 H
 ```
 
-G、C、S、X、B、E、H 标识在对应源文档定义。B-01 至 B-17 是运行测试要求，按对应任务逐项验收；B-14 已延后。T-01 至 T-18 及 T-10A/T-10B 共 20 张卡在实施任务中定义，当前 T-01 至 T-08 本地验收完成、T-09 完整验收；状态在 progress，最新实际证据见 [T-09 核查/恢复验证](../validation/t09-reconciliation-recovery.md)。新会话方法见 [交接说明](../handoff.md)。质量计划建立映射，不另改需求含义。
+G、C、S、X、B、E、H 标识在对应源文档定义。B-01 至 B-17 是运行测试要求，按对应任务逐项验收；B-14 已延后。T-01 至 T-18 及 T-10A/T-10B 共 20 张卡在实施任务中定义，当前 T-01 至 T-08 本地验收完成、T-09 完整验收；状态在 progress，实际证据见 [T-09 核查/恢复验证](../validation/t09-reconciliation-recovery.md) 与 [T-10 故障验证](../validation/t10-faults-cancellation.md)。新会话方法见 [交接说明](../handoff.md)。质量计划建立映射，不另改需求含义。
 
 ## 规划边界
 
@@ -70,3 +70,5 @@ T-08 内置 Memory 的落地决定见 [ADR-0012](../decisions/0012-transactional
 T-09 的审批/输入子范围决定见 [ADR-0014](../decisions/0014-durable-approval-input.md)，实际证据见 [交互验证](../validation/t09-interactions.md)；首批历史子范围保留；整卡最新证据在本轮验证。
 
 T-09 外部路径的决定见 [ADR-0015](../decisions/0015-external-effects-recovery.md)，完整离线证据见 [本轮验证](../validation/t09-reconciliation-recovery.md)；T-10 硬崩溃专项单独验收。
+
+T-10 的真实 SDK 硬终止、SQLite 提交/只读/页数耗尽故障、部分成功、取消竞争及所有权矩阵见 [专项验证](../validation/t10-faults-cancellation.md)，不覆盖沙箱/真实模型/MCP/HTTP 或旧备份维护。
