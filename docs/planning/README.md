@@ -1,6 +1,6 @@
 # 实施前规划导航
 
-状态：P1 至 P4、T-01 至 T-08 本地验收完成，含只读 Agent、可检查上下文和内置事务 Memory；T-09 已交付审批/输入子范围，下一轮继续该卡的未知效果与显式恢复。首版新增 Python 代码沙箱必交范围，T-10A/T-10B 尚未实施；真实模型、外部未知效果/显式恢复和服务尚未实现。日期：2026-10-14（Asia/Shanghai）。
+状态：P1 至 P4、T-01 至 T-08 本地验收完成，含只读 Agent、可检查上下文和内置事务 Memory；T-09 全路径已本地验收；下一项按 progress 选择 T-10 故障矩阵。首版新增 Python 代码沙箱必交范围，T-10A/T-10B 尚未实施；外部未知效果/显式恢复已实现；真实模型和服务尚未实现。日期：2026-10-14（Asia/Shanghai）。
 
 ## 当前共识
 
@@ -55,7 +55,7 @@ P1 至 P4 文档完成只表示设计和实施准备通过审查，不表示 API
        外部证据 E / 差异化假设 H
 ```
 
-G、C、S、X、B、E、H 标识在对应源文档定义。B-01 至 B-17 是运行测试要求，按对应任务逐项验收；B-14 已延后。T-01 至 T-18 及 T-10A/T-10B 共 20 张卡在实施任务中定义，当前 T-01 至 T-08 本地验收完成、T-09 子范围进行中；状态在 progress，实际证据见 [T-08 验证](../validation/t08-memory.md)。新会话方法见 [交接说明](../handoff.md)。质量计划建立映射，不另改需求含义。
+G、C、S、X、B、E、H 标识在对应源文档定义。B-01 至 B-17 是运行测试要求，按对应任务逐项验收；B-14 已延后。T-01 至 T-18 及 T-10A/T-10B 共 20 张卡在实施任务中定义，当前 T-01 至 T-08 本地验收完成、T-09 完整本地验收；状态在 progress，实际证据见 [T-08 验证](../validation/t08-memory.md)。新会话方法见 [交接说明](../handoff.md)。质量计划建立映射，不另改需求含义。
 
 ## 规划边界
 
@@ -67,4 +67,6 @@ T-08 内置 Memory 的落地决定见 [ADR-0012](../decisions/0012-transactional
 
 2026-10-14 仅按用户要求调整首版沙箱范围，未重新开启 P4 一般规划；两张新增卡接在 T-10 后，下一轮先 T-09。文档同步与未运行范围见 [本轮验证](../validation/2026-10-14-sandbox-scope.md)。
 
-T-09 的审批/输入子范围决定见 [ADR-0014](../decisions/0014-durable-approval-input.md)，实际证据见 [交互验证](../validation/t09-interactions.md)；未关闭整卡，不提前进入 T-10。
+T-09 的审批/输入子范围决定见 [ADR-0014](../decisions/0014-durable-approval-input.md)，实际证据见 [交互验证](../validation/t09-interactions.md)；首批历史子范围保留；整卡最新证据在本轮验证。
+
+T-09 外部路径的决定见 [ADR-0015](../decisions/0015-external-effects-recovery.md)，完整离线证据见 [本轮验证](../validation/t09-reconciliation-recovery.md)；T-10 硬崩溃专项单独验收。

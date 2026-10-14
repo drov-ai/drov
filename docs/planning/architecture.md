@@ -1,6 +1,6 @@
 # 架构与模块边界
 
-状态：P4 实施基线；T-02 至 T-08 已实现定义/协议、事务存储、Runtime 注册/资源、只读 Agent、上下文选择/清单和内置事务 Memory；T-09 审批/输入子范围已实现；外部未知效果/显式恢复及服务尚未实现。更新：2026-10-14。
+状态：P4 实施基线；T-02 至 T-08 已实现定义/协议、事务存储、Runtime 注册/资源、只读 Agent、上下文选择/清单和内置事务 Memory；T-09 审批/输入子范围已实现；T-09 已接入外部未知效果/显式恢复；服务尚未实现。更新：2026-10-14。
 
 本文定义职责、依赖和数据归属。[行为契约](runtime-contract.md) 是状态、恢复、权限和生命周期规则的唯一详细定义；[API 草案](api-draft.md) 描述用户入口，不能独立改变这些规则。
 
@@ -11,6 +11,8 @@
 依据：[ADR-0002](../decisions/0002-unified-runtime.md)、[ADR-0003](../decisions/0003-context-and-memory.md)、[ADR-0004](../decisions/0004-first-release-engineering.md)、[ADR-0005](../decisions/0005-control-and-observation.md)。具体依赖和文件布局见 [工程方案](engineering.md)。
 
 T-09 的 InteractionController 归 Runtime，负责保存的原计划暂停、到期和响应消费；ToolDispatcher/MemoryDispatcher 仍各自执行实际操作，批准不能把外部写入变成 Memory 事务。HumanInput 是注册描述，响应由内核写成原操作结果；无需保存/恢复 Python 函数栈。interaction 保存请求与 operation/配置绑定，receipt 保存不可变响应及可信响应者；检查点引用原 model_response 和 operation_ids。同 tenant 的私有归属定位只用于经 Authorizer 检查的查看/控制，数据读取和继续执行使用原 owner。见 [ADR-0014](../decisions/0014-durable-approval-input.md)。
+
+ReconciliationController 归 Runtime，协调原 operation 的未知事实、当前核查请求和独立查询所有权；RecoveryController 负责排他启动扫描及显式恢复。实际 Python 调用仍由 ToolDispatcher 拥有，verifier 是原 PythonTool 的受控只读回调，不是第二套 Agent 循环。核查审计使用不可变 receipt 子记录，终态后完成审计不改 Run；查询权限与正文投影复用原内核。模块与兼容取舍见 [ADR-0015](../decisions/0015-external-effects-recovery.md)。
 
 ## 依赖方向
 
@@ -41,7 +43,7 @@ flowchart TD
 | 公共类型与定义 | Agent、工具 schema、配置、结果、事件和错误 | 全局可变会话或隐式当前用户 |
 | Runtime | 运行接收、任务所有权、状态推进、取消、恢复和资源清理 | 任意业务事务的回滚或外部 exactly-once |
 | 模型适配 | 能力声明、输入转换、输出/工具调用归一、用量 | 自动放宽权限、悄悄切模型、任意修复结构化输出 |
-| 工具分发 | 校验、授权、审批、记录操作意图、执行与结果提交；T-05 已交付只读 Python/权限/记录接点，T-09 审批/输入子范围已接入，外部未知效果/恢复仍待实现 | 依据模型自述信任工具的安全性 |
+| 工具分发 | 校验、授权、审批、记录操作意图、执行与结果提交；T-05 已交付只读 Python/权限/记录接点，T-09 审批/输入子范围已接入，外部未知效果/恢复已接入，硬崩溃专项由 T-10 验收 | 依据模型自述信任工具的安全性 |
 | 上下文规划 | T-07：RunController 读取已提交作用域事实并原子保存输入/清单；内部 context 纯函数做预算、完整组选取和预览 | 跨用户隐式检索或将知识内容提升为控制指令 |
 | Memory | T-08：内部 memory 描述/期限检索/事务处理器；同 Storage/CAS 保存修改、结果及事件；ContextPolicy 决定份额 | 会话历史、整个任务检查点或默认后台总结所有用户 |
 | 事务存储 | 原子提交状态/事件/检查点，按归属查询，管理版本 | 包含外部 API 调用的跨系统事务 |

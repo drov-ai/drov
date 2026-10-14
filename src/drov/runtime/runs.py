@@ -1,4 +1,4 @@
-"""Read-only Agent execution and authorized observation of committed facts."""
+"""Agent execution, explicit controls and authorized observation of committed facts."""
 
 import asyncio
 from collections.abc import Awaitable, Callable
@@ -59,6 +59,7 @@ from drov.types import (
     Failed,
     InteractionSummary,
     JsonOutcome,
+    OperationSummary,
     RunContext,
     RunError,
     RunInspection,
@@ -111,6 +112,11 @@ class RunController:
         from drov.runtime.interactions import InteractionController
 
         self.interactions = InteractionController(self)
+        from drov.runtime.reconciliation import ReconciliationController
+        from drov.runtime.recovery import RecoveryController
+
+        self.reconciliation = ReconciliationController(self)
+        self.recovery = RecoveryController(self)
         self.works: dict[str, _Work[None]] = {}
         self.failures: dict[str, BaseException] = {}
         self.subscribers: dict[str, set[RunEvents]] = {}
@@ -202,7 +208,6 @@ class RunController:
         if any(
             not isinstance(item, (PythonTool, HumanInput))
             or (isinstance(item, PythonTool) and not callable(item.function))
-            or item.effect != "read"
             for item in agent.tools
         ):
             raise ConfigurationError("This development snapshot executes only callable read tools")
@@ -283,6 +288,7 @@ class RunController:
 
     def attach(self, run_id: str, work: "_Work[None]") -> None:
         self.failures.pop(run_id, None)
+        work.run_id = run_id
         self.works[run_id] = work
 
         def done(task: asyncio.Task[None]) -> None:
@@ -328,6 +334,17 @@ class RunController:
             if record.state.cancel_requested:
                 raise asyncio.CancelledError
             checkpoint = await tx.get_checkpoint(context, run_id)
+            data = dict(data or {})
+            for event in events:
+                if (
+                    event.type == "model.attempt_failed"
+                    and event.data.get("error_code") != "transient_model_error"
+                ):
+                    data["stop_error"] = RunError(
+                        code=cast(str, event.data["error_code"]),
+                        message="Committed model attempt failed",
+                        stage="model",
+                    ).model_dump(mode="json")
             version = record.state.state_version + 1
             for item in items:
                 await tx.put_item(context, item)
@@ -373,13 +390,24 @@ class RunController:
         output: StrictJson = None,
         error: RunError | None = None,
         cancelled: bool = False,
+        operations: list[OperationSummary] | None = None,
+        extra_events: list[EventDraft] | None = None,
     ) -> None:
         record = await tx.get_run(context, run_id)
         if record.state.status in TERMINAL:
             return
+        if operations is not None:
+            record = record.model_copy(
+                update={"state": record.state.model_copy(update={"operations": operations})}
+            )
+        from drov.runtime.reconciliation import ambiguous
+
+        if ambiguous(record):
+            await self.reconciliation.suspend_in(tx, record, error=error, cancelled=cancelled)
+            return
         checkpoint = await tx.get_checkpoint(context, run_id)
         summaries = list(record.state.operations)
-        final_events: list[EventDraft] = []
+        final_events: list[EventDraft] = list(extra_events or [])
         for index, summary in enumerate(summaries):
             if summary.status != "prepared":
                 continue
@@ -542,6 +570,8 @@ class RunController:
                             "result": operation.data["result"],
                             "error_code": operation.data["error_code"],
                         }
+                        if operation.data.get("effect_resolution") is not None:
+                            result["effect_resolution"] = operation.data["effect_resolution"]
                         version = str(operation.version)
                         memory_sources = operation.data.get("memory_sources", [])
                         if not isinstance(memory_sources, list):
@@ -758,7 +788,12 @@ class RunController:
                     update={
                         "state_version": version,
                         "data": checkpoint.data
-                        | {"model_step_count": count + (not rejected), "engine_schema": 1},
+                        | {
+                            "model_step_count": count + (not rejected),
+                            "engine_schema": 1,
+                            "pending_model_call": model_call_id if not rejected else None,
+                            "pending_model_attempt_count": 0,
+                        },
                     }
                 ),
                 events=[EventDraft(type="context.prepared", data=event_data)],
@@ -846,6 +881,18 @@ class RunController:
                 end = min(end, wall_end)
             work.checkpoint()
             await self.step(run_id, context, [EventDraft(type="run.running")])
+            pending_output = checkpoint.data.get("pending_output")
+            if pending_output is not None:
+                if not isinstance(pending_output, str):
+                    raise PersistenceUnavailable("Invalid saved output reference")
+                async with self.storage.transaction() as tx:
+                    output_item = await tx.get_item(
+                        context, run_id, "model_response", pending_output
+                    )
+                await self.finish_response(
+                    record, ModelResponse.model_validate(output_item.data["response"]), work, end
+                )
+                return
             pending_plan = checkpoint.data.get("pending_plan")
             if pending_plan is not None:
                 if not isinstance(pending_plan, str):
@@ -863,11 +910,27 @@ class RunController:
                 if loop.time() >= end:
                     raise _RunFailure(end_code, "runtime")
                 self.runtime.validate_record(await self.storage.get_run(context, run_id))
-                call_id = str(uuid4())
                 record = await self.storage.get_run(context, run_id)
-                request = await self.prepare(record, context, call_id, work, end)
+                current_checkpoint = await self.storage.get_checkpoint(context, run_id)
+                saved_call = current_checkpoint.data.get("pending_model_call")
+                if saved_call is not None:
+                    if not isinstance(saved_call, str):
+                        raise PersistenceUnavailable("Invalid saved model call reference")
+                    call_id = saved_call
+                    async with self.storage.transaction() as tx:
+                        input_item = await tx.get_item(context, run_id, "model_input", call_id)
+                    request = ModelRequest.from_json(canonical_json(input_item.data["request"]))
+                    call_attempts = current_checkpoint.data.get("pending_model_attempt_count", 0)
+                    if type(call_attempts) is not int or call_attempts < 0:
+                        raise PersistenceUnavailable("Invalid saved model attempt count")
+                else:
+                    call_id = str(uuid4())
+                    request = await self.prepare(record, context, call_id, work, end)
+                    call_attempts = 0
+                if call_attempts >= record.limits.model_retries + 1:
+                    raise _RunFailure("model_attempt_limit", "model")
                 response: ModelResponse | None = None
-                for attempt in range(record.limits.model_retries + 1):
+                for attempt in range(call_attempts, record.limits.model_retries + 1):
                     work.checkpoint()
                     allowance = min(record.limits.model_timeout_seconds, end - loop.time())
                     if allowance <= 0:
@@ -890,6 +953,7 @@ class RunController:
                         data={
                             "active_seconds": attempt_start - started + allowance,
                             "model_attempt_count": attempt_count + 1,
+                            "pending_model_attempt_count": attempt + 1,
                         },
                         usage=_usage(prior_usage, Usage(), first=attempt_count == 0),
                     )
@@ -988,6 +1052,9 @@ class RunController:
                         "response_ids": [*ids, call_id],
                         "active_seconds": loop.time() - started,
                         "pending_plan": call_id if response.tool_calls else None,
+                        "pending_model_call": None,
+                        "pending_model_attempt_count": 0,
+                        "pending_output": call_id if not response.tool_calls else None,
                     },
                     usage=_usage(prior_usage, response.usage, first=attempt_count == 1),
                     items=(
@@ -1005,28 +1072,7 @@ class RunController:
                     ),
                 )
                 if not response.tool_calls:
-                    if response.message is None:
-                        raise _RunFailure("model_protocol_error", "output")
-                    try:
-                        decoded = (
-                            response.message
-                            if agent.output_type is str
-                            else agent.output_codec.parse(
-                                response.message, max_bytes=record.limits.max_tool_result_bytes
-                            )
-                        )
-                        output = agent.output_codec.encode(decoded)
-                        if (
-                            len(canonical_json(output).encode("utf-8"))
-                            > record.limits.max_tool_result_bytes
-                        ):
-                            raise ValueError("Output exceeds limit")
-                    except (TypeError, ValueError):
-                        raise _RunFailure("invalid_output", "output") from None
-                    work.checkpoint()
-                    if loop.time() >= end:
-                        raise _RunFailure(end_code, "runtime")
-                    await self.finish(run_id, context, output=output)
+                    await self.finish_response(record, response, work, end)
                     return
                 if not await self.execute_plan(record, response, operation_ids, work, started, end):
                     return
@@ -1058,6 +1104,41 @@ class RunController:
                 ),
             )
 
+    async def finish_response(
+        self,
+        record: RunRecord,
+        response: ModelResponse,
+        work: "_Work[None]",
+        end: float,
+    ) -> None:
+        run_id, context = record.state.run_id, self.resource(record).owner
+        agent = self.runtime._agents[(record.agent_name, record.revision)]
+        if response.message is None:
+            raise _RunFailure("model_protocol_error", "output")
+        try:
+            decoded = (
+                response.message
+                if agent.output_type is str
+                else agent.output_codec.parse(
+                    response.message, max_bytes=record.limits.max_tool_result_bytes
+                )
+            )
+            output = agent.output_codec.encode(decoded)
+            if len(canonical_json(output).encode("utf-8")) > record.limits.max_tool_result_bytes:
+                raise ValueError("Output exceeds limit")
+        except (TypeError, ValueError):
+            raise _RunFailure("invalid_output", "output") from None
+        work.checkpoint()
+        if asyncio.get_running_loop().time() >= end:
+            raise _RunFailure(
+                "deadline_exceeded"
+                if record.limits.expires_at is not None
+                and datetime.now(UTC) >= record.limits.expires_at
+                else "limit_exceeded",
+                "runtime",
+            )
+        await self.finish(run_id, context, output=output)
+
     async def execute_plan(
         self,
         record: RunRecord,
@@ -1075,10 +1156,19 @@ class RunController:
             work.checkpoint()
             if call.name not in tools:
                 raise _RunFailure("unknown_tool", "tool")
+            previous = await OperationJournal(self.storage, context).get(run_id, operation_id)
+            if previous is not None and previous.status not in (
+                "prepared",
+                "dispatched",
+                "unknown",
+            ):
+                continue
+            selected_tool = tools[call.name]
+            retries = record.limits.read_tool_retries if selected_tool.effect == "read" else 0
             allowance = min(
                 end - loop.time(),
-                record.limits.tool_timeout_seconds * (record.limits.read_tool_retries + 1)
-                + record.limits.retry_backoff_seconds * record.limits.read_tool_retries,
+                record.limits.tool_timeout_seconds * (retries + 1)
+                + record.limits.retry_backoff_seconds * retries,
             )
             if allowance <= 0:
                 raise _RunFailure("limit_exceeded", "tool")
@@ -1096,7 +1186,6 @@ class RunController:
                 data={"active_seconds": loop.time() - started + allowance},
             )
             work.checkpoint()
-            selected_tool = tools[call.name]
             dispatcher = (
                 MemoryDispatcher(
                     storage=self.storage,
@@ -1148,6 +1237,14 @@ class RunController:
                 return False
             if result.operation.error_code == "interaction_expired":
                 raise _RunFailure("interaction_expired", "tool")
+            if result.operation.effect != "read" and result.operation.status in (
+                "dispatched",
+                "unknown",
+            ):
+                await self.reconciliation.suspend(
+                    run_id, context, active_seconds=loop.time() - started
+                )
+                return False
             if any(not call.done() for call in work._calls):
                 raise _RunFailure(result.operation.error_code or "tool_timeout", "tool")
             # Tool errors become explicit messages; the model may choose another action.
@@ -1196,7 +1293,7 @@ class RunController:
                 raise self.failures[run_id]
             work = self.works.get(run_id)
             if work is None:
-                raise ConfigurationError("Run has no active owner; explicit recovery requires T-09")
+                raise ConfigurationError("Run has no active owner; use Runtime.recover explicitly")
             # Shield execution from a cancelled waiter. Reauthorize at the return boundary.
             await work.wait()
 
@@ -1211,11 +1308,6 @@ class RunController:
             async with self.storage.transaction() as tx:
                 record = await tx.get_run(owner, run_id)
                 if record.state.status not in TERMINAL and not record.state.cancel_requested:
-                    if any(
-                        operation.effect != "read" and operation.status in ("dispatched", "unknown")
-                        for operation in record.state.operations
-                    ):
-                        raise ConfigurationError("Unknown effects require T-09 reconciliation")
                     checkpoint = await tx.get_checkpoint(owner, run_id)
                     version = record.state.state_version + 1
                     await tx.save_step(

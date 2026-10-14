@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；外部未知写入、verify/recover 和真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
+状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -45,7 +45,7 @@ run/wait/resume/stream/recover(wait=True) 返回正文，预检 read 与 view_co
 
 verify 需要核查响应权限及 read/view_content，以原执行者当前权限进行只读查询；同一 operation 同时至多一个 verifier 调用，占用活动容量并保留资源所有权。它不接受模型传来的新查询目标，也不执行写入。查询期间原请求被其他合法响应消费时，迟到建议不能再用于推进旧请求。
 
-T-06 已实现表中的 start/run/wait/cancel/inspect/events/stream 与 Agent.run/run_sync。T-07 已实现 get_context；T-09 子范围已实现 HumanInput、respond/resume 的 approval/input 路径，见 [ADR-0014](../decisions/0014-durable-approval-input.md)。verify/recover/sessions/session 仍未实现，reconciliation 响应尚不可用。显式 Runtime 接收 callable read 工具、HumanInput 及配置 Memory 的 Agent；ASK 保存原计划并 suspended/approval。临时 Agent.run 遇到 ASK/input 仍 failed/interaction_unavailable；外部 write/unknown 接收前拒绝。inspect.context_manifests 只返回本次事件页中 context.prepared 对应的摘要（sources=[]、content_visible=False），沿事件游标可遍历全部索引；get_context 返回完整来源清单，include_content=True 返回选入内容/预览，provider 正文始终不可见。旧完整轮次确定性选取，保护项无法装入时提前失败；清单预算/粗估包括协议和 schema，供应商已报告用量单独关联。默认查询按 context 的 tenant/user 隔离；同 tenant 跨用户查看/响应须由应用 Authorizer 分别授予，工具继续使用原用户身份。跨 tenant 无法定位。
+T-06 已实现表中的 start/run/wait/cancel/inspect/events/stream 与 Agent.run/run_sync。T-07 已实现 get_context；T-09 子范围已实现 HumanInput、respond/resume 的 approval/input 路径，见 [ADR-0014](../decisions/0014-durable-approval-input.md)。T-09 已实现 verify/recover 与 reconciliation 响应；sessions/session 仍未实现。显式 Runtime 接收 callable Python 工具（read/write/unknown）、HumanInput 及配置 Memory 的 Agent；ASK 保存原计划并 suspended/approval。临时 Agent.run 遇到 ASK/input 仍 failed/interaction_unavailable；外部 write/unknown 按权限/审批单次派发，未知结果暂停核查。inspect.context_manifests 只返回本次事件页中 context.prepared 对应的摘要（sources=[]、content_visible=False），沿事件游标可遍历全部索引；get_context 返回完整来源清单，include_content=True 返回选入内容/预览，provider 正文始终不可见。旧完整轮次确定性选取，保护项无法装入时提前失败；清单预算/粗估包括协议和 schema，供应商已报告用量单独关联。默认查询按 context 的 tenant/user 隔离；同 tenant 跨用户查看/响应须由应用 Authorizer 分别授予，工具继续使用原用户身份。跨 tenant 无法定位。
 
 Runtime 的有效限额从 Agent 默认与管理员上限取较严格值，显式 Limits 仅覆盖设置过的字段且不得放宽管理员上限；Agent.run 临时环境由应用配置限额。ScriptedModel/ScriptedStep 可从 drov.models 导入，用预定响应或事件/异常及输入检查构建离线序列，不调用外部模型。
 
@@ -201,7 +201,7 @@ assert decision.decision == "allow"
 
 PermissionPolicy(deny={...}, ask={...}, allow={...}) 保存不可变集合，支持 set/frozenset/list。decide 返回 PermissionDecision 的 decision/reason；业务 Authorizer 使用新增 execute_tool action 与 ToolResource 检查原归属及规范参数。默认 OwnerAuthorizer 只允许本人，跨用户查看/审批仍需宿主明确授权。Runtime 接收 policy/authorizer，配置引用只读，原 authorizer 对象可反映动态业务权限；当前权限会在尝试、队列等待后、派发标记提交后再次检查，allow 不覆盖否决或 required approval。
 
-外部 Python 派发目前只有 read 可执行；外部 write/unknown 明确 not_executed/effect_not_supported，私有派发器 ASK 返回 prepared；T-09 的显式 Runtime 持久化绑定原调用的 ApprovalRequest，批准/拒绝后处理保存的原计划。临时 Agent.run 的 ASK 仍 failed/interaction_unavailable；外部写入/核查/显式恢复仍待 T-09 剩余范围。结果必须经 codec 和大小校验；非法输出不当成功，None 用内部 has_result 区分可用结果。只读瞬态错误用 `drov.errors.TransientToolError`，其他错误/超时/非法结果不自动重试。排队/线程与原子记录规则见运行契约第 4 节和 ADR-0009。
+外部 Python 派发已支持 read/write/unknown；后两者单次派发，派发后不明结果为 unknown，私有派发器 ASK 返回 prepared；T-09 的显式 Runtime 持久化绑定原调用的 ApprovalRequest，批准/拒绝后处理保存的原计划。临时 Agent.run 的 ASK 仍 failed/interaction_unavailable；T-09 已接入外部写入/核查/显式恢复，见 [ADR-0015](../decisions/0015-external-effects-recovery.md)。结果必须经 codec 和大小校验；非法输出不当成功，None 用内部 has_result 区分可用结果。只读瞬态错误用 `drov.errors.TransientToolError`，其他错误/超时/非法结果不自动重试。排队/线程与原子记录规则见运行契约第 4 节和 ADR-0009。
 
 
 ```python
@@ -227,7 +227,15 @@ PermissionPolicy 初期提供 deny、ask、allow 的明确工具规则；高优�
 
 `from drov import HumanInput`；构造 `HumanInput(name="ask_item", input_type=ItemChoice, revision="1")`，input_type 使用既有结果 schema 子集。工具只接受 prompt: str，无宿主 callable；InputResponse.value 经过注册 codec 校验成为原调用的结果。默认 read，应用 ask 会先生成审批，deny/当前业务否决仍生效。非法值/多余字段不消费请求，用户可修正；输入与批准不能混用。跨进程重建相同 Agent revision/schema 后可响应保存的请求，示例见 [审批/输入离线检查](../../examples/interactions_offline.py)。
 
-本子范围支持显式 Runtime 的内存或 SQLite 存储；跨进程事实需要 SQLite。完整未知效果恢复尚未实现，不把 respond/resume 当作通用 recover。累计预算、回执和到期语义以运行契约为准。
+显式 Runtime 支持内存或 SQLite 存储；跨进程事实需要 SQLite。respond/resume 消费人工请求，recover 处理原恢复暂停，不绕过审批/输入/核查。累计预算、回执和到期语义以运行契约为准。
+
+### 外部写入、verify 和 recover（T-09）
+
+`@tool(..., verifier=verify_item, verifier_revision="1")` 可显式绑定异步只读回调 `async def verify_item(ctx: ToolContext) -> ReconciliationDecision`。ctx 固定为原用户/run/operation 及当前应用 dependencies；verifier 不接收模型提供的新目标。没有回调时 verify 抛 ConfigurationError；改变核查实现/服务契约须更新对应 revision。普通 Python 工具由宿主执行，effect/verifier 声明不提供隔离安全证明。
+
+write/unknown 没有自动重试；超时、异常和不可用输出暂停核查。verify 不消费请求或继续 Agent；随后明确 respond/resume 提交证据。applied 正常继续须有原工具 codec 可验证的 result；取消/预算收尾可省略 result。not_applied 仅在原调用停止后重走当前权限/审批；unresolved 换新 request_id。证据非空和 schema 合法不证明业务真实性，宿主须提供可靠操作查询或获授权核查人。
+
+`recover(..., wait=False)` 返回无正文 RunSnapshot；默认 wait=True 要求正文权限并等待下个暂停/终态。启动扫描不执行外部动作；recover 不消费人工请求，也不复活终态。未提交模型响应只允许按原保存输入与剩余次数重试，可能有新输出/用量；已提交模型计划、工具结果与最终响应不重做。详见 [核查/恢复验证](../validation/t09-reconciliation-recovery.md)。
 
 ## 内置 Memory 与上下文
 

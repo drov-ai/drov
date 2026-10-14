@@ -143,7 +143,12 @@ class StartKeyRecord(WireModel):
 
 
 ItemKind = Literal[
-    "operation", "interaction", "context", "model_input", "model_response", "receipt"
+    "operation",
+    "interaction",
+    "context",
+    "model_input",
+    "model_response",
+    "receipt",
 ]
 
 

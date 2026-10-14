@@ -34,6 +34,7 @@ from drov.types import (
     InputResponse,
     InteractionRequest,
     InteractionResponse,
+    ReconciliationDecision,
     ResponseReceipt,
     RunContext,
     RunError,
@@ -170,6 +171,10 @@ class InteractionController:
         await runs.authorize(context, runs.resource(record), ("respond",))
         response = TypeAdapter(InteractionResponse).validate_python(response)
         response = TypeAdapter(InteractionResponse).validate_json(response.model_dump_json())
+        if isinstance(response, ReconciliationDecision):
+            return await runs.reconciliation.respond(
+                run_id, request_id=request_id, response=response, context=context
+            )
         response_data = response.model_dump(mode="json")
         owner = runs.resource(record).owner
 
@@ -201,8 +206,6 @@ class InteractionController:
                         raise InteractionConflict("Request is no longer pending")
                     if response.kind != request.kind:
                         raise InteractionConflict("Response kind differs from the request")
-                    if request.kind == "reconciliation":
-                        raise ConfigurationError("Reconciliation is not implemented in this batch")
                     expired = await self.expire_in(tx, current)
                     if not expired:
                         runs.runtime.validate_record(current)
@@ -400,6 +403,8 @@ class InteractionController:
                                     data={
                                         "request_id": request_id,
                                         "response_id": receipt.response_id,
+                                        "response": response_data,
+                                        "actor": context.model_dump(mode="json"),
                                     },
                                 ),
                                 *events,

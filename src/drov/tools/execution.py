@@ -1,4 +1,4 @@
-"""Private read-tool dispatcher, with durable barriers and real call ownership."""
+"""Private tool dispatcher, with durable barriers and real call ownership."""
 
 import asyncio
 import hashlib
@@ -102,8 +102,6 @@ class ToolDispatcher:
         work.checkpoint()
         run = await self.storage.get_run(scope, record.state.run_id)
         self.validate(run, tool)
-        if run.state.status != "running" or run.state.cancel_requested:
-            raise Conflict("Run is not accepting tool dispatch")
         context = ToolContext(
             tenant_id=scope.tenant_id,
             user_id=scope.user_id,
@@ -150,6 +148,8 @@ class ToolDispatcher:
             # Stored operations are facts, never implicit approval/retry permission.
             if not continuation or previous.status != "prepared":
                 return ToolExecution(previous)
+        if run.state.status != "running" or run.state.cancel_requested:
+            raise Conflict("Run is not accepting tool dispatch")
         operation = previous or ToolOperation(
             run_id=run.state.run_id,
             operation_id=operation_id,
@@ -253,7 +253,9 @@ class ToolDispatcher:
         admission: Admission | None = None
         decision: PermissionDecision | None = None
         try:
-            for attempt in range(run.limits.read_tool_retries + 1):
+            for attempt in range(
+                (run.limits.read_tool_retries if tool.effect == "read" else 0) + 1
+            ):
                 decision = await permission()
                 if decision.decision == "deny":
                     code = (
@@ -271,10 +273,6 @@ class ToolDispatcher:
                         EventDraft(type="tool.prepared", data={"operation_id": operation_id}),
                     )
                     return ToolExecution(operation, decision)
-                if tool.effect != "read":
-                    return ToolExecution(
-                        await save("not_executed", "effect_not_supported"), decision
-                    )
                 if loop.time() >= end:
                     return ToolExecution(await save("not_executed", "deadline_exceeded"), decision)
                 synchronous = not inspect.iscoroutinefunction(tool.function)
@@ -309,6 +307,8 @@ class ToolDispatcher:
                         "attempts": operation.attempts + 1,
                         "attempt_id": str(uuid4()),
                         "error_code": None,
+                        "effect_resolution": None,
+                        "evidence": None,
                     }
                 )
                 await journal.commit(
@@ -355,10 +355,17 @@ class ToolDispatcher:
                 )
                 if not done:
                     call.cancel()
-                    return ToolExecution(await save("failed_known", "tool_timeout"), decision)
+                    return ToolExecution(
+                        await save(
+                            "failed_known" if tool.effect == "read" else "unknown", "tool_timeout"
+                        ),
+                        decision,
+                    )
                 try:
                     value = pending.result()
                 except TransientToolError:
+                    if tool.effect != "read":
+                        return ToolExecution(await save("unknown", "tool_error"), decision)
                     await save("failed_known", "transient_tool_error")
                     if (
                         attempt < run.limits.read_tool_retries
@@ -369,7 +376,12 @@ class ToolDispatcher:
                         continue
                     return ToolExecution(operation, decision)
                 except (Exception, asyncio.CancelledError):
-                    return ToolExecution(await save("failed_known", "tool_error"), decision)
+                    return ToolExecution(
+                        await save(
+                            "failed_known" if tool.effect == "read" else "unknown", "tool_error"
+                        ),
+                        decision,
+                    )
                 try:
                     if inspect.iscoroutine(value):
                         value.close()
@@ -381,14 +393,29 @@ class ToolDispatcher:
                     ):
                         raise ValueError("Result too large")
                 except (ValueError, TypeError, RecursionError, OverflowError):
-                    return ToolExecution(await save("failed_known", "output_unavailable"), decision)
+                    return ToolExecution(
+                        await save(
+                            "failed_known" if tool.effect == "read" else "unknown",
+                            "output_unavailable",
+                        ),
+                        decision,
+                    )
                 return ToolExecution(
                     await save("succeeded", None, result=encoded, has_result=True), decision
                 )
+        except InteractionExpired:
+            if call is None:
+                await save("not_executed", "interaction_expired")
+            raise
         except asyncio.CancelledError:
             if call is not None:
                 call.cancel()
-            await save("failed_known" if call is not None else "not_executed", "tool_cancelled")
+            await save(
+                ("failed_known" if tool.effect == "read" else "unknown")
+                if call is not None
+                else "not_executed",
+                "tool_cancelled",
+            )
             raise
         finally:
             if admission is not None:

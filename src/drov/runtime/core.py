@@ -1,4 +1,4 @@
-"""Unified Runtime ownership, lifecycle, and read-only Agent entry points."""
+"""Unified Runtime ownership, lifecycle, Agent execution and explicit recovery."""
 
 import asyncio
 import threading
@@ -30,11 +30,13 @@ from drov.types import (
     CancelReceipt,
     ContextManifest,
     InteractionResponse,
+    ReconciliationDecision,
     ResponseReceipt,
     RunContext,
     RunInspection,
     RunOutcome,
     RunRef,
+    RunSnapshot,
     ScopedIdentifier,
 )
 
@@ -124,6 +126,8 @@ class _Work(Generic[T]):
         self.slot = slot
         self.cancel_requested = False
         self.started = False
+        self.run_id: str | None = None
+        self.kind = "agent"
         self.task: asyncio.Task[T]
         self._calls: set[asyncio.Future[Any] | ThreadFuture[Any]] = set()
 
@@ -175,7 +179,7 @@ class _Work(Generic[T]):
 
 
 class Runtime:
-    """Own read-only Agent execution and its resources; recovery is a later task."""
+    """Own Agent execution, interactions, explicit recovery and their resources."""
 
     def __init__(
         self,
@@ -299,6 +303,18 @@ class Runtime:
         await self.respond(run_id, request_id=request_id, response=response, context=context)
         return await self.wait(run_id, context=context)
 
+    async def verify(
+        self, run_id: str, *, request_id: str, context: RunContext
+    ) -> ReconciliationDecision:
+        return await self._runs.reconciliation.verify(
+            run_id, request_id=request_id, context=context
+        )
+
+    async def recover(
+        self, run_id: str, *, context: RunContext, wait: bool = True
+    ) -> RunOutcome[Any] | RunSnapshot:
+        return await self._runs.recovery.recover(run_id, context=context, wait=wait)
+
     async def cancel(self, run_id: str, *, context: RunContext) -> CancelReceipt:
         return await self._runs.cancel(run_id, context=context)
 
@@ -414,7 +430,7 @@ class Runtime:
         return expected
 
     def validate_record(self, record: RunRecord) -> AgentRegistration:
-        """Validate a storage-loaded record before later recovery can dispatch anything."""
+        """Validate a storage-loaded record before explicit continuation."""
         self._require_open()
         valid = RunRecord.from_json(record.model_dump_json())
         key = (valid.agent_name, valid.revision)
@@ -521,6 +537,7 @@ class Runtime:
                     validate=self._validate_tool,
                 )
             self._state = "open"
+            await self._runs.recovery.scan()
         except BaseException:
             self._state = "failed"
             await self._close_resources(

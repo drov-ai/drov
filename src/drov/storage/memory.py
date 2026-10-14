@@ -23,11 +23,12 @@ class MemoryDriver:
             for key, row in self.rows.items()
             if (
                 key.kind == query.kind
-                and key.tenant_id == query.tenant_id
+                and (query.tenant_id is None or key.tenant_id == query.tenant_id)
                 and (query.user_id is None or key.user_id == query.user_id)
                 and (query.namespace is None or key.namespace == query.namespace)
                 and (query.key is None or key.key == query.key)
                 and (query.state is None or row.state == query.state)
+                and (query.states is None or row.state in query.states)
                 and (query.after_sequence is None or row.sequence > query.after_sequence)
                 and (
                     query.before is None

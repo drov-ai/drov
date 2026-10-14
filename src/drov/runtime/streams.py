@@ -116,7 +116,7 @@ class RunEvents:
             if self.run_id in self.controller.failures:
                 raise self.controller.failures[self.run_id]
             if self.run_id not in self.controller.works:
-                raise ConfigurationError("Run has no active owner; recovery requires T-09")
+                raise ConfigurationError("Run has no active owner; use Runtime.recover explicitly")
             # Polling bridges journal commits made by T-05 without an in-memory notification.
             # No durable event is queued or dropped; the next same-run cursor reads every commit.
             try:

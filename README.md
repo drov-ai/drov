@@ -2,9 +2,9 @@
 
 面向 Python 开发者的通用 Agent 框架，目标是以少量核心概念提供完整、可组合的能力，并让开发、调试和服务化使用一致的运行机制。
 
-**当前阶段：T-01 至 T-08 已验收，T-09 审批/输入子范围已实施，开发版本 `0.1.0a0`。** 包提供类型/schema、模型协议、事务存储、Runtime 注册/资源、Python 工具/权限、只读 Agent 执行、授权结果/事件读取、上下文选择/预览/来源清单和事务 Memory。HumanInput 与 respond/resume 的审批/输入路径已可运行；外部未知写入、verify/recover、真实模型与服务尚未实现；尚未公开发布包或获得真实模型评测结果。
+**当前阶段：T-01 至 T-08 已验收，T-09 审批/核查/恢复已实施，开发版本 `0.1.0a0`。** 包提供类型/schema、模型协议、事务存储、Runtime 注册/资源、Python 工具/权限、只读 Agent 执行、授权结果/事件读取、上下文选择/预览/来源清单和事务 Memory。HumanInput 与 respond/resume 的审批/输入路径已可运行；外部未知效果、verify/recover 已可运行，真实模型与服务尚未实现；尚未公开发布包或获得真实模型评测结果。
 
-P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-08 验证记录](docs/validation/t08-memory.md)。本轮证据见 [T-09 子范围验证](docs/validation/t09-interactions.md)，下一项继续 T-09 未知效果、verify 与显式恢复；换会话方法见 [交接说明](docs/handoff.md)。
+P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-08 验证记录](docs/validation/t08-memory.md)。本轮证据见 [T-09 子范围验证](docs/validation/t09-interactions.md)，完整证据见 [核查/恢复验证](docs/validation/t09-reconciliation-recovery.md)，下一项 T-10 故障与取消矩阵；换会话方法见 [交接说明](docs/handoff.md)。
 
 ## 本地开发
 
@@ -30,7 +30,7 @@ uv run --locked python examples/research_offline.py
 uv run --locked python examples/research_offline.py --stream
 ```
 
-预设回答只验证运行契约，不证明模型推理质量。外部工具当前仅支持 read；内置 Memory 使用专用事务工具与限时检索。显式 Runtime 的 ASK 保存审批并支持原子响应，临时 Agent.run 仍 failed/interaction_unavailable；外部 write/unknown 配置接收前拒绝。上下文/记忆来源可由 get_context 核对。
+预设回答只验证运行契约，不证明模型推理质量。外部工具当前仅支持 read；内置 Memory 使用专用事务工具与限时检索。显式 Runtime 的 ASK 保存审批并支持原子响应，临时 Agent.run 仍 failed/interaction_unavailable；外部 write/unknown 单次派发，未知效果须显式核查，不承诺外部 exactly-once。上下文/记忆来源可由 get_context 核对。
 
 这些操作不需要 API Key。构件生成在本地 `dist/`，不会发布到 PyPI。extras 当前仅声明依赖，尚无对应适配器实现。
 

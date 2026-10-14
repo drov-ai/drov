@@ -1,6 +1,6 @@
 # 本地开发
 
-T-01 至 T-08 已本地验收，包版本为 `0.1.0a0`。提供定义/类型/schema、模型协议、事务存储、Runtime 生命周期、只读 Agent 执行、Python 工具/权限、上下文选择/预览/清单及事务 Memory；T-09 已交付审批/输入与 respond/resume 子范围；外部未知写入、verify/recover、服务与 CLI 均未实现。不要把规划中的运行片段当成可运行教程。
+T-01 至 T-08 已本地验收，包版本为 `0.1.0a0`。提供定义/类型/schema、模型协议、事务存储、Runtime 生命周期、只读 Agent 执行、Python 工具/权限、上下文选择/预览/清单及事务 Memory；T-09 已交付审批/输入与 respond/resume 子范围；T-09 已实现外部未知效果/verify/recover；服务与 CLI 尚未实现。不要把规划中的运行片段当成可运行教程。
 
 ## 环境与安装
 
@@ -61,7 +61,7 @@ uv run --locked python scripts/check_package.py
 uv run --locked twine check --strict dist/*.whl dist/*.tar.gz
 ```
 
-检查器从源码构建 wheel/sdist，再从 sdist 重建 wheel 并比较内容。它在两个全新环境中分别安装、检查依赖，并从仓库外验证实际 site-packages 导入、`py.typed`、版本与许可证；核心安装不包含 OpenAI/MCP/FastAPI/Uvicorn；随后在仓库外用隔离解释器运行普通/流式离线检索、上下文预览、七进程 Memory 及四进程审批/输入示例，验证安装后的执行能力。
+检查器从源码构建 wheel/sdist，再从 sdist 重建 wheel 并比较内容。它在两个全新环境中分别安装、检查依赖，并从仓库外验证实际 site-packages 导入、`py.typed`、版本与许可证；核心安装不包含 OpenAI/MCP/FastAPI/Uvicorn；随后在仓库外用隔离解释器运行普通/流式离线检索、上下文预览、七进程 Memory 及四进程审批/输入及独立服务写入/核查示例，验证安装后的执行能力。
 
 导入检查禁用 Python 自身的字节缓存写入，阻止导入期间应用级文件写入、网络、子进程、线程和常用事件循环创建入口，并阻止可选组件导入。这是针对当前包的回归检查，不是对任意第三方 Python 代码的安全沙箱证明。
 

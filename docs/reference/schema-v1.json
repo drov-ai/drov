@@ -429,7 +429,9 @@
             "interaction.expired",
             "context.prepared",
             "memory.changed",
-            "recovery.required"
+            "recovery.required",
+            "verification.started",
+            "verification.completed"
           ],
           "title": "Type",
           "type": "string"
@@ -2171,7 +2173,9 @@
                 "interaction.expired",
                 "context.prepared",
                 "memory.changed",
-                "recovery.required"
+                "recovery.required",
+                "verification.started",
+                "verification.completed"
               ],
               "title": "Type",
               "type": "string"

@@ -26,11 +26,12 @@ class Row:
 @dataclass(frozen=True)
 class Query:
     kind: str
-    tenant_id: str
+    tenant_id: str | None
     user_id: str | None
     namespace: str | None = None
     key: str | None = None
     state: str | None = None
+    states: tuple[str, ...] | None = None
     after_sequence: int | None = None
     limit: int = 100
     order: Literal["key", "sequence", "newest", "memory_recent"] = "key"

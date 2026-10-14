@@ -85,8 +85,11 @@ class SQLiteDriver:
         return int(rows[0][0])
 
     async def select(self, query: Query) -> list[Row]:
-        clauses = ["kind=?", "tenant_id=?"]
-        parameters: list[Any] = [query.kind, query.tenant_id]
+        clauses = ["kind=?"]
+        parameters: list[Any] = [query.kind]
+        if query.tenant_id is not None:
+            clauses.append("tenant_id=?")
+            parameters.append(query.tenant_id)
         if query.user_id is not None:
             clauses.append("user_id=?")
             parameters.append(query.user_id)
@@ -95,6 +98,9 @@ class SQLiteDriver:
             if value is not None:
                 clauses.append(f"{column}=?")
                 parameters.append(value)
+        if query.states is not None:
+            clauses.append("state IN (" + ",".join("?" for _ in query.states) + ")")
+            parameters.extend(query.states)
         if query.after_sequence is not None:
             clauses.append("sequence>?")
             parameters.append(query.after_sequence)

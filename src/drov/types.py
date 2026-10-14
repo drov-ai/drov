@@ -337,6 +337,8 @@ DurableEventType: TypeAlias = Literal[
     "context.prepared",
     "memory.changed",
     "recovery.required",
+    "verification.started",
+    "verification.completed",
 ]
 
 

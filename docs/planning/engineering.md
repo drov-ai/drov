@@ -24,7 +24,7 @@
 
 Python 导入名使用 `drov`；PyPI 分发名暂定 `drov`，占用和控制权待发布准备核实。若不可用，变更分发名不自动变更导入名。npm 组织保留，v0.1 不为凑产品线发布 JS SDK。
 
-T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；显式恢复调度尚未实现。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。
+T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；T-09 已实现显式恢复调度。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。
 
 以下是完整首版的目标布局。T-01 只建立元数据包、测试/构建检查和 CI，其他模块按任务创建，不以空壳占位：
 
@@ -73,6 +73,8 @@ docs/                        用户文档、规划和决策
 T-05 @tool 返回 PythonTool，name 必填，revision 默认 "1"、effect 默认 unknown、approval 默认 policy；含参数/返回 codec 和真实 callable。同步/异步函数共用 schema 子集；生成器拒绝。只读瞬态错误用 TransientToolError，其他错误不默认重试。ToolPool 在 Runtime 打开时装配，线程只在真实提交时启动；有界等待先于派发标记，实际 Future 由内核持有。内部操作 payload schema=1，Checkpoint.data.tool_dispatch_count 保存预算预留；即使提交后撤权/取消使函数没执行也不回退，恢复不会把尝试变成免费次数。实际详情见 ADR-0009。
 
 T-09 子范围复用 RunItem：interaction.data 包含 schema_version=1、request、request_hash、config_hash；receipt.data 包含 schema_version=1、response、actor、receipt，收据索引 request_id 且不可改写。Checkpoint.data.pending_plan 引用原 model_response，approval_grants 将 operation_id 映射到已消费的请求；原 ToolOperation schema=1 不增加字段。HumanInput 从注册 input_type 生成结果 codec，与普通工具一致进入指纹。累计 model_step_count/model_attempt_count/tool_dispatch_count/active_seconds 跨人工暂停保存。没有新 DDL/依赖，旧缺少新字段的记录仍可读，通用恢复兼容待 T-09 剩余范围验收。到期/授权/继续规则见运行契约第 5–6 节，实际证据见 [T-09 验证](../validation/t09-interactions.md)。
+
+T-09 完整路径增加 pending_model_call/pending_model_attempt_count/pending_output，原输入/call ID、累计预算和已提交响应在恢复时保留；旧 engine=1 游标可从已提交事件/response_ids 重建，未知 engine 拒绝。ToolOperation schema=1 的可缺省 effect_resolution/evidence 表达核实事实，重新派发清空旧证据；无该字段的旧记录照常读取。verification.started/completed 为 schema_version=1 新事件类型；每次查询以 `verification:<id>:started/completed` 的两个不可变 receipt 子记录审计（record_type=verification），不增加 DDL kind。未终态同步事件/检查点，终态后只保存审计回执。@tool 的 async verifier 与 verifier_revision 进入有 verifier 的注册指纹；无 verifier 不增加该键。无新依赖/锁更新；验证见 [本轮记录](../validation/t09-reconciliation-recovery.md)。
 
 ## 4. SQLite、锁与 Memory
 
@@ -143,7 +145,7 @@ T-01 已验证锁定依赖的本地安装组合，T-02 已验证类型、工具 
 
 RunController 连接接收、模型循环、只读工具、限额、历史和正文投影；RunEvents/RunStream 以有界临时缓冲和持久事件分页读取实现 SDK 订阅。模型瞬态重试只使用 TransientModelError，固定已保存输入、每次独立 attempt_id；ScriptedModel/ScriptedStep 为无网络离线适配器，额外调用失败。T-06 未增加依赖或改变 uv.lock。
 
-Checkpoint.engine_schema=1；model_input/model_response payload 各 schema_version=1；session_sequence 在接收事务使用 Session 版本保存，避免相同时间戳的随机 ID 打乱历史。计数及活动预留保留原 Run 事实；正常返回按实耗结算，未停止调用保留预留与资源，禁止迟到结果变成成功。T-07 已替换完整历史模式为确定性组选取/预览/清单，仍对保护输入溢出前置失败。SDK 活动订阅至多 50ms 轮询提交，durable 事件不进入无界队列。显式 Runtime 的 ASK 支持审批/输入原子响应，临时入口仍失败；外部 write/unknown 接收前拒绝；T-08 Memory 是专用事务处理器；完整细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
+Checkpoint.engine_schema=1；model_input/model_response payload 各 schema_version=1；session_sequence 在接收事务使用 Session 版本保存，避免相同时间戳的随机 ID 打乱历史。计数及活动预留保留原 Run 事实；正常返回按实耗结算，未停止调用保留预留与资源，禁止迟到结果变成成功。T-07 已替换完整历史模式为确定性组选取/预览/清单，仍对保护输入溢出前置失败。SDK 活动订阅至多 50ms 轮询提交，durable 事件不进入无界队列。显式 Runtime 的 ASK 支持审批/输入原子响应，临时入口仍失败；外部 write/unknown 单次派发且未知结果暂停核查；T-08 Memory 是专用事务处理器；完整细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
 
 ## T-07 落地边界
 

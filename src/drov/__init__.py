@@ -1,4 +1,4 @@
-"""Drov definitions, transactional storage, and read-only Agent runtime."""
+"""Drov definitions, transactional storage, and Agent execution with explicit controls."""
 
 from drov.agent import Agent
 from drov.auth import OwnerAuthorizer

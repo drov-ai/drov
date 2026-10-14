@@ -1,6 +1,7 @@
 """Versioned fingerprints of declared configuration, never of executable code."""
 
 import hashlib
+import inspect
 from typing import Any, Literal
 
 from pydantic import Field, TypeAdapter
@@ -9,6 +10,7 @@ from drov._json import canonical_json
 from drov.agent import Agent
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.errors import ConfigurationError
+from drov.tools.python import PythonTool
 from drov.tools.schema import compile_output, compile_type
 from drov.types import ScopedIdentifier, WireModel
 
@@ -45,6 +47,10 @@ def fingerprint(agent: Agent[Any]) -> AgentRegistration:
             "policy",
         ):
             raise ConfigurationError("Invalid registered tool metadata")
+        if isinstance(tool, PythonTool) and tool.verifier is not None:
+            if not inspect.iscoroutinefunction(tool.verifier):
+                raise ConfigurationError("Registered verifier must be an async read-only callback")
+            TypeAdapter(ScopedIdentifier).validate_python(tool.verifier_revision, strict=True)
         properties = {
             key: dict(compile_type(codec.python_type).schema)
             for key, codec in tool.argument_codecs.items()
@@ -76,6 +82,11 @@ def fingerprint(agent: Agent[Any]) -> AgentRegistration:
                 "parameters": expected,
                 "result": result.schema,
                 "context_parameter": tool.context_parameter,
+                **(
+                    {"verifier_revision": tool.verifier_revision}
+                    if isinstance(tool, PythonTool) and tool.verifier is not None
+                    else {}
+                ),
             }
         )
     output_schema = compile_output(checked.output_type).schema

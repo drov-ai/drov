@@ -177,8 +177,6 @@ async def test_illegal_arguments_never_dispatch(arguments: str) -> None:
         (PermissionPolicy(ask={"search"}, allow={"search"}), "read", "policy", "approval_required"),
         (PermissionPolicy(allow={"search"}), "write", "required", "approval_required"),
         (PermissionPolicy(), "unknown", "policy", "approval_required"),
-        (PermissionPolicy(allow={"search"}), "write", "policy", "effect_not_supported"),
-        (PermissionPolicy(allow={"search"}), "unknown", "policy", "effect_not_supported"),
     ],
 )
 async def test_denied_ask_and_unsupported_effects_dispatch_zero(

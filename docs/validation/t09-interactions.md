@@ -1,4 +1,4 @@
-# T-09 审批与补充输入子范围验证
+# T-09 首批审批与补充输入子范围验证（历史）
 
 - 日期：2026-10-14（Asia/Shanghai），开发版本 0.1.0a0
 - 起点：`/Users/yanlong/projects/drov`，main / d9bafbc，工作区干净，与 origin/main 同步
@@ -57,7 +57,7 @@ git diff --check
 
 CI 状态/完整日志分别保存在 `.drov/t09-ci-status.json` / `.drov/t09-ci.log`，只将检查结论写入仓库。最后补记只改 progress/本记录，使用 skip ci 保存；不将补记视作新的代码测试，也未发布构件。实际最新 Git 与工作区状态由 git log/status 核实。
 
-## 剩余范围与恢复步骤
+## 首批交接时的剩余范围与恢复步骤（历史）
 
 1. 外部 write/unknown 仍接收前拒绝，没有 result verifier 注册、核查建议或 applied/not_applied/unresolved 消费。完整 S-03-A/B/C 的外部业务写入、S-03-D/B-05 未实现；当前 read_item 例子与 Memory 本地写入仅交付机制子范围。
 2. recover 和启动扫描未实现：accepted/running 无本地所有者仍要求显式恢复；已消费响应后调度失败留下的 recovery 记录不可通过重复批准推进。下一子范围依据原计划/检查点/回执继续实现，不能手改记录/重新调用写入来代替恢复。旧无 pending_plan 的引擎记录只承诺查询兼容，恢复兼容另验收。
@@ -66,3 +66,5 @@ CI 状态/完整日志分别保存在 `.drov/t09-ci-status.json` / `.drov/t09-ci
 5. 无需新仓库/账号/模型 Key。下一轮在同 Local checkout 核实 Git/本页/progress，运行锁定检查，再实施独立合成事项写入/查询服务 → unknown/reconciliation → verify/respond → recover/启动扫描，补全五个 S-03 路径后才关闭 T-09。
 
 用户资源与会话建议唯一维护在 [progress](../planning/progress.md)。
+
+上述剩余范围为首批交接时状态；本轮外部写入/核查/显式恢复的实现和最新验收见 [后续记录](t09-reconciliation-recovery.md)，当前任务状态只以 progress 为准。

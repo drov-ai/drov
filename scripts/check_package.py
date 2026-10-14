@@ -46,6 +46,8 @@ def inspect_archives(wheel: Path, sdist: Path) -> None:
             "examples/context_preview_offline.py",
             "examples/memory_offline.py",
             "examples/interactions_offline.py",
+            "examples/operations_offline.py",
+            "examples/item_service_fixture.py",
             "LICENSE",
             "THIRD_PARTY.md",
         } <= names
@@ -148,6 +150,7 @@ def main() -> None:
                     "context_preview_offline.py",
                     "memory_offline.py",
                     "interactions_offline.py",
+                    "operations_offline.py",
                 )
                 for arguments in ([], ["--stream"])
             ):

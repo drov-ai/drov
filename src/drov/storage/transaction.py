@@ -203,6 +203,24 @@ class Transaction:
             raise RecordNotFound("Run is unavailable")
         return record
 
+    async def _unfinished_runs(
+        self, *, before: tuple[datetime, str] | None = None
+    ) -> list[RunRecord]:
+        """Exclusive Runtime startup only; never a user-facing data query."""
+        self._check()
+        rows = await self._driver.select(
+            Query(
+                "run",
+                None,
+                None,
+                states=tuple(UNFINISHED),
+                order="newest",
+                before=self._before(before),
+                limit=100,
+            )
+        )
+        return [_decode(RunRecord, row) for row in rows]
+
     async def _locate_run(self, actor: RunContext, run_id: str) -> RunRecord:
         """Trusted controller lookup within a tenant; callers MUST authorize before use."""
         self._check()

@@ -41,6 +41,8 @@ class ToolOperation(WireModel):
     has_result: bool = False
     result: StrictJson = None
     error_code: Identifier | None = None
+    effect_resolution: Literal["applied", "not_applied"] | None = None
+    evidence: str | None = None
     memory_sources: list[ContextSource] = Field(default_factory=list)
 
     @model_validator(mode="after")
