@@ -183,14 +183,17 @@ class ArtifactController:
         new_records = []
         if fresh:
             owner = MemoryScope(**actor.model_dump(), agent_name=agent_name)
-            reserved = await store._reserve(
-                owner=owner,
-                run_id=run_id,
-                operation_id=None,
-                purpose="input",
-                size_bytes=sum(len(item.data) for item in fresh),
-            )
-            stage = await store._stage(reserved.stage_id, fresh)
+            try:
+                reserved = await store._reserve(
+                    owner=owner,
+                    run_id=run_id,
+                    operation_id=None,
+                    purpose="input",
+                    size_bytes=sum(len(item.data) for item in fresh),
+                )
+                stage = await store._stage(reserved.stage_id, fresh)
+            except OSError as exc:
+                raise PersistenceUnavailable("Input file staging failed") from exc
             for entry in stage.files:
                 record = ArtifactRecord(
                     ref=entry.ref,

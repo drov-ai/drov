@@ -4,7 +4,7 @@
 
 ## 实际交付与当前验收边界
 
-决定见 [ADR-0021](../decisions/0021-sandbox-fault-boundaries.md)。新增真实 Docker 隔离/资源、故障和独立 SDK/stream 硬终止测试；修复监督程序启动竞态、恢复成功事件缺 result、恢复绕过原结果字节限额三个问题。未改公共 schema、SQLite DDL/扩展版本、uv.lock、固定 runner/hash、P4 fingerprint 或品牌。
+决定见 [ADR-0021](../decisions/0021-sandbox-fault-boundaries.md)。新增真实 Docker 隔离/资源、故障和独立 SDK/stream 硬终止测试；修复监督程序启动竞态、恢复成功事件缺 result、恢复绕过原结果字节限额及文件接收 OS I/O 异常映射四个问题。未改公共 schema、SQLite DDL/扩展版本、uv.lock、固定 runner/hash、P4 fingerprint 或品牌。
 
 Linux AMD64 wheel 与许可清单已经实际下载/核验，新增显式双平台准备参数、Docker 专项工作流和 core-only wheel 实际安装检查。**整卡状态仍以 progress 为准：本地检查和远程专项/安装全部完成后才能关闭。** 本记录的后续结果按实际证据补记，不用此前普通核心 CI 或无 daemon skip 替代本轮专项。
 
@@ -30,7 +30,7 @@ SIGKILL 屏障包含输入 staged/接收提交、container create 应答/身份�
 
 本机 Docker Desktop Linux ARM64 VM/Engine 27.0.3/cgroup v2、固定标准库与分析镜像沿用 T-10A。分析镜像 config ID/RepoDigests 区分、固定 Moby v27.0.3 seccomp/许可保留。实际运行 Python 3.11.9 与独立 `.drov/check-py314` 的3.14.3，避免 uv sync 并发替换 `.venv`。
 
-- 初批真实隔离16项通过；丢应答/SQLite/磁盘8项通过，补恢复限额后9项通过（`.drov/t10b-faults-final.log`：9 passed /7.90s）。
+- 初批真实隔离16项通过；丢应答/SQLite/磁盘8项通过，补恢复限额后.损坏/输入4项追加后，故障组13项；此前9项通过（`.drov/t10b-faults-final.log`：9 passed /7.90s）。
 - 第一批36个硬终止通过，运行中补验后38个通过；进一步补齐执行意图/身份、字节 fsync 后，共56个硬终止；未确认创建关闭保留另2个。
 - 增量阶段未含最后2个保留用例的专项：**90 passed /795 deselected，107.89s**，`.drov/t10b-docker-final311.log`。最终全库/静态/包/安装与远程结果在下节补记。
 - Ruff/格式172 files、mypy110 files、schema check 通过；不会把静态通过当作实际代码/模型质量。
@@ -65,3 +65,6 @@ DROV_DOCKER_TEST_CONFIG="$PWD/.drov/sandbox-environment.json" \
 工作流在独立 Linux runner 上准备固定 base、预下载/hash wheel、network=none 构建，实际专项和干净 core-only wheel 标准库/分析×SDK/stream。配置记录和测试XML仅非秘密合成数据；不发布镜像/包/网站。Docker API兼容事实核对来源为 [官方API版本矩阵](https://docs.docker.com/reference/api/engine/)（查阅2026-10-15），不能用版本表代替本工作流实测。
 
 最终全库/构件/安装/远程状态将在实际完成后补记；目前不宣称整卡关闭。用户无需新仓库/账号/Key/model ID/预算，保持 Docker Desktop 开启即可。若换机器，保留原 SQLite+bytes+租约/config，按 recipe 准备对应架构固定镜像；未完成阶段不能删后重跑。下一任务与会话建议仅在 progress 维护。
+
+11. 最后3.11全库的低 CPU 试验因10s包含容器/监督/wrapper启动而得到真实timeout（1 failed/885 passed/2 skip），不是CPU配额失效；节流验证保留0.1CPU，执行期限明确25s，独立2s超时/进程树用例仍保留。
+12. 追加丢文件/hash损坏与输入清单ENOSPC/接收SQL拒绝：首次发现公开文件接收传出了原始OSError，按ADR-0021在接收边界映射PersistenceUnavailable；私有阶段异常契约保持。修正后真实文件/资源/故障与接收相关 **64 passed /37.66s**（`.drov/t10b-file-resource-final.log`）。输入失败Run/ready/容器/模型0，损坏暂存恢复failed_known且原代码不重做。

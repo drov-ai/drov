@@ -306,3 +306,110 @@ async def test_recovery_cannot_bypass_original_result_byte_limit(
             rows, _ = await tx._driver.execute("SELECT count(*) FROM artifact_records")
             assert rows[0][0] == 0
         await check_clean(runtime, backend, done.run_id)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("damage", ["missing", "changed"])
+async def test_damaged_original_export_is_unavailable_without_recalculation(
+    tmp_path: Path, config: dict[str, str], monkeypatch: pytest.MonkeyPatch, damage: str
+) -> None:
+    original = DockerControl.command
+    blocked = False
+    creates = 0
+
+    async def command(
+        self: DockerControl, arguments: list[str], *, data: bytes | None = None
+    ) -> bytes:
+        nonlocal blocked, creates
+        if arguments[:2] == ["container", "create"]:
+            creates += 1
+        if arguments[:2] == ["container", "rm"] and not blocked:
+            blocked = True
+            raise ControlError("Synthetic cleanup interruption")
+        return await original(self, arguments, data=data)
+
+    monkeypatch.setattr(DockerControl, "command", command)
+    runtime, agent, backend = create_runtime(tmp_path, model_for(CODE, ["result.csv"]), config)
+    async with runtime:
+        pending = await runtime.run(
+            agent, "damaged original bytes", session_id="s", context=CONTEXT
+        )
+        record = await runtime.storage.get_run(CONTEXT, pending.run_id)
+        async with runtime.storage.transaction() as tx:
+            lease = await LeaseTransaction(tx).get(
+                OWNER, pending.run_id, record.state.operations[0].operation_id
+            )
+        assert lease is not None and lease.stage_id and not lease.destroyed
+        store = runtime._files.store()
+        stage = await store._snapshot(lease.stage_id)
+        target = store.directory / stage.stage_id / stage.files[0].ref.artifact_id
+        if damage == "missing":
+            target.unlink()
+        else:
+            target.write_bytes(b"value\n99\n")
+        done = await runtime.recover(pending.run_id, context=CONTEXT)
+        record = await runtime.storage.get_run(CONTEXT, done.run_id)
+        assert record.state.operations[0].status == "failed_known" and creates == 1
+        with pytest.raises(RecordNotFound):
+            await runtime.read_artifact(stage.files[0].ref, context=CONTEXT)
+        assert (await store._snapshot(stage.stage_id)).reserved_bytes == stage.reserved_bytes
+        await check_clean(runtime, backend, done.run_id)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("failure", ["input_manifest", "admission_commit"])
+async def test_input_disk_or_sql_failure_creates_no_run_ready_or_container(
+    tmp_path: Path, config: dict[str, str], monkeypatch: pytest.MonkeyPatch, failure: str
+) -> None:
+    from drov.artifacts import ArtifactInput
+    from drov.errors import Conflict
+
+    original = LocalArtifacts._json
+    model = model_for(CODE, ["result.csv"])
+    runtime, agent, _ = create_runtime(tmp_path, model, config)
+    creates = 0
+    control_command = DockerControl.command
+
+    async def command(
+        self: DockerControl, arguments: list[str], *, data: bytes | None = None
+    ) -> bytes:
+        nonlocal creates
+        if arguments[:2] == ["container", "create"]:
+            creates += 1
+        return await control_command(self, arguments, data=data)
+
+    def faulty(self: LocalArtifacts, fd: int, name: str, value: WireModel) -> None:
+        if isinstance(value, _Stage) and value.purpose == "input" and value.state == "staged":
+            raise OSError(errno.ENOSPC, "Synthetic input manifest disk full")
+        original(self, fd, name, value)
+
+    monkeypatch.setattr(DockerControl, "command", command)
+    async with runtime:
+        if failure == "input_manifest":
+            monkeypatch.setattr(LocalArtifacts, "_json", faulty)
+        else:
+            async with runtime.storage.transaction() as tx:
+                assert isinstance(tx._driver, SQLiteDriver)
+                await tx._driver.execute("""CREATE TRIGGER reject_input_admission
+                    BEFORE INSERT ON records WHEN NEW.kind='run'
+                    BEGIN SELECT RAISE(ABORT,'fixture input failure'); END""")
+        with pytest.raises((Conflict, PersistenceUnavailable)):
+            await runtime.run(
+                agent,
+                "input transaction failure",
+                session_id="s",
+                context=CONTEXT,
+                artifacts=[ArtifactInput(name="input.csv", data=b"value\n60\n")],
+            )
+        assert creates == 0 and model.calls == []
+        async with runtime.storage.transaction() as tx:
+            assert isinstance(tx._driver, SQLiteDriver)
+            rows, _ = await tx._driver.execute("SELECT count(*) FROM records WHERE kind='run'")
+            assert rows[0][0] == 0
+            rows, _ = await tx._driver.execute("SELECT count(*) FROM artifact_records")
+            assert rows[0][0] == 0
+            assert await LeaseTransaction(tx).active_count() == 0
+        stages = await runtime._files.store()._pending()
+        assert len(stages) == 1 and stages[0].files
+        with pytest.raises(RecordNotFound):
+            await runtime.read_artifact(stages[0].files[0].ref, context=CONTEXT)

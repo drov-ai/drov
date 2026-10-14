@@ -417,6 +417,8 @@ async def file_analysis_example(model, analysis_image_digest, docker_cli, docker
         )
 ```
 
+文件接收 reserve/stage 的 OS I/O 失败在 Runtime 入口报告 PersistenceUnavailable；接收事务未成功时不返回 RunRef 或 ready 输入，不自动覆盖/删除已开始的私有暂存。
+
 实际工具计划须选择该输入 ID，并声明 outputs=["summary.csv", "chart.png"]；应用从 SandboxResult 的真实引用调用 read_artifact，不能相信模型自述的路径/ID。返回引用保持规范 outputs 的顺序；ArtifactInfo.name 为文件名末段，完整相对输出路径只留在有正文权限的操作清单中，不成为宿主路径。所有声明文件通过校验并可持久读取才是 artifact_status=complete；缺失/非法/超限/导出不可用时 artifacts=[]、artifact_status=rejected 并保留真实代码退出事实。非正常退出/取消不发布部分文件；清理/提交未知按运行契约核查，不能以 rejected 掩盖未知资源。
 
 T-13 的 HTTP 同一入口扩展：POST /v1/runs 新增可选 artifact_ids，仅引用本身份/Agent 可授权的 ready 输入；POST /v1/artifacts 以有界流上传单文件并明确 agent_name/revision/session_id 目标，得到短期暂存 upload ID（不是 ready 引用），只可由同作用域 start 原子消费。上传控制与总量沿 ArtifactLimits，未消费暂存按维护规则回收。GET /v1/artifacts/{id} 返回相同元数据；GET /v1/artifacts/{id}/content 授权后流式附件下载，不接受宿主路径/后端 URL。JSON Run 输入可以使用 upload_ids，不能上传代码工具/配置或把 bytes 隐式编码成模型输入；HTTP 上传是 T-13 的传输适配，不在 T-10A 预建服务。权限/错误码沿现有 HTTP 约定，内容不可用 410，猜 ID 无权读取统一 404。

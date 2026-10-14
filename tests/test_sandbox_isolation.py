@@ -270,7 +270,7 @@ print(json.dumps(dict(throttled=b['nr_throttled']-a['nr_throttled'],
         tmp_path,
         model_for(code, []),
         config,
-        limits=SandboxLimits(cpus=0.1),
+        limits=SandboxLimits(cpus=0.1, execution_seconds=25),
     )
     async with runtime:
         done = await runtime.run(agent, "CPU pressure", session_id="s", context=CONTEXT)

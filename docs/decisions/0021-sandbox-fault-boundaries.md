@@ -10,6 +10,8 @@
 
 恢复还必须应用原 Run 的 max_tool_result_bytes。不能因正常路径在销毁失败处中断，就在 recover 发布过大的原结果。超过限额按 failed_known/output_unavailable 收尾，不发布 ready 输出、不重算；原观察/暂存仍保留容量与台账。
 
+文件接收的私有 reserve/stage 工作线程若发生 OSError（如 ENOSPC），公开 Runtime 接收入口统一抛 PersistenceUnavailable；不将宿主路径/原始 OS 错误当作公共成功/结果，也不自动重写已开始阶段。私有字节层的异常保持原有内部契约，Run/ready/授予接收事务未提交。真实字节/清单和 SQLite 接收失败测试确认模型/容器均为0。
+
 未知创建、停止或销毁不因查询暂时 absent 就伪造清理。无可靠创建身份的原租约继续占容量，关闭抛 ShutdownIncomplete 并保留 SQLite/字节资源所有权；硬终止释放 OS 锁不改变持久事实。已确认容器身份的丢销毁应答可通过原身份查询并确认不存在后收尾。
 
 ## 替代方案与代价

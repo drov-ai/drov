@@ -166,7 +166,7 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 
 ## 9. 首版 Docker 代码与文件沙箱
 
-T-10B 补充实际边界与恢复限额/事件修正见 [ADR-0021](../decisions/0021-sandbox-fault-boundaries.md) 和 [专项验证](../validation/t10b-sandbox-faults.md)，实际平台/远程验收以验证记录为准；不改变旧配置、runner hash 或 schema。
+T-10B 补充实际边界与恢复限额/事件修正见 [ADR-0021](../decisions/0021-sandbox-fault-boundaries.md) 和 [专项验证](../validation/t10b-sandbox-faults.md)，文件接收 OS I/O 失败在 Runtime 边界归为 PersistenceUnavailable，私有字节阶段保留；实际平台/远程验收以验证记录为准；不改变旧配置、runner hash 或 schema。
 
 第三批内部控制/预检已按 [ADR-0019](../decisions/0019-docker-control-preflight.md) 实施：本地 POSIX Unix socket、Linux Engine/cgroup v2/API ≥ 1.41、同架构 ARM64/AMD64 固定 CPython 3.11 镜像与资源能力查询；构造无 I/O，open 不创建容器。内部 binding v1 包含实际 Engine/CLI/image/profile/限额与控制版本，不含随机配置目录。后续已按 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md) 绑定 Runtime 审批/Run 并接通执行与发布；实际 SDK/代码证据见 [本轮验证](../validation/t10a-runtime-sandbox.md)，不代表 T-10B 全平台/恶意故障或真实模型质量。
 
