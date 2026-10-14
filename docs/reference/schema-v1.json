@@ -4695,6 +4695,205 @@
       "title": "RunSnapshot",
       "type": "object"
     },
+    "SandboxLimits": {
+      "additionalProperties": false,
+      "description": "Private until the corresponding Runtime tool and result contract is implemented.",
+      "properties": {
+        "concurrency": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "title": "Concurrency",
+          "type": "integer"
+        },
+        "control_seconds": {
+          "default": 10.0,
+          "exclusiveMinimum": 0,
+          "title": "Control Seconds",
+          "type": "number"
+        },
+        "cpus": {
+          "default": 1.0,
+          "exclusiveMinimum": 0,
+          "title": "Cpus",
+          "type": "number"
+        },
+        "execution_seconds": {
+          "default": 10.0,
+          "exclusiveMinimum": 0,
+          "title": "Execution Seconds",
+          "type": "number"
+        },
+        "max_code_bytes": {
+          "default": 65536,
+          "exclusiveMinimum": 0,
+          "title": "Max Code Bytes",
+          "type": "integer"
+        },
+        "max_output_bytes": {
+          "default": 65536,
+          "exclusiveMinimum": 0,
+          "title": "Max Output Bytes",
+          "type": "integer"
+        },
+        "memory_bytes": {
+          "default": 536870912,
+          "exclusiveMinimum": 0,
+          "title": "Memory Bytes",
+          "type": "integer"
+        },
+        "pids": {
+          "default": 64,
+          "exclusiveMinimum": 0,
+          "title": "Pids",
+          "type": "integer"
+        },
+        "workspace_bytes": {
+          "default": 67108864,
+          "exclusiveMinimum": 0,
+          "title": "Workspace Bytes",
+          "type": "integer"
+        }
+      },
+      "title": "SandboxLimits",
+      "type": "object"
+    },
+    "SandboxResult": {
+      "$defs": {
+        "ArtifactRef": {
+          "additionalProperties": false,
+          "properties": {
+            "artifact_id": {
+              "pattern": "^art_[0-9a-f]{32}$",
+              "title": "Artifact Id",
+              "type": "string"
+            },
+            "media_type": {
+              "maxLength": 128,
+              "title": "Media Type",
+              "type": "string"
+            },
+            "sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            },
+            "size_bytes": {
+              "minimum": 0,
+              "title": "Size Bytes",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "sha256",
+            "size_bytes",
+            "media_type"
+          ],
+          "title": "ArtifactRef",
+          "type": "object"
+        },
+        "SandboxArtifactError": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "minLength": 1,
+              "title": "Code",
+              "type": "string"
+            }
+          },
+          "required": [
+            "code"
+          ],
+          "title": "SandboxArtifactError",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "artifact_error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SandboxArtifactError"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "artifact_status": {
+          "enum": [
+            "not_requested",
+            "complete",
+            "rejected"
+          ],
+          "title": "Artifact Status",
+          "type": "string"
+        },
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/ArtifactRef"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "execution_key": {
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Execution Key",
+          "type": "string"
+        },
+        "exit_code": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Exit Code"
+        },
+        "stderr": {
+          "title": "Stderr",
+          "type": "string"
+        },
+        "stderr_truncated": {
+          "default": false,
+          "title": "Stderr Truncated",
+          "type": "boolean"
+        },
+        "stdout": {
+          "title": "Stdout",
+          "type": "string"
+        },
+        "stdout_truncated": {
+          "default": false,
+          "title": "Stdout Truncated",
+          "type": "boolean"
+        },
+        "termination": {
+          "enum": [
+            "exited",
+            "timeout",
+            "output_limit",
+            "resource_limit",
+            "cancelled"
+          ],
+          "title": "Termination",
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution_key",
+        "exit_code",
+        "termination",
+        "stdout",
+        "stderr",
+        "artifact_status"
+      ],
+      "title": "SandboxResult",
+      "type": "object"
+    },
     "SessionPage": {
       "$defs": {
         "SessionSummary": {

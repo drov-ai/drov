@@ -1,11 +1,11 @@
 """Internal durable records. These are full records, not authorized API projections."""
 
-from typing import Literal, Self
+from typing import Any, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, SerializerFunctionWrapHandler, model_serializer, model_validator
 
 from drov._json import StrictJson
-from drov.artifacts.types import ArtifactRef
+from drov.artifacts.types import ArtifactRef, Sha256
 from drov.config import Limits, validate_input
 from drov.types import (
     DurableEventType,
@@ -45,6 +45,7 @@ class StartRequest(WireModel):
     limits: Limits = Field(default_factory=Limits)
     requested_limits: Limits | None = None
     canonical_artifacts: list[dict[str, StrictJson]] = Field(default_factory=list)
+    sandbox_bindings: dict[ScopedIdentifier, Sha256] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def valid_input(self) -> Self:
@@ -100,6 +101,14 @@ class RunRecord(WireModel):
     last_seq: PositiveInt
     artifact_inputs: list[ArtifactRef] = Field(default_factory=list)
     artifact_binding: dict[str, StrictJson] = Field(default_factory=dict)
+    sandbox_bindings: dict[ScopedIdentifier, Sha256] = Field(default_factory=dict)
+
+    @model_serializer(mode="wrap")
+    def compatible_payload(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        value: dict[str, Any] = handler(self)
+        if not self.sandbox_bindings:
+            value.pop("sandbox_bindings", None)
+        return value
 
     @model_validator(mode="after")
     def consistent(self) -> Self:

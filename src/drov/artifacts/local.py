@@ -489,6 +489,11 @@ class LocalArtifacts:
         async with self._gate:
             return await _io(self._scan)
 
+    async def _snapshot(self, stage_id: str) -> _Stage:
+        self._require_open()
+        async with self._gate:
+            return await _io(lambda: self._load(stage_id))
+
     def _close(self) -> None:
         if self._lock is not None:
             self._lock.close()

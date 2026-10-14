@@ -82,6 +82,8 @@ def main() -> None:
     ):
         import drov
         import drov.artifacts
+        import drov.sandbox
+        from drov.sandbox import DockerSandbox, PythonSandbox, SandboxLimits, SandboxResult
         from drov.sandbox._docker import DockerPreflight
         from drov.sandbox._profile import PROFILE_SHA256, DockerLimits
 
@@ -94,6 +96,19 @@ def main() -> None:
             limits=DockerLimits(),
         )
         assert not preflight.is_open
+        backend = DockerSandbox(
+            image="sha256:" + "a" * 64,
+            docker=Path(sys.executable),
+            host="unix:///synthetic/not-running.sock",
+            limits=SandboxLimits(),
+        )
+        assert not backend.is_open
+        tool = PythonSandbox(backend="code")
+        assert tool.name == "sandbox.run_python" and tool.effect == "write"
+        assert {"DockerSandbox", "PythonSandbox", "SandboxLimits", "SandboxResult"} <= set(
+            drov.sandbox.__all__
+        )
+        assert SandboxResult.model_json_schema()["type"] == "object"
 
     metadata = importlib.metadata.metadata("drov")
     assert metadata["Name"] == "drov"

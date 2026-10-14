@@ -10,8 +10,10 @@ from drov._json import canonical_json
 from drov.agent import Agent
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.errors import ConfigurationError
+from drov.sandbox.tools import PythonSandbox, SandboxResultCodec
+from drov.sandbox.types import SandboxResult
 from drov.tools.python import PythonTool
-from drov.tools.schema import compile_output, compile_type
+from drov.tools.schema import JsonCodec, compile_output, compile_type
 from drov.types import ScopedIdentifier, WireModel
 
 
@@ -65,7 +67,13 @@ def fingerprint(agent: Agent[Any]) -> AgentRegistration:
             "required": [key for key in properties if key not in tool.defaults],
             "additionalProperties": False,
         }
-        result = compile_type(tool.result_codec.python_type, allow_dict=True)
+        result: JsonCodec
+        if isinstance(tool, PythonSandbox):
+            if not isinstance(tool.result_codec, SandboxResultCodec):
+                raise ConfigurationError("Sandbox result requires its dedicated trusted codec")
+            result = SandboxResultCodec(SandboxResult, SandboxResult.model_json_schema())
+        else:
+            result = compile_type(tool.result_codec.python_type, allow_dict=True)
         if (
             canonical_json(expected) != canonical_json(tool.parameters)
             or result.schema != tool.result_codec.schema
@@ -82,6 +90,7 @@ def fingerprint(agent: Agent[Any]) -> AgentRegistration:
                 "parameters": expected,
                 "result": result.schema,
                 "context_parameter": tool.context_parameter,
+                **({"sandbox_backend": tool.backend} if isinstance(tool, PythonSandbox) else {}),
                 **(
                     {"verifier_revision": tool.verifier_revision}
                     if isinstance(tool, PythonTool) and tool.verifier is not None

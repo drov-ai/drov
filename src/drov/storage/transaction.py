@@ -334,6 +334,11 @@ class Transaction:
                     if request.canonical_artifacts
                     else {}
                 ),
+                **(
+                    {"sandbox_bindings": request.sandbox_bindings}
+                    if request.sandbox_bindings
+                    else {}
+                ),
             }
         )
         return key_hash, fingerprint
@@ -398,6 +403,7 @@ class Transaction:
             last_seq=1,
             artifact_inputs=list(_artifact_refs),
             artifact_binding=_artifact_binding or {},
+            sandbox_bindings=request.sandbox_bindings,
         )
         new_session = SessionRecord(
             scope=scope,

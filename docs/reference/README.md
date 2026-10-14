@@ -4,7 +4,7 @@ T-02 至 T-08 提供类型/schema、协议、事务存储、Runtime 生命周期
 
 ## 模块入口
 
-T-10A 文件通道已实现；第三批在 `drov.sandbox._docker` / `_profile` 交付私有控制/预检与固定 profile 校验，见 [ADR-0019](../decisions/0019-docker-control-preflight.md)。它们不是公共工具入口，尚无 PythonSandbox/Runtime 审批执行或 SandboxResult，故不加入下方公共入口表。
+T-10A 的文件通道、公共沙箱定义与 Runtime 专用执行路径已实现；控制预检见 ADR-0019，实际执行/租约/发布决定见 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md)，适用范围与证据见 [验证](../validation/t10a-runtime-sandbox.md)。
 
 | 入口 | 已实现内容 |
 | --- | --- |
@@ -17,7 +17,8 @@ T-10A 文件通道已实现；第三批在 `drov.sandbox._docker` / `_profile` �
 | drov.tools | @tool/不可变 PythonTool/PermissionPolicy；compile_tool 仍是 schema-only；真实派发只由私有内核接点使用 |
 | drov.auth / drov.errors | Authorizer/AuthAdapter、ToolResource/OwnerAuthorizer、错误与 TransientToolError；HTTP 认证仍未实现 |
 | drov.storage | MemoryStorage / SQLiteStorage；异步 open/aclose、start/查询、原子 transaction 接点；内部协议尚不稳定 |
-| drov.artifacts | ArtifactInput/Ref/Info/Limits 与 LocalArtifacts POSIX 私有字节层；Runtime owned/borrowed/factory 装配、文件接收/Run 授予/去重、ready 输入与 get/read_artifact 动态授权；私有 stage 仍不可读，输出沙箱链未接入 |
+| drov.artifacts | ArtifactInput/Ref/Info/Limits 与 LocalArtifacts POSIX 私有字节层；Runtime 资源装配、文件接收/Run 授予/去重、ready 输入/产物与 get/read_artifact 动态授权；私有 stage 不可读 |
+| drov.sandbox | PythonSandbox、DockerSandbox、SandboxLimits、SandboxResult；固定 sandbox.run_python 专用派发、审批/绑定、实际 Docker 单次执行、有界文件导出/PNG 校验、销毁后共同发布与原阶段恢复 |
 
 Memory 是配置对象，MemoryStorage 是事务内存后端；配置 Memory 的注册 Agent 自动导出三个内置工具，实际检索/事务执行见 [ADR-0012](../decisions/0012-transactional-memory.md)；Agent 只定义行为，构造不会执行。存储描述只在 open/异步上下文进入时获取连接和锁；完整记录由内核做授权投影，不能直接作为 API 响应。compile_tool 只创建描述，@tool 创建含 callable 的 PythonTool；private execution/operations 接点真实派发 Python 工具并保存操作事实。外部 Python write/unknown 支持审批、单次派发及 unknown 核查，显式 Runtime 的 ASK 已保存审批并支持原子响应；临时入口 ASK 仍 failed/interaction_unavailable。完整未知效果/恢复已接入 T-09，硬崩溃专项留到 T-10。provider_items 仅供适配器往返，不用于向用户显示内部协议数据。
 
@@ -57,9 +58,9 @@ assert "result" not in evidence.model_dump()
 
 默认只支持本人查询；同 tenant 的跨用户正文/响应需应用 Authorizer 分别授予权限，执行仍使用原用户；schema-only 在接收前拒绝；write/unknown 支持单次派发与持久核查；配置 Memory 的 Agent 已可执行内置事务工具。inspect.context_manifests 返回当前事件页的有界清单索引（不带 sources），get_context 默认完整来源元数据，include_content=True 带选入内容/预览；provider 正文始终隐藏。旧历史按完整 Run 组选取，原结果不因预览改写；HumanInput 与 respond/resume 的 approval/input 子范围已实现；verify/recover 已有实际实现，见 [完整验证](../validation/t09-reconciliation-recovery.md)。完整 API 表中的后续条目须按状态说明使用。
 
-## 待实施的沙箱接口
+## 可运行的沙箱接口
 
-C-17 的 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult **仍不可导入**，安全导出/输出结果共同发布与清理租约未接入；文件接收/授予/读取已实现，见上表。E2B 独立可选 T-10C，无 E2BSandbox 空壳。最终接口见 [API](../planning/api-draft.md)，状态统一见 progress，不用输入通道验收替代沙箱整卡。
+`from drov.sandbox import PythonSandbox, DockerSandbox, SandboxLimits, SandboxResult` 已可用，构造无 I/O；显式 Runtime 需要 SQLiteStorage、配对 LocalArtifacts 和固定本地 Docker dependency。默认审批，临时 Agent.run 拒绝。运行教程见 [实际 CSV/PNG 示例](../../examples/sandbox_offline.py) 与 [准备说明](../../sandbox/README.md)。SandboxLimits/Result 已加入生成 schema；显式 sandbox SQL 扩展 v1 的实际 DDL 见 [storage-sandbox-schema-v1.sql](storage-sandbox-schema-v1.sql)，旧核心库不自动启用，旧 SDK 拒绝扩展库。verify 只读，recover 查询/销毁原环境并使用原暂存，不重跑代码，人工核查 response 不能替代清理事实。T-10B 专项尚未验收，E2B 独立可选 T-10C，无空壳。接口见 [API](../planning/api-draft.md)，任务状态统一见 progress。
 
 ## 可运行审批与输入子范围
 

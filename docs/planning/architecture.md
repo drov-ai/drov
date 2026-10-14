@@ -1,6 +1,6 @@
 # 架构与模块边界
 
-状态：P4 实施基线；T-02 至 T-08 已实现定义/协议、事务存储、Runtime 注册/资源、只读 Agent、上下文选择/清单和内置事务 Memory；T-09 审批/输入子范围已实现；T-09 已接入外部未知效果/显式恢复；服务尚未实现。更新：2026-10-14。
+状态：P4 实施基线；T-02 至 T-08 已实现定义/协议、事务存储、Runtime 注册/资源、只读 Agent、上下文选择/清单和内置事务 Memory；T-09 审批/输入子范围已实现；T-09 已接入外部未知效果/显式恢复；T-10A 文件/代码沙箱闭环已接通；服务尚未实现。更新：2026-10-14。
 
 本文定义职责、依赖和数据归属。[行为契约](runtime-contract.md) 是状态、恢复、权限和生命周期规则的唯一详细定义；[API 草案](api-draft.md) 描述用户入口，不能独立改变这些规则。
 
@@ -29,7 +29,7 @@ flowchart TD
     C --> S
     T --> S
     T --> EXT[Python 工具 / MCP 适配器]
-    T --> SB[PythonSandbox 处理器：待实现]
+    T --> SB[PythonSandbox 专用处理器]
     SB --> BP[执行/传输/查证/销毁协议：随真实实现建立]
     BP --> DB[Docker/Linux 默认必交：待实现]
     BP --> CB[E2B 可选 T-10C：待实现]
@@ -122,7 +122,7 @@ T-06 的 Session 消息按保存的 session_sequence（Session 版本）投影�
 
 ## 代码沙箱模块与归属（T-10A 部分实施）
 
-C-17 的 Docker 代码/受控文件/产物由 T-10A/T-10B 交付，可选 E2B 由 T-10C 交付，见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。sandbox/ 已交付内部本地控制/预检、固定 profile 与实际控制检查（ADR-0019），专用 PythonSandbox、执行/传输/查证/销毁及持久租约仍待接通；artifacts/ 已管理私有字节与 ready 输入/Run 授予/授权读取。integrations/e2b 在 T-10C 实际适配时建立。不接管 ModelAdapter 或另建 Agent 循环。
+C-17 的 Docker 代码/受控文件/产物由 T-10A/T-10B 交付，可选 E2B 由 T-10C 交付，见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。sandbox/ 已交付内部本地控制/预检、固定 profile 与实际控制检查（ADR-0019），专用 PythonSandbox、Engine 执行/有界传输/只读查证/归属销毁及持久租约已按 ADR-0020 接通；artifacts/ 已管理私有字节与 ready 输入/Run 授予/授权读取与销毁后 ready 输出共同发布。integrations/e2b 在 T-10C 实际适配时建立。不接管 ModelAdapter 或另建 Agent 循环。
 
 | 边界 | 唯一责任 | 不能代替的边界 |
 | --- | --- | --- |

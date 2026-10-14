@@ -1,6 +1,6 @@
 # 本地开发
 
-包版本为 `0.1.0a0`。已有定义/schema、模型协议、事务存储、Runtime/Agent、工具/权限、上下文/Memory、审批/输入及 verify/recover。T-10A 第二批接入文件接收/授予/去重、ready 输入与授权读取，[文件通道示例](../examples/artifact_inputs_offline.py) 可运行；PythonSandbox、安全导出/输出结果共同发布仍未接入，真实模型适配与服务/CLI 仍未实现。实际状态见 [progress](planning/progress.md)，不要把完整沙箱设计片段当运行教程。
+包版本为 `0.1.0a0`。已有模型协议、事务存储、Runtime/Agent、工具/权限、上下文/Memory、交互及 verify/recover。T-10A 已接通文件输入、PythonSandbox 审批/实际执行、有界导出及销毁后原工具结果/ready 共同发布，[真实 Docker 示例](../examples/sandbox_offline.py) 可运行；完整隔离/故障矩阵、真实模型适配与服务/CLI 尚未验收。任务状态见 [progress](planning/progress.md)，实际证据见 [本轮验证](validation/t10a-runtime-sandbox.md)。
 
 ## 环境与安装
 
@@ -79,9 +79,11 @@ CI 使用只读仓库权限，无发布或凭据步骤；Actions 固定到上游
 
 每轮按 [协作规则](../AGENTS.md) 更新进度、受影响契约和验证记录；新会话按 [交接说明](handoff.md) 恢复工作。上游依赖与源码复用入口见 [THIRD_PARTY](../THIRD_PARTY.md)。下一项以 [progress](planning/progress.md) 为准。
 
-## 首版代码沙箱的准备时点（计划）
+## 运行 Docker 文件分析
 
-drov.artifacts 文件通道已实现；drov.sandbox 当前只有内部控制/预检（ADR-0019），没有公共 PythonSandbox 或 E2B adapter；普通 SDK 与文件通道不连接 Docker。按 ADR-0016/0018，T-10A/T-10B 完成 Docker Python/持久 CSV/PNG 输出，T-10C 独立可选。当前 Local 已有固定标准库/分析镜像、显式 seccomp 和私有字节存储，见 [准备与限制](../sandbox/README.md)，保持 Desktop 运行；换机器按 recipe 重建并核实实际 ID，不从固定可信探针推断完整 SDK 隔离。
+drov.sandbox 公共入口和 Runtime 链已实现（ADR-0020）；普通 SDK/文件通道不连接 Docker。当前 Local 已有固定标准库/分析镜像、显式 seccomp 和私有字节存储，见 [准备与运行](../sandbox/README.md)，保持 Desktop 运行；换机器按 recipe 重建并核实实际 ID。示例需显式 CLI/socket/image 参数，默认审批后执行，--chart 使用固定分析镜像，--stream 检查同一 SDK 流入口；模型是确定性夹具，没有 live 调用。
+
+真实 Docker 用例显式读取非秘密配置路径 `DROV_DOCKER_TEST_CONFIG`，示例配置字段见本轮验证。未配置时普通核心测试跳过 9 个 Docker 用例，不能据此关闭 T-10B 或声称 Docker 专项 CI 通过。配置后运行 `uv run --locked pytest tests/test_sandbox_docker.py`。只操作夹具独占名称/标签的资源，不关闭共享 daemon。
 
 不挂宿主凭据/仓库/socket，不在执行时拉镜像/安装，不用宿主回退。默认/平台/文件控制见 [工程方案第 9 节](planning/engineering.md)，接口在 [API 草案](planning/api-draft.md)，未跑真实组不能 skip 关闭两卡。下一项以 progress 为准，New Chat 交接见 handoff；忽略目录的准备文件仅当前 Local 存在。
 

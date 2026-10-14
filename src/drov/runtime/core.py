@@ -22,6 +22,9 @@ from drov.runtime.registration import AgentRegistration, fingerprint
 from drov.runtime.resources import ResourceBinding
 from drov.runtime.runs import RunController
 from drov.runtime.streams import RunEvents, RunStream
+from drov.sandbox._backend import DockerBackend
+from drov.sandbox._controller import SandboxController
+from drov.sandbox.tools import PythonSandbox
 from drov.storage import MemoryStorage
 from drov.storage.base import Storage
 from drov.storage.records import RunRecord
@@ -258,6 +261,7 @@ class Runtime:
         self._works: set[_Work[Any]] = set()
         self._changed = asyncio.Event()
         self._tool_dispatcher: ToolDispatcher | None = None
+        self._sandboxes: SandboxController | None = None
         self._controls: set[asyncio.Task[Any]] = set()
         self._temporary = False
         self._runs = RunController(self)
@@ -471,6 +475,13 @@ class Runtime:
             raise Conflict("Saved Agent configuration/schema fingerprint differs")
         if valid.artifact_inputs and valid.artifact_binding != self._files.binding():
             raise Conflict("Saved ArtifactStore configuration differs")
+        if valid.sandbox_bindings:
+            if self._sandboxes is None or valid.sandbox_bindings != self._sandboxes.bindings(
+                self._agents[key]
+            ):
+                raise Conflict("Saved sandbox configuration differs")
+            if valid.artifact_binding != self._files.binding():
+                raise Conflict("Saved sandbox ArtifactStore configuration differs")
         self._require_dependencies(self._agents[key])
         return registration
 
@@ -524,7 +535,9 @@ class Runtime:
             value = await binding.create()
         else:
             value = cast(T, binding.value)
-        resource = self._install(value, binding, exclusive=storage)
+        resource = self._install(
+            value, binding, exclusive=storage or isinstance(value, DockerBackend)
+        )
         if storage:
             if not isinstance(value, Storage):
                 raise ConfigurationError("Runtime storage must implement the internal Storage type")
@@ -562,15 +575,47 @@ class Runtime:
                 self._artifacts = file_store
             for model_binding in self._model_bindings:
                 await self._acquire(model_binding)
+            if any(
+                isinstance(tool, PythonSandbox)
+                for agent in self._agents.values()
+                for tool in agent.tools
+            ):
+                if not isinstance(self._storage, SQLiteStorage) or self._artifacts is None:
+                    raise ConfigurationError(
+                        "PythonSandbox requires SQLiteStorage and LocalArtifacts"
+                    )
             dependencies: dict[str, object] = {}
             for key, value in self._dependency_bindings.items():
                 binding = (
                     value if isinstance(value, ResourceBinding) else ResourceBinding.borrowed(value)
                 )
                 dependencies[key] = await self._acquire(binding)
+                if isinstance(dependencies[key], DockerBackend):
+                    backend = cast(DockerBackend, dependencies[key])
+                    if binding.mode == "borrowed":
+                        if not backend.is_open:
+                            raise ConfigurationError("Borrowed Docker backend must already be open")
+                        backend._require_loop()
+                    elif not backend.is_open:
+                        await backend.open()
             self._dependencies = MappingProxyType(dependencies)
             for agent in self._agents.values():
                 self._require_dependencies(agent)
+            if any(
+                isinstance(tool, PythonSandbox)
+                for agent in self._agents.values()
+                for tool in agent.tools
+            ):
+                if not isinstance(self._storage, SQLiteStorage) or self._artifacts is None:
+                    raise ConfigurationError(
+                        "PythonSandbox requires SQLiteStorage and LocalArtifacts"
+                    )
+                controller = SandboxController(self)
+                for agent in self._agents.values():
+                    controller.bindings(agent)
+                await self._storage._bind_sandbox()
+                self._sandboxes = controller
+                self._install(controller, ResourceBinding.owned(controller))
             if any(
                 isinstance(tool, PythonTool)
                 for agent in self._agents.values()

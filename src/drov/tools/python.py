@@ -28,8 +28,8 @@ def tool(
     verifier_revision: str = "1",
 ) -> Callable[[Callable[..., Any]], PythonTool]:
     """Compile a callable; construction neither authorizes nor executes it."""
-    if name in {"memory.remember", "memory.recall", "memory.forget"}:
-        raise ConfigurationError("Built-in Memory tool names are reserved")
+    if name in {"memory.remember", "memory.recall", "memory.forget", "sandbox.run_python"}:
+        raise ConfigurationError("Built-in tool names are reserved")
 
     def decorate(function: Callable[..., Any]) -> PythonTool:
         if (

@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
+状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；T-10A 文件/代码沙箱公共接口与 Runtime 闭环已实现；真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -357,14 +357,14 @@ HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；�
 
 ## 首版文件与代码沙箱接口（T-10A，部分实施）
 
-第三批仅交付私有 Docker 控制/预检与 profile 检查（[ADR-0019](../decisions/0019-docker-control-preflight.md)）；没有新增公共调用入口或 Sandbox DTO。`drov.sandbox` 暂不导出下表对象，不能用内部可信探针替代 Runtime 工具。公共字段和返回语义保持以下契约。
+公共沙箱入口、审批/执行/销毁/输出发布已接通，决定见 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md)，可运行离线示例见 [sandbox_offline.py](../../examples/sandbox_offline.py)。模型为确定性 fixture，真实模型质量仍未验证；T-10B 故障/隔离矩阵另验收。
 
-本节按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 扩展 ADR-0013。T-10A 第二批已实现值类型/私有字节层、Runtime store 装配、start/run/stream 文件接收与 Run 授予/去重、ready 输入元数据、get/read_artifact 动态授权、上下文文件描述，见 [ADR-0018](../decisions/0018-artifact-input-admission.md) 和 [可运行文件通道示例](../../examples/artifact_inputs_offline.py)。私有 stage 仍不是 ready；输入接收不执行代码。下表的 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、输入只读容器副本、输出导出/销毁/原工具结果共同发布仍未实现。执行/恢复规则唯一在运行契约第 13 节，默认、镜像与支持矩阵唯一在工程方案。
+本节按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 扩展 ADR-0013。T-10A 第二批已实现值类型/私有字节层、Runtime store 装配、start/run/stream 文件接收与 Run 授予/去重、ready 输入元数据、get/read_artifact 动态授权、上下文文件描述，见 [ADR-0018](../decisions/0018-artifact-input-admission.md) 和 [可运行文件通道示例](../../examples/artifact_inputs_offline.py)。私有 stage 仍不是 ready；输入接收不执行代码。下表入口、受保护输入与输出导出/销毁/原工具结果共同发布已实现。执行/恢复规则唯一在运行契约第 13 节，默认、镜像与支持矩阵唯一在工程方案。
 
-| 拟议入口/对象 | 字段与责任 |
+| 已实现入口/对象 | 字段与责任 |
 | --- | --- |
 | drov.sandbox.PythonSandbox | backend: 宿主 dependency 名称；逻辑工具固定 sandbox.run_python，revision 随内置版本固定；approval 默认 policy、可设 required；effect 固定 write；不接受普通 callable 或任意后端 flags |
-| drov.sandbox.DockerSandbox | image: 必填已预装 repository@sha256（manifest）或显式 sha256:image-config-id（本地构建，ADR-0017）；拒绝 tag；limits: SandboxLimits；宿主显式本地连接引用/可信 CLI；构造不连接，Runtime 装配时预检，ResourceBinding 管理所有权；仍待实施 |
+| drov.sandbox.DockerSandbox | image: 必填已预装 repository@sha256（manifest）或显式 sha256:image-config-id（本地构建，ADR-0017）；拒绝 tag；limits: SandboxLimits；宿主显式本地连接引用/可信 CLI；docker: 必填绝对可信 CLI 路径；host: 必填本地 Unix socket；构造不连接，Runtime 装配时预检，ResourceBinding 管理所有权 |
 | drov.sandbox.SandboxLimits | execution_seconds、control_seconds、memory_bytes、cpus、pids、workspace_bytes、max_code_bytes、max_output_bytes、concurrency；严格有限正值；Docker 专属配置不作为云能力的默认保证 |
 | drov.artifacts.ArtifactInput | name: 单个安全文件名；data: bytes；media_type: str（默认 application/octet-stream）；宿主 SDK 提交有界字节，框架不接受主机路径/URL，不解压档案；不是模型工具参数 |
 | ArtifactRef / ArtifactInfo | Ref：artifact_id（内核生成不透明 ID）、sha256、size_bytes、media_type；Info 另有 schema_version、来源 Run/operation、状态与正文可见标记；name 属正文，不出现在默认元数据投影；引用不可变，不包含主机/容器路径、云 URL 或凭据 |
@@ -374,18 +374,18 @@ HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；�
 | runtime.get_artifact(artifact_id, *, context, include_content=False) | 返回授权 ArtifactInfo；正文模式可见逻辑文件名；不返回字节。当前 read/view_content 动态复核；知道 ID 不代表有权限 |
 | runtime.read_artifact(ref_or_id, *, context) | 已实现：接受 ID 或 ArtifactRef（含 ArtifactInfo），返回有界 bytes（read + view_content）；传 Ref 额外核对其 hash/大小/类型；读前后复核，缺失/损坏提交 unavailable，不返回成功内容或重算 |
 | sandbox.run_python 参数 | code: 非空 str；inputs: list[str]（Artifact ID，默认 []）；outputs: list[str]（/work/outputs 下相对文件名，默认 []）；拒绝额外字段。输入只能选本 Run 已获准引用，模型不能提交归属/hash/主机路径或改变 limits/后端 |
-| SandboxResult | execution_key、exit_code: int 或 None、termination: exited/timeout/output_limit/resource_limit/cancelled、有界 stdout/stderr、两种 truncated 标记；artifact_status: not_requested/complete/rejected、artifacts: list[ArtifactRef]、artifact_error: 可空结构化错误码；字节不进工具 JSON。清理不明不能构造成功结果 |
+| SandboxResult | execution_key、exit_code: int 或 None、termination: exited/timeout/output_limit/resource_limit/cancelled、有界 stdout/stderr、两种 truncated 标记；artifact_status: not_requested/complete/rejected、artifacts: list[ArtifactRef]、artifact_error: None 或 {code: str}；字节不进工具 JSON。清理不明不能构造成功结果 |
 
 模型只看到本 Run 获准的输入描述（ID、逻辑名、hash/大小/类型和固定输入位置 /work/inputs/<artifact_id>/<name>），不能枚举存储。审批展示原代码、所选输入与输出声明；批准绑定服务器解析的不可变清单，不相信模型填写的元数据。没有 artifacts 参数的旧调用保持原语义；临时 Agent.run/run_sync、内存 Storage 或缺配套 ArtifactStore 的文件/沙箱配置接收前 ConfigurationError。Artifact Authorizer 资源使用原 tenant/user/Agent 与来源 Run/operation、artifact_id；新输入授权也核对目标 Run，复用 read/view_content，工具派发仍检查 execute_tool。
 
 ```python
-# 设计片段：文件通道已实现，但 drov.sandbox 与完整代码闭环仍未实现。
+# 使用片段：需要真实 ModelAdapter 和已预装镜像/可信 CLI/本地 socket。
 from drov import Agent, PermissionPolicy, ResourceBinding, RunContext, Runtime, SQLiteStorage
 from drov.artifacts import ArtifactInput, LocalArtifacts
 from drov.sandbox import DockerSandbox, PythonSandbox, SandboxLimits
 
 
-async def file_analysis_example(model, analysis_image_digest):
+async def file_analysis_example(model, analysis_image_digest, docker_cli, docker_host):
     agent = Agent(
         name="analyst",
         revision="1",
@@ -394,7 +394,9 @@ async def file_analysis_example(model, analysis_image_digest):
         tools=[PythonSandbox(backend="code")],
         required_dependencies=["code"],
     )
-    backend = DockerSandbox(image=analysis_image_digest, limits=SandboxLimits())
+    backend = DockerSandbox(
+        image=analysis_image_digest, limits=SandboxLimits(), docker=docker_cli, host=docker_host
+    )
     async with Runtime(
         agents=[agent],
         storage=SQLiteStorage(".drov/file-example.db"),
@@ -421,4 +423,6 @@ T-13 的 HTTP 同一入口扩展：POST /v1/runs 新增可选 artifact_ids，仅
 
 T-10C 才新增拟议 drov.integrations.e2b.E2BSandbox（可选 extra 名 e2b）：宿主显式提供非秘密 credential_ref、固定 template/build、region、后端限额与 cloud_data_policy；密钥由宿主解析，模型参数和 ArtifactStore 不接触密钥。实际 SDK 接口/版本与可验证能力在 T-10C 锁定，不能写入不存在的已支持配置；构造无远端副作用。使用相同 PythonSandbox/Artifact DTO，禁止缺能力时切换到弱配置，详见工程方案第 10 节。
 
-显式 allow 只授权已配置的代码工具；业务写入仍单独审批。代码生成/消费结果沿现有 ModelAdapter，没有自动代写/修复/执行循环。当前生成 schema 不提前增加上述未实现符号。
+显式 allow 只授权已配置的代码工具；业务写入仍单独审批。代码生成/消费结果沿现有 ModelAdapter，没有自动代写/修复/执行循环。SandboxLimits/Result 已加入生成 schema；E2B/HTTP 等未实现符号不提前增加。
+
+当前输出集合的 basename 也须唯一；PNG 验证接受有界非交错静态 profile，限制/代价见工程第 9 节与 ADR-0020。核查中的沙箱人工 response 不替代资源/结果事实；使用 recover 查询/销毁并恢复原可靠暂存，verify 仅只读。

@@ -306,6 +306,11 @@ class ReconciliationController:
                     current, request, item, operation = await self.pending_in(
                         tx, owner, run_id, request_id
                     )
+                    if operation.tool_name == "sandbox.run_python":
+                        raise InteractionConflict(
+                            "Sandbox output/cleanup must be resolved through recover; "
+                            "human evidence cannot replace original execution facts"
+                        )
                     checkpoint = await tx.get_checkpoint(owner, run_id)
                     data = dict(checkpoint.data)
                     stop = self.stopping_error(current, data)
@@ -497,6 +502,37 @@ class ReconciliationController:
         await runs.authorize(context, runs.resource(record), ("respond", "verify"))
         owner = runs.resource(record).owner
         key: tuple[str, str]
+
+        async with runs.storage.transaction() as tx:
+            current, _, _, operation = await self.pending_in(tx, owner, run_id, request_id)
+        if operation.tool_name == "sandbox.run_python":
+            runs.runtime.validate_record(current)
+            controller = runs.runtime._sandboxes
+            if controller is None:
+                raise ConfigurationError("Original sandbox backend is not configured")
+            key = (run_id, operation.operation_id)
+            prior = self.verifying.get(key)
+            if prior is not None and not prior.task.done():
+                raise CapacityExceeded("This operation has an active verifier")
+            slot = runs.runtime._reserve()
+
+            async def observe(work: "_Work[ReconciliationDecision]") -> ReconciliationDecision:
+                result = await controller.verify(current, operation.operation_id)
+                async with runs.storage.transaction() as tx:
+                    latest, _, _, _ = await self.pending_in(tx, owner, run_id, request_id)
+                    await runs.authorize(
+                        context,
+                        runs.resource(latest),
+                        ("read", "view_content", "respond", "verify"),
+                    )
+                return result
+
+            work = runs.runtime._spawn(slot, observe)
+            work.kind = "verify"
+            work.run_id = run_id
+            self.verifying[key] = work
+            work.task.add_done_callback(lambda _: self.verifying.pop(key, None))
+            return await work.wait()
 
         async def schedule() -> "_Work[ReconciliationDecision]":
             nonlocal key

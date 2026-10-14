@@ -70,6 +70,10 @@ class Agent(Generic[T]):
 
         if any(tool.name in NAMES for tool in tools):
             raise ConfigurationError("Built-in Memory tool names are reserved")
+        from drov.sandbox.tools import NAME, PythonSandbox
+
+        if any(tool.name == NAME and not isinstance(tool, PythonSandbox) for tool in tools):
+            raise ConfigurationError("Built-in sandbox tool name is reserved")
         if memory is not None:
             Memory.model_validate(memory)
             if not capabilities.tools:
@@ -125,6 +129,10 @@ class Agent(Generic[T]):
             raise ConfigurationError("Temporary Agent.run cannot accept persistent files")
         if self.memory is not None:
             raise ConfigurationError("Temporary Agent.run cannot use persistent Memory")
+        from drov.sandbox.tools import PythonSandbox
+
+        if any(isinstance(tool, PythonSandbox) for tool in self.tools):
+            raise ConfigurationError("PythonSandbox requires an explicit persistent Runtime")
         # Clone identity only; never mutate a definition borrowed by an existing Runtime.
         temporary = Agent(
             model=self.model,

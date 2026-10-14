@@ -38,7 +38,8 @@ Drov 面向通用 Agent 应用，以 Python 为主要语言、AgentScope 2.0 为
 | 25 | [文件与后端决定](../decisions/0016-sandbox-artifacts-and-backends.md) | 受控文件/持久产物必交、E2B 可选及分工怎样落地（计划）？ |
 | 26 | [私有字节暂存决定](../decisions/0017-private-artifact-staging.md) | T-10A 首批存储配对、预留与固定本地镜像身份怎样落地，哪些运行接点仍未实现？ |
 | 27 | [文件接收与授予决定](../decisions/0018-artifact-input-admission.md) | Artifact SQL 扩展、Run 授予/去重/授权读取、上下文 v2 与旧数据怎样兼容？ |
-| 28 | [Docker 控制预检决定](../decisions/0019-docker-control-preflight.md) | 私有控制/固定 profile、指纹与实际检查怎样落地，哪些 Runtime 接点仍未实现？ |
+| 28 | [Docker 控制预检决定](../decisions/0019-docker-control-preflight.md) | 私有控制/固定 profile、指纹与实际检查怎样落地？ |
+| 29 | [Runtime 沙箱执行决定](../decisions/0020-runtime-sandbox-execution.md) | 真实 Engine 执行、权限/租约、输入/导出/PNG、销毁后共同发布与原阶段恢复怎样落地？ |
 
 ## 状态词约定
 

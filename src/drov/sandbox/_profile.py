@@ -19,7 +19,7 @@ ENVIRONMENT = {
 }
 
 
-class DockerLimits(WireModel):
+class SandboxLimits(WireModel):
     """Private until the corresponding Runtime tool and result contract is implemented."""
 
     execution_seconds: PositiveSeconds = 10.0
@@ -33,7 +33,7 @@ class DockerLimits(WireModel):
     concurrency: PositiveInt = 2
 
     @model_validator(mode="after")
-    def docker_precision(self) -> "DockerLimits":
+    def docker_precision(self) -> "SandboxLimits":
         # Docker rounds CPU quotas to microseconds in a 100000us period. Do not
         # advertise an arbitrary float that cannot be represented by that quota.
         quota = self.cpus * 100000
@@ -44,6 +44,9 @@ class DockerLimits(WireModel):
         if self.workspace_bytes > 2**63 - 1 or self.pids > 2**31 - 1:
             raise ValueError("Docker limits exceed their controller representation")
         return self
+
+
+DockerLimits = SandboxLimits
 
 
 def image_reference(value: str) -> str:
@@ -357,3 +360,36 @@ class DockerProfile:
 
 def configuration_hash(payload: dict[str, Any]) -> str:
     return hashlib.sha256(canonical_json(payload).encode("utf-8")).hexdigest()
+
+
+INPUT_TMPFS = "rw,noexec,nosuid,nodev,size=16777216,uid=65534,gid=65534,mode=0700"
+
+
+@dataclass(frozen=True)
+class ExecutionProfile(DockerProfile):
+    """Bounded input area owned by the trusted UID, separate from the workload UID."""
+
+    def create_arguments(self, *, name: str, labels: dict[str, str], seccomp: str) -> list[str]:
+        arguments = super().create_arguments(name=name, labels=labels, seccomp=seccomp)
+        return arguments[:-1] + ["--tmpfs=/work/inputs:" + INPUT_TMPFS, arguments[-1]]
+
+    def inspect_created(
+        self, resource: dict[str, Any], *, name: str, labels: dict[str, str], seccomp: bytes
+    ) -> None:
+        host = resource.get("HostConfig")
+        require(isinstance(host, dict), "Missing execution container controls")
+        host = cast(dict[str, Any], host)
+        tmpfs = host.get("Tmpfs")
+        require(
+            isinstance(tmpfs, dict) and tmpfs.get("/work/inputs") == INPUT_TMPFS,
+            "Input area controls differ",
+        )
+        checked = dict(resource)
+        checked["HostConfig"] = host | {
+            "Tmpfs": {
+                key: value
+                for key, value in cast(dict[str, Any], tmpfs).items()
+                if key != "/work/inputs"
+            }
+        }
+        super().inspect_created(checked, name=name, labels=labels, seccomp=seccomp)

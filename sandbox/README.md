@@ -1,6 +1,6 @@
 # T-10A 镜像与字节层的实际准备
 
-这里包含分析镜像 recipe 与可信镜像探针，**不是可调用的 PythonSandbox，也不是任意模型代码执行器**。T-10A 尚未完整验收；状态与剩余项见 [progress](../docs/planning/progress.md)，实际结果见 [本轮验证](../docs/validation/t10a-artifact-staging.md)。
+这里维护分析镜像 recipe 与可信镜像探针；SDK 可调用的 PythonSandbox 实现在 src/drov/sandbox，由 Runtime 专用路径派发。完整 CSV/PNG 示例见 [sandbox_offline.py](../examples/sandbox_offline.py)，实际证据见 [本轮验证](../docs/validation/t10a-runtime-sandbox.md)。任务状态与 T-10B 剩余专项以 [progress](../docs/planning/progress.md) 为准；单独镜像探针不能替代 SDK 验收。
 
 第三批已新增 SDK 内部 Docker 控制/预检和固定控制检查，见 [ADR-0019](../docs/decisions/0019-docker-control-preflight.md) 与 [实际验证](../docs/validation/t10a-docker-controls.md)。open 仅查 info/version/image，不创建代码容器。显式可信探针 `scripts/check_docker_backend.py` 检查标准库计算/有效控制/两次独立目录及归属清理；脚本不接收用户代码，不做 Runtime 审批/执行或文件导出。
 
@@ -49,7 +49,21 @@ uv run --locked python scripts/check_analysis_image.py \
 
 ## 私有字节层
 
-`from drov.artifacts import ArtifactInput, ArtifactRef, ArtifactInfo, ArtifactLimits, LocalArtifacts` 已实现。第二批由 Runtime(artifacts=store 或 ResourceBinding) 装配，start/run/stream 接收输入，get/read_artifact 授权返回 ready 输入与字节，见 [可运行示例](../examples/artifact_inputs_offline.py) 和 [验证](../docs/validation/t10a-artifact-inputs.md)。独立字节层仍可显式 open(storage=已打开的 SQLiteStorage)/aclose；私有阶段方法不产生 ready 元数据，应用不得用它们绕过授权。代码/输出安全导出与销毁后结果共同发布尚未实现。
+`from drov.artifacts import ArtifactInput, ArtifactRef, ArtifactInfo, ArtifactLimits, LocalArtifacts` 已实现。Runtime 装配，start/run/stream 接收输入，get/read_artifact 授权返回 ready 输入/产物，见 [文件通道示例](../examples/artifact_inputs_offline.py) 与 ADR-0018。代码执行后有界安全导出、PNG 校验、可靠暂存、确认整个容器销毁，再同一事务发布原结果与 ready 产物，见 ADR-0020。独立字节层仍可显式 open(storage=已打开的 SQLiteStorage)/aclose；私有阶段方法不产生 ready 元数据，应用不得用它们绕过授权。
+
+## 真实 SDK 示例
+
+以下为本 checkout 的实际本地分析 image ID；换机器须使用自己的固定构建记录。每次 directory 选新的私有目录，原库/字节/台账保留用于检查，不共用容器状态：
+
+```sh
+uv run --locked python examples/sandbox_offline.py \
+  --docker /usr/local/bin/docker \
+  --host unix:///Users/yanlong/.docker/run/docker.sock \
+  --image sha256:90b64b063ac57fd1399adb4447f77718ef839d9a1cb61a0bb1df93dadaf29f45 \
+  --directory .drov/my-sdk-analysis --chart
+```
+
+加 --stream 检查流入口；不加 --chart 可用预装固定标准库镜像。示例自己通过默认审批后检查工具真实结果，模型是确定性夹具，不能作为真实模型质量。默认输入/输出额、PNG 有界解码 profile 与 POSIX 限制见工程方案第 9 节；合法但超出 PNG profile 的文件也会被拒绝。尚未交付 Linux Docker 专项 CI、全恶意/资源/硬崩溃矩阵或完整维护备份，不用于敌对公网多租户部署承诺。
 
 当前字节层仅在 POSIX 控制下可打开；构造/导入在其他平台仍无 I/O。文件目录、store.json、stage.json 与原始 ID 字节共同构成配对数据；不能在尚未完成 T-15 备份 barrier 时声称有完整 Artifact 备份。无清单目录、临时清单或其他未知项使 open fail closed，保留证据，不手工删除/改写后假装恢复已验收。调小容量不会清空旧预留；容量不足明确拒绝。
 

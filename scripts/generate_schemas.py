@@ -13,6 +13,8 @@ from drov.auth import ArtifactResource, Resource, ToolResource
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
 from drov.runtime import AgentRegistration
+from drov.sandbox import SandboxLimits, SandboxResult
+from drov.sandbox._leases import SANDBOX_DDL
 from drov.storage.sqlite import DDL, RECORD_VERSION, SCHEMA_VERSION
 from drov.tools import PermissionPolicy
 from drov.tools.permissions import PermissionDecision
@@ -66,6 +68,8 @@ def schema_text() -> str:
         "ArtifactInfo": ArtifactInfo,
         "ArtifactLimits": ArtifactLimits,
         "ArtifactResource": ArtifactResource,
+        "SandboxLimits": SandboxLimits,
+        "SandboxResult": SandboxResult,
     }
     bundle = {
         "schema_version": 1,
@@ -92,6 +96,12 @@ def main() -> None:
     for target, expected in (
         (root / "schema-v1.json", schema_text()),
         (root / "storage-schema-v1.sql", sql),
+        (
+            root / "storage-sandbox-schema-v1.sql",
+            "-- Explicit sandbox lease extension v1.\n"
+            + ";\n\n".join(statement.strip() for statement in SANDBOX_DDL)
+            + ";\n",
+        ),
         (
             root / "storage-artifacts-schema-v1.sql",
             "-- Explicit ArtifactStore extension v1; core records/user_version remain 1.\n"

@@ -288,8 +288,8 @@ T-05 已验证 S-01-B 的只读瞬态重试/超时及 S-03-A/C 的权限否决�
 
 ## 代码沙箱变体的交付边界
 
-S-01-E/S-02-E/S-03-F/X-03 按 ADR-0016 加强文件/产物要求，当前无 sandbox/artifacts 源码或可运行示例。配置用法见 API 草案，语义见运行契约第 13 节；T-10A/T-10B 交付实际标准库及固定分析镜像、CSV/PNG 离线 example 并复用三类应用。T-10C 复用相同案例与断言，使用 ScriptedModel 在真实 E2B 验证 adapter，不据此增加模型评分样本或假设两种后端逐字相同。ScriptedModel 用固定代码验证机制；T-16 才验证真实模型生成代码、运行与使用结果，不能相互代替。
+S-01-E/S-02-E/S-03-F/X-03 按 ADR-0016 加强文件/产物要求，已有 sandbox/artifacts 源码和 [真实 SDK 示例](../../examples/sandbox_offline.py)，证据见 [本轮验证](../validation/t10a-runtime-sandbox.md)。配置用法见 API 草案，语义见运行契约第 13 节；T-10A 已接通实际标准库/固定分析镜像、CSV/PNG、默认审批/产物读取与两次独立环境/显式复用；T-10B 深度故障和 T-16 三类真实模型任务仍需验收。输入位置保留 /work/inputs/<id>/<name>，输出 basename 唯一，PNG 按工程有界 profile 验证；恢复使用原阶段且人工核查不能代替资源事实。T-10C 复用相同案例与断言，使用 ScriptedModel 在真实 E2B 验证 adapter，不据此增加模型评分样本或假设两种后端逐字相同。ScriptedModel 用固定代码验证机制；T-16 才验证真实模型生成代码、运行与使用结果，不能相互代替。
 
-T-09 的实际 [interactions_offline.py](../../examples/interactions_offline.py) 为安全的只读演练：每个批准/拒绝案例用四个新进程先提出 HumanInput、提交合法回答生成固定 read_item 候选、审批并读取/拒绝，再重复原响应验证旧回执和计数。两种入口核对实际原计划、返回值与 1/0 次独立工具计数。另有两后端 Memory ASK 原子写入与取消保留事实测试。它们交付审批/输入机制及 S-03-E 的补充输入子路径，完整 S-03 的外部业务写入、响应丢失核查与 recover 仍未实现。
+T-09 的实际 [interactions_offline.py](../../examples/interactions_offline.py) 为安全的只读演练：每个批准/拒绝案例用四个新进程先提出 HumanInput、提交合法回答生成固定 read_item 候选、审批并读取/拒绝，再重复原响应验证旧回执和计数。两种入口核对实际原计划、返回值与 1/0 次独立工具计数。另有两后端 Memory ASK 原子写入与取消保留事实测试。它们交付审批/输入机制及 S-03-E 的补充输入子路径，完整 S-03 的外部业务写入、响应丢失核查与 recover 证据见下段。
 
 T-09 完整 [operations_offline.py](../../examples/operations_offline.py) 使用独立进程非幂等事项服务：批准/拒绝、审批期间新进程、重复回执、补充输入、成功回包丢失和未知时取消五组。每组 3–4 个独立 SDK 进程，普通/stream 各复跑，服务自身记录实际写次数 1/0；核查按原 operation 查询，确认后不多写，取消组无后续模型。S-03-C 的错误身份/参数/撤权、B-07 的已保存输入/结果/预算与修复环境见对应集成测试。T-10 的真实硬终止矩阵见专项验证，T-16 才评测真实模型选目标与解释。

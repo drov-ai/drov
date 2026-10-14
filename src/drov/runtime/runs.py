@@ -37,6 +37,7 @@ from drov.models.protocol import (
     ModelResponse,
     ModelTool,
 )
+from drov.sandbox.tools import PythonSandbox
 from drov.storage.base import Storage
 from drov.storage.records import (
     EventDraft,
@@ -209,7 +210,7 @@ class RunController:
         if self.runtime._agents[(name, revision)] is not agent:
             raise ConfigurationError("Use the Agent object registered in this Runtime")
         if any(
-            not isinstance(item, (PythonTool, HumanInput))
+            not isinstance(item, (PythonTool, HumanInput, PythonSandbox))
             or (isinstance(item, PythonTool) and not callable(item.function))
             for item in agent.tools
         ):
@@ -230,6 +231,9 @@ class RunController:
     ) -> RunRef:
         self.runtime._require_open()
         self.executable(agent)
+        if self.runtime._sandboxes is not None:
+            controller = self.runtime._sandboxes
+            await self.control(lambda: controller.precheck(agent))
         inputs, declarations = self.runtime._files.normalize(artifacts)
         context = RunContext.model_validate(context)
         selected = self.effective_limits(agent, limits)
@@ -245,6 +249,9 @@ class RunController:
             limits=selected,
             requested_limits=limits,
             canonical_artifacts=declarations,
+            sandbox_bindings=self.runtime._sandboxes.bindings(agent)
+            if self.runtime._sandboxes
+            else {},
         )
         resource = Resource(owner=context, session_id=session_id)
         await self.authorize(
@@ -259,6 +266,7 @@ class RunController:
                     previous = await tx.lookup_start(request)
                     if previous is not None:
                         original = await tx.get_run(context, previous.run_id)
+                        self.runtime.validate_record(original)
                         await self.runtime._files.validate(original, actor=context, tx=tx)
                         return previous
                     try:
@@ -287,7 +295,9 @@ class RunController:
                         max_unfinished=self.runtime.limits.unfinished_runs,
                         _run_id=new_run_id,
                         _artifact_refs=[item.ref for item in file_records],
-                        _artifact_binding=self.runtime._files.binding() if file_records else None,
+                        _artifact_binding=self.runtime._files.binding()
+                        if file_records or request.sandbox_bindings
+                        else None,
                     )
                     await self.runtime._files.publish_inputs(
                         tx, await tx.get_run(context, ref.run_id), file_records
@@ -1251,6 +1261,8 @@ class RunController:
                 if isinstance(selected_tool, MemoryTool)
                 else self.interactions
                 if isinstance(selected_tool, HumanInput)
+                else self.runtime._sandboxes
+                if isinstance(selected_tool, PythonSandbox)
                 else self.runtime._tool_dispatcher
             )
             assert dispatcher is not None

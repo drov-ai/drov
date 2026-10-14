@@ -57,6 +57,9 @@ def inspect_archives(wheel: Path, sdist: Path) -> None:
             "examples/interactions_offline.py",
             "examples/operations_offline.py",
             "examples/item_service_fixture.py",
+            "examples/artifact_inputs_offline.py",
+            "examples/sandbox_offline.py",
+            "docs/reference/storage-sandbox-schema-v1.sql",
             "LICENSE",
             "THIRD_PARTY.md",
         } <= names

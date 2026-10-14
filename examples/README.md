@@ -31,7 +31,7 @@ uv run --locked python examples/memory_offline.py --stream
 
 父进程在本地临时目录创建 SQLite 路径，依次启动七个独立进程：保存、新会话读取、其他用户/租户/Agent 隔离、删除、删除后新会话读取。每个子进程重建 Agent/Runtime/模型对象，检查实际工具结果、来源版本和 memory.changed 事务事件；父进程核对不同 PID，完成后清理夹具库。资料与回答均为自有合成夹具；脚本断言正确注入与读取，不构成真实模型记忆质量证据。无需账号/Key/付费调用。
 
-首版计划在原三类参考应用中加入文件/代码执行变体；T-10A/T-10B 将交付真实 Docker/Linux CSV 输入、分析与 CSV/PNG 持久输出/下载示例，目前没有对应文件。可选 T-10C 后再复用相同案例验证 E2B；不预建云示例或依赖账号。预设模型代码只证明机制，T-11/T-16 的真实模型生成/实际执行结果单独评测；设计片段不能作为当前可运行例子，见 [参考应用](../docs/planning/reference-scenarios.md)。
+[sandbox_offline.py](sandbox_offline.py) 已实现真实 Docker/Linux CSV 输入 → 默认审批 → Python 统计/CSV/PNG → 同一 Agent 最终回答 → Runtime 关闭后重新授权下载/hash。显式参数与实际镜像准备见 [sandbox 说明](../sandbox/README.md)，--chart 使用分析镜像，--stream 覆盖 SDK 流；目录必须新建，运行记录持久保留。真实测试还验证同进程两次独立环境及显式引用复用。模型生成的是预注册夹具代码，只证明机制；T-11/T-16 的真实模型生成质量另评，T-10B 完整隔离/故障尚未验收。可选 T-10C 后再复用同一协议验证 E2B；参考应用继续检验通用性，见 [案例](../docs/planning/reference-scenarios.md)。
 
 T-09 的审批/输入子范围：
 

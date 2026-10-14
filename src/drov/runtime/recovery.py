@@ -152,6 +152,12 @@ class RecoveryController:
         async def apply() -> None:
             slot = None
             try:
+                if runs.runtime._sandboxes is not None:
+                    latest = await runs.storage.get_run(owner, run_id)
+                    runs.runtime.validate_record(latest)
+                    local = runs.works.get(run_id)
+                    if local is None or local.task.done():
+                        await runs.runtime._sandboxes.recover(latest)
                 async with runs.storage.transaction() as tx:
                     current = await tx.get_run(owner, run_id)
                     await runs.authorize(
