@@ -4,9 +4,9 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-09 完整验收；**T-10 故障与取消矩阵本地验收完成，远程 CI 待本轮提交后核对**。新增 120 项，全库 613 项，下一项依赖 T-10 验收结果选择 T-10A。T-09 的最终代码 413fa1b / CI 38497287077 为历史证据，不能代替本轮新测试的 CI；准确结果见下文与 [T-10 验证](../validation/t10-faults-cancellation.md)。
+- 阶段：P1 至 P4、T-01 至 T-10 **实施验收完成**；本轮 T-10 新增 120 项，全库 613 项，本地两解释器及远程跨平台均通过。测试/夹具提交 52f70e3 已推送 origin/main，[CI 38510903650](https://github.com/drov-ai/drov/actions/runs/38510903650) 为 success，10/10 job success。下一项 T-10A 尚未开始；准确结果见下文与 [T-10 验证](../validation/t10-faults-cancellation.md)。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱范围前移见 [ADR-0013](../decisions/0013-first-release-code-sandbox.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
-- 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；本轮新增外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
+- 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 未实现：真实模型/MCP、HTTP/工作台、维护迁移/备份/清理；T-11 至 T-18 及 T-10A/T-10B 未开始。最小 Python 代码沙箱已纳入首版必交，尚未实现；B-14、多 Agent、Skill 与更深沙箱后续，无公共空壳。T-10 的真实 SDK 硬终止/故障/取消矩阵已本地验证，不代表 HTTP/MCP 或沙箱专项已验收。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
@@ -27,10 +27,10 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 | 提交故障 | 同 11 边界的提交前/后错误；SQLite 自身实际拒绝 COMMIT；实际 SQLITE_READONLY/SQLITE_FULL，无未提交成功事实；解除故障后显式恢复/核查 |
 | 取消/观察/回执 | 两后端五组完成取消次序、部分计划取消、wait/流断开；接收事务前后取消调用方与显式 cancel；20 次重复响应/取消，原回执与成功事实保留 |
 | 所有权与预算 | 非协作真实线程/Task 均有释放/硬终止路径；ShutdownIncomplete 保留槽位/SQLite 锁，另一个进程无法接管；停止后可重开；耗尽次数/活动预算不重置，未知用量不填 0 |
-| 本地验证 | 新增 120，全库 613；3.11：611 passed / 2 skipped，3.14：613 passed；Ruff/格式/mypy 75 files/schema 通过；两解释器 wheel/sdist/重建、共四套干净核心安装、五示例普通/stream 通过；远程证据待补 |
+| 验证 | 新增 120，全库 613；3.11：611 passed / 2 skipped，3.14：613 passed；Ruff/格式/mypy 75 files/schema 通过；两解释器 wheel/sdist/重建、共四套干净核心安装、五示例普通/stream 通过；52f70e3 的 10 个远程 CI job 全部 success，准确平台计数见验证记录 |
 | 保护范围 | 无 SDK/公共 schema/DDL/uv.lock/品牌/历史 fingerprint 变更；仅新增测试夹具与事项服务屏障，无 Key/私有数据/付费调用/发布/部署 |
 
-本地没有剩余 T-10 任务卡缺项，远程矩阵在本轮同步后核对。模型、token/金额是脚本合成值；独立事项服务写入计数是真实本地事实，不能由此宣称真实模型质量、通用 exactly-once 或断电/设备故障安全。HTTP/MCP 生命周期由 T-12/T-13 验收；旧备份 barrier 待 T-15。
+**T-10 任务卡本地与远程已完整验收，无剩余缺项。** 测试/夹具 52f70e3 已推送，远程状态/日志保存在 .drov/t10-final-ci.json / t10-final-ci.log；最后进度/验证补记单独提交同步，不改已验证测试。模型、token/金额是脚本合成值；独立事项服务写入计数是真实本地事实，不能由此宣称真实模型质量、通用 exactly-once 或断电/设备故障安全。HTTP/MCP 生命周期由 T-12/T-13 验收；旧备份 barrier 待 T-15。
 
 ## T-09 外部核查与恢复（历史整卡验收）
 
@@ -155,7 +155,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## 下一项：T-10A Python 代码沙箱闭环
 
-T-10 本地矩阵已通过，本轮先同步并核对远程；远程发现失败先修正。通过后按 [任务卡](implementation-plan.md)、C-17、ADR-0013 与运行契约第 13 节实施 T-10A：
+T-10 本地与远程矩阵均已通过，按 [任务卡](implementation-plan.md)、C-17、ADR-0013 与运行契约第 13 节实施 T-10A：
 
 1. 核实实际 Docker/Linux 后端与预装可信 Python 镜像 digest/平台/许可，检查所需资源控制。配置/协议先完成；无可用后端也不创建空壳或宿主执行回退。
 2. 落地 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、依赖注入与接收前预检、code-only schema、控制配置指纹；宿主配置不能来自模型或用户输入。
@@ -168,9 +168,9 @@ T-10 本地矩阵已通过，本轮先同步并核对远程；远程发现失败
 
 | 事项 | 当前状态 / 需要时点与配置方式 |
 | --- | --- |
-| T-10 故障与取消 | 本轮矩阵不需要新增仓库/账号/Key/私有资料；独立合成服务/真实 SDK 屏障、SQLite 错误与恢复已本地通过，远程同步由执行者完成 |
+| T-10 故障与取消 | 本轮矩阵不需要新增仓库/账号/Key/私有资料；独立合成服务/真实 SDK 屏障、SQLite 错误与恢复已本地与远程验收并推送，无需用户新增资源 |
 | GitHub 仓库 | 已提供，继续使用当前 origin；有具体同步/CI 阻碍再说明，无需重新建仓库 |
-| T-10A/T-10B 本地沙箱环境与镜像 | 下一轮真实执行前需要：可用的 Docker Engine/Linux 容器（macOS 可用 Docker Desktop 的 Linux VM）、预装可信 Python 镜像的具体 `@sha256:…`/linux 平台/许可；内存、CPU、PID、tmpfs 等控制须实际核实。当前仅历史确认 CLI 路径，未验证 daemon/版本/镜像。控制配置保留宿主，不给容器挂控制 socket、仓库或凭据，不自动拉镜像；无需新增云账号、模型 Key 或付费预算 |
+| T-10A/T-10B 本地沙箱环境与镜像 | 下一轮真实执行前需要：可用的 Docker Engine/Linux 容器（macOS 可用 Docker Desktop 的 Linux VM）、预装可信 Python 镜像的具体 `@sha256:…`/linux 平台/许可；内存、CPU、PID、tmpfs 等控制须实际核实。本轮只读版本查询无法连接默认本地 socket `/Users/yanlong/.docker/run/docker.sock`，Server 返回 null；需要先使该 Docker daemon 可连接，Engine 版本/镜像/资源能力仍未验证。控制配置保留宿主，不给容器挂控制 socket、仓库或凭据，不自动拉镜像；无需新增云账号、模型 Key 或付费预算 |
 | 模型服务、可访问 model ID、密钥和总预算 | T-11 smoke/T-16 live 前提供可访问服务/model ID 并批准共同费用上限；工程执行者先按新增代码任务量估价。Key 仅本地环境/忽略配置或凭据管理，聊天/Git 不贴密钥；未授权预算前不付费调用 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
 | Cloudflare drop.dev、账号范围、品牌来源与公开使用范围 | 官网/素材初次公开前核实；现有素材保留本地，当前不部署 |
@@ -179,7 +179,7 @@ T-10 本地矩阵已通过，本轮先同步并核对远程；远程发现失败
 
 ## 会话切换建议
 
-**下一轮建议 New Chat，实施 T-10A。** 本轮先完成 T-10 的远程核对和 Git 证据；沙箱引入实际容器后端、隔离与清理语义，适合独立会话。继续选择 Local `/Users/yanlong/projects/drov`，读 AGENTS/progress/导航/handoff、本轮验证及 ADR-0013、运行第 13 节/工程方案，再核实 Git 和实际容器条件。无需新仓库/worktree或模型 Key；环境缺失时先完成独立配置子范围，保留真实后端缺项。
+**下一轮建议 New Chat，实施 T-10A。** T-10 已完整验收并推送检查点；沙箱引入实际容器后端、隔离与清理语义，适合独立会话。继续选择 Local `/Users/yanlong/projects/drov`，读 AGENTS/progress/导航/handoff、本轮验证及 ADR-0013、运行第 13 节/工程方案，再核实 Git 和实际容器条件。无需新仓库/worktree 或模型 Key；环境缺失时先完成独立配置子范围，保留真实后端缺项。
 
 ## 阶段记录
 
@@ -198,4 +198,4 @@ T-10 本地矩阵已通过，本轮先同步并核对远程；远程发现失败
 | 2026-10-14 | 首版范围调整 | 用户确认代码生成/执行首版必交，新增 T-10A/T-10B，契约/案例/质量/发布及交接文档同步并检查；沙箱未实施，下一项仍 T-09 |
 | 2026-10-14 | T-09 子范围 | 审批/输入、原子 respond/resume、原计划/预算与回执、同 tenant 授权及四进程示例本地验收；外部未知效果/verify/recover 未实施，整卡进行中 |
 | 2026-10-14 | T-09 整卡验收 | 外部单次写入/unknown、verify/核查响应、启动扫描/显式步骤恢复、五组独立服务/多进程 SDK 与 stream 示例及 493 项回归；413fa1b 的 10 个远程 CI job success；T-10 硬崩溃专项尚未开始 |
-| 2026-10-14 | T-10 本地验收 | 120 项硬终止/真实 SQLite 故障/取消竞争新增；全库 613、两解释器/构建/安装通过；本轮远程待核对，下一项 T-10A 尚未开始 |
+| 2026-10-14 | T-10 整卡验收 | 120 项硬终止/真实 SQLite 故障/取消竞争新增；全库 613、两解释器/构建/安装及 52f70e3 的 10 个远程 CI job success；下一项 T-10A 尚未开始 |

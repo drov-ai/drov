@@ -6,7 +6,7 @@
 - 环境：macOS 26.6.2 arm64，uv 0.13.0；Python 3.11.9 / SQLite 3.45.1、Python 3.14.3 / SQLite 3.52.0。
 - 交付：[进程夹具](../../tests/runtime_process_fixture.py)、[硬终止矩阵](../../tests/test_runtime_crashes.py)、[取消/真实 I/O 故障](../../tests/test_runtime_faults.py)，独立 [事项服务](../../examples/item_service_fixture.py) 增加写后回包前屏障。
 - 本轮没有修改 SDK、公共接口/schema、依赖锁、SQLite 持久 DDL 或历史 fingerprint；无需新 ADR。T-10A/T-10B 没有开始。
-- 本地全库：Python 3.11 **611 passed / 2 skipped**（93.10s）；Python 3.14 **613 passed**（99.03s）。两项 skip 为仅 Python 3.12+ 可用的即时任务工厂。Ruff/格式、严格 mypy（75 files）、schema、两解释器构建/安装/Twine 全通过；远程待本轮提交后核对，不用历史 CI 关闭整卡。
+- 本地全库：Python 3.11 **611 passed / 2 skipped**（93.10s）；Python 3.14 **613 passed**（99.03s）。两项 skip 为仅 Python 3.12+ 可用的即时任务工厂。Ruff/格式、严格 mypy（75 files）、schema、两解释器构建/安装/Twine 全通过；52f70e3 的本轮 CI 共 10/10 job success，详见下方最终远程矩阵；T-10 整卡验收完成。
 
 ## 矩阵与断言
 
@@ -50,11 +50,11 @@ git diff --check
 
 完整回归日志：.drov/t10-final-py311.log / t10-final-py314.log；构建与干净安装日志：.drov/t10-package-py311.log / t10-package-py314.log。构建产物在 dist/ 与 .drov/t10-dist-py314/，均忽略且未上传。
 
-两解释器各一次 wheel/sdist 与从 sdist 重建的 payload 一致性；各两套干净核心安装、兼容/隔离导入及五示例普通/stream，共四套干净安装。operations_offline 仍逐例核对独立服务与新 SDK 进程；事项服务新增 barrier_reply 模式未改变普通示例。Twine 四构件均 PASSED。新增测试/夹具由现有 sdist 的 tests 目录包含；新验证说明与进度补记晚于本地构建，远程 CI 需对实际提交重新构建。
+两解释器各一次 wheel/sdist 与从 sdist 重建的 payload 一致性；各两套干净核心安装、兼容/隔离导入及五示例普通/stream，共四套干净安装。operations_offline 仍逐例核对独立服务与新 SDK 进程；事项服务新增 barrier_reply 模式未改变普通示例。Twine 四构件均 PASSED。新增测试/夹具由现有 sdist 的 tests 目录包含；新验证说明与进度补记晚于本地构建，远程 CI 已对实际提交 52f70e3 重新构建。
 
 ## 调查中失败与修正
 
-第一批 57 项通过后扩展矩阵，夹具出现三类错误，均修正并留下日志：取消标志提交后重开仍处于原审批，夹具不能 resume 已取消的请求，需重复显式 cancel 完成原收尾；applied 提供有效结果后操作会变成 succeeded，不能继续断言 unknown；query_only 禁止 BEGIN IMMEDIATE，不能直接用原 Storage 读取，改为真实数据库事实核对。SQLITE_FULL 会使 SQLite 自行回滚且让原连接保守停止使用，测试通过正常有界关闭重试取得新所有权，不修改 `_poisoned` 绕过失败。另修正类型收窄/格式检查。没有以重跑消除非确定性失败，也没有修改 SDK 来放宽断言。
+第一批 57 项通过后扩展矩阵，夹具出现三类错误，均修正并留下日志：取消标志提交后重开仍处于原审批，夹具不能 resume 已取消的请求，需重复显式 cancel 完成原收尾；applied 提供有效结果后操作会变成 succeeded，不能继续断言 unknown；query_only 禁止 BEGIN IMMEDIATE，不能直接用原 Storage 读取，改为真实数据库事实核对。SQLITE_FULL 会使 SQLite 自行回滚且让原连接保守停止使用，测试通过正常有界关闭取得新所有权，不修改 `_poisoned` 绕过失败。另修正类型收窄/格式检查。没有以重跑消除非确定性失败，也没有修改 SDK 来放宽断言。
 
 局部记录在 .drov/t10-crashes-first.log、t10-crashes-second.log、t10-races-first.log、t10-races-second.log、t10-io-first.log、t10-io-second.log、t10-io-final.log、t10-ownership-cancel.log、t10-real-commit-first.log、t10-extra-first.log、t10-receiving-first.log。局部旧通过不替代最终完整回归。
 
@@ -65,3 +65,23 @@ git diff --check
 - stream 组验证流式接收入口；继续执行通过同一 respond/resume/recover 控制器。HTTP 断连、真实 MCP/HTTP 资源生命周期仍分别由 T-12/T-13 验收，不从本轮 X-02 的 SDK 子范围推断完成。
 - 旧备份回退、restore barrier、维护仍待 T-15。Python 线程不能强杀，未停止调用仍保留所有权；核查事实由宿主/获授权核查者负责。
 - 下一项是 T-10A：显式 Docker/Linux 配置预检、固定本地镜像、代码专用工具审批/执行键、实际逐调用容器与有界结果的离线闭环。T-10B 才完整验收隔离/资源/清理/崩溃，缺真实后端不能关闭沙箱卡。用户准备与会话建议由 [progress](../planning/progress.md) 维护。
+
+本轮另做一次只读 `docker version --format` 查询：CLI 返回 1，Server=null，无法连接默认本地 socket `/Users/yanlong/.docker/run/docker.sock`。没有启动 daemon、读取凭据、盘点私有镜像、拉取/运行容器；这不是沙箱验收。T-10A 真实执行前需使 Linux 后端可用并明确预装可信镜像 digest。
+
+## 最终远程矩阵与 Git 交接
+
+测试/夹具提交 [52f70e3](https://github.com/drov-ai/drov/commit/52f70e3424b795f0cf48408edd2b5b36fb58875f) 已推送当前 origin/main。[CI 38510903650](https://github.com/drov-ai/drov/actions/runs/38510903650) 的实际 headSha=52f70e3424b795f0cf48408edd2b5b36fb58875f，结论 **success，10/10 job success**。首轮即全部通过；一次状态读取遇到 API EOF，重试后成功获取最终状态，这不是 CI 失败。quality 静态/格式/严格类型/schema 全通过；八个 package job 均完成全库、wheel/sdist/重建、各两套干净核心安装/五示例普通与 stream、Twine、extras 隔离导入。没有上传构件。
+
+| 平台 / Python | 实际 pytest 结果 |
+| --- | --- |
+| Linux / macOS 3.11 | 各 611 passed / 2 skipped |
+| Linux 3.12、3.13、3.14；macOS 3.14 | 各 613 passed |
+| Windows 3.11 | 610 passed / 3 skipped |
+| Windows 3.14 | 612 passed / 1 skipped |
+| Linux 3.15 advisory | 613 passed；仍不属于承诺支持矩阵 |
+
+Python 3.11 的两项 skip 为 Python 3.12+ 即时任务工厂；Windows 另跳过“替换打开的 SQLite 文件”，操作系统不允许该动作。**新增 120 项在全部九个 pytest job 均通过，无新增跳过**。SDK/stream 的硬终止、SQLite 自身失败及两种非协作调用没有按平台降级为替身。
+
+最终状态与原始日志：.drov/t10-final-ci.json / t10-final-ci.log；本轮文档检查为 49 Markdown 文件、398 本地链接、14 Python 片段 AST 全通过，结果 .drov/t10-doc-check.json。Git 差异/保护范围检查通过，暂存差异凭据模式命中 0；未读取真实环境凭据，模式扫描不保证发现所有秘密，AST 不证明 SDK 运行。最终补记只修改 progress 与本验证文件，以文档 skip-ci 提交保存并同步，不改 52f70e3 已验证测试/服务。
+
+T-10 负责的 C-11/12/15、S-03-B/D、X-02 SDK 资源与 B-03/04/05/06/07/12 验收范围均完成；没有未关闭子范围。后续 HTTP/MCP、沙箱/隔离、真实模型、旧备份/维护由其各自任务负责。下一轮建议 New Chat 接 T-10A；恢复前核对实际 HEAD、工作区、上述证据与 Docker/Linux 环境，准确资源与时点以 progress 为准。
