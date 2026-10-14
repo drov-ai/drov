@@ -16,7 +16,7 @@ uv run --locked python scripts/check_docker_backend.py \
 
 ## 镜像锁与构建
 
-[wheel 清单](analysis/wheels-linux-arm64.json) 和 [require-hashes 锁](analysis/requirements-linux-arm64.lock) 由 Linux ARM64 / CPython 3.11 实际解析生成，两者必须一致。这个平台锁不能用于 AMD64；Linux Docker CI 的其他架构镜像尚待 T-10B。SDK 的 uv.lock 不含这些分析依赖，它们只在显式准备的镜像内安装。
+[wheel 清单](analysis/wheels-linux-arm64.json) 和 [require-hashes 锁](analysis/requirements-linux-arm64.lock) 由 Linux ARM64 / CPython 3.11 实际解析生成，两者必须一致。这个平台锁不能用于 AMD64；T-10B 已另行实际下载核验 AMD64 wheel/哈希/许可，文件为 wheels-linux-amd64.json、requirements-linux-amd64.lock、license-inventory-linux-amd64.json。准备脚本默认 ARM64，显式 --platform linux/amd64 使用 AMD64 的固定 base/锁；镜像原生执行与远程 CI 状态见 [专项验证](../docs/validation/t10b-sandbox-faults.md)，下载本身不表示镜像通过。SDK 的 uv.lock 不含这些分析依赖，它们只在显式准备的镜像内安装。
 
 构建工具从固定 PyPI wheel URL 下载并逐个核对 hash，输出私有构建目录、license inventory、日志和 `image.json`。构建阶段 `--network=none`，pip `--no-index --require-hashes` 使用预下载 wheel；不在代码执行期间安装包。镜像的 dist-info license/notice 原样保留。构建使用实际 Engine 27.0.3 可用的 legacy builder；未安装 buildx，不以此承诺其他 Engine 版本兼容。
 
@@ -68,3 +68,5 @@ uv run --locked python examples/sandbox_offline.py \
 当前字节层仅在 POSIX 控制下可打开；构造/导入在其他平台仍无 I/O。文件目录、store.json、stage.json 与原始 ID 字节共同构成配对数据；不能在尚未完成 T-15 备份 barrier 时声称有完整 Artifact 备份。无清单目录、临时清单或其他未知项使 open fail closed，保留证据，不手工删除/改写后假装恢复已验收。调小容量不会清空旧预留；容量不足明确拒绝。
 
 [许可 inventory](analysis/license-inventory-linux-arm64.json) 记录实际 wheel 中的声明和 license 文件 hash；依赖源码归属及 Moby profile 来源见 [THIRD_PARTY](../THIRD_PARTY.md)。安全 profile 是未修改的上游 v27.0.3 文件，不是 Drov 原创，也不是漏洞扫描证明。
+
+T-10B 新增真实隔离/资源/应答故障/SDK 与 stream SIGKILL 测试和 Docker 专项 CI。复跑、实际通过/失败和收尾限制见 [专项验证](../docs/validation/t10b-sandbox-faults.md)；不以工作流存在推断通过。

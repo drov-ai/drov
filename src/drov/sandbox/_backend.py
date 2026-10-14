@@ -110,11 +110,16 @@ class DockerBackend(DockerPreflight):
             require(await self.resource(lease) is None, "Container destruction is unconfirmed")
         return await fact({"destroyed": True})
 
-    async def _copy_control(self, container_id: str) -> dict[str, Any]:
+    async def _copy_control(self, container_id: str) -> dict[str, Any] | None:
         control = self._control
         assert control is not None
         engine = UnixEngine(control.host, control_seconds=self.profile.limits.control_seconds)
-        program = "import pathlib; print(pathlib.Path('/work/.drov-control.json').read_text())"
+        program = (
+            "import pathlib\n"
+            "try: data=pathlib.Path('/work/.drov-control.json').read_text()\n"
+            "except FileNotFoundError: data='null'\n"
+            "print(data)"
+        )
         execution_id = await engine.create_exec(container_id, program, control=True)
         result = await engine.start_exec(
             execution_id, seconds=self.profile.limits.control_seconds, max_bytes=4096
@@ -129,6 +134,8 @@ class DockerBackend(DockerPreflight):
             "Protected control observation unavailable",
         )
         value = load_json(result.stdout)
+        if value is None:
+            return None  # Supervisor startup is bounded below, not a workload retry.
         require(isinstance(value, dict), "Invalid effective Docker controls")
         return cast(dict[str, Any], value)
 
@@ -271,6 +278,13 @@ class DockerBackend(DockerPreflight):
                         raise
                     await asyncio.sleep(0.05)
                 else:
+                    if observed is None:
+                        require(
+                            asyncio.get_running_loop().time() < end,
+                            "Protected supervisor startup deadline exceeded",
+                        )
+                        await asyncio.sleep(0.05)
+                        continue
                     self.profile.inspect_effective(observed)
                     break
             lease = await fact({"exec_create_intent": True})

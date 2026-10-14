@@ -1,6 +1,6 @@
 # Third-party sources and dependencies
 
-Updated: 2026-10-14. Drov has not copied or modified source code from another Agent
+Updated: 2026-10-15. Drov has not copied or modified source code from another Agent
 framework. Design references are recorded in `docs/planning/evidence.md` and the
 decision records. Integration does not make upstream capabilities Drov inventions.
 
@@ -47,7 +47,7 @@ required notices beside the copied code and in distributions. Unverified provena
 must not be described as original Drov implementation. This record is an engineering
 inventory, not a blanket compatibility assessment of future dependencies.
 
-## T-10A container recipe and copied Docker security profile
+## T-10A/T-10B container recipe and copied Docker security profile
 
 The analysis image is a separate, locally built resource, not a Python SDK dependency
 or a published container. Its exact Linux ARM64 / CPython 3.11 wheel versions, PyPI
@@ -55,6 +55,13 @@ URLs and SHA-256 hashes are in `sandbox/analysis/wheels-linux-arm64.json` and
 `requirements-linux-arm64.lock`. The actual wheel license declarations and license
 file hashes are in `license-inventory-linux-arm64.json`; installed upstream license
 and notice files are retained in the image. They are not relicensed as Drov code.
+
+T-10B adds separately downloaded/verified Linux AMD64 / CPython 3.11 wheels in
+`wheels-linux-amd64.json`, `requirements-linux-amd64.lock`, and
+`license-inventory-linux-amd64.json`. The versions below are the same; platform
+wheel hashes and bundled notices remain separate. Both fixed base manifests were
+resolved from the previously recorded official Python image index; build and
+execution evidence is recorded separately in `docs/validation/t10b-sandbox-faults.md`.
 
 | Package | Actual version | Declared license / upstream license text |
 | --- | --- | --- |

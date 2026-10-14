@@ -41,6 +41,8 @@ Drov 面向通用 Agent 应用，以 Python 为主要语言、AgentScope 2.0 为
 | 28 | [Docker 控制预检决定](../decisions/0019-docker-control-preflight.md) | 私有控制/固定 profile、指纹与实际检查怎样落地？ |
 | 29 | [Runtime 沙箱执行决定](../decisions/0020-runtime-sandbox-execution.md) | 真实 Engine 执行、权限/租约、输入/导出/PNG、销毁后共同发布与原阶段恢复怎样落地？ |
 
+T-10B 的实际隔离/资源与故障恢复、事件/限额修正见 [ADR-0021](../decisions/0021-sandbox-fault-boundaries.md) 与 [专项验证](../validation/t10b-sandbox-faults.md)；任务状态仍只在 progress。
+
 ## 状态词约定
 
 - **已确认方向**：来自用户明确要求或已接受的产品建议。

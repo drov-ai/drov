@@ -166,6 +166,8 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 
 ## 9. 首版 Docker 代码与文件沙箱
 
+T-10B 补充实际边界与恢复限额/事件修正见 [ADR-0021](../decisions/0021-sandbox-fault-boundaries.md) 和 [专项验证](../validation/t10b-sandbox-faults.md)，实际平台/远程验收以验证记录为准；不改变旧配置、runner hash 或 schema。
+
 第三批内部控制/预检已按 [ADR-0019](../decisions/0019-docker-control-preflight.md) 实施：本地 POSIX Unix socket、Linux Engine/cgroup v2/API ≥ 1.41、同架构 ARM64/AMD64 固定 CPython 3.11 镜像与资源能力查询；构造无 I/O，open 不创建容器。内部 binding v1 包含实际 Engine/CLI/image/profile/限额与控制版本，不含随机配置目录。后续已按 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md) 绑定 Runtime 审批/Run 并接通执行与发布；实际 SDK/代码证据见 [本轮验证](../validation/t10a-runtime-sandbox.md)，不代表 T-10B 全平台/恶意故障或真实模型质量。
 
 - 首个后端选择宿主显式配置的本地 Docker CLI/Engine，执行端为 Linux 容器；Drov 用 asyncio.create_subprocess_exec 的固定 argv 管理可信 CLI，并用有界本地 Unix Engine API v1.41 分开 exec-create/start/inspect；代码仅作为容器内固定 Python runner 的输入，不拼进宿主 shell。核心无新增 Python Docker SDK 依赖；sandbox/ 模块在 T-10A 真实实施时建立，普通 SDK 安装/导入不需要 daemon。
@@ -174,7 +176,7 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 - 限额必须由 daemon/内核实际执行，不能仅是 Drov 字段；内存与 swap 总额一并限定，不启用 oom-kill-disable；工作区/tmp/shm 有限，资源耗用包含 tmpfs。使用有界 stdout/stderr 管道，先按原始字节限制，显示以 UTF-8 errors=replace 增量解码，区分边界截断与非法字节替换；禁用容器持久日志（log driver none），避免日志绕开输出上限占满磁盘。序列化结果仍受 max_tool_result_bytes，超限按结果不可用收尾，不重跑代码。丢失未保存输出时按契约报告不可用，不依靠无界日志回填。依据：[资源限制](https://docs.docker.com/engine/containers/resource_constraints/) / [tmpfs](https://docs.docker.com/engine/storage/tmpfs/)。
 - 模型代码不做“AST 过滤后就安全”的承诺；隔离依赖实际后端与宿主维护。Docker daemon 是可信控制面，容器配置/内核漏洞可能破坏隔离，因此首版定位为受管理的本地应用执行，未经额外评估不承诺面向敌对公网多租户的强隔离平台。[Docker 安全文档](https://docs.docker.com/engine/security/)。其他更深隔离后端仍后续；可选 E2B 已按 ADR-0016 单列 T-10C，其保证不从 Docker 参数推断。未创建 E2B 远端资源。
 
-以下起始默认值已通过本机固定可信控制探针，尚未做性能、恶意超限或完整平台兼容实测；在 T-10A/T-10B 以真实边界检查继续确定，不回写历史 P4 fingerprint。SandboxLimits 严格有限，CPU 要求能表示为 100000µs period 下至少 1000µs 的整数 quota，memory 至少 6MiB；并发/期限已接通真实执行，但完整超限/性能矩阵仍由 T-10B 验收：
+以下起始默认值已有可信控制探针与 T-10B 本地实际恶意超限子范围证据；不是性能基准或所有平台兼容承诺；在 T-10A/T-10B 以真实边界检查继续确定，不回写历史 P4 fingerprint。SandboxLimits 严格有限，CPU 要求能表示为 100000µs period 下至少 1000µs 的整数 quota，memory 至少 6MiB；并发/期限已接通真实执行，但完整超限/性能矩阵仍由 T-10B 验收：
 
 | SandboxLimits/固定控制 | 工作默认 | 规则 |
 | --- | --- | --- |

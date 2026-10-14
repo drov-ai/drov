@@ -606,6 +606,11 @@ class SandboxController:
             if not record.state.cancel_requested:
                 try:
                     result = await self.result(lease)
+                    if (
+                        len(canonical_json(result.model_dump(mode="json")).encode())
+                        > record.limits.max_tool_result_bytes
+                    ):
+                        result = None
                 except (ConfigurationError, PersistenceUnavailable):
                     pass  # Lost bytes/output are never a reason to run original code again.
             from drov.runtime.reconciliation import operation_in, put_operation
@@ -669,7 +674,14 @@ class SandboxController:
                     events=[
                         EventDraft(
                             type=cast(Any, "tool." + operation.status),
-                            data={"operation_id": operation.operation_id},
+                            data={
+                                "operation_id": operation.operation_id,
+                                **(
+                                    {"result": result.model_dump(mode="json")}
+                                    if result is not None
+                                    else {}
+                                ),
+                            },
                         ),
                         EventDraft(type="recovery.required"),
                     ],

@@ -1,4 +1,4 @@
-"""Prepare a pinned Linux ARM64 analysis image locally; never publish or run model code."""
+"""Prepare a pinned Linux ARM64/AMD64 analysis image locally; never publish or run model code."""
 
 import argparse
 import email
@@ -150,7 +150,9 @@ def main() -> None:
     parser.add_argument(
         "--curl", type=Path, help="Optional absolute trusted curl for wheel transfer"
     )
+    parser.add_argument("--platform", choices=["linux/arm64", "linux/amd64"], default="linux/arm64")
     args = parser.parse_args()
+    architecture = args.platform.split("/", 1)[1]
     if not args.docker.is_absolute() or not args.docker.is_file():
         raise ValueError("Provide the absolute trusted Docker CLI path")
     if args.curl is not None and (not args.curl.is_absolute() or not args.curl.is_file()):
@@ -162,20 +164,22 @@ def main() -> None:
     config = work / "cli"
     config.mkdir(mode=0o700, exist_ok=True)
     (config / "config.json").write_text('{"auths":{},"proxies":{}}\n')
-    manifest = json.loads((RECIPE / "wheels-linux-arm64.json").read_text())
+    manifest = json.loads((RECIPE / f"wheels-linux-{architecture}.json").read_text())
     context = work / "context"
     wheels = context / "wheels"
     wheels.mkdir(parents=True, exist_ok=True)
     expected_lock = "\n".join(
         f"{p['name']}=={p['version']} --hash=sha256:{p['sha256']}" for p in manifest["packages"]
     )
-    lock = (RECIPE / "requirements-linux-arm64.lock").read_text()
+    lock = (RECIPE / f"requirements-linux-{architecture}.lock").read_text()
     if (
         "\n".join(line for line in lock.splitlines() if line and not line.startswith("#"))
         != expected_lock
     ):
         raise ValueError("Requirement and wheel locks disagree")
-    shutil.copyfile(RECIPE / "requirements-linux-arm64.lock", context / "requirements.lock")
+    shutil.copyfile(
+        RECIPE / f"requirements-linux-{architecture}.lock", context / "requirements.lock"
+    )
     licenses = []
     for package in manifest["packages"]:
         filename = urllib.parse.urlparse(package["url"]).path.split("/")[-1]
@@ -206,8 +210,10 @@ def main() -> None:
         check=True,
         timeout=20,
     )
-    if json.loads(image_info.stdout)[0]["Architecture"] != "arm64":
-        raise ValueError("This lock requires a locally installed Linux ARM64 base image")
+    if json.loads(image_info.stdout)[0]["Architecture"] != architecture:
+        raise ValueError(
+            "This lock requires a locally installed base image of the selected platform"
+        )
     iid = work / "image-id.txt"
     with (work / "build.log").open("wb") as log:
         subprocess.run(
@@ -216,7 +222,7 @@ def main() -> None:
                 "build",
                 "--network=none",
                 "--pull=false",
-                "--platform=linux/arm64",
+                "--platform=" + args.platform,
                 "--build-arg",
                 "BASE_IMAGE=" + manifest["base_image"],
                 "--iidfile",
@@ -236,16 +242,20 @@ def main() -> None:
         base + ["image", "inspect", image_id], env=env, capture_output=True, check=True, timeout=20
     )
     image = json.loads(actual.stdout)[0]
-    if image["Os"] != "linux" or image["Architecture"] != "arm64" or image["Config"].get("Volumes"):
+    if (
+        image["Os"] != "linux"
+        or image["Architecture"] != architecture
+        or image["Config"].get("Volumes")
+    ):
         raise ValueError("Unexpected analysis image configuration")
     result = {
-        "scope": "local analysis image preparation; Runtime sandbox not integrated",
+        "scope": "local image preparation only; separate Runtime acceptance required",
         "image_id": image_id,
         "repo_digests": image.get("RepoDigests", []),
-        "platform": "linux/arm64",
+        "platform": args.platform,
         "base_image": manifest["base_image"],
         "docker_server": json.loads(server.stdout),
-        "requirements_sha256": digest(RECIPE / "requirements-linux-arm64.lock"),
+        "requirements_sha256": digest(RECIPE / f"requirements-linux-{architecture}.lock"),
         "dockerfile_sha256": digest(RECIPE / "Dockerfile"),
         "license_inventory_sha256": digest(work / "license-inventory.json"),
     }

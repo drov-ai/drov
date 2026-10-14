@@ -1,0 +1,55 @@
+name: Docker acceptance
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sandbox:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    env:
+      DROV_REQUIRE_DOCKER: "1"
+      DROV_DOCKER_TEST_CONFIG: ${{ github.workspace }}/.drov/docker-ci.json
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: uv sync --locked
+      - name: Prepare explicit local Docker configuration
+        run: |
+          mkdir -p .drov/cli
+          printf '{"auths":{},"proxies":{}}\n' > .drov/cli/config.json
+          uv run --locked python - <<'PY'
+          import json, shutil, subprocess
+          from pathlib import Path
+          record = json.loads(Path("sandbox/analysis/wheels-linux-amd64.json").read_text())
+          docker = str(Path(shutil.which("docker")).resolve())
+          subprocess.run([docker, "--config", ".drov/cli", "--host", "unix:///var/run/docker.sock", "pull", "--platform=linux/amd64", record["base_image"]], check=True, timeout=180)
+          Path(".drov/docker-ci.json").write_text(json.dumps({"docker_cli": docker, "docker_host": "unix:///var/run/docker.sock", "image": record["base_image"]}))
+          PY
+      - name: Build fixed analysis image without build-time networking
+        run: |
+          uv run --locked python scripts/prepare_analysis_image.py --docker "$(command -v docker)" --host unix:///var/run/docker.sock --platform linux/amd64 --work-directory .drov/analysis --curl /usr/bin/curl
+      - name: Actual Docker isolation, client/storage faults and SDK hard kills
+        run: uv run --locked pytest -m docker --junitxml=.drov/docker-tests.xml
+      - name: Core wheel and sdist installations
+        run: uv run --locked python scripts/check_package.py
+      - name: Installed core-only wheel with actual stdlib/analysis SDK and stream
+        run: |
+          uv run --locked python scripts/check_installed_sandbox.py --python "$(uv run --locked python -c 'import sys;print(sys.executable)')" --wheel dist/drov-0.1.0a0-py3-none-any.whl --config .drov/docker-ci.json --analysis-record .drov/analysis/image.json --directory .drov/installed-acceptance

@@ -8,7 +8,15 @@ from typing import cast
 
 import pytest
 
-from drov import Agent, ApprovalDecision, PermissionPolicy, ResourceBinding, RunContext, Runtime
+from drov import (
+    Agent,
+    ApprovalDecision,
+    Limits,
+    PermissionPolicy,
+    ResourceBinding,
+    RunContext,
+    Runtime,
+)
 from drov._json import StrictJson
 from drov.artifacts import ArtifactLimits, LocalArtifacts
 from drov.models import ScriptedModel
@@ -26,6 +34,8 @@ CONTEXT = RunContext(tenant_id="fixture", user_id="alice")
 def config() -> dict[str, str]:
     path = os.environ.get("DROV_DOCKER_TEST_CONFIG")
     if not path:
+        if os.environ.get("DROV_REQUIRE_DOCKER") == "1":
+            pytest.fail("Docker acceptance requires its explicit non-secret config")
         pytest.skip("Explicit local Docker acceptance config not provided")
     record = json.loads(Path(path).read_text())
     return {"docker": record["docker_cli"], "host": record["docker_host"], "image": record["image"]}
@@ -57,9 +67,14 @@ def create_runtime(
     allow: bool = True,
     file_limits: ArtifactLimits | None = None,
     limits: SandboxLimits | None = None,
+    run_limits: Limits | None = None,
 ) -> tuple[Runtime, Agent[str], DockerSandbox]:
     agent: Agent[str] = Agent(
-        model=model, name="docker-acceptance", revision="1", tools=[PythonSandbox(backend="code")]
+        model=model,
+        name="docker-acceptance",
+        revision="1",
+        tools=[PythonSandbox(backend="code")],
+        limits=run_limits,
     )
     backend = DockerSandbox(**config, limits=limits)
     runtime = Runtime(
