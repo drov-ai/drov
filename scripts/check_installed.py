@@ -80,6 +80,9 @@ def main() -> None:
         patch("asyncio.events.set_event_loop", deny_runtime_resource),
     ):
         import drov
+        import drov.artifacts
+
+        assert "LocalArtifacts" in drov.artifacts.__all__
 
     metadata = importlib.metadata.metadata("drov")
     assert metadata["Name"] == "drov"

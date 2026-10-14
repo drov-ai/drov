@@ -1,6 +1,6 @@
 # 本地开发
 
-包版本为 `0.1.0a0`。提供定义/类型/schema、模型协议、事务存储、Runtime 生命周期、Agent 执行、Python 工具/权限、上下文预览/清单、事务 Memory，以及审批/输入、外部未知效果、verify/recover。实际验收状态以 [progress](planning/progress.md) 为准，T-10 故障矩阵见 [验证](validation/t10-faults-cancellation.md)；沙箱、真实模型适配与服务/CLI 尚未实现。不要把规划片段当成可运行教程。
+包版本为 `0.1.0a0`。提供定义/类型/schema、模型协议、事务存储、Runtime 生命周期、Agent 执行、Python 工具/权限、上下文预览/清单、事务 Memory，以及审批/输入、外部未知效果、verify/recover。T-10A 首批新增私有字节暂存与固定分析镜像，见 [准备工具与边界](../sandbox/README.md)；PythonSandbox、Runtime 文件/ready/授权读取路径仍未接入，真实模型适配与服务/CLI 仍未实现。实际验收状态以 [progress](planning/progress.md) 为准，T-10 故障矩阵见 [验证](validation/t10-faults-cancellation.md)；不要把规划片段当成可运行教程。
 
 ## 环境与安装
 

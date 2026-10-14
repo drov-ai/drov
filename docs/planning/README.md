@@ -36,6 +36,7 @@ Drov 面向通用 Agent 应用，以 Python 为主要语言、AgentScope 2.0 为
 | 23 | [首版代码沙箱决定](../decisions/0013-first-release-code-sandbox.md) | 首次前移的历史决定及继续有效的派发/清理义务 |
 | 24 | [审批输入决定](../decisions/0014-durable-approval-input.md) / [外部效果恢复决定](../decisions/0015-external-effects-recovery.md) | 已实现的原计划、回执和核查/恢复边界 |
 | 25 | [文件与后端决定](../decisions/0016-sandbox-artifacts-and-backends.md) | 受控文件/持久产物必交、E2B 可选及分工怎样落地（计划）？ |
+| 26 | [私有字节暂存决定](../decisions/0017-private-artifact-staging.md) | T-10A 首批存储配对、预留与固定本地镜像身份怎样落地，哪些运行接点仍未实现？ |
 
 ## 状态词约定
 

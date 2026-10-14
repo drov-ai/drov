@@ -54,7 +54,7 @@ packages = ["src/drov"]
 
 [tool.hatch.build.targets.sdist]
 only-include = [
-  "src", "tests", "scripts", "examples", "docs", "pyproject.toml", "uv.lock",
+  "src", "tests", "scripts", "examples", "docs", "sandbox", "pyproject.toml", "uv.lock",
   "README.md", "AGENTS.md", "LICENSE", "THIRD_PARTY.md", ".python-version",
 ]
 

@@ -7,6 +7,7 @@ from typing import Any
 
 from pydantic import TypeAdapter
 
+from drov.artifacts import ArtifactInfo, ArtifactLimits, ArtifactRef
 from drov.auth import Resource, ToolResource
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
@@ -60,6 +61,9 @@ def schema_text() -> str:
         "PermissionPolicy": PermissionPolicy,
         "PermissionDecision": PermissionDecision,
         "ToolResource": ToolResource,
+        "ArtifactRef": ArtifactRef,
+        "ArtifactInfo": ArtifactInfo,
+        "ArtifactLimits": ArtifactLimits,
     }
     bundle = {
         "schema_version": 1,

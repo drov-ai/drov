@@ -283,9 +283,11 @@ SDK resume 是 respond + wait 的便利形式；响应接收与继续执行之�
 
 P3 已在 [质量计划](quality-plan.md) 和 [实施任务](implementation-plan.md) 映射每个首期适用条目、全部 S/X 和数据维护检查；B-14 延后理由在能力表。这些均是未来测试要求。
 
-## 13. 首版 Python 代码沙箱（计划，尚未实现）
+## 13. 首版 Python 代码沙箱（最终契约，T-10A 部分实施）
 
 用户于 2026-10-14 确认“生成并执行代码”进入 v0.1；用户同日进一步采纳受控文件/产物与可选 E2B；以下为 T-10A/T-10B 和可选 T-10C 的工作契约，见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)，补充 ADR-0013。已实现的 PythonTool/Memory 语义不由本节改变。
+
+T-10A 首批仅交付固定分析镜像和 POSIX 私有字节暂存（ADR-0017），不是以下完整运行路径。镜像探针使用执行者固定源码，不提供任意模型代码入口；stage 不表示 ready。Run 接收/授予/去重、动态授权、审批、执行/清理租约和结果共同发布仍未接入，实际证据见 [本轮验证](../validation/t10a-artifact-staging.md)。
 
 ### 13.1 控制与隔离
 

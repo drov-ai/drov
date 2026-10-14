@@ -355,14 +355,14 @@ HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；�
 
 内容清理后的 request_key、数据放弃和旧备份 barrier 以 [维护策略](release-policy.md) / 行为契约为准；恢复旧数据不是允许旧操作再次执行。
 
-## 首版文件与代码沙箱接口草案（T-10A，尚未实现）
+## 首版文件与代码沙箱接口（T-10A，部分实施）
 
-本节按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 扩展 ADR-0013，不是当前可导入 API。执行/恢复规则唯一在运行契约第 13 节，默认、镜像与支持矩阵唯一在工程方案；本轮不创建符号/schema/DDL。已有 start/run/stream 签名仍按已实现版本使用，下列 artifacts 参数与 Artifact API 在 T-10A 一并实现。
+本节按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 扩展 ADR-0013。T-10A 首批已实现 ArtifactInput/Ref/Info/Limits 值类型与 LocalArtifacts 私有字节层，见 [ADR-0017](../decisions/0017-private-artifact-staging.md)；可显式 open(storage=已打开的 SQLiteStorage)/aclose，但暂存不是 ready 产物。下表的 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、Runtime artifacts 参数、get/read_artifact、授权与结果共同发布均仍未实现。执行/恢复规则唯一在运行契约第 13 节，默认、镜像与支持矩阵唯一在工程方案；已有 start/run/stream 签名继续按无文件版本使用。
 
 | 拟议入口/对象 | 字段与责任 |
 | --- | --- |
 | drov.sandbox.PythonSandbox | backend: 宿主 dependency 名称；逻辑工具固定 sandbox.run_python，revision 随内置版本固定；approval 默认 policy、可设 required；effect 固定 write；不接受普通 callable 或任意后端 flags |
-| drov.sandbox.DockerSandbox | image: 必填 repository@sha256；limits: SandboxLimits；宿主显式本地连接引用/可信 CLI；构造不连接，Runtime 装配时预检，ResourceBinding 管理所有权 |
+| drov.sandbox.DockerSandbox | image: 必填已预装 repository@sha256（manifest）或显式 sha256:image-config-id（本地构建，ADR-0017）；拒绝 tag；limits: SandboxLimits；宿主显式本地连接引用/可信 CLI；构造不连接，Runtime 装配时预检，ResourceBinding 管理所有权；仍待实施 |
 | drov.sandbox.SandboxLimits | execution_seconds、control_seconds、memory_bytes、cpus、pids、workspace_bytes、max_code_bytes、max_output_bytes、concurrency；严格有限正值；Docker 专属配置不作为云能力的默认保证 |
 | drov.artifacts.ArtifactInput | name: 单个安全文件名；data: bytes；media_type: str（默认 application/octet-stream）；宿主 SDK 提交有界字节，框架不接受主机路径/URL，不解压档案；不是模型工具参数 |
 | ArtifactRef / ArtifactInfo | Ref：artifact_id（内核生成不透明 ID）、sha256、size_bytes、media_type；Info 另有 schema_version、来源 Run/operation、状态与正文可见标记；name 属正文，不出现在默认元数据投影；引用不可变，不包含主机/容器路径、云 URL 或凭据 |
@@ -403,7 +403,11 @@ async def file_analysis_example(model, analysis_image_digest):
         return await runtime.run(
             agent,
             "分析本次 CSV 的合计/均值，交付汇总表和图表；给出工具实际返回的产物 ID。",
-            artifacts=[ArtifactInput(name="numbers.csv", data=b"value\n12\n18\n30\n", media_type="text/csv")],
+            artifacts=[
+                ArtifactInput(
+                    name="numbers.csv", data=b"value\n12\n18\n30\n", media_type="text/csv"
+                )
+            ],
             session_id="analysis-01",
             context=RunContext(tenant_id="local", user_id="alice"),
         )

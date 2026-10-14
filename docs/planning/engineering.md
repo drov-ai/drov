@@ -167,7 +167,7 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 ## 9. 首版 Docker 代码与文件沙箱（计划，T-10A/T-10B）
 
 - 首个后端选择宿主显式配置的本地 Docker CLI/Engine，执行端为 Linux 容器；Drov 用 asyncio.create_subprocess_exec 的固定 argv 管理可信 CLI，代码仅作为容器内固定 Python runner 的输入，不拼进宿主 shell。核心无新增 Python Docker SDK 依赖；sandbox/ 模块在 T-10A 真实实施时建立，普通 SDK 安装/导入不需要 daemon。
-- 镜像由宿主预装并以 repository@sha256 固定，禁用执行期自动 pull/构建/安装依赖；固定非 root 用户与 Python 入口，固定覆盖 entrypoint、禁用镜像 healthcheck，拒绝镜像自动 VOLUME；镜像环境经白名单核验，不继承宿主环境/凭据。必交标准库计算及一个固定数据分析镜像（numpy/pandas/matplotlib，用于 CSV/PNG 案例）；依赖由宿主预构建并验收，执行期间不安装。当前已准备的官方镜像只有标准库，不承诺已含分析库；数据镜像由 T-10A 执行者实际构建、锁版本/许可、记录 digest 和复跑。具体 CLI/Engine/Python patch、镜像平台/digest 和兼容性由 T-10A 实际核实记录，不编造已安装版本或示例 digest。
+- 镜像由宿主预装并以 repository@sha256 manifest 或显式本地 sha256:image-config-id 固定（ADR-0017），禁用可变 tag、执行期自动 pull/构建/安装依赖；固定非 root 用户与 Python 入口，固定覆盖 entrypoint、禁用镜像 healthcheck，拒绝镜像自动 VOLUME；镜像环境经白名单核验，不继承宿主环境/凭据。必交标准库计算及一个固定数据分析镜像（numpy/pandas/matplotlib，用于 CSV/PNG 案例）；依赖由宿主预构建并验收，执行期间不安装。T-10A 首批已有本地 ARM64 分析镜像、wheel 锁/许可与可信探针，见 [验证](../validation/t10a-artifact-staging.md) 和 [实际 recipe](../../sandbox/README.md)；这不是 SDK 任意代码后端/完整平台验收，标准库镜像保持原样。具体版本与三种 digest 区分按真实记录，不把本地 config ID 伪装为 registry manifest。
 - 隔离配置固定：network=none、无端口发布/host namespace、无 bind/volume/device/docker socket 挂载、只读根文件系统、有限私有 tmpfs、非 root、cap-drop=ALL、no-new-privileges、保留有效 seccomp；缺少所需能力或实际配置不一致即拒绝，不自动降级。[Docker 运行配置](https://docs.docker.com/engine/containers/run/) / [CLI 参数](https://docs.docker.com/reference/cli/docker/container/run/) / [seccomp 文档](https://docs.docker.com/engine/security/seccomp/) 支持这些机制的存在，不证明 Drov 已实现或抵抗所有内核攻击。
 - 限额必须由 daemon/内核实际执行，不能仅是 Drov 字段；内存与 swap 总额一并限定，不启用 oom-kill-disable；工作区/tmp/shm 有限，资源耗用包含 tmpfs。使用有界 stdout/stderr 管道，先按原始字节限制，显示以 UTF-8 errors=replace 增量解码，区分边界截断与非法字节替换；禁用容器持久日志（log driver none），避免日志绕开输出上限占满磁盘。序列化结果仍受 max_tool_result_bytes，超限按结果不可用收尾，不重跑代码。丢失未保存输出时按契约报告不可用，不依靠无界日志回填。依据：[资源限制](https://docs.docker.com/engine/containers/resource_constraints/) / [tmpfs](https://docs.docker.com/engine/storage/tmpfs/)。
 - 模型代码不做“AST 过滤后就安全”的承诺；隔离依赖实际后端与宿主维护。Docker daemon 是可信控制面，容器配置/内核漏洞可能破坏隔离，因此首版定位为受管理的本地应用执行，未经额外评估不承诺面向敌对公网多租户的强隔离平台。[Docker 安全文档](https://docs.docker.com/engine/security/)。其他更深隔离后端仍后续；可选 E2B 已按 ADR-0016 单列 T-10C，其保证不从 Docker 参数推断。本轮仅文档调整，没有创建远端资源。
@@ -191,7 +191,9 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 
 ### 9.1 受控文件与私有产物存储
 
-采用显式 LocalArtifacts + SQLite 元数据，新增符号只在 T-10A 实现。构造不读写；open 检查目录/配对标识及排他所有权。私有目录 POSIX 0700、文件 0600，在其他平台核对等效访问控制；不承诺该存储已加密。不以逻辑文件名生成宿主路径，不跟随 symlink；root/权限/配对不满足即拒绝。字节写入受控暂存 → 校验大小/hash → 文件同步/原子 rename 与目录持久性 → 记录私有清单 → SQLite 发布 ready；实现阶段确定可支持平台上的实际持久性边界，不能把进程崩溃测试写成物理断电保证。
+采用显式 LocalArtifacts + SQLite 元数据。T-10A 首批已实现 POSIX 私有字节层：构造不读写，open(storage=已打开的 SQLiteStorage) 检查目录、双向配对及排他所有权；metadata 增量 artifact_store_id，不改 records DDL/版本。私有目录 POSIX 0700、文件 0600，其他平台的等效访问控制尚未实施，不承诺已加密。不以逻辑文件名生成宿主路径，不跟随 symlink；root/权限/配对不满足即拒绝。私有预留/清单和字节 fsync/目录同步已验证；SQLite Artifact 元数据、Run 授予、Runtime 装配与 ready 共同发布仍待接入。最终链仍为字节可靠暂存 → 确认销毁 → 同事务发布 ready/结果，不能把阶段台账当 ready 或把进程崩溃测试写成物理断电保证。
+
+字节层每批额外预留 16KiB 清单逻辑配额（清单编码硬上限同值），计入下表 owner/store 容量，空批也占额；原始字节与未完成预留跨重开保留。配额不等于底层文件系统 block/inode 物理限额。缺清单/未知项 fail closed；已开始写入的批次不自动重写或删除，受控恢复/回收仍待后续接入，见 ADR-0017。
 
 | ArtifactLimits | 工作默认 | 约束 |
 | --- | --- | --- |

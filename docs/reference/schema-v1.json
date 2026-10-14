@@ -37,6 +37,179 @@
       "title": "AgentRegistration",
       "type": "object"
     },
+    "ArtifactInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^art_[0-9a-f]{32}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "content_visible": {
+          "default": false,
+          "title": "Content Visible",
+          "type": "boolean"
+        },
+        "media_type": {
+          "maxLength": 128,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "operation_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation Id"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "state": {
+          "enum": [
+            "ready",
+            "unavailable"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "sha256",
+        "size_bytes",
+        "media_type",
+        "run_id",
+        "state"
+      ],
+      "title": "ArtifactInfo",
+      "type": "object"
+    },
+    "ArtifactLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_artifact_bytes": {
+          "default": 8388608,
+          "maximum": 1073741824,
+          "minimum": 1,
+          "title": "Max Artifact Bytes",
+          "type": "integer"
+        },
+        "max_export_bytes": {
+          "default": 16777216,
+          "maximum": 1073741824,
+          "minimum": 1,
+          "title": "Max Export Bytes",
+          "type": "integer"
+        },
+        "max_input_bytes": {
+          "default": 8388608,
+          "maximum": 1073741824,
+          "minimum": 1,
+          "title": "Max Input Bytes",
+          "type": "integer"
+        },
+        "max_input_files": {
+          "default": 8,
+          "maximum": 256,
+          "minimum": 1,
+          "title": "Max Input Files",
+          "type": "integer"
+        },
+        "max_output_files": {
+          "default": 8,
+          "maximum": 256,
+          "minimum": 1,
+          "title": "Max Output Files",
+          "type": "integer"
+        },
+        "max_owner_bytes": {
+          "default": 67108864,
+          "maximum": 68719476736,
+          "minimum": 1,
+          "title": "Max Owner Bytes",
+          "type": "integer"
+        },
+        "max_store_bytes": {
+          "default": 1073741824,
+          "maximum": 1099511627776,
+          "minimum": 1,
+          "title": "Max Store Bytes",
+          "type": "integer"
+        }
+      },
+      "title": "ArtifactLimits",
+      "type": "object"
+    },
+    "ArtifactRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {
+          "pattern": "^art_[0-9a-f]{32}$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "media_type": {
+          "maxLength": 128,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_id",
+        "sha256",
+        "size_bytes",
+        "media_type"
+      ],
+      "title": "ArtifactRef",
+      "type": "object"
+    },
     "CancelReceipt": {
       "additionalProperties": false,
       "properties": {

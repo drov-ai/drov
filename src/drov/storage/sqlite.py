@@ -301,6 +301,32 @@ class SQLiteStorage(Storage):
             raise asyncio.CancelledError
         return SQLiteDriver(self._sql)
 
+    async def _bind_artifacts(self, store_id: str) -> None:
+        """Pair one private byte directory with this database; no record/DDL migration."""
+        import re
+
+        if not re.fullmatch(r"[0-9a-f]{32}", store_id):
+            raise IncompatibleStorage("Invalid artifact store identity")
+        self._require_open()
+        self._check_lifecycle()
+        async with self._gate:
+            self._require_open()
+            try:
+                await self._begin()
+                rows, _ = await self._sql(
+                    "SELECT value FROM metadata WHERE key='artifact_store_id'"
+                )
+                if rows and rows[0][0] != store_id:
+                    raise Conflict("SQLite storage is paired to another artifact directory")
+                if not rows:
+                    await self._sql(
+                        "INSERT INTO metadata VALUES ('artifact_store_id',?)", (store_id,)
+                    )
+                await self._finish(True)
+            except BaseException:
+                await self._finish(False)
+                raise
+
     async def _finish(self, commit: bool) -> None:
         if not self._in_transaction:
             return

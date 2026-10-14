@@ -143,6 +143,11 @@ def main() -> None:
             )
             run([uv, "pip", "check", "--python", str(python)], temporary)
             run([str(python), "-I", "-B", str(checker), "--installed", "--no-extras"], temporary)
+            if os.name == "posix":
+                run(
+                    [str(python), "-I", "-B", str(ROOT / "scripts/check_artifact_store.py")],
+                    temporary,
+                )
             for example, example_args in (
                 (name, arguments)
                 for name in (
