@@ -32,6 +32,12 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 **T-10 任务卡本地与远程已完整验收，无剩余缺项。** 测试/夹具 52f70e3 已推送，远程状态/日志保存在 .drov/t10-final-ci.json / t10-final-ci.log；最后进度/验证补记单独提交同步，不改已验证测试。模型、token/金额是脚本合成值；独立事项服务写入计数是真实本地事实，不能由此宣称真实模型质量、通用 exactly-once 或断电/设备故障安全。HTTP/MCP 生命周期由 T-12/T-13 验收；旧备份 barrier 待 T-15。
 
+## 本轮接续：T-10A 前的环境准备
+
+用户开启 Docker Desktop 后本轮资源已可连接；执行者完成官方固定 ARM64 镜像下载、来源/许可与指纹记录，真实小型容器执行及 cgroup/非 root/只读根目录/工作区/显式 seccomp 检查。默认 seccomp=unconfined 是实际发现，已用独立官方 profile 对自建探针容器启用，未改 daemon 全局设置。全部本轮探针已停止并删除，详情见 [环境准备验证](../validation/sandbox-environment-preparation.md)。
+
+**完成的是本地资源准备；T-10A/T-10B SDK 实施尚未开始。** 无完整恶意隔离、超限、取消或恢复验收，无 SDK/依赖/schema/品牌改动。非秘密准备文件仅在当前 Local 的 .drov/，换 checkout 不会自动带走。下一项与 New Chat 建议保持 T-10A；当前无需用户再准备额外配置或密钥，保持 Docker Desktop 运行即可。
+
 ## T-09 外部核查与恢复（历史整卡验收）
 
 起点 main / 7809192，干净且与 origin/main 同步。复跑首批 446 passed / 2 skipped、静态/类型/schema 后补完 T-09；决定见 [ADR-0015](../decisions/0015-external-effects-recovery.md)，完整证据与限制见 [本轮验证](../validation/t09-reconciliation-recovery.md)。
@@ -157,7 +163,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 T-10 本地与远程矩阵均已通过，按 [任务卡](implementation-plan.md)、C-17、ADR-0013 与运行契约第 13 节实施 T-10A：
 
-1. 核实实际 Docker/Linux 后端与预装可信 Python 镜像 digest/平台/许可，检查所需资源控制。配置/协议先完成；无可用后端也不创建空壳或宿主执行回退。
+1. 复核本轮已经准备的 Docker/Linux 后端、固定 Python 镜像与非秘密配置（见准备验证），在 SDK 中落实预检与所需资源控制。配置/协议先完成；无可用后端也不创建空壳或宿主执行回退。
 2. 落地 PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、依赖注入与接收前预检、code-only schema、控制配置指纹；宿主配置不能来自模型或用户输入。
 3. 沿原审批保存代码/hash/稳定执行键/预算后才执行；真实逐调用容器、有界 stdout/stderr/退出事实；原操作不重复执行，同进程两次调用不共享工作目录/变量。
 4. 提交实际 code → 容器计算 → 工具结果 → 类型化最终输出的离线示例与完整 T-10A 证据，再进入 T-10B 隔离/资源/清理故障。无 daemon/镜像时仅记已验收配置子范围，不关闭整卡。
@@ -170,7 +176,7 @@ T-10 本地与远程矩阵均已通过，按 [任务卡](implementation-plan.md)
 | --- | --- |
 | T-10 故障与取消 | 本轮矩阵不需要新增仓库/账号/Key/私有资料；独立合成服务/真实 SDK 屏障、SQLite 错误与恢复已本地与远程验收并推送，无需用户新增资源 |
 | GitHub 仓库 | 已提供，继续使用当前 origin；有具体同步/CI 阻碍再说明，无需重新建仓库 |
-| T-10A/T-10B 本地沙箱环境与镜像 | 下一轮真实执行前需要：可用的 Docker Engine/Linux 容器（macOS 可用 Docker Desktop 的 Linux VM）、预装可信 Python 镜像的具体 `@sha256:…`/linux 平台/许可；内存、CPU、PID、tmpfs 等控制须实际核实。本轮只读版本查询无法连接默认本地 socket `/Users/yanlong/.docker/run/docker.sock`，Server 返回 null；需要先使该 Docker daemon 可连接，Engine 版本/镜像/资源能力仍未验证。控制配置保留宿主，不给容器挂控制 socket、仓库或凭据，不自动拉镜像；无需新增云账号、模型 Key 或付费预算 |
+| T-10A/T-10B 本地沙箱环境与镜像 | 2026-10-14 用户开启 Docker Desktop 后已可连接：Desktop 4.32.0、CLI/Engine 27.0.3、Linux ARM64；已预装官方 Python 3.11.17-slim-bookworm 的固定平台 digest，并完成基础受限容器探针，见 [准备验证](../validation/sandbox-environment-preparation.md)。用户保持 Docker Desktop 开启即可，无需自行求 digest/新账号/Key/付费预算。daemon 默认 seccomp=unconfined，准备时已用固定 Moby v27.0.3 官方 profile 显式启用并核实 Seccomp=2；T-10A 必须维持该控制与独立 CLI 配置。非秘密快照在 .drov/sandbox-environment.json，环境/镜像需复查；尚未验收完整隔离/资源压力/恢复，未改其他容器或全局设置 |
 | 模型服务、可访问 model ID、密钥和总预算 | T-11 smoke/T-16 live 前提供可访问服务/model ID 并批准共同费用上限；工程执行者先按新增代码任务量估价。Key 仅本地环境/忽略配置或凭据管理，聊天/Git 不贴密钥；未授权预算前不付费调用 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
 | Cloudflare drop.dev、账号范围、品牌来源与公开使用范围 | 官网/素材初次公开前核实；现有素材保留本地，当前不部署 |
@@ -199,3 +205,4 @@ T-10 本地与远程矩阵均已通过，按 [任务卡](implementation-plan.md)
 | 2026-10-14 | T-09 子范围 | 审批/输入、原子 respond/resume、原计划/预算与回执、同 tenant 授权及四进程示例本地验收；外部未知效果/verify/recover 未实施，整卡进行中 |
 | 2026-10-14 | T-09 整卡验收 | 外部单次写入/unknown、verify/核查响应、启动扫描/显式步骤恢复、五组独立服务/多进程 SDK 与 stream 示例及 493 项回归；413fa1b 的 10 个远程 CI job success；T-10 硬崩溃专项尚未开始 |
 | 2026-10-14 | T-10 整卡验收 | 120 项硬终止/真实 SQLite 故障/取消竞争新增；全库 613、两解释器/构建/安装及 52f70e3 的 10 个远程 CI job success；下一项 T-10A 尚未开始 |
+| 2026-10-14 | 沙箱环境准备 | Docker 已连接、官方 ARM64 固定镜像预装、基础受限容器与显式 seccomp 生效；资源就绪，T-10A/T-10B 尚未实施 |

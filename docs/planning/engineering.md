@@ -183,3 +183,5 @@ Transaction.recall_memory 的最近顺序使用 updated_at DESC/key ASC；子串
 平台承诺分别核验：核心 CPython 3.11–3.14 的 Linux/macOS/Windows 矩阵不变；新增沙箱必交验收基线为 Linux Docker Engine/Linux 容器 + CPython 3.11–3.14。macOS/Windows 本地 Linux VM 后端须另外实际验证后才列入沙箱已支持平台，不从核心 SDK CI 推断；原生 Windows 容器、远程 daemon、云沙箱本轮不支持。Docker 专项 CI 明确提供 daemon 与预装镜像，环境缺失导致未验收，不能用 skip 或协议替身关闭任务。
 
 后端配置（非秘密连接引用、镜像 digest、固定控制、限额/执行入口版本）与 Agent/工具定义绑定并持久化检查，避免旧审批或恢复运行在新镜像/弱限制下。内部操作 payload 的新增执行/清理字段在 T-10A 明确版本和旧记录读取，必要 DDL/migration 在对应实现同轮处理，不对旧操作伪造执行事实。记录与保留语义见运行契约/维护策略，不在此另造状态机。
+
+2026-10-14 本地资源准备证据见 [Docker/镜像准备验证](../validation/sandbox-environment-preparation.md)。当前 macOS Linux VM 的基础探针可运行，但不代表 SDK/完整隔离平台验收。该 daemon 默认 seccomp=unconfined；实际执行须显式使用固定可信 profile 并核实有效，profile 内容 hash 纳入既定安全控制指纹。控制 CLI 不应继承用户配置中的容器代理/环境注入，准备探针使用独立空 auths/proxies 配置；具体 SDK 落地由 T-10A 实施，不改变以上固定边界或提前创建 API。
