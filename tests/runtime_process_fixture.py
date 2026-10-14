@@ -164,7 +164,9 @@ async def main(args: argparse.Namespace) -> None:
     service.port = args.port
     service.mode = "barrier_reply" if args.boundary == "write_before_reply" else "normal"
     model = FixtureModel(args.boundary if args.mode != "recover" else "", args.count, args.scenario)
-    agent = build(model, service, limits=Limits(model_timeout_seconds=2, tool_timeout_seconds=2))
+    # Ordinary process/commit tests measure facts and ownership, not a 2s speed
+    # guarantee. Keep deliberate budget scenarios below at their original 2s.
+    agent = build(model, service, limits=Limits(model_timeout_seconds=10, tool_timeout_seconds=10))
     if args.budget != "normal":
         agent = build(
             model,
@@ -223,7 +225,7 @@ async def main(args: argparse.Namespace) -> None:
             revision="1",
             model=model,
             tools=[selected],
-            limits=Limits(model_timeout_seconds=2, tool_timeout_seconds=30),
+            limits=Limits(model_timeout_seconds=10, tool_timeout_seconds=30),
         )
     storage = SQLiteStorage(args.path) if args.mode == "recover" else BarrierStorage(args)
     runtime = Runtime(
@@ -301,7 +303,23 @@ async def main(args: argparse.Namespace) -> None:
                 await runtime.respond(
                     run_id, request_id=outcome.pending.request_id, response=response, context=ALICE
                 )
-                assert await asyncio.to_thread(sys.stdin.readline) == "cancel\n"
+                instruction = asyncio.create_task(asyncio.to_thread(sys.stdin.readline))
+                advancing = asyncio.create_task(runtime.wait(run_id, context=ALICE))
+                done, _ = await asyncio.wait(
+                    (instruction, advancing), return_when=asyncio.FIRST_COMPLETED
+                )
+                if advancing in done and not instruction.done():
+                    unexpected = advancing.result()
+                    await halt(
+                        {
+                            "boundary": "fixture_call_not_entered",
+                            "outcome": unexpected.model_dump(mode="json"),
+                        }
+                    )
+                assert await instruction == "cancel\n"
+                # The real call remains owned by Runtime; this observation waiter is expendable.
+                advancing.cancel()
+                await asyncio.gather(advancing, return_exceptions=True)
                 await runtime.cancel(run_id, context=ALICE)
                 outcome = await runtime.wait(run_id, context=ALICE)
                 try:

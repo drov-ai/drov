@@ -12,7 +12,7 @@
 2. start/run/stream 接收有序 ArtifactInput/ArtifactRef。规范 request_key 摘要含输入 NFC 名/hash/大小/类型或完整原 ref；空清单不新增摘要键。先 lookup 原 Run，后检查新接收容量和写字节。新输入先私有预留/可靠暂存/校验，再在同一 SQLite 接收事务保存 ready 元数据、原 Run/文件绑定、Run 授予、去重、检查点及接收事件；失败全部回滚，已落盘私有阶段保留容量、不可下载。接收调用方取消不撤销已归控制 Task 的事务，重试复用同一 Run。输入没有代码资源，无需销毁事实；**输出产物仍必须按 ADR-0016 的销毁前暂存/销毁后结果共同发布**。
 3. 原始归属/Agent/来源和目标 Run 授予分别保存。ArtifactResource 使用既有 read/view_content，含原 Agent/run/operation、artifact_id 与目标 run/Agent/session；tenant 边界不可覆盖，默认本人且不跨 Agent 复用，显式 Authorizer 可允许同 tenant 的共享引用。引用 ID/name/hash 与 ready 字节逐一核对，授权在 I/O 后再复核；不能用正文中提到旧 ID 自动授予。原字节不复制、不转移原归属。
 4. get_artifact 返回受授权元数据；include_content 才给逻辑名。read_artifact 接受 ID 或完整 ArtifactRef，后者另外复核调用方固定 hash/大小/类型；两个入口都读前/后复核，字节有界校验，缺失/损坏拒绝并提交 unavailable，不重算。未发布私有阶段无索引、不可查询或读。默认 Run/上下文投影不泄露名称/字节/主机路径。
-5. 获准描述进入受预算保护的当前输入/来源：仅 ID、名、hash/大小/类型和虚拟 sandbox_path，不含字节或宿主路径；Artifact grant 不把文件内容当指令，也不代表现在存在可执行代码环境。正文 Run 查询及模型调用前重新检查当前文件授权；模型调用前检查字节。已接收输入随后丢失是 durable failed/artifact_unavailable，模型调用 0，不能冒充 SQLite 不可用或成功输出。
+5. 获准描述进入受预算保护的当前输入/来源：仅 ID、名、hash/大小/类型和虚拟 sandbox_path，不含字节或宿主路径；Artifact grant 不把文件内容当指令，也不代表现在存在可执行代码环境。正文 Run 查询及模型调用前重新检查当前文件授权；模型调用前检查字节。已接收输入在首次模型派发前丢失是 durable failed/artifact_unavailable，模型调用 0，不能冒充 SQLite 不可用或成功输出。
 6. 新增来源枚举 artifact，因此含文件的 ContextManifest 明确用 **schema_version=2**，无文件继续用 v1；新版读取 v1/v2，v1 不允许 artifact，boolean/未知版本拒绝。Artifact 扩展/Ref/Info/Grant 各自 v1；记录与 public schema 的增量同轮生成。Runtime 保存字节 store ID、扩展版本及限额 hash，继续原 Run 时复核，不在新配置下猜测旧批准/输入。
 
 ## 替代方案、代价与影响

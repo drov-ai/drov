@@ -50,3 +50,9 @@ UV_OFFLINE=true .drov/tooling/bin/uv run --offline --locked python scripts/check
 下一批先做标准库真实 PythonSandbox 审批/执行与租约，再接受保护输入/安全输出/分析镜像闭环，保持同一 T-10A。最终闭环需要审批前创建 0、已派发不重跑、两次不隐式共享、非法/超限无悬空引用、销毁后授权 hash 下载及安装证据；整卡完成才进入 T-10B/T-11。T-10C 未建模块，不需要云账号/Key。当前保持 Docker Desktop 开启，无新账号/模型 ID/预算；远程网络条件、下一轮会话建议与 Git 状态统一在 progress。
 
 文档检查：59 个 Markdown / 468 个相对链接 / 14 个 Python AST 片段，错误 0；这不是 SDK 运行验证。构件/安装在最终夹具关闭修正和文档同步后再次生成、验证，日志已保存。
+
+## Git / 远程
+
+原 f2f45c1/412e39b 与本批 **29d225d** 已成功推送 origin/main；37 个跟踪文件经保护/敏感模式与差异检查，无 uv.lock/品牌/P4/模型凭据或 `.drov/` 数据变更。远程核心 [CI 38532234182](https://github.com/drov-ai/drov/actions/runs/38532234182) 正在验收，最终状态补记；不代表尚未实现的 Docker 专项。
+
+首轮远程 29d225d：Windows 3.11 为 607 passed / 75 skipped / 3 failed（641.85s），plan-after-stream 的服务计数为 0，两个 kill 非协作夹具未发 live_call 而等待超时；其他平台结果保留 CI JSON。普通 fixture 的 model/tool 期限原 2s，脚本 final 接受工具错误的路径仍可能 completed；本轮将普通期限改 10s，专项 attempt/time 预算仍 2s、非协作 tool=30s/shutdown=0.2s 不改，并加入未进入实际调用的即时 outcome 诊断和断言上下文。SDK 默认/规则与计数、锁、硬终止断言均不放宽。本地对应 97 项矩阵复跑通过；新的 Windows 结果待实际 CI，不把首轮失败当成功。

@@ -199,7 +199,7 @@ async def check_boundary(
         )
     result = await recover(path, service, entry)
     assert result["outcome"]["status"] == "completed"
-    assert result["stats"]["writes"] == result["stats"]["attempts"] == 1
+    assert result["stats"]["writes"] == result["stats"]["attempts"] == 1, result
     checkpoint = result["checkpoint"]
     dispatched_without_call = boundary == "dispatch" and phase == "after"
     assert checkpoint["tool_dispatch_count"] == (2 if dispatched_without_call else 1)
@@ -276,7 +276,8 @@ async def test_real_noncooperative_call_retains_lock_until_stopped(
     path = tmp_path / "owner.db"
     process = await launch(path, service, mode="halt", kind=kind)
     try:
-        assert (await read_signal(process))["boundary"] == "live_call"
+        first_signal = await read_signal(process)
+        assert first_signal.get("boundary") == "live_call", first_signal
         assert process.stdin is not None
         process.stdin.write(b"cancel\n")
         await process.stdin.drain()

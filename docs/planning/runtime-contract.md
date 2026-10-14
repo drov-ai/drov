@@ -287,7 +287,7 @@ P3 已在 [质量计划](quality-plan.md) 和 [实施任务](implementation-plan
 
 用户于 2026-10-14 确认“生成并执行代码”进入 v0.1；用户同日进一步采纳受控文件/产物与可选 E2B；以下为 T-10A/T-10B 和可选 T-10C 的工作契约，见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)，补充 ADR-0013。已实现的 PythonTool/Memory 语义不由本节改变。
 
-T-10A 第二批已接入 POSIX 字节层/Runtime 装配、文件接收、ready 输入/Run 授予/去重与授权读取（ADR-0018），并将获准描述保存到上下文 v2；无文件清单仍 v1。输入没有代码资源，不以 container 销毁为输入发布条件。私有 stage 仍不可读；接收成功后丢失输入是 durable failed/artifact_unavailable，模型调用 0。镜像探针是执行者固定代码；以下审批、代码执行/清理租约、容器输入保护、安全导出和输出结果共同发布仍未接入，证据见 [输入/授权验证](../validation/t10a-artifact-inputs.md)。
+T-10A 第二批已接入 POSIX 字节层/Runtime 装配、文件接收、ready 输入/Run 授予/去重与授权读取（ADR-0018），并将获准描述保存到上下文 v2；无文件清单仍 v1。输入没有代码资源，不以 container 销毁为输入发布条件。私有 stage 仍不可读；接收成功后首次模型派发前丢失输入是 durable failed/artifact_unavailable，模型调用 0。镜像探针是执行者固定代码；以下审批、代码执行/清理租约、容器输入保护、安全导出和输出结果共同发布仍未接入，证据见 [输入/授权验证](../validation/t10a-artifact-inputs.md)。
 
 ### 13.1 控制与隔离
 
