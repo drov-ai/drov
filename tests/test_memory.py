@@ -406,7 +406,12 @@ async def test_retrieval_deadline_failure_and_late_cleanup(required: bool, failu
     agent = memory_agent(
         model,
         memory=Memory(retrieval="required" if required else "best_effort"),
-        limits=Limits(memory_required_seconds=0.01, memory_best_effort_seconds=0.01),
+        # Exception classification must not race an OS scheduling tick. The separate
+        # timeout/late cases still expire before their one-second test wait.
+        limits=Limits(
+            memory_required_seconds=1.0 if failure == "exception" else 0.1,
+            memory_best_effort_seconds=1.0 if failure == "exception" else 0.1,
+        ),
     )
     async with Runtime(agents=[agent]) as runtime:
         await seed(runtime.storage, content="late-private")

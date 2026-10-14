@@ -66,4 +66,6 @@ git diff --check
 
 另两项把 SQLite/权限准备也压在 30–50ms 内，导致尚未派发就正常 not_executed：旧调用保留用例改为观察真实调用 entered 屏障后显式 cancel，保持“不合作调用仍活跃、not_applied 拒绝、计数/槽位 1、最终释放”断言；预算用例把数值窗口设为 5s，仍在实际 attempt 预留后注入失败，恢复预算耗尽/模型次数 1/写入 0 断言保留；非协作 verifier 的有限期限设为 0.5s，关闭保锁断言不变。SDK 超时/权限/所有权语义没有为夹具放宽。
 
-日志保存 .drov/t09-full-ci-first.json / t09-full-ci-first-failed.log；ab241dc 同轮补严格版本拒绝，随后夹具修正的完整最终矩阵另补，不能用旧成功 job 替代新代码验收。
+日志保存 .drov/t09-full-ci-first.json / t09-full-ci-first-failed.log；[ab241dc 的 CI 38495447901](https://github.com/drov-ai/drov/actions/runs/38495447901) 同轮补严格版本拒绝，仍因上述夹具问题失败。
+
+[fd3d7d5 的 CI 38496446663](https://github.com/drov-ai/drov/actions/runs/38496446663) 共九个 job success，Windows 3.11 唯一失败是旧 T-08 Memory 用例：即时异常分类也要求在 10ms 内完成，系统调度较慢时合法 timeout 被当作 failed 断言错误。该 job 的全部 37 项核查/12 项恢复测试通过。现只将 exception 夹具期限设为 1s，timeout/late 设为 0.1s，仍在等待屏障的 1s 前过期；保留异常/超时状态、迟到结果不可用、取消和调用计数断言，没有改 Memory 实现。修正后本地两解释器各 56 项 Memory 通过，完整矩阵重新运行；旧成功 job 不能代替最终代码验收。状态保存 .drov/t09-full-ci-third.json，失败日志 .drov/t09-full-ci-third-win311-failed.log。
