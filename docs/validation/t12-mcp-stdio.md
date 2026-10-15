@@ -58,3 +58,6 @@ python scripts/check_installed_mcp.py --uv .drov/tooling/bin/uv --python 3.11 --
 
 
 Windows日志复核发现4ebedb7的job“success”不能作为验收：PowerShell多条native命令让前面失败被后面Responses安装的0退出码覆盖。Windows3.11实际 **52 failed /14 passed** MCP，安装例也失败；另有既存E2B安装probe左侧resolve长路径、右侧sys.prefix仍8.3短路径而断言失败。日志 `.drov/t12-win311-accepted.log`。已拆为独立CI步骤，并将真实MCP专项前置到构建前，避免旧false-green；E2Bprobe同时resolve两侧路径。MCP启动根因方向为覆盖SDK OS变量至空，违背Windows有效SystemRoot要求；恢复固定SDK OS白名单并保留模型Key/任意变量不继承，版本化环境策略进入MCP source_hash，API/ADR同轮同步。后续真实Windows通过前不宣称修复已验收；以前全部绿色Windows步骤记录作废，不关闭T-12。
+
+
+OS环境修正dd73a0a后，真实MCP前置门禁在Windows3.14成功；Windows3.11为 **65 passed /1 failed**，失败是stubborn样本在SDK返回后立即查询一个父PID仍未signalled，`.drov/t12-os-env-win311-failed.log`。已改为5s内持续观察全部已记录父/子PID，必须实际消失，超时仍失败，不以SDK Task结束替代OS退出。依据微软 [TerminateProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-terminateprocess) 的异步终止/待完成I/O说明（查阅2026-10-15）；是否属于退出通知竞态由下一轮Windows真实测试确认，未直接认定已修复。生产关闭代码不因这一测试调整而改动。

@@ -456,17 +456,29 @@ def process_alive(pid: int) -> bool:
     return bool(status) and not status.startswith("Z")
 
 
+async def assert_processes_stopped(tmp_path: Path) -> None:
+    # Windows termination requests stop threads before all process objects become
+    # signalled. Observe actual OS exit within a bound, rather than assuming the
+    # SDK return and WaitForSingleObject notification happen in the same tick.
+    pids = {
+        row.get("child_pid", row["pid"])
+        for row in ledger(tmp_path, "start") + ledger(tmp_path, "child")
+    }
+    async with asyncio.timeout(5):
+        while any(process_alive(pid) for pid in pids):  # noqa: ASYNC110 - OS process-exit observation
+            await asyncio.sleep(0.02)
+    assert all(not process_alive(pid) for pid in pids)
+
+
 @pytest.mark.asyncio
 async def test_stubborn_process_tree_is_actually_stopped(tmp_path: Path) -> None:
     connection = server(tmp_path, "stubborn")
     await connection.discover()
     assert len(ledger(tmp_path, "child")) == 1
-    for row in ledger(tmp_path, "start") + ledger(tmp_path, "child"):
-        assert not process_alive(row.get("child_pid", row["pid"]))
+    await assert_processes_stopped(tmp_path)
     await connection.open()
     await connection.aclose()
-    for row in ledger(tmp_path, "start") + ledger(tmp_path, "child"):
-        assert not process_alive(row.get("child_pid", row["pid"]))
+    await assert_processes_stopped(tmp_path)
 
 
 @pytest.mark.asyncio
