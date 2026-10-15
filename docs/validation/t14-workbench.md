@@ -52,7 +52,7 @@ Python历史全库检查点（查询入口前）3.11为**1137通过/61skip，305
 
 两解释器构件逐字一致，wheel SHA256 **051439d08f00904a5c29230286df255d0456be7476335919ea439d1d3f9dce64**，sdist SHA256 **7f676bd6ccc63df38e1d60554d58fcf9919926136d572d540cecff9cd82404f9**。wheel中全部**81个Git跟踪的Drov源码/资源文件**与该提交逐字节相等，`.drov/t14-d2914ca-artifacts.json`。首次载荷辅助脚本误纳入本机忽略的.DS_Store而报KeyError，改为Git跟踪集合后比对0差异；没有把OS元文件打包或忽略实际源码差异。构建之后补记不伪称已包含在该sdist。
 
-含extras与core-only严格mypy各155文件通过，Ruff/231文件格式、生成schema/OpenAPI、文档74份/相对链接626个/15个Python片段AST、差异空白与凭据模式检查通过。凭据模式、uv.lock/三份原DDL/P4/品牌原素材变更均0，选定品牌副本SHA256为cc60756d84916ea18118eae48a3b78ca8e0145d6da94fdbb0b96afe07464b9ad；`.drov/t14-doc-check.json`。AST不代表SDK可运行；运行证据以上述实际示例为准。
+含extras与core-only严格mypy各155文件通过，Ruff/231文件格式、生成schema/OpenAPI、文档74份/相对链接626个/15个Python片段AST、差异空白与凭据模式检查通过。凭据模式、uv.lock/原DDL/P4/品牌原素材变更均0，选定品牌副本SHA256为cc60756d84916ea18118eae48a3b78ca8e0145d6da94fdbb0b96afe07464b9ad；`.drov/t14-doc-check.json`。AST不代表SDK可运行；运行证据以上述实际示例为准。
 
 最终Python3.14 HTTP/静态/查询专项**72通过（4.58s）**，`.drov/t14-http-query314.log`，OpenAPI与3.11相同。3.14实际浏览器同一最终静态资产**22通过/1无Docker配置适用skip（14.7s）**，`.drov/t14-d2914ca-ui314.log`；真实Docker浏览器由3.11的23全通过覆盖。明确复现原a/b会话被start接收202、路径读取404、查询读取200且ID完整，`.drov/t14-session-path-repro.json`；原入口保留，查询形式支持完整SDK合法ID，不修改标识符契约。
 
@@ -60,3 +60,19 @@ Python历史全库检查点（查询入口前）3.11为**1137通过/61skip，305
 
 
 示例收尾审查另发现FileDemoModel的单次FixtureModel会在带历史的会话中取第一个旧tool结果。新增纯协议回归先实际失败（`.drov/t14-example-history-before.log`），随后只把例子的输入限定到当前轮次，原请求不变；SDK/HTTP/工作台运行源码与静态资产不变。修正后协议/HTTP专项**73通过**（`.drov/t14-example-history-fixed311.log`）；实际make_app三场景及同一会话连续两次分析镜像CSV→400×300 PNG全部通过，最终输出引用必须与本次实际工具产物一致、active lease=0，`.drov/t14-demo-smoke-repeated.log`/json。此例子修正需另存源码检查点并核对其构件/CI，不能把d2914ca整套证据冒充更新后的提交。
+
+
+最终例子修正源码为 **06455ff674358b491ac85d93e72500c15dd2787e**。其两解释器wheel/sdist与重建/四套core安装通过（`.drov/t14-06455ff-package{311,314}.log`），wheel继续是前述051439d0…字节，全部81文件与最终src相等；与已实测两套server安装的wheel逐字节相同。新sdist SHA256为 **496501824f70f0f568291511430ad655dc85ee36a81b98e69ed2d7fab431e9f5**，两解释器一致；`.drov/t14-06455ff-artifacts.json`。最终Twine strict通过。严格mypy（含extras/core-only）各156文件通过，Ruff/232文件格式通过。
+
+最终3.14实际浏览器**23全通过，含真实Docker（15.9s）**，`.drov/t14-06455ff-ui314.log`；make_app的同会话连续两次真实分析镜像CSV/PNG及引用绑定通过。3.14协议/HTTP专项73通过（4.40s）。同一Runtime/静态资产的3.11全库检查点d2914ca为**1142通过/61skip，297.00s**，`.drov/t14-d2914ca-full311.log`；这之后仅例子修正和新增1协议回归，3.11专项73通过（5.15s），未将旧1142伪称新1204项整库。最终3.14全库与远程[核心38759707490](https://github.com/drov-ai/drov/actions/runs/38759707490)/[Docker38759707538](https://github.com/drov-ai/drov/actions/runs/38759707538)另补。旧d2914ca的Docker4 jobs成功，核心因推送本次例子修正而取消，不能作为最终整套通过。
+
+
+最终源码06455ff本地Python3.14含真实Docker全库**1145通过/59skip，307.05s**（完整收集1204，`.drov/t14-06455ff-full314.log`）。59项仅为未配置/未授权的真实E2B；没有读取私有env或动用云预算。只读清点本地Drov执行归属标签，剩余容器**0**，`.drov/t14-container-inventory.json`。
+
+远程06455ff首轮Docker在3.12的首个HTTP-Docker SDK用例、Runtime.open查询`docker system info`时触发原10s控制期限；**101通过/1失败**，尚未创建Run/执行代码。其余3个Docker job成功；原失败完整保留`.drov/t14-06455ff-docker-failed.log`与attempt1元数据。未改生产控制期限、测试断言或跳过项，只对3.12在新runner重跑（同一run的attempt2），结果另补；不能把“新runner”推测写成已诊断的OS耗时根因。
+
+
+收尾同页身份审查：原“跨归属”浏览器helper重新导航整页，未覆盖同页注销后的控件复用。改为同页切换后，实际复现旧Session表单值保留，以及已发出的verify回执在切换身份后短暂写入旧核查证据；MutationObserver捕获到旧证据（`.drov/t14-identity-before.log`，2失败），没有以随后错误覆盖/最终截图不见作为通过。修正注销清空所有表单/游标/缓存DOM、控制/核查回执绑定原视图代次、文件固定原Client/AbortSignal，并在隐藏正文时清除提示区证据。4项身份/交互专项通过（`.drov/t14-identity-fixed.log`）；最终全矩阵与构件需按新的静态资产另补。Python/Runtime/HTTP/DDL源码没有改变，06455ff的1145项全库保持为同一Python实现证据，不能把旧23项UI/旧构件冒充新24项UI与新资源。
+
+
+06455ff的最终核心11 jobs全部success，Docker attempt2的3.12重跑也success，其他三个首轮已成功；该源码的15个job均有完成证据（`.drov/t14-06455ff-core-ci.json`、`t14-06455ff-docker-retry.json`）。这支持原Python/HTTP实现与23项UI的检查点，不用于替代后续同页身份修正的新静态资源。新24项初轮为23通过/1测试失败：关闭正文后提示区已被清空并hidden，测试用默认可见role定位导致未找到元素；改为检查保留的DOM节点文本确实为空，未放宽“不含旧证据”的要求（`.drov/t14-final-identity311.log`）。

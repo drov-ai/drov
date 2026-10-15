@@ -10,7 +10,7 @@ DrovApp 新增 `workbench=True` 装配选项，默认提供 `/workbench/`，`/`�
 
 新增 `GET /v1/agents -> AgentCatalog`，经认证及 `read` 的 `Resource(owner=actor)` 授权后，只列当前注册的 name/revision；不返回 instructions、工具 schema、模型/后端配置或凭据。新增 `GET /v1/session?session_id=...` 与原路径读取复用同一函数和Runtime授权，供包含斜杠、点段或保留字符的合法会话ID无损查询；原路径接口保留，不缩窄SDK标识类型。这个应用级目录不表示可以启动任意 Agent/会话，start 仍按实际资源授权；宿主需把愿意向该应用读者公开的 Agent 注册到本服务。没有修改 Runtime/存储/旧事件 DTO 或 DDL，新增 HTTP schema 从真实类型/路由生成。
 
-登录令牌只在当前 Client 内存中；提交后清空密码输入，不写 URL、cookie、local/sessionStorage、日志或 HTML。刷新后重新登录。认证失败清除连接和正文；正文/文件/上下文读取被拒绝时撤销 Blob URL、取消旧视图并清除已取正文，后到的旧请求不能恢复它。默认元数据视图，用户显式打开正文。浏览器不显示 raw provider protocol items；所有服务返回文本用 DOM textContent 展示，不执行 HTML/Markdown。页面没有外部字体、脚本、统计或 CORS 请求。CSP 限定脚本/样式/连接同源，图片仅同源或本地 Blob，禁止 frame/object/base。
+登录令牌只在当前 Client 内存中；提交后清空密码输入，不写 URL、cookie、local/sessionStorage、日志或 HTML。刷新后重新登录。认证失败清除连接和正文；正文/文件/上下文读取被拒绝时撤销 Blob URL、取消旧视图并清除已取正文，后到的旧请求不能恢复它。注销清除会话表单值、分页游标和脱离文档的旧DOM；核查/控制回执绑定发起的身份/视图代次，文件请求固定原Client与AbortSignal，不能在新身份显示旧证据。提示区的核查正文在关闭正文/切换视图时一并清除。默认元数据视图，用户显式打开正文。浏览器不显示 raw provider protocol items；所有服务返回文本用 DOM textContent 展示，不执行 HTML/Markdown。页面没有外部字体、脚本、统计或 CORS 请求。CSP 限定脚本/样式/连接同源，图片仅同源或本地 Blob，禁止 frame/object/base。
 
 ## 运行、交互与文件
 

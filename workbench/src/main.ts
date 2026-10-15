@@ -125,9 +125,11 @@ const sessionList = el("div"),
   side = el("aside", "", "inspector");
 const connection = el("span", "", "connection");
 async function safe(action: () => void | Promise<void>) {
+  const identity = api;
   try {
     await action();
   } catch (error) {
+    if (api !== identity) return;
     if (error instanceof DOMException && error.name === "AbortError") return;
     errorText =
       error instanceof HTTPError && [403, 404].includes(error.status)
@@ -165,6 +167,7 @@ function purge() {
   transient = "";
   cursor = null;
   pendingResponse = null;
+  errorText = noticeText = "";
 }
 function denial(status: number) {
   purge();
@@ -186,6 +189,8 @@ function logout() {
   api = null;
   sessions = [];
   runRefs = [];
+  sessionCursor = runCursor = null;
+  sessionMore = runMore = false;
   catalog = [];
   staged = [];
   uploadNames = [];
@@ -193,8 +198,16 @@ function logout() {
   selectedRun = "";
   selectedSession = "";
   prompt.value = "";
+  sessionInput.value = crypto.randomUUID();
+  agentSelect.replaceChildren();
   files.value = "";
+  files.disabled = false;
   content = false;
+  activeTab = "overview";
+  streamState = "未订阅";
+  errorText = noticeText = "";
+  for (const node of [sessionList, history, main, side, notification])
+    node.replaceChildren();
   showLogin();
 }
 function showLogin() {
@@ -332,9 +345,13 @@ function shell() {
     button(
       "刷新",
       async () => {
+        const generation = epoch,
+          session = selectedSession,
+          run = selectedRun;
         await loadSessions();
-        if (selectedSession) await loadSession(selectedSession);
-        if (selectedRun) await loadRun(selectedRun);
+        if (generation !== epoch) return;
+        if (session) await loadSession(session);
+        else if (run) await loadRun(run);
       },
       "quiet",
     ),
@@ -545,7 +562,9 @@ function renderComposer() {
       const [name, revision] = JSON.parse(agentSelect.value) as string[];
       const generation = epoch,
         client = api!;
+      const session = sessionInput.value;
       upload.disabled = true;
+      agentSelect.disabled = sessionInput.disabled = files.disabled = true;
       try {
         for (const file of files.files) {
           if (file.size > 8 * 1024 * 1024)
@@ -553,7 +572,7 @@ function renderComposer() {
           const query = new URLSearchParams({
             agent_name: name,
             revision,
-            session_id: sessionInput.value,
+            session_id: session,
             name: file.name,
             media_type: /^[\w.+-]+\/[\w.+-]+$/.test(file.type)
               ? file.type
@@ -571,7 +590,7 @@ function renderComposer() {
         }
         files.value = "";
       } finally {
-        upload.disabled = false;
+        upload.disabled = files.disabled = false;
         if (generation === epoch) shell();
       }
     },
@@ -630,6 +649,16 @@ async function startRun() {
     throw error;
   } finally {
     prompt.disabled = false;
+  }
+}
+async function reloadNotice(run: string, text: string) {
+  const identity = api;
+  const loading = loadRun(run),
+    generation = epoch;
+  await loading;
+  if (generation === epoch && api === identity) {
+    noticeText = text;
+    notify();
   }
 }
 async function loadRun(id: string) {
@@ -869,7 +898,9 @@ function renderInteraction(panel: HTMLElement) {
     form.append(detail("原计划参数", pending.arguments_summary));
   const actions = el("div", "", "interaction-actions");
   const send = async (response: Wire["ResponseBody"]["response"]) => {
-    const generation = epoch;
+    const generation = epoch,
+      run = selectedRun,
+      client = api!;
     for (const control of form.querySelectorAll<HTMLButtonElement>("button"))
       control.disabled = true;
     const body =
@@ -878,14 +909,13 @@ function renderInteraction(panel: HTMLElement) {
         : { request_id: requestId, response };
     pendingResponse = body;
     try {
-      const receipt = await api!.post<Wire["ResponseReceipt"]>(
-        `/v1/runs/${path(selectedRun)}/responses`,
+      const receipt = await client.post<Wire["ResponseReceipt"]>(
+        `/v1/runs/${path(run)}/responses`,
         body,
       );
       if (generation !== epoch) return;
       pendingResponse = null;
-      noticeText = `响应已接收 · ${receipt.response_id}`;
-      await loadRun(selectedRun);
+      await reloadNotice(run, `响应已接收 · ${receipt.response_id}`);
     } catch (error) {
       if (error instanceof HTTPError && error.status < 500)
         pendingResponse = null;
@@ -968,15 +998,17 @@ function renderInteraction(panel: HTMLElement) {
       button(
         "调用原核查器",
         async () => {
-          const decision = await api!.post<
+          const generation = epoch,
+            run = selectedRun,
+            client = api!;
+          const decision = await client.post<
             Extract<
               Wire["ResponseBody"]["response"],
               { kind: "reconciliation" }
             >
-          >(`/v1/runs/${path(selectedRun)}/verify`, { request_id: requestId });
-          noticeText = "核查器返回：" + fmt(decision);
-          notify();
-          await loadRun(selectedRun);
+          >(`/v1/runs/${path(run)}/verify`, { request_id: requestId });
+          if (generation !== epoch) return;
+          await reloadNotice(run, "核查器返回：" + fmt(decision));
         },
         "quiet",
       ),
@@ -1159,10 +1191,12 @@ function renderFiles(panel: HTMLElement) {
       button(
         "读取文件信息",
         async () => {
-          const generation = epoch;
-          const info = await api!.get<Wire["ArtifactInfo"]>(
+          const generation = epoch,
+            client = api!,
+            signal = view.signal;
+          const info = await client.get<Wire["ArtifactInfo"]>(
             `/v1/artifacts/${path(id)}?include_content=true`,
-            view.signal,
+            signal,
           );
           if (generation !== epoch || !info.content_visible || !content) return;
           card.replaceChildren(
@@ -1176,20 +1210,20 @@ function renderFiles(panel: HTMLElement) {
           );
           if (info.state !== "ready") return;
           const obtain = async () => {
-            const current = await api!.get<Wire["ArtifactInfo"]>(
+            const current = await client.get<Wire["ArtifactInfo"]>(
               `/v1/artifacts/${path(id)}?include_content=true`,
-              view.signal,
+              signal,
             );
             const data = await verifiedBlob(
-              await api!.fetch(`/v1/artifacts/${path(id)}/content`, {
-                signal: view.signal,
+              await client.fetch(`/v1/artifacts/${path(id)}/content`, {
+                signal: signal,
               }),
               current,
             );
             // Recheck after download: revocation during the transfer cannot leave a preview.
-            await api!.get<Wire["ArtifactInfo"]>(
+            await client.get<Wire["ArtifactInfo"]>(
               `/v1/artifacts/${path(id)}?include_content=true`,
-              view.signal,
+              signal,
             );
             if (generation !== epoch || !content)
               throw new DOMException("Stale view", "AbortError");
@@ -1276,8 +1310,9 @@ function renderSide() {
       async () => {
         stop();
         retryCount = 0;
-        await refreshSnapshot(epoch);
-        void subscribe(epoch);
+        const generation = epoch;
+        await refreshSnapshot(generation);
+        if (generation === epoch) void subscribe(generation);
       },
       "quiet full",
     ),
@@ -1287,14 +1322,20 @@ function renderSide() {
       button(
         "取消运行",
         async () => {
-          const receipt = await api!.post<Wire["CancelReceipt"]>(
-            `/v1/runs/${path(selectedRun)}/cancel`,
+          const generation = epoch,
+            run = selectedRun,
+            client = api!;
+          const receipt = await client.post<Wire["CancelReceipt"]>(
+            `/v1/runs/${path(run)}/cancel`,
             {},
           );
-          noticeText = receipt.cancel_requested
-            ? "取消请求已提交，等待内核确认。"
-            : labels[receipt.status];
-          await loadRun(selectedRun);
+          if (generation !== epoch) return;
+          await reloadNotice(
+            run,
+            receipt.cancel_requested
+              ? "取消请求已提交，等待内核确认。"
+              : labels[receipt.status],
+          );
         },
         "danger full",
       ),
@@ -1304,8 +1345,11 @@ function renderSide() {
       button(
         "显式恢复原运行",
         async () => {
-          await api!.post(`/v1/runs/${path(selectedRun)}/recover`, {});
-          await loadRun(selectedRun);
+          const generation = epoch,
+            run = selectedRun,
+            client = api!;
+          await client.post(`/v1/runs/${path(run)}/recover`, {});
+          if (generation === epoch) await loadRun(run);
         },
         "quiet full",
       ),

@@ -190,6 +190,6 @@ T-12 MCPFixture 已落地为 [官方SDK服务](../../examples/mcp_stdio_fixture.
 
 ## T-14 工作台验证落地
 
-`tests/test_workbench.py` 检查固定公开资产的Host/Origin/URL凭据边界、HEAD/CSP/no-store、认证数据/目录和关闭工作台；会话查询入口覆盖斜杠、点段、保留字符及Unicode的无损往返/跨归属拒绝；原HTTP身份/文件矩阵保持。Playwright以实际loopback服务运行研究/Memory/输入审批/拒绝/unknown核查、失败、保存final的显式恢复、断连重连、丢start回执去重、撤权正文清除、跨归属、HTML/SVG附件、PNG预览与窄屏；另检查分块UTF-8/CRLF/多行SSE、临时帧无游标/不完整帧、大小/hash拒绝。真实Docker浏览器用例必须实际上传CSV→批准原计划→生成CSV/PNG→销毁后授权读取/下载并比较实际内容，查看不增加模型调用。无Docker配置的适用skip不能作为该项通过。
+`tests/test_workbench.py` 检查固定公开资产的Host/Origin/URL凭据边界、HEAD/CSP/no-store、认证数据/目录和关闭工作台；会话查询入口覆盖斜杠、点段、保留字符及Unicode的无损往返/跨归属拒绝；原HTTP身份/文件矩阵保持。Playwright以实际loopback服务运行研究/Memory/输入审批/拒绝/unknown核查、失败、保存final的显式恢复、断连重连、丢start回执去重、撤权正文清除、同页身份切换清除表单/游标/DOM、延迟核查回执和提示区正文隔离、跨归属、HTML/SVG附件、PNG预览与窄屏；另检查分块UTF-8/CRLF/多行SSE、临时帧无游标/不完整帧、大小/hash拒绝。真实Docker浏览器用例必须实际上传CSV→批准原计划→生成CSV/PNG→销毁后授权读取/下载并比较实际内容，查看不增加模型调用。无Docker配置的适用skip不能作为该项通过。
 
 安装检查须从wheel/sdist重建比较所有静态字节，core-only无Web导入仍通过；独立server安装后以真实HTTP读取页面/每个资源/CSP并验证数据仍需认证。前端CI固定锁重新生成schema和资源、比较跟踪文件并运行浏览器；Docker CI独立执行真实代码/文件用例。实际结果/失败修正在 [验证](../validation/t14-workbench.md)，不由本节推断全部通过，不把脚本模型、维护者截图或Chromium移动视口当真实模型质量/外部用户体验/所有浏览器设备支持。

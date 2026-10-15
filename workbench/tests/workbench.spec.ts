@@ -14,8 +14,8 @@ async function controls(request: APIRequestContext, data?: object) {
   expect(response.ok()).toBeTruthy();
   return response.json();
 }
-async function login(page: Page, token = "workbench-test") {
-  await page.goto("/workbench/");
+async function login(page: Page, token = "workbench-test", navigate = true) {
+  if (navigate) await page.goto("/workbench/");
   await page.getByLabel("访问令牌").fill(token);
   await page.getByRole("button", { name: "连接工作台" }).click();
   await expect(page.getByRole("heading", { name: "运行工作区" })).toBeVisible();
@@ -154,6 +154,9 @@ test("unknown write, verifier, and manual reconciliation do not repeat effect", 
   await expect(page.getByRole("status")).toContainText(
     "synthetic local write log",
   );
+  await page.getByLabel("显示正文", { exact: true }).uncheck();
+  await expect(page.locator('[role="status"]')).toHaveText("");
+  await page.getByLabel("显示正文", { exact: true }).check();
   await page.getByLabel("核查结论").selectOption("applied");
   await page.getByLabel("核查依据").fill("local counted write");
   await page.getByLabel("核查结果 JSON").fill('"written"');
@@ -246,6 +249,9 @@ test("revocation purges existing content and preview names; other scope sees no 
   await login(page);
   await start(page, "research");
   await done(page, "cache-a vs cache-b");
+  const priorSession = await page
+    .locator(".session.selected .session-name")
+    .innerText();
   await controls(request, { denied: ["view_content"] });
   await page.getByRole("button", { name: "重连事件" }).click();
   await expect(page.getByRole("status")).toContainText("已清除当前正文");
@@ -253,8 +259,9 @@ test("revocation purges existing content and preview names; other scope sees no 
   await expect(page.getByLabel("显示正文", { exact: true })).not.toBeChecked();
   await controls(request, { denied: [] });
   await page.getByRole("button", { name: "断开连接" }).click();
-  await login(page, "other");
+  await login(page, "other", false);
   await expect(page.locator(".session")).toHaveCount(0);
+  await expect(page.getByLabel("会话名称")).not.toHaveValue(priorSession);
 });
 
 test("untrusted text and HTML/SVG files are escaped and downloaded, never executed", async ({
@@ -509,4 +516,61 @@ test("opaque session names round-trip through the query lookup", async ({
   await page.getByRole("button", { name: "＋  新任务" }).click();
   await page.locator(".session").filter({ hasText: name }).click();
   await done(page, "cache-a vs cache-b");
+});
+
+test("late verifier response cannot restore private evidence after an identity switch", async ({
+  page,
+  request,
+}) => {
+  await login(page);
+  await start(page, "operations", "unknown");
+  await page.getByLabel("补充输入").fill("item-01");
+  await page.getByRole("button", { name: "提交输入" }).click();
+  await page.getByRole("button", { name: "批准原计划" }).click();
+  let release!: () => void, arrived!: () => void;
+  const hold = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const started = new Promise<void>((resolve) => {
+    arrived = resolve;
+  });
+  await page.route("**/v1/runs/*/verify", async (route) => {
+    const response = await route.fetch();
+    arrived();
+    await hold;
+    await route.fulfill({ response });
+  });
+  await page.getByRole("button", { name: "调用原核查器" }).click();
+  await started;
+  await page.getByRole("button", { name: "断开连接" }).click();
+  await login(page, "other", false);
+  await page.evaluate(() => {
+    (window as any).seen = [];
+    new MutationObserver(() =>
+      (window as any).seen.push(
+        document.querySelector('[role="status"]')?.textContent,
+      ),
+    ).observe(document.querySelector('[role="status"]')!, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  });
+  const returned = page.waitForResponse((response) =>
+    response.url().endsWith("/verify"),
+  );
+  release();
+  await (await returned).finished();
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      ),
+  );
+  expect(
+    (await page.evaluate(() => (window as any).seen)).join(" "),
+  ).not.toContain("synthetic local write log");
+  await expect(page.getByRole("heading", { name: "运行工作区" })).toBeVisible();
+  await expect(page.locator(".session")).toHaveCount(0);
+  await controls(request, { denied: [] });
 });
