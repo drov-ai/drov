@@ -17,7 +17,7 @@ from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
 from drov.runtime import AgentRegistration
 from drov.sandbox import SandboxLimits, SandboxResult
 from drov.sandbox._leases import SANDBOX_DDL
-from drov.server.types import ResponseBody, ServerLimits, StartBody, VerifyBody
+from drov.server.types import AgentCatalog, ResponseBody, ServerLimits, StartBody, VerifyBody
 from drov.storage.sqlite import DDL, RECORD_VERSION, SCHEMA_VERSION
 from drov.tools import PermissionPolicy
 from drov.tools.permissions import PermissionDecision
@@ -72,6 +72,7 @@ def schema_text() -> str:
         "ArtifactLimits": ArtifactLimits,
         "ArtifactResource": ArtifactResource,
         "HTTPStart": StartBody,
+        "AgentCatalog": AgentCatalog,
         "HTTPResponse": ResponseBody,
         "HTTPVerify": VerifyBody,
         "ServerLimits": ServerLimits,

@@ -152,3 +152,10 @@ route mapping, upload ledger and fixtures are original integration code; protoco
 sources are linked in ADR-0025. httpx 0.28.1 (BSD-3-Clause), already locked through
 other extras, is now explicitly a development test requirement; the server extra
 does not require it. No third-party code or built frontend assets were vendored.
+
+
+## T-14 workbench build assets
+
+The workbench uses Vite 8.3.4 (MIT) to compile project TypeScript/CSS. Its generated browser module-preload helper is retained with the upstream MIT notice in `workbench/public/THIRD_PARTY.txt` and `drov/server/static/THIRD_PARTY.txt` inside the wheel. Exact development dependencies are recorded in `workbench/package-lock.json`: TypeScript 5.9.3 and Playwright 1.64.1 (Apache-2.0), openapi-typescript 7.13.0 and Prettier 3.8.3 (MIT). These tools are not application SDKs loaded by the browser; no third-party UI/component/icon library is copied. Source and installed license metadata inspected 2026-10-15. The original upstream distributions retain their other bundled/build dependency notices; this is not a T-18 complete transitive license audit.
+
+The selected `drov-icon.svg` is a byte-for-byte copy of the user-approved local `drov-brand/svg/drov-icon-black.svg` vector reconstruction; other ignored brand originals are untouched and excluded from sdist. Provenance and public-use scope are still to be consolidated before the first package/site publication, as required by release-policy; this task does not publish either.

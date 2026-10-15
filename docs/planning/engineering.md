@@ -264,3 +264,14 @@ DrovApp导入不加载Web栈，构造需server extra；已锁FastAPI0.143.0/Star
 上传TTL沿第9节1h，只拒绝新消费、不后台删除；需要准确Content-Length，字节大小仍受ArtifactLimits。上传先预留原store/owner容量（含私有manifest额度），失败/中断仍计容量，T-15离线维护回收；单文件接收缓冲受已预留大小约束。下载先在内核上限内读取/hash校验，再按64KiB块动态授权发送；原生ASGI帧在服务器交付之前的缓冲由Uvicorn流控负责，不把应用上限称作恶意宿主ASGI实现的硬内存隔离。
 
 新增upload_schema=1独立表，与原records/Artifact/Sandbox版本分离；仅带store的服务启用。`serve()`单worker/无reload/不信任代理头；应用认证非本地须显式Authorizer和精确同源Host/Origin，TLS由宿主接入。安装server不自动启动监听或读取模型凭据。生成OpenAPI需server extra，`scripts/generate_openapi.py --check`在CI server步骤运行；core schema生成仍不需要Web依赖。
+
+
+## T-14 工作台落地
+
+TypeScript/Vite 的实际开发组合固定为 Node 24.14.0、npm 11.9.0、TypeScript 5.9.3、Vite 8.3.4、openapi-typescript 7.13.0、Playwright 1.64.1、Prettier 3.8.3，精确传递锁在 workbench/package-lock.json。未使用组件框架；工具仅开发时安装。TypeScript 7 与 schema 生成器的 peer 不兼容，实际选择兼容组合，没有忽略约束。源码/生成类型与预构建资源都纳入sdist，所有wheel包含同一资源；SDK导入不加载Web/Node，安装无需Node。
+
+浏览器保守限额：每次暂存最多8个文件、单文件8 MiB，下载16 MiB，PNG 16M像素；真实宿主的数量/累计容量限额仍由服务拒绝。SSE单帧上限2 MiB，事件列表最多最近1000条，临时文本最多最近65536字符；完整日志不删除。重连退避从500ms起、指数增长、上限10s；永久游标错误停止自动重连并要求刷新。运行/交互POST不自动重试；显式重试复用原body/键。
+
+静态服务只映射固定构建文件，CSP脚本/样式/连接同源、图片self/blob，禁止内联HTML执行及外部资源。默认正文关闭；动态授权拒绝取消旧视图/订阅、清除正文和Blob。每次文件下载/预览获取原授权元数据，读取时长度/hash校验，展示前再次授权；PNG签名/IHDR/像素/浏览器解码通过后才建立image/png Blob，其余字节为下载附件。没有SVG/HTML/PDF内联、Markdown执行、raw provider展示或云后端控制。空闲页面不保证立即感知宿主撤权，下一次同步/操作时清除；旧下载不可撤回。
+
+实现边界见 [ADR-0026](../decisions/0026-local-workbench.md)，构建/操作见 [workbench](../../workbench/README.md)，真实浏览器/安装/平台证据见 [验证](../validation/t14-workbench.md)。单worker、POSIX文件层和暂存T-15维护边界不变。

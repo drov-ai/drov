@@ -2,7 +2,7 @@
 
 面向 Python 开发者的通用 Agent 框架，目标是以少量核心概念提供完整、可组合的能力，并让开发、调试和服务化使用一致的运行机制。
 
-**开发版本 `0.1.0a0`；T-10A/T-10B 的 Docker Python、文件与故障专项已验收。** Runtime 支持受控文件输入、代码审批、实际单次执行、CSV/PNG 持久产物与授权下载。完整任务状态和下一项以 [progress](docs/planning/progress.md) 为准；受测隔离/资源/SDK硬终止、原生Linux3.11–3.14 Docker专项与安装证据见 [T-10B 验证](docs/validation/t10b-sandbox-faults.md)。包另提供模型协议、事务存储、工具/权限、Agent 循环、上下文/Memory 和持久交互/恢复。OpenAI Responses 已实现离线协议适配，MCP stdio已接通（实际验收见progress）；HTTP按ADR-0025接通（验收见progress），工作台尚未实施；尚未公开发布包或获得真实模型评测结果。
+**开发版本 `0.1.0a0`；T-10A/T-10B 的 Docker Python、文件与故障专项已验收。** Runtime 支持受控文件输入、代码审批、实际单次执行、CSV/PNG 持久产物与授权下载。完整任务状态和下一项以 [progress](docs/planning/progress.md) 为准；受测隔离/资源/SDK硬终止、原生Linux3.11–3.14 Docker专项与安装证据见 [T-10B 验证](docs/validation/t10b-sandbox-faults.md)。包另提供模型协议、事务存储、工具/权限、Agent 循环、上下文/Memory 和持久交互/恢复。OpenAI Responses 已实现离线协议适配，MCP stdio已接通（实际验收见progress）；HTTP按ADR-0025接通（验收见progress），实验性[本地工作台](workbench/README.md)已接入同一HTTP；尚未公开发布包或获得真实模型评测结果。
 
 P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-08 验证记录](docs/validation/t08-memory.md)。本轮证据见 [T-09 子范围验证](docs/validation/t09-interactions.md)，完整证据见 [核查/恢复验证](docs/validation/t09-reconciliation-recovery.md)，T-10 已验收，见 [专项验证](docs/validation/t10-faults-cancellation.md)；下一项及资源准备见 progress；换会话方法见 [交接说明](docs/handoff.md)。
 

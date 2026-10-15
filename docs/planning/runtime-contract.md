@@ -235,6 +235,7 @@ Runtime 退出：停止接收 → 对活动运行请求取消 → 在关闭宽�
 
 | HTTP 草案 | 核心操作 | 成功语义 |
 | --- | --- | --- |
+| GET /v1/agents | 当前注册目录 | 200 + AgentCatalog；认证/read 后只返回 name/revision，目录不授予启动权限 |
 | POST /v1/runs | start | 202 + RunRef；已接收不等于任务完成 |
 | GET /v1/runs/{id} | inspect | 当前可授权查看的快照与结果 |
 | GET /v1/runs/{id}/events | events | SSE 订阅，不创建新任务 |
@@ -243,6 +244,7 @@ Runtime 退出：停止接收 → 对活动运行请求取消 → 在关闭宽�
 | POST /v1/runs/{id}/verify | verify | 200 + 核查建议；body 指定当前 request_id，不消费交互请求 |
 | POST /v1/runs/{id}/recover | recover(wait=False) | 202 + RunSnapshot；需要继续处理的交互显式返回 |
 | GET /v1/sessions | sessions | 200 + 授权作用域内分页摘要 |
+| GET /v1/session?session_id=... | session | 200 + 同一会话视图；任意合法ID使用查询传递，避免路径规范化 |
 | GET /v1/sessions/{session_id} | session | 200 + 会话摘要与分页 RunRef |
 | GET /v1/runs/{id}/contexts/{model_call_id} | get_context | 200 + 授权后的清单，正文需额外权限 |
 
@@ -361,3 +363,6 @@ MCP元数据与annotations不授予effect/权限；默认unknown→ASK。工具�
 [ADR-0025](../decisions/0025-http-identity-and-uploads.md) 细化身份/HTTP传输：DrovApp管理自建Runtime的lifespan或借用已打开实例；HTTP请求认证后只委托同内核。头前校验SSE完整游标与授权，durable帧使用run_id:seq，临时帧不带id；头后错误以非durable stream.error结束。每次发送前按当前身份/权限复核，超时/断连/关闭订阅不产生cancel，不自动recover或重执行。
 
 上传记录归原owner/Agent配置/目标session/配对store；receiving→staged→consumed，只有原接收事务能把staged授予Run并共同发布ready元数据/去重事实。未完成/过期/未知字节不消费，重复相同接收键复用原Run，已消费ID另建Run冲突。TTL不删除字节或清除消费事实。上传预留同样计入owner/store；中断后仍保留台账，维护清理属于T-15。下载先校验ready/hash和正文授权，再逐块认证/授权，已发送数据不在撤权可回收范围。HTTP不暴露宿主路径或后端配置。
+
+
+T-14 的登录壳、固定静态资产与认证目录边界见 [ADR-0026](../decisions/0026-local-workbench.md)。工作台默认元数据视图，显式读取正文；SSE 重连只补读原游标，start/response 丢应答保留原请求声明以显式重试，取消/恢复必须显式提交。仅内置 sandbox 的已发布成功结果支持“已确认销毁”展示，否则保留清理未确认。下载/预览仍走原授权接口，查看不触发代码；PNG 解码与其他附件策略由工程方案限定。

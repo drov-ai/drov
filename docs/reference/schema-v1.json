@@ -2,6 +2,48 @@
   "description": "Independent JSON Schema documents; cross-field invariants also require Python validation.",
   "schema_version": 1,
   "schemas": {
+    "AgentCatalog": {
+      "$defs": {
+        "AgentSummary": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Name",
+              "type": "string"
+            },
+            "revision": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Revision",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "revision"
+          ],
+          "title": "AgentSummary",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/AgentSummary"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "AgentCatalog",
+      "type": "object"
+    },
     "AgentRegistration": {
       "additionalProperties": false,
       "properties": {

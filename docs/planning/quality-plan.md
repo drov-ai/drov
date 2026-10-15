@@ -186,3 +186,10 @@ T-12 MCPFixture 已落地为 [官方SDK服务](../../examples/mcp_stdio_fixture.
 ## T-13 HTTP 验证落地
 
 实际矩阵和最终状态见 [本轮验证](../validation/t13-http.md)。`test_http*`覆盖合成可信身份/任意头和body伪造/Host-Origin/猜ID与跨归属/撤权、三参考场景SDK-stream-HTTP对照、原审批/输入/核查响应及持久回执/重开恢复、签名scope/query分页、完整SSE游标和元数据投影；真实loopback连接退出与ASGI2.0/2.4的阻塞发送、临时有界队列/持久补读、显式取消及借用关闭。上传覆盖预留/大小/未完成/过期/重复接收、同scope事务消费失败回滚与并发去重、HTML安全附件/失去字节410与动态权限；真实Docker三入口使用实际CSV统计与PNG绘图，批准前0创建、销毁后/重开无后端HTTP下载hash。生成OpenAPI与独立server安装进入平台CI；已有SDK原故障矩阵仍保留，不以HTTP脚本成功替代隔离或真实模型质量。T-15再检验上传回收/备份一致性，T-14检验UI安全预览。
+
+
+## T-14 工作台验证落地
+
+`tests/test_workbench.py` 检查固定公开资产的Host/Origin/URL凭据边界、HEAD/CSP/no-store、认证数据/目录和关闭工作台；会话查询入口覆盖斜杠、点段、保留字符及Unicode的无损往返/跨归属拒绝；原HTTP身份/文件矩阵保持。Playwright以实际loopback服务运行研究/Memory/输入审批/拒绝/unknown核查、失败、保存final的显式恢复、断连重连、丢start回执去重、撤权正文清除、跨归属、HTML/SVG附件、PNG预览与窄屏；另检查分块UTF-8/CRLF/多行SSE、临时帧无游标/不完整帧、大小/hash拒绝。真实Docker浏览器用例必须实际上传CSV→批准原计划→生成CSV/PNG→销毁后授权读取/下载并比较实际内容，查看不增加模型调用。无Docker配置的适用skip不能作为该项通过。
+
+安装检查须从wheel/sdist重建比较所有静态字节，core-only无Web导入仍通过；独立server安装后以真实HTTP读取页面/每个资源/CSP并验证数据仍需认证。前端CI固定锁重新生成schema和资源、比较跟踪文件并运行浏览器；Docker CI独立执行真实代码/文件用例。实际结果/失败修正在 [验证](../validation/t14-workbench.md)，不由本节推断全部通过，不把脚本模型、维护者截图或Chromium移动视口当真实模型质量/外部用户体验/所有浏览器设备支持。

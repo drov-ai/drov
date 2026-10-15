@@ -4,11 +4,11 @@
 
 ## 当前状态
 
-- 阶段：P1至P4、T-01至T-13（含T-10A/T-10B/T-10C）已完整验收。**T-13 HTTP与身份边界整卡已关闭，下一项T-14本地工作台**；最新源码26b97ee已推送，新增65项HTTP测试（62传输/离线+3真实Docker）。最终两解释器含Docker全库1132+61skip /1134+59skip通过；同一源码的核心10与Docker4个远程job全部success。SSE认证期间撤权已复现并修正，具体失败/构件/平台证据见 [本轮验证](../validation/t13-http.md)。
+- 阶段：P1至P4、T-01至T-13（含T-10A/T-10B/T-10C）已完整验收。**T-14本地工作台正在实施/验收，未提前关闭整卡**；T-13历史源码26b97ee已推送，新增65项HTTP测试（62传输/离线+3真实Docker）。最终两解释器含Docker全库1132+61skip /1134+59skip通过；同一源码的核心10与Docker4个远程job全部success。SSE认证期间撤权已复现并修正，具体失败/构件/平台证据见 [本轮验证](../validation/t13-http.md)。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
-- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；未验收：T-14至T-18，工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
-- 本轮T-13仅本地合成身份/文件/模型输出、真实loopback HTTP/SSE及原Docker环境；未读真实Key、调用付费模型/云、上传私有资料或公开发布/部署。T-10C历史云授权/预留与边界见其验证记录，本轮未动用该云预算。
+- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；工作台代码已接入，最终构件/平台验收进行中；未验收：T-14至T-18，维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
+- 本轮T-14仅本地合成身份/文件/模型输出、真实loopback HTTP/SSE及原Docker环境；未读真实Key、调用付费模型/云、上传私有资料或公开发布/部署。T-10C历史云授权/预留与边界见其验证记录，本轮未动用该云预算。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 - 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
 - 2026-10-14 首版范围文档轮起点（历史）：同一 `/Users/yanlong/projects/drov`、main / 8f3c5e0，工作区干净且与 origin/main 同步。本轮仅修改规划、协作/开发说明与验证文档；未改 SDK 源码、测试、schema、依赖锁、DDL 或品牌，未运行/拉取容器或调用模型。文档检查点以本轮 Git 提交和下述验证记录为准。
@@ -17,7 +17,13 @@
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 本轮交付：T-13 HTTP 与身份边界（完整验收）
+## 本轮交付：T-14 本地工作台（验收中）
+
+起点main/cf6c8cd，干净且远端同步；前置26b97ee的核心10/Docker4 jobs已实查success。按[ADR-0026](../decisions/0026-local-workbench.md)接通同源登录/固定资源/认证目录、会话与运行/上下文/交互/取消恢复/事件重连、原上传和安全PNG/附件。页面接入发现合法会话ID的路径表示缺口，新增查询入口与原函数共用授权；原Runtime/DDL/uv.lock/P4和品牌原素材不改。最终本地23项Playwright（4协议/19浏览器，含真实Docker）全部通过，Python HTTP+资源/查询72项通过。两解释器全库/最终构件/安装与CI核验尚在收尾，**整卡未关闭，不能进入T-15**。实际失败修正和证据见[本轮验证](../validation/t14-workbench.md)。
+
+无真实Key/付费模型/云调用或公开发布/部署。当前无需用户新增仓库、账号、model ID或预算；保留Docker和原私有数据。完成最终检查后再更新下一项。
+
+## 历史验收：T-13 HTTP 与身份边界（完整验收）
 
 起点 main /119de61，工作区干净且与远端同步；T-12最终两套CI及T-10B前置已复核。交付 [DrovApp](../../src/drov/server/app.py)、同内核路由/可信身份/SSE、Runtime会话分页、私有有期限上传与Run接收同事务消费、动态授权附件；新增upload_schema=1独立扩展，原records/Artifact/Sandbox DDL不改。接口/源契约/案例/质量/兼容/schema/OpenAPI与 [ADR-0025](../decisions/0025-http-identity-and-uploads.md) 同轮同步。
 

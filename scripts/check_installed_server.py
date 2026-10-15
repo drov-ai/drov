@@ -83,6 +83,10 @@ def main() -> None:
         shutil.copyfile(ROOT / "examples/http_offline.py", example)
         for arguments in ([], ["--stream"]):
             run([str(python), "-I", "-B", str(example), *arguments], temporary)
+        run(
+            [str(python), "-I", "-B", str(ROOT / "scripts/check_workbench_assets.py")],
+            temporary,
+        )
         print(
             json.dumps(
                 {

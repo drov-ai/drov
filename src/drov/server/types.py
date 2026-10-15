@@ -31,6 +31,15 @@ class VerifyBody(WireModel):
     request_id: Identifier
 
 
+class AgentSummary(WireModel):
+    name: ScopedIdentifier
+    revision: ScopedIdentifier
+
+
+class AgentCatalog(WireModel):
+    items: list[AgentSummary]
+
+
 class EmptyBody(WireModel):
     pass
 

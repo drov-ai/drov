@@ -90,3 +90,6 @@ T-12 的固定MCP发现、同一权限/审批、单次调用和owner task关闭�
 
 
 T-13 服务的身份/所有权、同一Runtime路由/SSE、私有上传接收与兼容决定见 [ADR-0025](../decisions/0025-http-identity-and-uploads.md)，实际传输/三场景/Docker/安装与平台证据见 [T-13验证](../validation/t13-http.md)。当前状态仍只在progress维护。
+
+
+T-14 的同源登录壳/内存凭据、最小Agent目录、原事件/交互与安全PNG/附件取舍见 [ADR-0026](../decisions/0026-local-workbench.md)，实际浏览器、Docker与wheel资产证据见 [验证](../validation/t14-workbench.md)。任务状态仍只在progress。

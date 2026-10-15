@@ -301,3 +301,6 @@ E2B控制应答失配变体：配置检查失败不执行原代码，原资源�
 
 
 T-13 的 [实际loopback示例](../../examples/http_offline.py) 用research/Memory/HumanInput→审批→单次write三种应用形态调用相同Runtime；9组SDK/stream/HTTP测试对照相同结果、操作/暂停与回执。另3组实际Docker CSV/PNG测试沿同一内核检查输入/代码正文权限、HTTP上传消费、批准前无创建、销毁及重开后hash下载，无模型或工作台独立执行循环。实际数量/最终平台结果见 [T-13](../validation/t13-http.md)，不把预定输出当真实模型任务分数。
+
+
+T-14 的三个参考形态由 [工作台离线例](../../examples/workbench_offline.py) 注册到同一DrovApp，浏览器通过原HTTP完成检索、Memory、输入/审批/拒绝和unknown核查。X-03 的浏览器专项实际沿受控上传/原代码批准/Docker/销毁后CSV下载与PNG解码检查，查看不增加模型调用；数据/代码均为固定合成计划，不限定产品业务边界，也不作为真实模型质量分数。实际验收矩阵见 [T-14](../validation/t14-workbench.md)。

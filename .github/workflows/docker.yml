@@ -53,3 +53,21 @@ jobs:
       - name: Installed core-only wheel with actual stdlib/analysis SDK and stream
         run: |
           uv run --locked python scripts/check_installed_sandbox.py --python "$(uv run --locked python -c 'import sys;print(sys.executable)')" --wheel dist/drov-0.1.0a0-py3-none-any.whl --config .drov/docker-ci.json --analysis-record .drov/analysis/image.json --directory .drov/installed-acceptance
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        if: matrix.python == '3.11'
+        with:
+          node-version: "24.14.0"
+          cache: npm
+          cache-dependency-path: workbench/package-lock.json
+      - run: uv sync --locked --extra server
+        if: matrix.python == '3.11'
+      - run: npm ci
+        working-directory: workbench
+        if: matrix.python == '3.11'
+      - run: npx playwright install --with-deps chromium
+        working-directory: workbench
+        if: matrix.python == '3.11'
+      - name: Browser workbench with actual Docker CSV and PNG
+        run: npm test
+        working-directory: workbench
+        if: matrix.python == '3.11'

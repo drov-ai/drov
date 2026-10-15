@@ -28,6 +28,36 @@ jobs:
       - run: uv run --locked mypy
       - run: uv run --locked python scripts/generate_schemas.py --check
 
+  workbench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24.14.0"
+          cache: npm
+          cache-dependency-path: workbench/package-lock.json
+      - run: uv sync --locked --extra server
+      - run: npm ci
+        working-directory: workbench
+      - run: npm run schema
+        working-directory: workbench
+      - run: git diff --exit-code -- workbench/src/schema.d.ts
+      - run: npm run format:check
+        working-directory: workbench
+      - run: npm run build
+        working-directory: workbench
+      - run: git diff --exit-code -- src/drov/server/static
+      - run: npx playwright install --with-deps chromium
+        working-directory: workbench
+      - run: npm test
+        working-directory: workbench
+
   package:
     strategy:
       fail-fast: false
@@ -51,7 +81,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: uv sync --locked --extra server
       - name: HTTP identity, real loopback SSE and file boundaries
-        run: uv run --locked --extra server pytest tests/test_http.py tests/test_http_transport.py tests/test_http_artifacts.py tests/test_http_scenarios.py
+        run: uv run --locked --extra server pytest tests/test_http.py tests/test_http_transport.py tests/test_http_artifacts.py tests/test_http_scenarios.py tests/test_workbench.py
       - run: uv run --locked --extra server python scripts/generate_openapi.py --check
       - run: uv sync --locked --extra mcp
       - name: Real MCP stdio integration

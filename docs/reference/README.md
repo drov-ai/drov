@@ -75,3 +75,8 @@ assert "result" not in evidence.model_dump()
 `from drov import DrovApp`或`from drov.server import DrovApp, ServerLimits`。核心导入不加载FastAPI/Uvicorn，构造服务需server extra。实际字段/端点为 [OpenAPI](openapi-v1.json)，通过`scripts/generate_openapi.py`从真实路由生成（需server extra）；服务的`GET /openapi.json`也需认证。默认正文不可见，错误不回显输入/异常细节，所有运行/交互/分页均委托同一Runtime。实际装配/认证/上传/流语义见 [API](../planning/api-draft.md) 与 [ADR-0025](../decisions/0025-http-identity-and-uploads.md)。
 
 HTTP JSON DTO/ServerLimits/UploadReceipt加入核心可生成schema。独立 [上传扩展DDL](storage-uploads-schema-v1.sql) 仅服务带ArtifactStore时启用；旧SDK拒绝含此表的库，原格式库不变。未消费暂存不返回ready引用或可下载字节；TTL到期仅拒绝新消费，维护回收后续T-15。三场景loopback普通/SSE例见 [http_offline.py](../../examples/http_offline.py)，不调用真实模型。
+
+
+## 本地工作台
+
+DrovApp默认提供实验性 `/workbench/`，可用 `workbench=False` 关闭。固定登录壳/资源允许无认证读取；全部数据接口仍认证，新增 `/v1/agents` 只返回已注册name/revision的AgentCatalog。用户安装无需Node；schema与静态资产归属见 [ADR-0026](../decisions/0026-local-workbench.md)，启动/开发与限制见 [工作台说明](../../workbench/README.md)。页面复用原HTTP，不更改Runtime/DDL；无损会话名使用`GET /v1/session?session_id=...`，同原路径入口的授权/分页。

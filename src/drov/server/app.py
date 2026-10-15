@@ -50,6 +50,7 @@ class DrovApp:
         allowed_hosts: Sequence[str] | None = None,
         allowed_origins: Sequence[str] | None = None,
         server_limits: ServerLimits | None = None,
+        workbench: bool = True,
     ) -> None:
         if type(port) is not int or not 1 <= port <= 65535:
             raise ConfigurationError("Expected a fixed server port")
@@ -128,6 +129,14 @@ class DrovApp:
             openapi_url=None,
         )
         install(self)
+        self._public_paths: set[str] = set()
+        if workbench:
+            from drov.server.workbench import assets
+            from drov.server.workbench import install as install_workbench
+
+            entries = assets()
+            install_workbench(self._app, entries)
+            self._public_paths = {"/", "/workbench", *entries}
 
     @asynccontextmanager
     async def _lifespan(self, app: Any) -> AsyncIterator[None]:
@@ -202,6 +211,8 @@ class DrovApp:
                     (b"x-request-id", request_id.encode()),
                     (b"cache-control", b"no-store"),
                     (b"x-content-type-options", b"nosniff"),
+                    (b"referrer-policy", b"no-referrer"),
+                    (b"cross-origin-resource-policy", b"same-origin"),
                 ]
             async with asyncio.timeout(self.server_limits.send_seconds):
                 await send(message)
@@ -239,6 +250,12 @@ class DrovApp:
                 scope.get("query_string", b"").decode("latin-1"), keep_blank_values=True
             ).keys():
                 raise HTTPFailure(400, "credential_in_url")
+            scope["drov.request_id"] = request_id
+            if scope["path"] in self._public_paths and scope["method"] in ("GET", "HEAD"):
+                # The login shell has no Runtime data or credential bootstrap. Host/Origin,
+                # local peer and credential-in-URL checks above still apply to all assets.
+                await self._app(scope, receive, bounded_send)
+                return
             context = await self._identity(headers)
             if self._connections >= self.server_limits.max_connections:
                 raise HTTPFailure(429, "capacity_exceeded")

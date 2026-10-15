@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；T-10A 文件/代码沙箱公共接口与 Runtime 闭环已实现；OpenAI Responses离线适配及MCP stdio tools已实现；真实模型未验证，HTTP按ADR-0025接通，工作台尚未实施。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-15。
+状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；T-10A 文件/代码沙箱公共接口与 Runtime 闭环已实现；OpenAI Responses离线适配及MCP stdio tools已实现；真实模型未验证，HTTP按ADR-0025接通，工作台按ADR-0026接入；实际验收状态见progress。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-15。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -470,10 +470,17 @@ runtime = Runtime(
 
 `from drov import DrovApp` / `from drov.server import DrovApp, ServerLimits`；安装server extra后构造ASGI对象。`agents`映射及storage/artifacts/policy/authorizer/dependencies/limits由宿主装配，或只传已打开的`runtime`借用。认证二选一：`local=True`（默认host=127.0.0.1/port=8000，本次lifespan token由宿主读`local_token`）或`auth=AuthAdapter`。非本地host还要求显式Authorizer、精确allowed_hosts/allowed_origins；两个列表为同源authority/origin，不含通配符。`await app.serve()`使用固定单worker；可调用ASGI对象供支持lifespan的宿主使用。不得从请求改变绑定/资源/策略。装配模式的模型仍沿Runtime默认借用规则，由宿主关闭；需Runtime拥有模型时，先以owned_models建立显式Runtime，再将其借给DrovApp并由宿主结束该Runtime。
 
-所有接口使用`Authorization: Bearer ...`，包括`GET /openapi.json`；身份不从body或任意用户头读取。`GET /v1/runs/{id}`返回`RunInspection`，`include_content=false`默认隐藏正文。`POST cancel/recover` body是`{}`，recover固定wait=False；终态recover按内核拒绝409。`POST responses`返回ResponseReceipt，verify不消费请求。分页limit/after、上下文正文与内核接口同义；新增`Runtime.sessions(*,context,after=None,limit=100)`、`Runtime.session(session_id,*,context,after=None,limit=100)`与HTTP共用授权分页。Session游标绑定原身份/查询和存储secret，不用于授权。
+所有数据接口使用`Authorization: Bearer ...`，包括`GET /openapi.json`；固定工作台登录/静态资产例外见ADR-0026；身份不从body或任意用户头读取。`GET /v1/runs/{id}`返回`RunInspection`，`include_content=false`默认隐藏正文。`POST cancel/recover` body是`{}`，recover固定wait=False；终态recover按内核拒绝409。`POST responses`返回ResponseReceipt，verify不消费请求。分页limit/after、上下文正文与内核接口同义；新增`Runtime.sessions(*,context,after=None,limit=100)`、`Runtime.session(session_id,*,context,after=None,limit=100)`与HTTP共用授权分页。Session游标绑定原身份/查询和存储secret，不用于授权。
 
 SSE支持`Last-Event-ID`或`after`，同时提供必须一致。durable帧含id/event/data；token.delta/gap/error无id。头前非法或超前游标400；头后错误是无id的stream.error。关闭HTTP等待/订阅不取消Run，显式cancel走原内核。实际正文/事件上限由Runtime/ServerLimits控制。
 
 `POST /v1/artifacts`使用`Content-Type: application/octet-stream`与明确`Content-Length`；query为`UploadTarget`的agent_name/revision/session_id/name/media_type。返回201 `UploadReceipt(upload_id,expires_at)`，不是可读ArtifactRef。Run JSON的upload_ids按顺序跟在artifact_ids后；组合输入重名/重复ID拒绝，容量/数量仍受ArtifactLimits；同request_key/相同声明复用RunRef，已消费ID另开接收冲突409。上传未完整409、已过期410、未知长度411、传输超大413、错误媒体415；失效已消费事实不因TTL重新执行。GET文件元数据/下载使用ready ID，临时upload_id不可读。
 
 下载统一octet-stream/attachment、编码后的filename*、nosniff/CSP，按64KiB块复核认证与正文权限，内容不可用410、存储暂不可用503。源运行/代码/文件逻辑名不通过默认元数据投影泄露。无路径/镜像/挂载/凭据HTTP接口。上传台账兼容、所有权和传输取舍见 [ADR-0025](../decisions/0025-http-identity-and-uploads.md)；暂存回收和数据清理仍按T-15实施，不由HTTP后台自动执行。
+
+
+## T-14 工作台实际入口
+
+`DrovApp(..., workbench=True)` 默认提供 `/workbench/`，`/`、`/workbench` 跳转到该地址；`workbench=False` 关闭页面而保留HTTP。无认证只允许固定页面/静态资源 GET/HEAD，仍验证Host/Origin/本地连接；没有token bootstrap或任意文件目录。浏览器在登录表单提交本地token或宿主应用credential，只在内存保存。`GET /v1/agents -> AgentCatalog(items=[AgentSummary(name, revision)])` 经认证及应用级read后返回当前注册名/版本，不暴露配置，也不替代start授权。字段/schema/OpenAPI已由实际类型生成。
+
+新增`GET /v1/session?session_id=...`与原路径接口同语义、同授权/分页，工作台采用查询形式无损传递包含斜杠/点段/保留字符的合法会话ID。页面复用前述会话/Run分页、inspection/context、responses/verify/cancel/recover、原上传消费和附件接口，没有新运行状态或存储字段。默认元数据，显式正文；清单中的provider内容仍不可见。重连不提交任务；未知start/response回执显式复用原请求重试。正文被拒绝时清除正文/文件名/Blob视图，后到旧请求不恢复内容。使用与数值限额见 [工作台说明](../../workbench/README.md) / [工程方案](engineering.md)，取舍和兼容边界见 [ADR-0026](../decisions/0026-local-workbench.md)。

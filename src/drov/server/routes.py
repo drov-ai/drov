@@ -12,6 +12,7 @@ from starlette.responses import JSONResponse, Response, StreamingResponse
 
 from drov.artifacts import ArtifactInfo, ArtifactRef
 from drov.artifacts.uploads import UploadReceipt, Uploads, UploadTarget
+from drov.auth import Resource
 from drov.errors import (
     ArtifactUnavailable,
     CapacityExceeded,
@@ -24,7 +25,15 @@ from drov.errors import (
     PersistenceUnavailable,
     RecordNotFound,
 )
-from drov.server.types import EmptyBody, ErrorEnvelope, ResponseBody, StartBody, VerifyBody
+from drov.server.types import (
+    AgentCatalog,
+    AgentSummary,
+    EmptyBody,
+    ErrorEnvelope,
+    ResponseBody,
+    StartBody,
+    VerifyBody,
+)
 from drov.types import (
     CancelReceipt,
     ContextManifest,
@@ -144,6 +153,13 @@ def install(service: "DrovApp") -> None:
     async def openapi() -> dict[str, Any]:
         return service.openapi()
 
+    @_route(app.get("/v1/agents", response_model=AgentCatalog, responses=errors))
+    async def agents(request: Request) -> AgentCatalog:
+        await runtime._runs.authorize(actor(request), Resource(owner=actor(request)), ("read",))
+        return AgentCatalog(
+            items=[AgentSummary(name=name, revision=revision) for name, revision in runtime._agents]
+        )
+
     @_route(app.post("/v1/runs", status_code=202, response_model=RunRef, responses=errors))
     async def start(body: StartBody, request: Request) -> RunRef:
         key = (body.agent_name, body.revision)
@@ -242,6 +258,7 @@ def install(service: "DrovApp") -> None:
     ) -> SessionPage:
         return await runtime.sessions(context=actor(request), after=after, limit=limit)
 
+    @_route(app.get("/v1/session", response_model=SessionView, responses=errors))
     @_route(app.get("/v1/sessions/{session_id}", response_model=SessionView, responses=errors))
     async def session(
         session_id: str,

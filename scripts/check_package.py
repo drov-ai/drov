@@ -32,6 +32,10 @@ def inspect_archives(wheel: Path, sdist: Path) -> None:
     with zipfile.ZipFile(wheel) as archive:
         names = set(archive.namelist())
         assert {"drov/__init__.py", "drov/py.typed"} <= names
+        assert {"drov/server/static/index.html", "drov/server/static/drov-icon.svg"} <= names
+        for file in (ROOT / "src/drov/server/static").rglob("*"):
+            if file.is_file():
+                assert archive.read(file.relative_to(ROOT / "src").as_posix()) == file.read_bytes()
         assert {"drov/sandbox/seccomp-v27.0.3.json", "drov/sandbox/LICENSE.moby"} <= names
         assert (
             archive.read("drov/sandbox/seccomp-v27.0.3.json")
@@ -60,10 +64,22 @@ def inspect_archives(wheel: Path, sdist: Path) -> None:
             "examples/artifact_inputs_offline.py",
             "examples/sandbox_offline.py",
             "docs/reference/storage-sandbox-schema-v1.sql",
+            "workbench/package-lock.json",
+            "workbench/src/main.ts",
             "LICENSE",
             "THIRD_PARTY.md",
         } <= names
-        forbidden = {".env", ".git", ".venv", ".drov", "drov-brand", "__pycache__"}
+        forbidden = {
+            ".env",
+            ".git",
+            ".venv",
+            ".drov",
+            "drov-brand",
+            "__pycache__",
+            "node_modules",
+            "test-results",
+            "playwright-report",
+        }
         assert not any(forbidden & set(Path(name).parts) for name in names)
 
 
