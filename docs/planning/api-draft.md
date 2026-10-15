@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；T-10A 文件/代码沙箱公共接口与 Runtime 闭环已实现；真实模型/服务入口仍未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
+状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；T-10A 文件/代码沙箱公共接口与 Runtime 闭环已实现；OpenAI Responses离线适配及MCP stdio tools已实现；真实模型未验证，HTTP/工作台尚未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-15。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -432,3 +432,35 @@ T-13 的 HTTP 同一入口扩展：POST /v1/runs 新增可选 artifact_ids，仅
 
 
 E2B的执行能力校验与清理身份核对分别处理；坏控制配置不执行代码，但归属可证的原资源仍可销毁。该修正不增加工具参数、调用次数或可下载成功产物。
+
+
+## MCP stdio tools（T-12）
+
+`from drov.integrations.mcp import MCPStdio, MCPTool, MCPToolPolicy`；安装 `drov[mcp]`。构造仅保存宿主配置，无启动/网络。完整可运行示例见 [mcp_stdio_offline.py](../../examples/mcp_stdio_offline.py)。调用约定：
+
+```python
+server = MCPStdio(
+    namespace="local",
+    revision="1",
+    command=absolute_executable,
+    args=[absolute_server_script],
+    env={},
+    inherit_env=(),
+)
+tools = await server.discover()  # 临时预检进程发现并关闭；不调用业务工具
+agent = Agent(name="assistant", revision="1", model=model, tools=tools)
+runtime = Runtime(
+    agents=[agent],
+    storage=SQLiteStorage("runs.db"),
+    dependencies={server.dependency: ResourceBinding.owned(server)},
+)
+# async with runtime: ...；普通run/stream/respond/resume沿原接口
+```
+
+`discover(policies={remote_name: MCPToolPolicy(effect="read", approval="policy")})` 只接受应用显式策略；未映射工具默认 unknown/policy，通常持久审批。readOnlyHint/idempotentHint 不授予权限。`tools` 是固定 tuple，每个定义的 `remote_name` 对应原名，`name` 是含 namespace 与远端名hash的Drov逻辑名，`revision` 为宿主服务revision。可从tuple选择子集注册；模型只能使用注册的逻辑名。`dependency` 是 `mcp.<namespace>`；owned/factory 自动打开未打开的连接并关闭，borrowed 需先 await server.open，由宿主最终 aclose。构造/发现/打开分别有明确边界；discover/open 单次使用，服务变化用新对象/新revision。临时 Agent.run 不含所需dependency，须使用显式Runtime。
+
+`command`/`cwd` 为绝对路径，`args` 为字符串列表；不从模型文本启动命令或shell。`env` 显式给值、`inherit_env` 显式选择宿主变量名，默认不继承宿主环境。Windows服务若依赖系统/临时目录变量，由宿主按需白名单传入。环境值不进入指纹，服务/环境语义变化需revision；秘密仅由宿主安全配置，不能写进args、工具描述或Git。stdio服务本身与启动行为是可信宿主程序，不是代码沙箱。
+
+支持固定分页发现、SDK initialize握手版本（本地实测2025-11-25）、闭合JSON Schema输入子集。支持有限标量/enum/对象/数组/nullable/已有数值与长度约束；未写additionalProperties时收紧为false，`$ref/$defs`、开放字典及其他关键字明确拒绝。可选字段缺省仍缺省，default不注入；严格JSON边界拒绝重复键/非有限值，之后按2020-12校验，不强转Python类型。服务outputSchema由SDK校验。结果为 `{"content": [{"type": "text", "text": "..."}], "structuredContent": object_or_null}`；非text内容/非对象structuredContent不可用，不转换为Artifact或抓取资源。更广schema、媒体结果与2026现代协议尚不支持。
+
+每次打开与调用前复核完整发现快照；变更拒绝，不替换原审批或重发。每个SDK原始tools/call只发一次，无自动input-required回合、sampling/roots/elicitation或任务执行；task-required定义在发现时拒绝。断连/工具错误/无效结果/超时和取消关闭整个连接，不自动重连。未知写入沿原reconciliation处理，不因SDK取消确认远端效果撤销。关闭尚未结束时报ShutdownIncomplete并保留所有权，可再次aclose等待原清理；细节见 [运行契约](runtime-contract.md) 与 [ADR-0024](../decisions/0024-mcp-stdio-tools.md)。

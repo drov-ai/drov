@@ -52,3 +52,8 @@ uv run --locked python examples/operations_offline.py --stream
 ```
 
 五组自有合成场景各建立一个仅 loopback、随机端口的独立事项服务，批准/拒绝、补充输入、回包丢失核查及未知时取消各用 3–4 个新 SDK 进程；服务记录实际写次数，核查/重复回执不多写。事项服务刻意非幂等，作为证据夹具，正常结束后关闭并清理临时目录；不是部署教程或正式业务服务。硬崩溃/逐故障矩阵仍按 T-10，预设模型不证明真实模型质量。
+
+
+## MCP stdio 离线闭环
+
+安装mcp extra后运行 `python examples/mcp_stdio_offline.py` 或加 `--stream`。示例由 [本地官方SDK服务](mcp_stdio_fixture.py) 提供两页工具，使用确定性ScriptedModel；默认unknown工具先持久暂停、批准后只调用一次，退出关闭预检/运行两个进程。无真实模型、账号或费用。该服务只含合成资料，带故障模式供测试，不是生产MCP服务。API/限制见 [MCP接口](../docs/planning/api-draft.md#mcp-stdio-toolst-12)。

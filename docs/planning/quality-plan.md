@@ -178,3 +178,6 @@ T-10C 实际验证入口：`tests/test_e2b_contracts.py`（core-only）、`test_
 
 
 T-10C追加拒绝组：真实创建后受控SDK应答返回坏网络配置，代码start intent/程序/暂存计数均0，仍可按原归属查询并实际销毁，结果failed_known且租约释放；不能为了清理放松template/完整metadata/原ID检查。
+
+
+T-12 MCPFixture 已落地为 [官方SDK服务](../../examples/mcp_stdio_fixture.py) 与 [真实子进程测试](../../tests/test_mcp_stdio.py)：分页/重复/循环/限额、默认unknown审批/拒绝/原计划重开、schema变化、成功/工具错误/非法结果/断连/卡住/超时/取消、进程树退出、owned/borrowed/factory/启动失败及ShutdownIncomplete保锁。SDK-only核心安装不加载MCP；独立extra安装后普通/stream实际启动stdio服务。B-12/X-02的MCP部分以 [验证记录](../validation/t12-mcp-stdio.md) 的实际平台为准；无真实模型/私有MCP服务结论，HTTP仍待T-13。

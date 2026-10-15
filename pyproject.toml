@@ -27,11 +27,11 @@ dependencies = [
   "typing-extensions>=4.16.0,<5",
 ]
 
-# Optional clients stay outside core imports; MCP/server implementation follows later tasks.
+# Optional clients stay outside core imports; HTTP server follows T-13.
 [project.optional-dependencies]
 openai = ["openai>=3.29.0,<4"]
 e2b = ["e2b==2.56.0"]
-mcp = ["mcp>=2.3.0,<3"]
+mcp = ["mcp==2.3.0"]
 server = ["fastapi>=0.143.0,<0.144", "uvicorn>=0.54.0,<0.55"]
 
 [dependency-groups]
@@ -72,7 +72,7 @@ strict = true
 files = ["src", "tests", "scripts", "examples"]
 
 [[tool.mypy.overrides]]
-module = ["openai", "openai.*", "httpx2", "httpx2.*", "e2b", "e2b.*", "httpx", "httpx.*"]
+module = ["openai", "openai.*", "httpx2", "httpx2.*", "e2b", "e2b.*", "httpx", "httpx.*", "mcp", "mcp.*", "jsonschema", "jsonschema.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

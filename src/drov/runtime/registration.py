@@ -10,6 +10,7 @@ from drov._json import canonical_json, load_json
 from drov.agent import Agent
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.errors import ConfigurationError
+from drov.integrations._mcp_tool import MCPTool
 from drov.sandbox.tools import PythonSandbox, SandboxResultCodec
 from drov.sandbox.types import SandboxResult
 from drov.tools.python import PythonTool
@@ -53,8 +54,11 @@ def fingerprint(agent: Agent[Any]) -> AgentRegistration:
             if not inspect.iscoroutinefunction(tool.verifier):
                 raise ConfigurationError("Registered verifier must be an async read-only callback")
             TypeAdapter(ScopedIdentifier).validate_python(tool.verifier_revision, strict=True)
+        mcp_registration = tool.registration() if isinstance(tool, MCPTool) else None
         properties = {
-            key: dict(compile_type(codec.python_type).schema)
+            key: dict(codec.schema)
+            if isinstance(tool, MCPTool)
+            else dict(compile_type(codec.python_type).schema)
             for key, codec in tool.argument_codecs.items()
         }
         if set(tool.defaults) - properties.keys():
@@ -64,11 +68,19 @@ def fingerprint(agent: Agent[Any]) -> AgentRegistration:
         expected = {
             "type": "object",
             "properties": properties,
-            "required": [key for key in properties if key not in tool.defaults],
+            "required": (
+                tool.parameters["required"]
+                if isinstance(tool, MCPTool)
+                else [key for key in properties if key not in tool.defaults]
+            ),
             "additionalProperties": False,
         }
+        if isinstance(tool, MCPTool):
+            expected = tool.parameters
         result: JsonCodec
-        if isinstance(tool, PythonSandbox):
+        if isinstance(tool, MCPTool):
+            result = tool.result_codec
+        elif isinstance(tool, PythonSandbox):
             if not isinstance(tool.result_codec, SandboxResultCodec):
                 raise ConfigurationError("Sandbox result requires its dedicated trusted codec")
             result = SandboxResultCodec(SandboxResult, SandboxResult.model_json_schema())
@@ -90,6 +102,7 @@ def fingerprint(agent: Agent[Any]) -> AgentRegistration:
                 "parameters": expected,
                 "result": result.schema,
                 "context_parameter": tool.context_parameter,
+                **({"mcp": mcp_registration} if mcp_registration is not None else {}),
                 **({"sandbox_backend": tool.backend} if isinstance(tool, PythonSandbox) else {}),
                 **(
                     {"verifier_revision": tool.verifier_revision}

@@ -24,7 +24,7 @@
 
 Python 导入名使用 `drov`；PyPI 分发名暂定 `drov`，占用和控制权待发布准备核实。若不可用，变更分发名不自动变更导入名。npm 组织保留，v0.1 不为凑产品线发布 JS SDK。
 
-T-01 已声明 extras：`openai`、`mcp`、`server`，T-11 已实现 openai 离线协议适配，mcp/server 仍只有依赖声明。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；T-09 已实现显式恢复调度。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。E2B experimental extra e2b 只在 T-10C 真实适配时新增，当前并未声明或安装。
+T-01 已声明 extras：`openai`、`mcp`、`server`，T-11 已实现 openai 离线协议适配，T-12 已实现 mcp stdio tools，server 仍只有依赖声明。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；T-09 已实现显式恢复调度。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。E2B experimental extra 已在 T-10C 实际接入，版本与远端证据见 ADR-0023。
 
 以下是完整首版的目标布局。T-01 只建立元数据包、测试/构建检查和 CI，其他模块按任务创建，不以空壳占位：
 
@@ -101,9 +101,11 @@ OpenAI 适配器名为 `OpenAIResponses`，从 `drov.models.openai` 导入。必
 
 T-11 的配置/生命周期、严格工具名/schema、按助手位置重放的 provider bundle、唯一完整提交和 Retry-After 细则见 [ADR-0022](../decisions/0022-openai-responses-adapter.md)。公共 DTO/DDL/uv.lock 未改变；导入/构造不依赖 SDK 安装，generate 缺 extra 明确拒绝。未列出已通过真实服务的模型或其他 compatible 服务。
 
-MCP 先连接应用显式配置的本地 stdio 服务，完成初始化、分页发现、调用、超时和退出；记录协商协议版本。客户端构造在 Runtime 生命周期内，工具名映射含 server namespace。初始 schema 固定到注册 revision；运行中服务工具改变需新注册，不能改变待审批操作。MCP annotations 只作提示，effect/权限由应用明确映射；默认 unknown/ask。禁止从模型文本启动任意命令；应用配置可执行文件与环境白名单，默认不把模型 API Key 传给子进程。
+MCP 先连接应用显式配置的本地 stdio 服务，完成初始化、分页发现、调用、超时和退出；记录协商协议版本。构造无 I/O；显式 discover 通过临时进程预检并关闭，固定工具定义；运行连接在 Runtime 生命周期内创建，工具名映射含 server namespace。初始 schema 固定到注册 revision；运行中服务工具改变需新注册，不能改变待审批操作。MCP annotations 只作提示，effect/权限由应用明确映射；默认 unknown/ask。禁止从模型文本启动任意命令；应用配置可执行文件与环境白名单，默认不把模型 API Key 传给子进程。
 
 仅启用 MCP tools；resources/prompts、sampling、elicitation 和远程认证属于后续范围。若服务要求尚不支持的能力，明确拒绝而非假装成功。Drov HTTP 事件流与 MCP 的传输协议不是同一功能。[E-12/13](evidence.md)
+
+T-12 的实际接口与边界见 [ADR-0024](../decisions/0024-mcp-stdio-tools.md)。精确固定 mcp 2.3.0（mcp-types 2.3.0/jsonschema 4.26.0）；只用 initialize 握手，真实夹具协商 2025-11-25，不自动升级 2026 协议。默认单次初始化/发现/调用 10s、close 等待 10s；分页最多32页/256工具/解析后256KiB，schema深度16。调用仍受原Run更严格的工具/活动期限与结果字节预算限制；stdout解析前无硬内存保证。关闭失败保留原资源/锁，调用失败使整个连接退出，不自动重连。实际schema子集/输出/环境与准备方式由API维护，验证见T-12记录。
 
 ## 6. 默认限额
 

@@ -343,3 +343,14 @@ T-10C 落地补充（ADR-0023）：同一 SandboxBackend 接入上述权限、�
 
 
 T-10C清理修正：执行前能力检查保持严格；查询/销毁只在原host配置hash、template、完整metadata和原ID匹配时操作。供应商控制配置失配须拒绝代码，但原资源归属可证时仍执行清理；确认销毁且无原输出为failed_known，归属不明或清理不明继续unknown并持有租约。
+
+
+## 14. MCP stdio 适配的运行边界
+
+T-12 使用 [ADR-0024](../decisions/0024-mcp-stdio-tools.md) 的固定发现快照。发现是显式预检连接，只初始化/分页列工具，关闭后才建立Agent；运行连接由Runtime资源绑定管理。初始化版本与完整清单/宿主配置摘要进入工具注册指纹，打开和每次调用前都复核；服务变动只能显式重新发现/注册，原审批参数/schema不改变。旧initialize协议无法把列工具和调用原子绑定，不能把客户端复核描述为冻结远端实现的保证。
+
+MCP元数据与annotations不授予effect/权限；默认unknown→ASK。工具沿同一权限、原计划、持久审批、单次派发、预算、结果校验及unknown核查。每次派发最多一个SDK原始tools/call；拒绝高层自动重发/补充输入回合，不提供sampling/roots/elicitation回调。非法参数、拒绝权限、等待审批时远端工具调用为0。服务工具错误/输出无效/超时/断连/取消不能证明write/unknown没有效果，保守暂停reconciliation；read可failed_known，适配层不自动重试。
+
+连接的SDK上下文由同一个owner task进入/退出。异常或取消发起整个stdio连接清理，其他未完成调用也失败；连接单次使用，不自动重连或接收新调用。SDK/进程退出尚未完成时调用/清理task持有引用，Runtime关闭超期保留资源和存储锁并报ShutdownIncomplete，后续aclose等待同一次清理。borrowed正常关闭只解除Runtime引用，宿主负责最终aclose；实际调用失败仍须中止故障连接。受测SDK进程树清理不等于恶意守护程序隔离，MCP不继承Docker保证；分页/结果限额是解析后校验，不是stdout硬内存上限。
+
+当前仅传输有界text/JSON结果，schema子集与字段形状由 [API](api-draft.md) 维护；不自动调用resources/prompts、执行媒体、抓取URI或发布Artifact。API与DTO/SQLite DDL无新增存储版本；未使用MCP的指纹保持原算法。

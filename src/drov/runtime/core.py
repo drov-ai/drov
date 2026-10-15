@@ -17,6 +17,7 @@ from drov.artifacts.types import ArtifactInfo, ArtifactInput, ArtifactRef
 from drov.auth import Authorizer, OwnerAuthorizer
 from drov.config import Limits
 from drov.errors import CapacityExceeded, ConfigurationError, Conflict, ShutdownIncomplete
+from drov.integrations._mcp_tool import MCPConnection, MCPTool
 from drov.models.protocol import ModelAdapter
 from drov.runtime.registration import AgentRegistration, fingerprint
 from drov.runtime.resources import ResourceBinding
@@ -590,6 +591,13 @@ class Runtime:
                     value if isinstance(value, ResourceBinding) else ResourceBinding.borrowed(value)
                 )
                 dependencies[key] = await self._acquire(binding)
+                if isinstance(dependencies[key], MCPConnection):
+                    connection = cast(MCPConnection, dependencies[key])
+                    if binding.mode == "borrowed":
+                        if not connection.is_open:
+                            raise ConfigurationError("Borrowed MCP connection must already be open")
+                    elif not connection.is_open:
+                        await connection.open()
                 if isinstance(dependencies[key], SandboxBackend):
                     backend = cast(SandboxBackend, dependencies[key])
                     if binding.mode == "borrowed":
@@ -603,6 +611,14 @@ class Runtime:
             self._dependencies = MappingProxyType(dependencies)
             for agent in self._agents.values():
                 self._require_dependencies(agent)
+                for tool in agent.tools:
+                    if isinstance(tool, MCPTool):
+                        tool_connection = dependencies.get(tool.dependency)
+                        if not isinstance(tool_connection, MCPConnection):
+                            raise ConfigurationError(
+                                "MCP tools require their discovered dependency"
+                            )
+                        tool_connection.validate_tool(tool)
             if any(
                 isinstance(tool, PythonSandbox)
                 for agent in self._agents.values()

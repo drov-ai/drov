@@ -113,6 +113,10 @@ def main() -> None:
             host="unix:///synthetic/not-running.sock",
             limits=DockerLimits(),
         )
+        from drov.integrations.mcp import MCPStdio
+
+        mcp_server = MCPStdio(namespace="inert", revision="1", command=sys.executable)
+        assert not mcp_server.is_open and mcp_server.tools == ()
         assert not preflight.is_open
         backend = DockerSandbox(
             image="sha256:" + "a" * 64,

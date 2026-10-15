@@ -139,3 +139,6 @@ C-17 的 Docker 代码/受控文件/产物由 T-10A/T-10B 交付，可选 E2B �
 Artifact 字节保存在显式私有本地目录，SQLite 负责 ready 元数据/引用关系与 Run 授予，私有文件阶段负责字节/容量预留台账；两者由 Runtime 协调，不能声称跨介质原子。不在操作 JSON/上下文塞二进制或凭据。第二批已实现 Artifact SQL 扩展 v1（artifact_records/artifact_grants），不伪装为旧 RunItem kind、不改 records DDL；显式配对启用，普通核心库不启用。Runtime 同一排他所有权覆盖配对 store/SQLite，原归属与目标 Run grant 分别保存。物理路径只用 ID，逻辑名仅正文；不跨作用域暴露去重/目录枚举，未发布阶段不可读取。
 
 输入接收、执行租约、输出暂存、ready 发布和维护回收由 Runtime 协调；LocalArtifacts 负责字节可靠保存/校验/删除，Storage 负责对应事务/CAS。必须保留“文件存在但未发布”与“资源销毁但结果未提交”的恢复阶段；外部资源或磁盘写入不能冒用 Memory 的同库事务。HTTP/UI 只适配上传/下载与权限投影，T-15 的备份/恢复/清理包含 blobs 及引用/租约，不复制活的执行环境。
+
+
+T-12 MCP适配实际结构：`integrations._mcp_tool` 是无可选依赖的定义/资源边界；`integrations.mcp` 在显式发现/打开时加载官方SDK与JSON Schema校验。短暂发现先固定Agent工具，运行连接沿Runtime dependencies/ResourceBinding；内部owner task独占SDK上下文的进入/退出。执行仍进入原PythonTool dispatcher和OperationJournal，不建立第二套权限/审批循环。配置/快照/协议只扩展MCP工具指纹，不改公共DTO/SQLite格式；实际决定见 [ADR-0024](../decisions/0024-mcp-stdio-tools.md)。

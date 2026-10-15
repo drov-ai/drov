@@ -17,8 +17,9 @@ dependencies, artifacts and hashes are recorded in `uv.lock`. Packages are insta
 separately; their code is not vendored in Drov's wheel. Their own licenses and notices
 remain applicable. The OpenAI extra implements a Responses adapter using the separately installed
 official openai 3.29.0 client (Apache-2.0) and its httpx2 2.13.1 transport
-(BSD-3-Clause); no SDK source is copied. MCP/server extras still install
-dependencies only. Protocol sources and actual offline validation are recorded in
+(BSD-3-Clause); no SDK source is copied. The MCP extra implements stdio tools with the separately installed official
+mcp 2.3.0 and mcp-types 2.3.0 clients (MIT), using jsonschema 4.26.0 (MIT).
+Only the server extra still installs dependencies without a Drov service implementation. Protocol sources and actual offline validation are recorded in
 `docs/decisions/0022-openai-responses-adapter.md` and
 `docs/validation/t11-openai-responses.md`.
 
@@ -128,3 +129,15 @@ Preserve the upstream artifact metadata omission in the T-18 public-extra review
 do not invent a License-Expression inside its wheel.
 Actual SDK/template/installation and cloud evidence is in
 `docs/validation/t10c-e2b.md`; this does not publish the template, image or package.
+
+
+## T-12 MCP stdio source inspection
+
+Inspected 2026-10-15: official python-sdk v2.3.0 tag resolves to commit
+`2118f14f8a19bc158d8a1cf90af58d85d187f849`; the installed wheel and lock retain
+upstream licenses. Client/ClientSession/stdio and POSIX/Windows process cleanup
+were inspected for lifecycle and single-call behavior. No upstream SDK code is
+vendored or modified. Drov's connection owner, frozen definitions, policy mapping
+and synthetic fixture are project code. Protocol references and compatibility
+limits are recorded in ADR-0024 and the T-12 validation record; using this SDK does
+not imply all MCP protocol versions or capabilities are supported.

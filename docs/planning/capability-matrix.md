@@ -12,7 +12,7 @@ AgentScope 列表示官方资料中可确认的覆盖，不表示质量排名或
 | --- | --- | --- | --- | --- | --- |
 | C-01 | Agent 循环与模型接入 | E-01、E-06：模型与循环接口 | 单 Agent 循环、能力校验、OpenAI Responses 适配器及 ScriptedModel；有步数与超时边界 | S-01-A；模型不支持工具时启动前给出清楚错误 | 更多供应商、路由、多模态 |
 | C-02 | Python 工具 | E-05：工具管理 | 函数/类型标注、参数校验、依赖注入、顺序执行及明确结果/错误 | S-01-B、S-03-A、B-05 | 动态工具集合、并发调度策略 |
-| C-03 | MCP | E-05：MCP 接入 | 官方 Python SDK v2 的 stdio tools 客户端，分页发现/调用/断连/关闭 | MCP 本地测试服务及错误路径；连接生命周期检查 | Streamable HTTP/OAuth、resources/prompts、sampling/elicitation |
+| C-03 | MCP | E-05：MCP 接入 | 官方 Python SDK 2.3.0 的 stdio tools 客户端（initialize握手版本，实测2025-11-25），固定分页发现/调用/断连/关闭；schema及text/JSON子集见API/ADR-0024 | MCP 本地测试服务及错误路径；连接生命周期检查 | Streamable HTTP/OAuth、2026现代握手、resources/prompts、sampling/elicitation/roots、任务扩展及媒体结果 |
 | C-04 | 结构化输出与事件 | E-01：结构化结果和流式输出 | 类型化输出、版本化事件形状；结果和流式由同一执行路径生成 | S-01-A、X-01 | 更多协议和输出媒体 |
 | C-05 | 会话与上下文 | E-01：上下文操作 | 会话隔离、完整消息组、预算、确定性裁剪与带来源结果预览 | S-01-C、S-02-C、B-15 | 模型摘要、大结果外部卸载、更多压缩策略 |
 | C-06 | 长期记忆 | E-02：多种记忆实现 | 内置事务 Memory、按用户/Agent 隔离、显式工具写回；最近记录/键/子串检索 | S-02-A/B/C、B-08/09/10 | 自动提取、语义/融合检索、外部后端一致性协议 |

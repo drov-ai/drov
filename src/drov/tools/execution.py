@@ -117,7 +117,9 @@ class ToolDispatcher:
                 arguments, context=context, max_bytes=run.limits.max_arguments_bytes
             )
             normalized = {
-                name: codec.encode(bound[name]) for name, codec in tool.argument_codecs.items()
+                name: codec.encode(bound[name])
+                for name, codec in tool.argument_codecs.items()
+                if name in bound
             }
             request: object = normalized
         except (ValueError, TypeError):

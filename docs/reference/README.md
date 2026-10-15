@@ -19,6 +19,7 @@ T-10A 的文件通道、公共沙箱定义与 Runtime 专用执行路径已实�
 | drov.auth / drov.errors | Authorizer/AuthAdapter、ToolResource/OwnerAuthorizer、错误与 TransientToolError；HTTP 认证仍未实现 |
 | drov.storage | MemoryStorage / SQLiteStorage；异步 open/aclose、start/查询、原子 transaction 接点；内部协议尚不稳定 |
 | drov.artifacts | ArtifactInput/Ref/Info/Limits 与 LocalArtifacts POSIX 私有字节层；Runtime 资源装配、文件接收/Run 授予/去重、ready 输入/产物与 get/read_artifact 动态授权；私有 stage 不可读 |
+| drov.integrations.mcp | MCPStdio/MCPTool/MCPToolPolicy；显式短暂发现、固定schema/配置、Runtime owned/borrowed/factory连接，原dispatcher/审批/unknown与实际stdio清理，见ADR-0024 |
 | drov.integrations.e2b | E2BSandbox/E2BLimits，可选固定 SDK、模板build、显式上传/独立预算、VM/工作负载profile；复用PythonSandbox/原Artifact/恢复，见ADR-0023与progress |
 | drov.sandbox | PythonSandbox、DockerSandbox、SandboxLimits、SandboxResult；固定 sandbox.run_python 专用派发、审批/绑定、实际 Docker 单次执行、有界文件导出/PNG 校验、销毁后共同发布与原阶段恢复 |
 

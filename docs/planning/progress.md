@@ -4,10 +4,10 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-10、T-10A、T-10B、T-11，以及本轮补做的 **T-10C 已完整验收**。本轮新增103项（44项离线、59项真实E2B），完整extras收集1062项；最终清理修正后的40项真实故障/崩溃回归、两解释器安装后SDK/stream均通过。最终源码 [763c25d](https://github.com/drov-ai/drov/commit/763c25db6a81548900e00979bfc4a5c47834b8b7) 的 [核心CI38683462374](https://github.com/drov-ai/drov/actions/runs/38683462374) 10 jobs 和 [Docker专项38683462346](https://github.com/drov-ai/drov/actions/runs/38683462346) 4 jobs 全部success；每套Docker99项实际通过。检查点、适用跳过和未验证边界见 [T-10C验证](../validation/t10c-e2b.md)。下一项 **T-12 MCP stdio适配**，尚未开始。
+- 阶段：P1 至 P4、T-01 至 T-10、T-10A、T-10B、T-11，以及本轮补做的 **T-10C 已完整验收**。本轮新增103项（44项离线、59项真实E2B），完整extras收集1062项；最终清理修正后的40项真实故障/崩溃回归、两解释器安装后SDK/stream均通过。最终源码 [763c25d](https://github.com/drov-ai/drov/commit/763c25db6a81548900e00979bfc4a5c47834b8b7) 的 [核心CI38683462374](https://github.com/drov-ai/drov/actions/runs/38683462374) 10 jobs 和 [Docker专项38683462346](https://github.com/drov-ai/drov/actions/runs/38683462346) 4 jobs 全部success；每套Docker99项实际通过。检查点、适用跳过和未验证边界见 [T-10C验证](../validation/t10c-e2b.md)。当前 **T-12 MCP stdio适配进行中**；本轮已接通固定发现/同一审批/真实调用/清理，64项本地专项通过，两解释器全库/构建/远程矩阵尚在验收，见 [本轮验证](../validation/t12-mcp-stdio.md)。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
-- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；未验收：T-12 至 T-18，MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
+- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；未验收：T-12 至 T-18；MCP已实施、尚在验收，HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
 - 无真实模型Key/调用或私有数据上传；本轮按用户授权使用E2B合成资料云验收及独立保守预算，实际范围见T-10C验证。未上传PyPI、部署官网或发布版本。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 - 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
@@ -17,7 +17,11 @@
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 本轮交付：T-10C 可选 E2B（完整验收）
+## 本轮交付：T-12 MCP stdio（进行中）
+
+起点main/d7dadca，干净；前置任务/最终CI已复核，启用Docker本地前置1001+61skip通过。按 [ADR-0024](../decisions/0024-mcp-stdio-tools.md) 实施固定SDK2.3.0、临时进程发现/运行连接复核、命名/schema/协议/配置指纹、同一权限/持久审批/单次派发及owner task退出。新增64项真实本地stdio测试已通过，普通/stream示例、OS进程树终止/跨连接审批恢复/ShutdownIncomplete保锁有实际证据；完整两解释器全库、构建/独立安装和远程平台矩阵尚待最终确认，**整卡暂不关闭**。失败/修正及实际日志见 [验证](../validation/t12-mcp-stdio.md)。无真实模型、私有服务、云调用或凭据读取；无需用户新增资源。
+
+## 历史验收：T-10C 可选 E2B（完整验收）
 
 起点 Local `/Users/yanlong/projects/drov`、main/e5f0a16，干净。T-10B/T-11完整验收已核对，前置含Docker复跑957+2skip后按用户明确选择插入T-10C。账号/本地凭据、合成上传和费用已获授权，无需额外用户材料；实际文件`.env.local`已确认忽略并收紧600，未输出Key。
 

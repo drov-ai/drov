@@ -542,7 +542,7 @@ requires-dist = [
     { name = "aiosqlite", specifier = ">=0.22.1,<0.23" },
     { name = "e2b", marker = "extra == 'e2b'", specifier = "==2.56.0" },
     { name = "fastapi", marker = "extra == 'server'", specifier = ">=0.143.0,<0.144" },
-    { name = "mcp", marker = "extra == 'mcp'", specifier = ">=2.3.0,<3" },
+    { name = "mcp", marker = "extra == 'mcp'", specifier = "==2.3.0" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=3.29.0,<4" },
     { name = "portalocker", specifier = ">=4.4.0,<5" },
     { name = "pydantic", specifier = ">=2.14.1,<3" },
