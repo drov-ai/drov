@@ -34,7 +34,7 @@ python scripts/check_package.py --uv .drov/tooling/bin/uv --python 3.11 --out-di
 python scripts/check_installed_server.py --uv .drov/tooling/bin/uv --python 3.11 --wheel .drov/t13-dist311/drov-0.1.0a0-py3-none-any.whl
 ```
 
-边界：HTTP 单 worker、精确同源 Bearer 认证，不自带账号/TLS/IAM。上传是已知 Content-Length 的原始单文件传输，不支持 multipart/未知大小；未消费/失败/过期暂存仍占容量，不自动回收；清理/备份在 T-15。下载按内核 hash/权限检查，有界块发送无法撤回已发送字节。SSE 控制错误无 durable cursor；token 不保证重放，持久事件可按原游标补读。工作台/真实模型/公开发布未做；本轮未调用 E2B，不将历史 E2B预算/质量写成本轮结果。
+边界：HTTP单worker、精确同源Bearer认证，不自带账号/TLS/IAM。文件层沿既有LocalArtifacts的POSIX限制，Windows仍可用无文件HTTP/SDK，文件项适用跳过不代表已经支持Windows私有字节层。上传是已知 Content-Length 的原始单文件传输，不支持 multipart/未知大小；未消费/失败/过期暂存仍占容量，不自动回收；清理/备份在 T-15。下载按内核 hash/权限检查，有界块发送无法撤回已发送字节。SSE 控制错误无 durable cursor；token 不保证重放，持久事件可按原游标补读。工作台/真实模型/公开发布未做；本轮未调用 E2B，不将历史 E2B预算/质量写成本轮结果。
 
 
 收尾前修正：core-only严格mypy发现可选依赖缺失时继承StreamingResponse成为Any基类。订阅所有权改由外层DrovApp ASGI请求的finally持有/关闭，返回普通StreamingResponse，避免核心类型检查依赖Web安装；两套严格类型（150文件）及59项HTTP回归均通过（4.49s），接口/行为未改。初批完整回归3.11 **1129+61skip，290.58s**；3.14 **1130+59skip/1失败，317.06s**。失败是既有Responses Retry-After日期在收集时生成，长回归运行到该用例时已老化超过原100s窗口；改为该用例开始时生成，保留真实官方客户端/HTTP日期解析与数值区间，生产适配不改。原失败日志保留，修正后两套HTTP+Responses专项均 **120 passed（5.15s/4.67s）**。追加文件发送中途撤权及未知/不符长度测试后，当前完整收集 **1192项**，新增HTTP **64项（61离线/传输+3真实Docker）**；最终全库另记，不把旧59项/初批构件冒充最终。
@@ -43,3 +43,18 @@ python scripts/check_installed_server.py --uv .drov/tooling/bin/uv --python 3.11
 
 
 首个推送20eb133的CI实际HTTP测试通过，但Python3.13/3.14在OpenAPI快照检查失败：FastAPI默认取标准库HTTPStatus描述，3.11的413/422短语与新Python不同。对比两份完整JSON，仅错误description不同。已将错误描述在真实路由中显式固定（同时补411/500文档），两解释器生成逐字一致；没有忽略快照差异或跳过平台。原CI为核心38726688899/Docker38726689008，作为历史检查点，不用于关闭最终卡。运行代码的安全错误形状/数值状态未变。另加强真实SSE测试：实际先订阅再释放模型，必须收到三个token.delta并逐帧检查无id，避免模型过快完成造成空断言；测试数量不变。
+
+
+当前验收目标为已推送 **478eb1ecb5f56f561b13cbe0a875a8da93706b44**，[核心38727059007](https://github.com/drov-ai/drov/actions/runs/38727059007) / [Docker38727058909](https://github.com/drov-ai/drov/actions/runs/38727058909)。八套支持平台的HTTP独立步骤与OpenAPI生成检查均已实际通过，后续MCP/核心/安装及Docker矩阵进行中；不能用之前被新提交取消的run关闭整卡。
+
+最终本地运行代码完整回归为 **1192项**：3.11 **1131 passed /61 skipped，293.85s**；3.14 **1133 passed /59 skipped，315.08s**，`.drov/t13-final-full311.log`、314.log，均含102项真实Docker（原99+本轮3）。59项skip为本轮未授权/未配置的真实E2B，3.11另两项版本适用项。之后仅固定路由OpenAPI错误描述并强化同数量的token测试，无执行语义改动；61项HTTP再次通过（4.51s），强化后的7项传输两套通过（1.68s/1.62s），OpenAPI两套逐字相等。全套静态/格式（223文件）/严格类型（150文件、含extras和core-only）/schema/OpenAPI/差异空白检查通过。
+
+订阅所有权修正后的两解释器构建/sdist重建、四套全新core安装及六例普通/stream、两套独立server安装与三场景真实HTTP/SSE全部通过，`.drov/t13-final-{package,installed}{311,314}.log`。最后OpenAPI描述修正后的wheel/sdist位于`.drov/t13-head-dist/`；Twine strict与两解释器独立server安装后的真实HTTP/SSE均通过，`.drov/t13-head-{build,twine,installed311,installed314}.log`；本节后续补记是Markdown，不伪称旧sdist含最终验收文字。wheel全部Drov文件与当前src逐字节核对，构件SHA256和文件数见`.drov/t13-head-artifacts.json`（本节最终关闭时补数值）。
+
+
+最终源码478eb1e的Docker CI **38727058909已completed/success**，四个job全部success，元数据/逐步日志为`.drov/t13-final-docker-{ci.json,jobs.json,ci.log}`。Linux3.11–3.14每套 **102 passed /3 skipped /996 deselected**，耗时198.97s/174.59s/139.42s/187.60s；3skip为未安装其它可选模块的收集跳过，不是跳过102项Docker。每套随后完成核心wheel/sdist和core-only安装后标准库/分析镜像的SDK/stream实际执行与字节读取。核心CI其余平台未结束前，仍不关闭整卡。
+
+最终wheel SHA256 **ce8085c73873211174010e1fd8c21c8c0ddec280694940be6d8d4aa0c1acc758**，sdist **89c5322c0c4ae445e9b278861769ec55551cb1e9df63364155e73eff4db5b274**；**75个Drov wheel文件逐字节等于当前src**。对应独立server安装后两解释器真实HTTP/SSE与Twine均通过；最终Markdown补记不在该sdist内，wheel运行payload未变。
+
+
+收尾SSE审查补充：478eb1e的核心10/Docker4 job均已success，但发现认证适配器本身可能等待，原先“RunEvents先投影→重新认证→发送”的首帧存在授权变化窗口。新增真实回归在逐帧authenticate中撤销view_content，修正前确实发送了带id的run.accepted首帧（`.drov/t13-prefetch-revocation-before.log`），未忽略该失败。现在认证固定actor后再次调用同一Runtime.visible复核读/正文权限，再交给传输；测试必须只收到无id的stream.error，不能发送已预取事件。两解释器HTTP+Responses专项 **121 passed（5.27s/5.02s）**，`.drov/t13-prefetch-fixed311.log`、314.log。新增测试使完整收集为1193、本轮HTTP65（62传输/离线+3真实Docker）；最终两解释器全库/构件/安装与远程目标将重核，不以478之前的成功关闭新修正。

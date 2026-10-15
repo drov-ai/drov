@@ -269,3 +269,31 @@ async def test_shutdown_closes_stream_borrowed_runtime_remains_open() -> None:
         runtime._require_open()
         await runtime.cancel(run_id, context=ALICE)
         assert (await runtime.wait(run_id, context=ALICE)).status == "cancelled"
+
+
+@pytest.mark.asyncio
+async def test_revocation_during_frame_authentication_cannot_send_prefetched_event() -> None:
+    policy = Policy()
+
+    class RevokingAuth(Auth):
+        def __init__(self) -> None:
+            super().__init__()
+            self.calls = 0
+
+        async def authenticate(self, credential: str) -> Any:
+            self.calls += 1
+            if self.calls == 2:
+                # Authentication may await an external authority while body access changes.
+                policy.denied.add("view_content")
+            return await super().authenticate(credential)
+
+    app = DrovApp(
+        agents={"assistant": definition(GateModel())}, auth=RevokingAuth(), authorizer=policy
+    )
+    async with client(app) as connection:
+        a = app.runtime._agents[("assistant", "1")]
+        ref = await app.runtime.start(a, "private input", session_id="s", context=ALICE)
+        response = await connection.get(f"/v1/runs/{ref.run_id}/events?include_content=true")
+        assert response.status_code == 200 and "event: stream.error" in response.text
+        assert "id: " not in response.text
+        assert "private input" not in response.text

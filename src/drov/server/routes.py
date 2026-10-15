@@ -299,6 +299,8 @@ def install(service: "DrovApp") -> None:
                     current = await service._identity(request.scope["drov.headers"])
                     if current != actor(request):
                         raise HTTPFailure(401, "unauthenticated")
+                    # Authentication itself may await while a prefetched page loses access.
+                    await runtime._runs.visible(run_id, current, include_content)
                     prefix = (
                         f"id: {event.run_id}:{event.seq}\n"
                         if isinstance(event, (DurableEvent, UnknownDurableEvent))

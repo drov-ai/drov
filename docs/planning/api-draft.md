@@ -468,7 +468,7 @@ runtime = Runtime(
 
 ## T-13 HTTP 实际接口
 
-`from drov import DrovApp` / `from drov.server import DrovApp, ServerLimits`；安装server extra后构造ASGI对象。`agents`映射及storage/artifacts/policy/authorizer/dependencies/limits由宿主装配，或只传已打开的`runtime`借用。认证二选一：`local=True`（默认host=127.0.0.1/port=8000，本次lifespan token由宿主读`local_token`）或`auth=AuthAdapter`。非本地host还要求显式Authorizer、精确allowed_hosts/allowed_origins；两个列表为同源authority/origin，不含通配符。`await app.serve()`使用固定单worker；可调用ASGI对象供支持lifespan的宿主使用。不得从请求改变绑定/资源/策略。
+`from drov import DrovApp` / `from drov.server import DrovApp, ServerLimits`；安装server extra后构造ASGI对象。`agents`映射及storage/artifacts/policy/authorizer/dependencies/limits由宿主装配，或只传已打开的`runtime`借用。认证二选一：`local=True`（默认host=127.0.0.1/port=8000，本次lifespan token由宿主读`local_token`）或`auth=AuthAdapter`。非本地host还要求显式Authorizer、精确allowed_hosts/allowed_origins；两个列表为同源authority/origin，不含通配符。`await app.serve()`使用固定单worker；可调用ASGI对象供支持lifespan的宿主使用。不得从请求改变绑定/资源/策略。装配模式的模型仍沿Runtime默认借用规则，由宿主关闭；需Runtime拥有模型时，先以owned_models建立显式Runtime，再将其借给DrovApp并由宿主结束该Runtime。
 
 所有接口使用`Authorization: Bearer ...`，包括`GET /openapi.json`；身份不从body或任意用户头读取。`GET /v1/runs/{id}`返回`RunInspection`，`include_content=false`默认隐藏正文。`POST cancel/recover` body是`{}`，recover固定wait=False；终态recover按内核拒绝409。`POST responses`返回ResponseReceipt，verify不消费请求。分页limit/after、上下文正文与内核接口同义；新增`Runtime.sessions(*,context,after=None,limit=100)`、`Runtime.session(session_id,*,context,after=None,limit=100)`与HTTP共用授权分页。Session游标绑定原身份/查询和存储secret，不用于授权。
 

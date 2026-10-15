@@ -21,7 +21,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 起点 main /119de61，工作区干净且与远端同步；T-12最终两套CI及T-10B前置已复核。交付 [DrovApp](../../src/drov/server/app.py)、同内核路由/可信身份/SSE、Runtime会话分页、私有有期限上传与Run接收同事务消费、动态授权附件；新增upload_schema=1独立扩展，原records/Artifact/Sandbox DDL不改。接口/源契约/案例/质量/兼容/schema/OpenAPI与 [ADR-0025](../decisions/0025-http-identity-and-uploads.md) 同轮同步。
 
-前置1067+61skip含Docker通过；当前61项HTTP/身份/上传/恢复/真实loopback与背压（含三场景9组对照）、另3项真实Docker CSV→CSV/PNG→销毁后HTTP/hash读取通过。两解释器全库、包/独立安装、严格类型/生成与远程平台矩阵进行中，不能提前关闭整卡。失败修正、命令与恢复入口见 [本轮验证](../validation/t13-http.md)。
+前置1067+61skip含Docker通过；当前62项HTTP/身份/上传/恢复/真实loopback与背压（含三场景9组对照）、另3项真实Docker CSV→CSV/PNG→销毁后HTTP/hash读取通过。两解释器全库、包/独立安装、严格类型/生成与远程平台矩阵进行中，不能提前关闭整卡。失败修正、命令与恢复入口见 [本轮验证](../validation/t13-http.md)。
 
 本轮仅合成文件/身份、本地loopback与原Docker，没有读真实Key/付费模型/云调用/公开发布或部署。暂存TTL只拒绝新消费，回收/备份尚属T-15；仅单worker和已知长度原始文件上传，工作台尚未实施。现在不需新仓库、账号、Key、model ID或预算；保留原Docker和`.drov`/私有env/SQLite/bytes/租约/云台账。若中断，继续当前Local checkout，先完成本节T-13剩余验收，不进入T-14；本轮结束时再给出换会话结论。
 

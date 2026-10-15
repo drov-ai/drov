@@ -10,7 +10,7 @@ T-13 将传输接入现有 Runtime，不建立第二个执行循环。`drov.Drov
 
 HTTP start/respond/cancel/recover 返回内核回执或快照；GET Run 返回 RunInspection，failed outcome 的获取仍为 200。cancel/recover 发送空 JSON 对象，verify 只收 request_id。错误只返回安全 code/message/request_id，不回显请求输入、验证细节或异常正文。请求 JSON 同样拒绝重复键/非有限值；正文、连接、上传并发与发送期限有界，数值唯一见 [工程方案](../planning/engineering.md)。OpenAPI 从实际路由生成，需认证获取；不会列出 Agent 配置或后端凭据。
 
-SSE 先验证读权限与完整游标再发送头。每帧复用 RunEvents 的当前授权投影，重新认证并固定为原 actor；只有 durable 帧有 run_id:seq，Last-Event-ID/after 必须一致。慢发送直接背压，无额外无界生产队列；临时增量沿内核限额丢弃并发 gap，durable 从日志补读。断连/发送超时/应用关闭只关闭订阅；显式 cancel 或 owned Runtime 的关闭才影响执行。头后授权/游标等错误用无 id、durable=false 的 stream.error 结束；已交给传输的旧字节无法收回。
+SSE 先验证读权限与完整游标再发送头。每帧复用 RunEvents 的当前授权投影，重新认证并固定为原actor，认证完成后再检查当前读/正文权限才交给传输；只有 durable 帧有 run_id:seq，Last-Event-ID/after 必须一致。慢发送直接背压，无额外无界生产队列；临时增量沿内核限额丢弃并发 gap，durable 从日志补读。断连/发送超时/应用关闭只关闭订阅；显式 cancel 或 owned Runtime 的关闭才影响执行。头后授权/游标等错误用无 id、durable=false 的 stream.error 结束；已交给传输的旧字节无法收回。
 
 sessions/session 在 Runtime 内实现本人的 scope 查询、逐资源授权与有界 keyset 分页。游标用 SQLite/MemoryStorage 原 secret、独立域和查询/身份绑定的 HMAC；篡改/跨查询/跨身份拒绝。分页不授予跨用户会话枚举，跨用户已知 Run 继续沿 Authorizer 查看。
 

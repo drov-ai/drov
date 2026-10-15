@@ -1,6 +1,6 @@
 # 运行行为契约 v3
 
-状态：P4 实施基线；T-03 至 T-08 已本地验证事务存储、资源/任务、只读 Agent 闭环、正文授权、SDK 订阅、上下文选择/清单及内置 Memory；T-09 审批/输入子范围已实现；T-09 已实现外部未知效果与显式恢复；T-10A 文件/代码沙箱闭环已实现；HTTP按ADR-0025接入同一Runtime，真实模型尚未验证。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
+状态：P4 实施基线；T-03 至 T-08 已本地验证事务存储、资源/任务、只读 Agent 闭环、正文授权、SDK 订阅、上下文选择/清单及内置 Memory；T-09 审批/输入子范围已实现；T-09 已实现外部未知效果与显式恢复；T-10A 文件/代码沙箱闭环已实现；HTTP按ADR-0025接入同一Runtime，真实模型尚未验证。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-15。
 
 本文是 Drov 自己拟采用的行为规则，不是竞品能力声明或已通过的测试报告。关联 C-01 至 C-15、C-17 和 Q-API-01 至 Q-API-08；模块归属见 [架构](architecture.md)，用户调用见 [API](api-draft.md)，默认数值见 [工程方案](engineering.md)。子运行内容为后续 C-16 契约，v0.1 不提供该能力。
 
