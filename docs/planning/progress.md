@@ -4,10 +4,10 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-10、T-10A、T-10B、**T-11 已完整验收**。本轮新增62、全库959；含真实Docker：Python3.11 **957 passed /2 skipped**，3.14 **959 passed**；静态/schema、四套core-only安装、两套extra安装后SDK/stream通过。最终源码 [f87b595](https://github.com/drov-ai/drov/commit/f87b595657fa36cd5d57840d27648eb9b9fc19c8) 的 [核心CI38663394874](https://github.com/drov-ai/drov/actions/runs/38663394874) 10 jobs 和 [Docker专项38663395005](https://github.com/drov-ai/drov/actions/runs/38663395005) 4 jobs 全部success。实际范围/日志见 [T-11验证](../validation/t11-openai-responses.md) 与 [ADR-0022](../decisions/0022-openai-responses-adapter.md)。用户本轮选择先补 **T-10C**，当前进行最终验收；完成后返回 **T-12**，尚未开始。
+- 阶段：P1 至 P4、T-01 至 T-10、T-10A、T-10B、T-11，以及本轮补做的 **T-10C 已完整验收**。本轮新增103项（44项离线、59项真实E2B），完整extras收集1062项；最终清理修正后的40项真实故障/崩溃回归、两解释器安装后SDK/stream均通过。最终源码 [763c25d](https://github.com/drov-ai/drov/commit/763c25db6a81548900e00979bfc4a5c47834b8b7) 的 [核心CI38683462374](https://github.com/drov-ai/drov/actions/runs/38683462374) 10 jobs 和 [Docker专项38683462346](https://github.com/drov-ai/drov/actions/runs/38683462346) 4 jobs 全部success；每套Docker99项实际通过。检查点、适用跳过和未验证边界见 [T-10C验证](../validation/t10c-e2b.md)。下一项 **T-12 MCP stdio适配**，尚未开始。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
-- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；T-10C已接通真实E2B/CSV/PNG与故障/崩溃，最终验收进行中；未验收：T-10C整卡、T-12 至 T-18，MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
+- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；未验收：T-12 至 T-18，MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
 - 无真实模型Key/调用或私有数据上传；本轮按用户授权使用E2B合成资料云验收及独立保守预算，实际范围见T-10C验证。未上传PyPI、部署官网或发布版本。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 - 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
@@ -17,17 +17,19 @@
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 本轮交付：T-10C 可选 E2B（最终验收中）
+## 本轮交付：T-10C 可选 E2B（完整验收）
 
 起点 Local `/Users/yanlong/projects/drov`、main/e5f0a16，干净。T-10B/T-11完整验收已核对，前置含Docker复跑957+2skip后按用户明确选择插入T-10C。账号/本地凭据、合成上传和费用已获授权，无需额外用户材料；实际文件`.env.local`已确认忽略并收紧600，未输出Key。
 
 按 [ADR-0023](../decisions/0023-e2b-single-execution.md) 接入真实E2BSandbox/E2BLimits、固定SDK/模板build与VM/工作负载profile；默认审批、原键/清理/文件/PNG/ready发布沿同一Runtime。独立保守费用与派发同事务累计、不退款；丢创建应答查空继续unknown。显式云绑定启用扩展v2以拒绝旧SDK，Docker-only保持v1和旧JSON字段。API/源契约/案例/质量/许可/安装/CI同轮同步，历史P4指纹与品牌保留。
 
-真实SDK/stream CSV→CSV/PNG→销毁后授权/hash读取、18项权限/网络/资源/文件/取消/过期、9类远端故障、30项SDK/stream强制终止及新进程恢复已通过检查点。最终runner/扩展兼容修正后的全库、云矩阵、两解释器构件/安装和远程CI仍在本轮收尾，**尚不关闭T-10C整卡**。实际命令/失败修正/资源与费用在 [本轮验证](../validation/t10c-e2b.md)，不能把估算当实际余额/扣费。
+真实SDK/stream CSV→CSV/PNG→销毁后授权/hash读取、权限/网络/资源/文件/取消/过期、远端故障、SDK/stream强制终止及新进程恢复均已通过。新增103项：44项离线、59项真实远端；完整extras收集1062项。含Docker本地全库检查点3.11为1000+59skip、3.14为1002+57skip，后续新增云测试已分别真实通过；不将该检查点冒充最后清理修正后的全库重跑。实际命令、失败修正和覆盖边界在 [本轮验证](../validation/t10c-e2b.md)。
 
-收尾审查修正了E2B坏控制应答阻止原资源清理的问题：执行前严格拒绝代码，清理保留严格归属/ID检查；新增离线和真实远端0代码/确认销毁测试，正重跑故障/硬终止及最终安装/CI。未放松选定执行profile，也未增加工具API。
+收尾审查修正了E2B坏控制应答阻止原资源清理的问题：执行前严格拒绝代码，清理保留严格归属/ID检查；最终44项离线及40项真实故障/硬终止回归通过（含新增0代码/确认销毁例）。两解释器最终wheel仓库外安装、SDK/stream实际云执行/下载通过；旧T-11 wheel实际读取新Docker v1、拒绝E2B v2且不改库。严格类型/schema/核心安装隔离、最终763c25d的核心10与Docker4 jobs全部success，**T-10C整卡已验收并关闭**。源码/测试/锁/工作流已推送main，收尾仅Markdown补记，以skip ci保存；实际HEAD/同步状态以git log/status为准。
 
-当前不需要新仓库/账号/模型ID/预算，保留`.env.local`、固定template2记录和`.drov`原台账/SQLite/bytes。T-12仍未开始；本卡完整验收后建议New Chat回到T-12，届时本地stdio服务夹具由执行者准备，无需模型Key或预算。
+最终云清点：活动/暂停实例0，本次Drov实例0，固定模板仍私有。两次构建及170次沙箱寿命的保守预留合计 **4.831美元**，低于自定5美元上限；未查询实际账单/余额/赠金资格，不能将预留当扣费。区域仅按截图声明us-west-1，SDK不能证明驻留；真实模型质量尚未验证，传递原生依赖的许可元数据遗漏已记录供T-18复核。
+
+当前不需要新仓库/账号/模型ID/预算，保留`.env.local`、固定template2记录和`.drov`原台账/SQLite/bytes。建议New Chat实施T-12，届时本地stdio服务夹具由执行者准备，无需模型Key或预算。
 
 ## 历史验收：T-11 OpenAI Responses 离线适配
 
@@ -271,13 +273,13 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 - 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
-## 下一项：本轮完成 T-10C 验收，然后返回 T-12
+## 下一项：T-12 MCP stdio适配
 
-T-10B/T-11前置完整验收，用户已明确选择先补E2B并授权现有账号/凭据、合成数据上传与赠金测试。本轮保守总上限5美元（含模板/失败/清理预留），单并发、有限资源寿命；模型费用未授权也未调用。
+T-10B前置已完整验收；T-11及用户插入的T-10C也已关闭。按 [任务卡](implementation-plan.md) 实施本地stdio接入，不重新开启一般规划轮。
 
-1. 收尾最终源码下的核心/Docker回归、E2B真实矩阵、旧扩展兼容、两解释器构件/核心与extra干净安装；确认原键不重算、资源无残留与台账可核对。
-2. 同步最终Git/CI和验证证据后才关闭整卡；缺项原样保留，不用skip或旧CI冒充本批。
-3. 返回T-12：官方MCP SDK的真实本地stdio分页发现/固定schema/revision、同一权限/审批/预算、成功/错误/卡住/断连/取消/进程清理、自有/借用与安装隔离全部通过才关闭。现在无须新增账号、模型Key/model ID或预算；本地合成stdio服务由执行者准备。
+1. 核实官方MCP SDK实际版本/许可并锁定，接通真实本地stdio分页发现、名称/schema/revision固定与能力拒绝；映射同一工具权限、审批和预算。
+2. 本地真实server的成功、工具错误、卡住、断连、超时、取消与进程退出清理，以及自有/借用关闭边界、SDK/stream和extra安装隔离全部通过才关闭；同步契约/案例/ADR及验证证据。
+3. 现在无须新增仓库、账号、模型Key/model ID或预算；本地合成stdio服务由执行者准备。若用户另选现成MCP服务，届时提供仓库/启动命令和允许能力。
 
 ## 用户准备事项
 
@@ -286,7 +288,8 @@ T-10B/T-11前置完整验收，用户已明确选择先补E2B并授权现有账�
 | T-10 故障与取消 | 本轮矩阵不需要新增仓库/账号/Key/私有资料；独立合成服务/真实 SDK 屏障、SQLite 错误与恢复已本地与远程验收并推送，无需用户新增资源 |
 | GitHub 仓库 | 继续现有 origin/身份；本轮连接已恢复，原检查点已同步，不需新仓库/账号/Key。完整闭环最终修正与 CI 的实际状态见上方 GitHub 记录；无需用户改变全局配置 |
 | T-10A/T-10B Docker/镜像/文件存储 | 保持 Docker Desktop 开启；标准库镜像不变，T-10A 首批已实际构建固定分析镜像并验证私有暂存，见 [本轮验证](../validation/t10a-artifact-staging.md)。不需新仓库/账号/Key/预算；T-10A/T-10B全部验收，ARM64与原生AMD64固定分析镜像/锁/许可、Linux专项/安装已通过；下一轮MCP本地协议适配不依赖新Docker资源。`.drov/sandbox-environment.json`、分析 image.json 与台账是本 checkout 非秘密快照/数据，换机器需重查，不能从探针推断整卡验收 |
-| T-10C 可选 E2B | 用户已授权当前项目/宿主E2B_API_KEY、合成代码/CSV/PNG上传及独立费用；实际`.env.local`安全显式加载，Key不显示/入库/上传。固定私有分析模板已由执行者准备并实测，最终验收见本轮记录；无需额外材料。保留账号权限/凭据/模板build和忽略的原台账；实际余额/扣费到控制台核对，未将估算当实付。区域按截图声明，SDK不能证明驻留，强区域要求拒绝 |
+| T-10C 可选 E2B | 整卡已验收；实际`.env.local`安全显式加载，Key不显示/入库/上传。固定私有分析模板保留，活动/暂停实例0；保守累计预留4.831美元，实际余额/扣费到控制台核对。无需额外材料或继续云调用；保留账号权限/凭据/模板build和忽略的原台账。区域按截图声明，SDK不能证明驻留，强区域要求拒绝 |
+| T-12 MCP stdio | 无需新仓库/账号/模型ID/Key/预算，执行者准备本地合成server及确定性模型夹具；指定现成服务时才需其仓库/启动命令与允许能力 |
 | 模型服务、可访问 model ID、密钥和总预算 | T-16 smoke/live 前提供可访问服务/model ID 并批准共同费用上限；工程执行者先按新增代码任务量估价。Key 仅本地环境/忽略配置或凭据管理，聊天/Git 不贴密钥；未授权预算前不付费调用 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
 | Cloudflare drop.dev、账号范围、品牌来源与公开使用范围 | 官网/素材初次公开前核实；现有素材保留本地，当前不部署 |
@@ -295,7 +298,7 @@ T-10B/T-11前置完整验收，用户已明确选择先补E2B并授权现有账�
 
 ## 会话切换建议
 
-当前继续本会话完成T-10C最终验收，不因材料齐备就提前关闭。完整检查点形成后，**建议New Chat返回T-12**，继续Local `/Users/yanlong/projects/drov`；先核对实际Git和T-10C验证。不要丢失`.env.local`、`.drov`原SQLite/bytes/租约/模板与费用台账。下一轮MCP不需要模型账号、Key、model ID或费用；T-16再准备真实模型服务/ID/能力依据及单独预算。
+T-10C已形成完整验收节点，下一轮切换到本地进程集成，**建议New Chat实施T-12**，继续Local `/Users/yanlong/projects/drov`；先核对实际Git、最终763c25d的两套CI和T-10C验证。不要丢失`.env.local`、`.drov`原SQLite/bytes/租约/模板与费用台账。下一轮MCP不需要模型账号、Key、model ID或费用；T-16再准备真实模型服务/ID/能力依据及单独预算。
 
 ## 阶段记录
 
@@ -324,5 +327,6 @@ T-10B/T-11前置完整验收，用户已明确选择先补E2B并授权现有账�
 | 2026-10-14 | T-10A Runtime 闭环 | 45 项新增、真实审批/代码/输入/CSV/PNG/下载/两次独立与取消、原发布恢复，本地804用例；最终独立两解释器/包/安装后8次Docker及2d768f7的10项远程CI通过，整卡关闭；下一项T-10B |
 | 2026-10-15 | T-10B 整卡验收 | 新增93、全库897，两解释器/构件/安装后实际Docker；原生Linux3.11–3.14每套97专项与最终9a4fba1的核心10+Docker4 jobs成功；下一项T-11，建议New Chat |
 | 2026-10-15 | T-11离线适配整卡验收 | 新增62、全库959，两解释器含Docker/核心与extra安装；最终f87b595核心10+Docker4 jobs全部成功，整卡关闭；下一项T-12，建议New Chat，真实模型未验收 |
+| 2026-10-15 | T-10C可选E2B整卡验收 | 用户插入补做；新增103（44离线/59真实云）、完整收集1062；最终清理修正40项云回归、两解释器安装后SDK/stream和763c25d核心10+Docker4 jobs成功；0活动/暂停实例，保守预留4.831美元，整卡关闭；恢复T-12，建议New Chat |
 
-2026-10-15 补记：用户咨询可选T-10C准备材料，核对任务卡/release-policy与E2B官方quickstart/网络/价格资料；修正本页下半部过期T-11交接为T-12。仅文档变更，没有SDK安装/凭据读取/云调用或任务范围调整，T-10C仍未开始。
+2026-10-15 准备轮历史补记：当时用户咨询可选T-10C材料，核对任务卡/release-policy与E2B官方quickstart/网络/价格资料；该准备轮仅文档变更，尚未安装SDK/读取凭据/调用云。其后用户明确授权本轮实施，现状以上方T-10C完整验收为准。
