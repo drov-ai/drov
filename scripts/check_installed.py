@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
-OPTIONAL_MODULES = {"openai", "mcp", "fastapi", "uvicorn"}
+OPTIONAL_MODULES = {"openai", "e2b", "mcp", "fastapi", "uvicorn"}
 MUTATIONS = {
     "os.mkdir",
     "os.remove",
@@ -84,6 +84,7 @@ def main() -> None:
         import drov.artifacts
         import drov.sandbox
         from drov.config import ModelCapabilities
+        from drov.integrations.e2b import E2BLimits, E2BSandbox
         from drov.models.openai import OpenAIResponses
         from drov.sandbox import DockerSandbox, PythonSandbox, SandboxLimits, SandboxResult
         from drov.sandbox._docker import DockerPreflight
@@ -92,6 +93,19 @@ def main() -> None:
         assert "LocalArtifacts" in drov.artifacts.__all__
         adapter = OpenAIResponses(model="offline-import", capabilities=ModelCapabilities(text=True))
         assert adapter._client is None
+        cloud = E2BSandbox(
+            template_id="inert-template",
+            build_id="347a1104-f90d-4644-8024-12fc30619da0",
+            credential_ref="inert-host-ref",
+            resolve_credential=lambda _: "never-read",
+            region="project-default",
+            cloud_data_policy="allow",
+            budget_id="inert-budget",
+            max_cost_micro_usd=100000,
+            rate_micro_usd_per_second=100,
+            limits=E2BLimits(),
+        )
+        assert not cloud.is_open
         # Even private backend construction is inert in a core-only installation.
         preflight = DockerPreflight(
             image="sha256:" + "a" * 64,

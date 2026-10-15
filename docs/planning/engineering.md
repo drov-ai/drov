@@ -223,12 +223,22 @@ ADR-0020 的控制/PID 1/安装/导出 UID=65534，工作负载 UID=65533，全�
 
 Sandbox SQL extension v1 在显式资源装配时启用；lease 关联完整非秘密配置快照/hash、原代码/输入/输出与执行/暂存/销毁事实，records DDL 保持。创建前 active/create intent 与原派发预算同事务，exec ID 与 start intent 分别持久保存，代码无重试；输出 ready 与结果/释放 lease 同事务，未知提交要求显式 recover，未确认租约可 ShutdownIncomplete。
 
-## 10. 可选 E2B 后端（计划，T-10C）
+## 10. 可选 E2B 后端（T-10C）
 
-按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 独立实现 experimental extra e2b，核心不导入供应商 SDK，不要求云账号。SDK 精确版本/许可和模板 build、可用区域/资源规格在真实适配时核验并锁定；官方滚动文档 E-30 至 E-33 不是兼容性验收。当前没有该依赖、模板、账号或远端实验。
+按 [ADR-0023](../decisions/0023-e2b-single-execution.md) 实现独立 experimental `e2b==2.56.0` extra；精确传递依赖/hash 在 uv.lock，实际证据见 [T-10C](../validation/t10c-e2b.md)，状态只维护在 progress。核心及显式 adapter 导入不加载供应商 SDK；构造无 I/O，open/revalidate 只读固定 build 状态。SDK 采用其进程级连接池，Drov 不关闭其他调用者共享的池；本次调用必须结束、原资源确认销毁后才释放自己的后端/存储所有权。
 
-Backend 的通用责任是持久执行键/归属匹配、能力预检、单次执行、输入复制/有界输出传输、状态查询、停止/销毁证据；Docker SandboxLimits 的 seccomp/PID/tmpfs 等控制属于 Docker profile。E2B 使用明确的 provider profile（有限 timeout、memory/vCPU、文件/输出容量、并发等）与 capability 声明，逐项验证可用保证；任何要求的硬保证不能提供则启动前拒绝该 profile，不把仅轮询的软件限制冒充内核限额。T-10C 以符合已选安全 profile 的真实模板为验收条件；不能为了上线放宽文件/授权/派发/清理规则。
+| 控制 | 当前 E2B profile / 默认值 |
+| --- | --- |
+| 模板/资源 | template ID + 不可变 build UUID；实际 info 为 2 vCPU、2048 MiB VM；核对 numpy 2.4.6/pandas 3.0.6/matplotlib 3.11.2，预装/锁/许可复用 AMD64 分析配方 |
+| 代码身份 | UID/GID 65533，无补充组/capability，no-new-privileges；root monitor 私有且不可 dump；输入 UID 65534、444/555 与受保护祖先 |
+| 硬限制 | 代码 RLIMIT_AS 512 MiB、NPROC 64、NOFILE 64、CORE 0、单文件 FSIZE 8 MiB、CPU 秒数向上取整；VM 与代码进程限额分别声明 |
+| 可写空间 | /work 64 MiB tmpfs，/tmp、/var/tmp、/dev/shm 各16 MiB，nosuid/nodev/noexec；未提供 Docker 的 seccomp/cgroup 或整个根盘只读保证 |
+| 有界文本/文件 | 默认 code/stdout+stderr 各总计64 KiB；export 单文件≤8 MiB、合计≤16 MiB，且受 ArtifactLimits 更小值约束；静态 PNG 沿第9节 profile |
+| 时间/并发 | E2BLimits 默认 execution 10s、control 30s、provider 寿命180s、单并发；寿命范围120–300s；control 至少比 execution 多10s；代码开始前扣除创建/准备/上传耗时 |
+| 网络/生命周期 | allow_internet_access=False、allow_public_traffic=False、on_timeout=kill、auto_resume=False；公共 token 只留宿主，不传代码；不继承 provider 默认 |
+| 数据/区域 | cloud_data_policy 必须显式 allow；上传范围由宿主授权；region 为项目声明，region_attested=False，require_region_attestation=True 在构造拒绝 |
+| 费用 | 必填独立 budget_id、max_cost_micro_usd 和经核对的 rate_micro_usd_per_second（至少37）；每次预留 (lifetime_seconds+1)×rate，按同 SQLite/budget_id 累计、不退款；模板及跨库批次另记宿主总账 |
 
-宿主显式配置 credential_ref、template/build、region、cloud_data_policy、有限并发/寿命和费用上限；凭据仅宿主解析，不传入环境/文件/模型，不读取或输出密钥值。默认 profile 禁代码外连、限制公共服务访问，实际选定 SDK 对应设置和黑盒测试均要有证据，不能继承供应商默认。用户明确准许上传的合成代码/文件才经 provider 控制 API 传输；费用包括创建/运行/清理/失败与剩余活动资源，单独账本，不挪用模型预算。
+凭据仅通过宿主 resolver 按 credential_ref 解析；未实现自动 dotenv，验收脚本显式 `--env-file` 加载单个 E2B_API_KEY，要求 POSIX 当前用户私有文件，不执行 shell 或复制该文件。`.env.local`/`.local.env` 都忽略，Key 不进绑定、审批、模型/代码环境、文件或报告。SDK 控制请求 retries=0；没有自动重新 create/执行代码。当前 region 字段不构成数据驻留证明，报价/保守预留不构成供应商实付账单。
 
-每 operation 新资源，模板预装 Python/分析依赖；不提供 persistent context、pause/fork 或 Shell API。持久 metadata 匹配 execution_key 与归属，实际 resource ID 仅内部保存；创建应答丢失不再次 create，查询/kill/期限/已过期资源的证据按运行契约处理。费用未知或预算不足停止新付费派发，并保留已有资源必要收尾的预算/义务；不能以停止收费请求代替已销毁。公开提供 adapter 前必须有真实远端单次执行/文件/网络/权限/应答丢失/取消/崩溃恢复/最终资源无残留及安装证据。缺资源只关闭已验收子范围，Docker 必交链继续。
+每 operation 新资源，metadata 绑定 execution/owner/config；原 ID/启动 intent 保存在租约。已知 ID 不存在和无应答创建查空是不同事实；后者保留 unknown/名额/锁。SDK 退出、连接断开、pause 或计时推测不能代替清理。共用原 Artifact 暂存→确认销毁→ready/原结果事务，不另建 Agent 循环。E2B 数据库显式 sandbox_schema=2（与v1相同 DDL），旧 SDK open 拒绝；Docker 单独配置仍为v1、旧 JSON 不加远端字段，不改核心 records/user_version。

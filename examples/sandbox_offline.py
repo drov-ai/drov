@@ -16,6 +16,7 @@ from drov.artifacts import ArtifactInput, ArtifactRef, LocalArtifacts
 from drov.config import ModelCapabilities
 from drov.models.protocol import ModelComplete, ModelEvent, ModelRequest, ModelResponse, ToolCall
 from drov.sandbox import DockerSandbox, PythonSandbox, SandboxResult
+from drov.sandbox._interface import SandboxBackend
 from drov.sandbox._png import validate_png
 
 CSV = b"value\n12\n18\n30\n"
@@ -112,14 +113,18 @@ class FixtureModel:
         pass
 
 
-async def check(args: argparse.Namespace) -> None:
+async def check(
+    args: argparse.Namespace, *, configured_backend: SandboxBackend | None = None
+) -> None:
     root: Path = args.directory.absolute()
     context = RunContext(tenant_id="fixture", user_id="alice")
     model = FixtureModel(args.chart)
     agent: Agent[str] = Agent(
         model=model, name="csv-sandbox", revision="1", tools=[PythonSandbox(backend="code")]
     )
-    backend = DockerSandbox(image=args.image, docker=args.docker, host=args.host)
+    backend = configured_backend or DockerSandbox(
+        image=args.image, docker=args.docker, host=args.host
+    )
     files = [ArtifactInput(name="numbers.csv", data=CSV, media_type="text/csv")]
     async with Runtime(
         agents=[agent],

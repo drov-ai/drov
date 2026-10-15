@@ -424,8 +424,8 @@ async def file_analysis_example(model, analysis_image_digest, docker_cli, docker
 
 T-13 的 HTTP 同一入口扩展：POST /v1/runs 新增可选 artifact_ids，仅引用本身份/Agent 可授权的 ready 输入；POST /v1/artifacts 以有界流上传单文件并明确 agent_name/revision/session_id 目标，得到短期暂存 upload ID（不是 ready 引用），只可由同作用域 start 原子消费。上传控制与总量沿 ArtifactLimits，未消费暂存按维护规则回收。GET /v1/artifacts/{id} 返回相同元数据；GET /v1/artifacts/{id}/content 授权后流式附件下载，不接受宿主路径/后端 URL。JSON Run 输入可以使用 upload_ids，不能上传代码工具/配置或把 bytes 隐式编码成模型输入；HTTP 上传是 T-13 的传输适配，不在 T-10A 预建服务。权限/错误码沿现有 HTTP 约定，内容不可用 410，猜 ID 无权读取统一 404。
 
-T-10C 才新增拟议 drov.integrations.e2b.E2BSandbox（可选 extra 名 e2b）：宿主显式提供非秘密 credential_ref、固定 template/build、region、后端限额与 cloud_data_policy；密钥由宿主解析，模型参数和 ArtifactStore 不接触密钥。实际 SDK 接口/版本与可验证能力在 T-10C 锁定，不能写入不存在的已支持配置；构造无远端副作用。使用相同 PythonSandbox/Artifact DTO，禁止缺能力时切换到弱配置，详见工程方案第 10 节。
+`from drov.integrations.e2b import E2BSandbox, E2BLimits` 提供可选实验性真实后端。构造参数为 `template_id`、不可变 `build_id`、非秘密 `credential_ref`、宿主 `resolve_credential(ref) -> str`、项目声明 `region`、显式 `cloud_data_policy="allow"`、独立 `budget_id`、`max_cost_micro_usd`、`rate_micro_usd_per_second`，以及可选 `limits`。没有自动读取环境/配置文件；构造无 I/O，open 只读固定 build。`require_region_attestation=True` 因 SDK 不支持区域证明而前置拒绝。E2BLimits 与 Docker SandboxLimits 分开，实际 VM/工作负载/文件/时间与预算语义见工程第10节和 ADR-0023；复用原 PythonSandbox/Artifact DTO/默认审批，不新增模型控制字段。E2B 显式 Runtime 绑定启用 sandbox_schema=2，core-only 可授权读取销毁后产物，旧 SDK 拒绝该扩展版本。实际任务验收状态见 progress。
 
-显式 allow 只授权已配置的代码工具；业务写入仍单独审批。代码生成/消费结果沿现有 ModelAdapter，没有自动代写/修复/执行循环。SandboxLimits/Result 已加入生成 schema；E2B/HTTP 等未实现符号不提前增加。
+显式 allow 只授权已配置的代码工具；业务写入仍单独审批。代码生成/消费结果沿现有 ModelAdapter，没有自动代写/修复/执行循环。SandboxLimits/Result 已加入生成 schema；HTTP 等未实现符号不提前增加；E2BLimits 已加入生成 schema。
 
 当前输出集合的 basename 也须唯一；PNG 验证接受有界非交错静态 profile，限制/代价见工程第 9 节与 ADR-0020。核查中的沙箱人工 response 不替代资源/结果事实；使用 recover 查询/销毁并恢复原可靠暂存，verify 仅只读。

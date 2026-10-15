@@ -87,4 +87,10 @@ drov.sandbox 公共入口和 Runtime 链已实现（ADR-0020）；普通 SDK/文
 
 不挂宿主凭据/仓库/socket，不在执行时拉镜像/安装，不用宿主回退。默认/平台/文件控制见 [工程方案第 9 节](planning/engineering.md)，接口在 [API 草案](planning/api-draft.md)，未跑真实组不能 skip 关闭两卡。下一项以 progress 为准，New Chat 交接见 handoff；忽略目录的准备文件仅当前 Local 存在。
 
-E2B 账号/固定 template-build/区域权限、本地 E2B_API_KEY 凭据引用、合成数据上传许可与单独沙箱预算只在 T-10C 远端验收前需要；模型服务/model ID/Key/共同模型预算只在 T-11/T-16 live 前需要。当前不创建这些资源或调用付费 API；无 E2B 资源不阻塞 Docker 首版，细则见工程第 10 节和维护发布策略。
+E2B 账号/固定 template-build/区域权限、本地 E2B_API_KEY 凭据引用、合成数据上传许可与单独沙箱预算只在 T-10C 远端验收前需要；模型服务/model ID/Key/共同模型预算只在 T-11/T-16 live 前需要。E2B 仅在用户授权的显式宿主验收命令中使用；普通测试不加载Key或创建云资源。无E2B资源不阻塞Docker首版，细则见工程第10节和维护发布策略。
+
+## 可选 E2B 的显式验收
+
+`uv sync --locked --extra e2b` 安装固定SDK；`pytest tests/test_e2b_contracts.py tests/test_e2b.py` 仅离线。`scripts/prepare_e2b_template.py --env-file <私有文件> --out <忽略目录记录>` 创建固定分析模板；`--status` 查询，已有记录拒绝重复构建。只传公开固定recipe/哈希锁，不复制checkout目录。E2B默认构建用户为user，recipe显式先设root；工作负载仍由独立UID运行。
+
+`scripts/check_e2b_live.py --env-file <私有文件> --template-record <ready记录> --directory <新目录>` 及 `--stream` 使用合成CSV/PNG/确定性模型，无真实模型调用。实际凭据文件可为根目录`.env.local`，POSIX需600权限，不能贴聊天/Git；不自动加载。`DROV_E2B_TEST_CONFIG` 只指向忽略的非秘密验收配置（env_file/template_record/record_dir/cost_ledger路径）；只有显式设置才运行test_e2b_live组，批次总账默认限制5美元保守预留，不能当实际账单。准备好账号、固定build、上传授权和独立预算后才运行。构件导入/extra安装用 `scripts/check_installed_e2b.py`，没有`--live-config`不会调用云；实际结果与恢复步骤见T-10C验证。

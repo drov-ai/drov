@@ -21,8 +21,8 @@ from drov.errors import (
     RecordNotFound,
     ShutdownIncomplete,
 )
-from drov.sandbox._backend import DockerBackend
 from drov.sandbox._docker import _settle
+from drov.sandbox._interface import SandboxBackend
 from drov.sandbox._leases import LeaseTransaction, SandboxLease
 from drov.sandbox.tools import PythonSandbox
 from drov.sandbox.types import SandboxArtifactError, SandboxResult
@@ -44,10 +44,10 @@ class SandboxController:
     def __init__(self, runtime: "Runtime") -> None:
         self.runtime = runtime
 
-    def backend(self, tool: PythonSandbox) -> DockerBackend:
+    def backend(self, tool: PythonSandbox) -> SandboxBackend:
         backend = self.runtime._dependencies.get(tool.backend)
-        if not isinstance(backend, DockerBackend) or not backend.is_open:
-            raise ConfigurationError("PythonSandbox requires an open configured Docker backend")
+        if not isinstance(backend, SandboxBackend) or not backend.is_open:
+            raise ConfigurationError("PythonSandbox requires an open configured sandbox backend")
         return backend
 
     def bindings(self, agent: "Agent[Any]") -> dict[str, str]:
@@ -240,7 +240,7 @@ class SandboxController:
                         operation_id=operation_id,
                         backend_name=tool.backend,
                         backend_hash=backend.config_hash,
-                        backend_config=cast(dict[str, StrictJson], backend._binding),
+                        backend_config=cast(dict[str, StrictJson], backend.binding),
                         code_hash=hashlib.sha256(code.encode()).hexdigest(),
                         inputs=grants,
                         outputs=cast(list[str], normalized["outputs"]),
@@ -335,6 +335,7 @@ class SandboxController:
             async with storage.transaction() as tx:
                 if await LeaseTransaction(tx).active_count() >= backend.profile.limits.concurrency:
                     raise CapacityExceeded("Sandbox active lease capacity reached")
+                await backend.reserve_in(tx, lease)
                 operation = operation.model_copy(
                     update={
                         "version": operation.version + 1,
@@ -362,7 +363,7 @@ class SandboxController:
         async def fact(patch: dict[str, Any]) -> SandboxLease:
             nonlocal lease
             assert lease is not None
-            if patch.get("exec_start_intent"):
+            if patch.get("exec_start_intent") or patch.get("remote_start_intent"):
                 if (await permission()).decision != "allow":
                     raise ConfigurationError("Original sandbox permission changed")
             async with storage.transaction() as tx:

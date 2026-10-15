@@ -29,6 +29,7 @@ dependencies only. Protocol sources and actual offline validation are recorded i
 | aiosqlite | Core async SQLite access | MIT | https://github.com/omnilib/aiosqlite |
 | portalocker | Core file ownership lock | BSD-3-Clause | https://github.com/wolph/portalocker |
 | openai | Optional model client | Apache-2.0 | https://github.com/openai/openai-python |
+| e2b | Optional cloud sandbox SDK, 2.56.0 | MIT | https://github.com/e2b-dev/E2B |
 | mcp | Optional MCP client | MIT | https://github.com/modelcontextprotocol/python-sdk |
 | fastapi | Optional HTTP service | MIT | https://github.com/fastapi/fastapi |
 | uvicorn | Optional ASGI server | BSD-3-Clause | https://github.com/encode/uvicorn |
@@ -98,3 +99,32 @@ An additional unmodified copy of the profile and LICENSE is distributed at
 and copies them into its explicit CLI configuration. Package checks require both
 copies to match; `.gitattributes` preserves upstream bytes on every checkout. Docker
 mechanisms and upstream analysis libraries are not claimed as Drov inventions.
+
+## T-10C optional E2B dependency and private template
+
+E2B 2.56.0 is separately installed under its MIT license; no E2B source is copied
+into Drov. Exact artifacts and transitive versions are locked in uv.lock. The
+private template reuses the existing Linux AMD64 Python base manifest and hashed
+analysis-package recipe above; upstream license/notice files remain installed.
+The builder uploads the fixed recipe/hash lock only, with no repository directory
+or credential-file copy. Drov's root monitor and integration are original code.
+
+The resolved RPC path uses connectrpc0.11.1 and protobuf-py0.1.1 (Apache-2.0),
+pyqwest0.12.0 (MIT text in its wheel), e2b-dockerfile-utils0.1.1 (Apache-2.0),
+and httpx0.28.1 (BSD-3-Clause). protobuf-py-ext0.1.1 is an upstream native
+dependency whose wheel/sdist omit license metadata/text. Its hash-verified sdist
+matches all 14 Python/Rust source/stub/build files plus Cargo.lock, README and
+pyproject.toml in upstream snapshot
+[9f963031200cbe6c70d62d5a142d7ba27313f203](https://github.com/bufbuild/protobuf-py/tree/9f963031200cbe6c70d62d5a142d7ba27313f203),
+whose root LICENSE is Apache-2.0 (SHA-256
+1c5e374691049b02313a909936cb4b70df33e5d94404688f27766fa42b8088e5).
+The sdist Cargo.toml is packaging-normalized and PKG-INFO is generated; this source
+comparison does not claim a reproducible native binary build. Artifact SHA-256 is
+e85bfdfdb3ed50634db8ccc7429dd9286520109489c735463971a418707b4fef.
+No native code is vendored or relicensed. Sources checked 2026-10-15:
+[0.1.1 artifact](https://pypi.org/project/protobuf-py-ext/0.1.1/),
+[fixed upstream license](https://github.com/bufbuild/protobuf-py/blob/9f963031200cbe6c70d62d5a142d7ba27313f203/LICENSE).
+Preserve the upstream artifact metadata omission in the T-18 public-extra review;
+do not invent a License-Expression inside its wheel.
+Actual SDK/template/installation and cloud evidence is in
+`docs/validation/t10c-e2b.md`; this does not publish the template, image or package.

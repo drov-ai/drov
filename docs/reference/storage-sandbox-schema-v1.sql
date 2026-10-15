@@ -1,4 +1,5 @@
 -- Explicit sandbox lease extension v1.
+-- E2B opts into metadata sandbox_schema=2; same DDL, remote payload fields.
 CREATE TABLE sandbox_leases (
         execution_key TEXT PRIMARY KEY NOT NULL,
         tenant_id TEXT NOT NULL, user_id TEXT NOT NULL, agent_name TEXT NOT NULL,

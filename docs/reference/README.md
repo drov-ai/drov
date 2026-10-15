@@ -19,6 +19,7 @@ T-10A 的文件通道、公共沙箱定义与 Runtime 专用执行路径已实�
 | drov.auth / drov.errors | Authorizer/AuthAdapter、ToolResource/OwnerAuthorizer、错误与 TransientToolError；HTTP 认证仍未实现 |
 | drov.storage | MemoryStorage / SQLiteStorage；异步 open/aclose、start/查询、原子 transaction 接点；内部协议尚不稳定 |
 | drov.artifacts | ArtifactInput/Ref/Info/Limits 与 LocalArtifacts POSIX 私有字节层；Runtime 资源装配、文件接收/Run 授予/去重、ready 输入/产物与 get/read_artifact 动态授权；私有 stage 不可读 |
+| drov.integrations.e2b | E2BSandbox/E2BLimits，可选固定 SDK、模板build、显式上传/独立预算、VM/工作负载profile；复用PythonSandbox/原Artifact/恢复，见ADR-0023与progress |
 | drov.sandbox | PythonSandbox、DockerSandbox、SandboxLimits、SandboxResult；固定 sandbox.run_python 专用派发、审批/绑定、实际 Docker 单次执行、有界文件导出/PNG 校验、销毁后共同发布与原阶段恢复 |
 
 Memory 是配置对象，MemoryStorage 是事务内存后端；配置 Memory 的注册 Agent 自动导出三个内置工具，实际检索/事务执行见 [ADR-0012](../decisions/0012-transactional-memory.md)；Agent 只定义行为，构造不会执行。存储描述只在 open/异步上下文进入时获取连接和锁；完整记录由内核做授权投影，不能直接作为 API 响应。compile_tool 只创建描述，@tool 创建含 callable 的 PythonTool；private execution/operations 接点真实派发 Python 工具并保存操作事实。外部 Python write/unknown 支持审批、单次派发及 unknown 核查，显式 Runtime 的 ASK 已保存审批并支持原子响应；临时入口 ASK 仍 failed/interaction_unavailable。完整未知效果/恢复已接入 T-09，通用硬崩溃专项已由 T-10 验收，沙箱深入专项由 T-10B 验收。provider_items 仅供适配器往返，不用于向用户显示内部协议数据。
@@ -61,7 +62,7 @@ assert "result" not in evidence.model_dump()
 
 ## 可运行的沙箱接口
 
-`from drov.sandbox import PythonSandbox, DockerSandbox, SandboxLimits, SandboxResult` 已可用，构造无 I/O；显式 Runtime 需要 SQLiteStorage、配对 LocalArtifacts 和固定本地 Docker dependency。默认审批，临时 Agent.run 拒绝。运行教程见 [实际 CSV/PNG 示例](../../examples/sandbox_offline.py) 与 [准备说明](../../sandbox/README.md)。SandboxLimits/Result 已加入生成 schema；显式 sandbox SQL 扩展 v1 的实际 DDL 见 [storage-sandbox-schema-v1.sql](storage-sandbox-schema-v1.sql)，旧核心库不自动启用，旧 SDK 拒绝扩展库。verify 只读，recover 查询/销毁原环境并使用原暂存，不重跑代码，人工核查 response 不能替代清理事实。T-10B 受测专项证据见 [验证](../validation/t10b-sandbox-faults.md) 与 ADR-0021；当前状态只见progress。E2B 独立可选 T-10C，无空壳。接口见 [API](../planning/api-draft.md)，任务状态统一见 progress。
+`from drov.sandbox import PythonSandbox, DockerSandbox, SandboxLimits, SandboxResult` 已可用，构造无 I/O；显式 Runtime 需要 SQLiteStorage、配对 LocalArtifacts 和固定本地 Docker dependency。默认审批，临时 Agent.run 拒绝。运行教程见 [实际 CSV/PNG 示例](../../examples/sandbox_offline.py) 与 [准备说明](../../sandbox/README.md)。SandboxLimits/Result 已加入生成 schema；显式 sandbox SQL 扩展 v1 的实际 DDL 见 [storage-sandbox-schema-v1.sql](storage-sandbox-schema-v1.sql)，旧核心库不自动启用，旧 SDK 拒绝扩展库。verify 只读，recover 查询/销毁原环境并使用原暂存，不重跑代码，人工核查 response 不能替代清理事实。T-10B 受测专项证据见 [验证](../validation/t10b-sandbox-faults.md) 与 ADR-0021；当前状态只见progress。E2B 独立可选后端已落地，实际验收与限制见 [T-10C](../validation/t10c-e2b.md)；显式启用的数据库扩展v2拒绝旧SDK，Docker单独配置仍保留v1。接口见 [API](../planning/api-draft.md)，任务状态统一见 progress。
 
 ## 可运行审批与输入子范围
 

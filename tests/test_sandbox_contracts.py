@@ -146,7 +146,7 @@ async def test_lease_scope_snapshot_and_monotonic_facts_survive_reopen(tmp_path:
 async def test_lease_unknown_schema_or_index_tampering_fail_closed(tmp_path: Path) -> None:
     async with SQLiteStorage(tmp_path / "state.db") as storage:
         await storage._bind_sandbox()
-        await storage._sql("UPDATE metadata SET value='2' WHERE key='sandbox_schema'")
+        await storage._sql("UPDATE metadata SET value='3' WHERE key='sandbox_schema'")
     with pytest.raises(IncompatibleStorage, match="Sandbox"):
         async with SQLiteStorage(tmp_path / "state.db"):
             pass

@@ -756,6 +756,54 @@
       "title": "DurableEvent",
       "type": "object"
     },
+    "E2BLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "concurrency": {
+          "const": 1,
+          "default": 1,
+          "title": "Concurrency",
+          "type": "integer"
+        },
+        "control_seconds": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "title": "Control Seconds",
+          "type": "number"
+        },
+        "execution_seconds": {
+          "default": 10,
+          "exclusiveMinimum": 0,
+          "maximum": 60,
+          "title": "Execution Seconds",
+          "type": "number"
+        },
+        "lifetime_seconds": {
+          "default": 180,
+          "maximum": 300,
+          "minimum": 120,
+          "title": "Lifetime Seconds",
+          "type": "integer"
+        },
+        "max_code_bytes": {
+          "default": 65536,
+          "maximum": 65536,
+          "minimum": 1,
+          "title": "Max Code Bytes",
+          "type": "integer"
+        },
+        "max_output_bytes": {
+          "default": 65536,
+          "maximum": 65536,
+          "minimum": 1,
+          "title": "Max Output Bytes",
+          "type": "integer"
+        }
+      },
+      "title": "E2BLimits",
+      "type": "object"
+    },
     "InteractionRequest": {
       "$defs": {
         "ApprovalRequest": {

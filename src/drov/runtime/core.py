@@ -22,8 +22,8 @@ from drov.runtime.registration import AgentRegistration, fingerprint
 from drov.runtime.resources import ResourceBinding
 from drov.runtime.runs import RunController
 from drov.runtime.streams import RunEvents, RunStream
-from drov.sandbox._backend import DockerBackend
 from drov.sandbox._controller import SandboxController
+from drov.sandbox._interface import SandboxBackend
 from drov.sandbox.tools import PythonSandbox
 from drov.storage import MemoryStorage
 from drov.storage.base import Storage
@@ -536,7 +536,7 @@ class Runtime:
         else:
             value = cast(T, binding.value)
         resource = self._install(
-            value, binding, exclusive=storage or isinstance(value, DockerBackend)
+            value, binding, exclusive=storage or isinstance(value, SandboxBackend)
         )
         if storage:
             if not isinstance(value, Storage):
@@ -590,11 +590,13 @@ class Runtime:
                     value if isinstance(value, ResourceBinding) else ResourceBinding.borrowed(value)
                 )
                 dependencies[key] = await self._acquire(binding)
-                if isinstance(dependencies[key], DockerBackend):
-                    backend = cast(DockerBackend, dependencies[key])
+                if isinstance(dependencies[key], SandboxBackend):
+                    backend = cast(SandboxBackend, dependencies[key])
                     if binding.mode == "borrowed":
                         if not backend.is_open:
-                            raise ConfigurationError("Borrowed Docker backend must already be open")
+                            raise ConfigurationError(
+                                "Borrowed sandbox backend must already be open"
+                            )
                         backend._require_loop()
                     elif not backend.is_open:
                         await backend.open()
@@ -613,7 +615,14 @@ class Runtime:
                 controller = SandboxController(self)
                 for agent in self._agents.values():
                     controller.bindings(agent)
-                await self._storage._bind_sandbox()
+                await self._storage._bind_sandbox(
+                    version=max(
+                        controller.backend(tool).lease_schema_version
+                        for agent in self._agents.values()
+                        for tool in agent.tools
+                        if isinstance(tool, PythonSandbox)
+                    )
+                )
                 self._sandboxes = controller
                 self._install(controller, ResourceBinding.owned(controller))
             if any(

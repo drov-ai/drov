@@ -82,3 +82,5 @@ T-09 外部路径的决定见 [ADR-0015](../decisions/0015-external-effects-reco
 T-10 的真实 SDK 硬终止、SQLite 提交/只读/页数耗尽故障、部分成功、取消竞争及所有权矩阵见 [专项验证](../validation/t10-faults-cancellation.md)，不覆盖沙箱/真实模型/MCP/HTTP 或旧备份维护。
 
 2026-10-14 用户采纳范围审查建议后，按 ADR-0016 将文件输入/持久产物纳入两张 Docker 必交卡，并添加可选 E2B 卡；源码、依赖和公共 schema 未变。同步/检查与未验证范围见 [本轮记录](../validation/2026-10-14-sandbox-artifacts-scope.md)；不重新开启 P4，也不以旧 CI 宣称新增能力通过。
+
+可选 E2B 的实际接口、独立 VM/费用与扩展兼容决定见 [ADR-0023](../decisions/0023-e2b-single-execution.md)，真实远端/安装证据见 [T-10C](../validation/t10c-e2b.md)。任务状态仍只维护在 progress。

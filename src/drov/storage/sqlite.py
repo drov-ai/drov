@@ -234,7 +234,7 @@ class SQLiteStorage(Storage):
                         expected_names |= {"artifact_records", "artifact_grants"}
                         await self._validate_artifact_schema()
                     if "sandbox_schema" in values:
-                        if values["sandbox_schema"] != "1":
+                        if values["sandbox_schema"] not in ("1", "2"):
                             raise IncompatibleStorage("Sandbox storage extension is unsupported")
                         expected_names.add("sandbox_leases")
                         await self._validate_sandbox_schema()
@@ -358,9 +358,11 @@ class SQLiteStorage(Storage):
             if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(statement.split()):
                 raise IncompatibleStorage("Artifact extension tables/index are invalid")
 
-    async def _bind_sandbox(self) -> None:
+    async def _bind_sandbox(self, *, version: int = 1) -> None:
         """Explicit sandbox resources enable their extension, without altering records DDL."""
         self._require_open()
+        if type(version) is not int or version not in (1, 2):
+            raise IncompatibleStorage("Unsupported sandbox binding version")
         self._check_lifecycle()
         async with self._gate:
             self._require_open()
@@ -375,8 +377,10 @@ class SQLiteStorage(Storage):
                     for statement in SANDBOX_DDL:
                         await self._sql(statement)
                     await self._sql("INSERT INTO metadata VALUES ('sandbox_schema','1')")
-                elif extension[0][0] != "1":
+                elif extension[0][0] not in ("1", "2"):
                     raise IncompatibleStorage("Sandbox storage extension is unsupported")
+                if version == 2:
+                    await self._sql("UPDATE metadata SET value='2' WHERE key='sandbox_schema'")
                 await self._validate_sandbox_schema()
                 await self._finish(True)
             except BaseException:

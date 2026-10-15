@@ -58,6 +58,8 @@ jobs:
       - name: Offline official Responses client and installed example
         run: |
           uv run --locked --all-extras pytest tests/test_openai_responses.py
+          uv run --locked --all-extras pytest tests/test_e2b_contracts.py tests/test_e2b.py
+          uv run --locked --all-extras python scripts/check_installed_e2b.py --python ${{ matrix.python }} --wheel dist/drov-0.1.0a0-py3-none-any.whl
           uv run --locked --all-extras python scripts/check_installed_openai.py --wheel dist/drov-0.1.0a0-py3-none-any.whl
 
   python-next:

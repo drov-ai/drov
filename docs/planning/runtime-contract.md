@@ -297,7 +297,7 @@ T-10A 第二批已接入 POSIX 字节层/Runtime 装配、文件接收、ready �
 
 - 模型通过固定逻辑工具 sandbox.run_python 提供 code、获准输入 ID 列表和相对输出声明；语言模型产出代码，执行器执行原参数快照并把实际结果返回同一工具/模型循环。模型不得选择后端、镜像、命令行 flags、宿主目录、网络模式、环境变量或限额。代码不在宿主 exec/eval/shell 中执行。
 - PythonSandbox 是 Runtime 专用工具描述，按 effect=write、approval=policy 进入既有权限顺序，默认 ask；应用可显式 allow 此工具，或设置 required approval，但不能放宽工程方案的固定隔离配置。审批绑定规范参数/code hash、服务器解析的输入 ID/hash/逻辑名/授权清单、输出声明、Agent/工具 revision、原归属、后端配置指纹和期限；代码/输入/输出声明/镜像或模板/限制/归属改变使旧批准失效。批准沙箱计算不批准另一业务写工具。
-- 配置需要显式 Runtime、SQLiteStorage、配套私有 ArtifactStore 和宿主依赖绑定；没有已验证后端、固定镜像或模板/构建、所需能力或真实资源绑定时接收前拒绝，模型/代码资源创建计数 0。Docker 是默认必交后端，E2B 仅在可选 T-10C 实际验收后使用。不能退回宿主 Python、普通线程、无隔离子进程或更弱配置来维持示例成功。
+- 配置需要显式 Runtime、SQLiteStorage、配套私有 ArtifactStore 和宿主依赖绑定；没有已验证后端、固定镜像或模板/构建、所需能力或真实资源绑定时接收前拒绝，模型/代码资源创建计数 0。Docker 是默认必交后端；E2B adapter 实际落地与独立验收按 ADR-0023/progress，不从 Docker 成绩推断云端能力。不能退回宿主 Python、普通线程、无隔离子进程或更弱配置来维持示例成功。
 - 每次操作使用新的、按 tenant/user/Agent/Run/operation 归属的隔离环境及工作目录；不共享变量或文件系统。只复制已批准清单的不可变字节到固定只读输入区，代码只能向私有工作区写文件；导出显式声明的安全普通文件并形成持久引用。新操作使用旧产物必须显式再次授予，不保留旧容器。持久 Notebook、主机路径/目录挂载、任意联网和执行期安装仍在后续；档案不自动解压。
 - 具体 backend/镜像/限额只由宿主配置。Docker 的非 root、无额外 capabilities、禁止提权、只读根文件系统、限定 tmpfs、有效 seccomp、禁外连/发布端口、无主机文件/设备/socket 挂载和无宿主凭据注入是首版固定条件；真实效果由 B-16 验证，不由“用了容器”推断。其他 Python/MCP 工具仍在其既有宿主边界，不宣传整个 Agent 应用已隔离。
 
@@ -337,3 +337,6 @@ E2B 的模板/构建、凭据引用、数据上传许可、网络/公开访问�
 云资源保证与 Docker 配置不同；T-10C 需逐条声明/实测选定后端能力，拒绝不支持的强制要求。适配完成但没有真实远端验收只算子范围；不新增持久上下文、任意 Shell/联网安装或独立执行循环。
 
 沙箱 verify 复用既有权限、限时/调用所有权与 verification.started/completed 审计；recover 清理前复核当前权限和非终态。沙箱核查人工 response 不得替代销毁/原结果证据，返回 InteractionConflict 并指向 recover；其他外部写工具的 T-09 人工核查不变。
+
+
+T-10C 落地补充（ADR-0023）：同一 SandboxBackend 接入上述权限、执行键、原阶段暂存/销毁/发布和恢复。E2B create/start intent 与原 ID 分开持久化；丢创建应答按完整 metadata 有界查询原资源，查空仍 unknown，已知 ID 的404才可用于确认不存在。无原观察/可靠导出则失败，不重新执行。独立费用完整寿命预留与派发 intent 同事务，已销毁不退款；同 SQLite/budget_id 累计，跨库/模板由宿主另控总账。区域只记录项目声明，要求强区域证明前置拒绝。E2B 显式 sandbox_schema=2，旧 SDK 启动拒绝；未选云的 Docker v1 payload 不增加远端字段。实际数值仅见工程第10节，已跑/未跑证据只见本轮验证与progress。

@@ -46,7 +46,7 @@ uv run --locked --extra openai python examples/openai_responses_offline.py --str
 - 能力范围对标 AgentScope 2.0，覆盖工具、MCP、Memory、权限、Human-in-the-loop、Tracing、持久化与应用服务。
 - 面向多种 Agent 应用；官方示例用于验证通用性，不限定产品业务范围。
 - 优先验证三项设计主张：渐进式 Python API、跨入口一致的运行机制、可检查的上下文与记忆。
-- Docker Python/受控文件/持久产物已有真实离线 SDK [示例](examples/sandbox_offline.py) 与 [验证](docs/validation/t10a-runtime-sandbox.md)，需显式配置 Docker 和固定镜像。可选 E2B 单列 T-10C，尚未实现；范围见 [ADR-0016](docs/decisions/0016-sandbox-artifacts-and-backends.md)，当前状态见 progress。
+- Docker Python/受控文件/持久产物已有真实离线 SDK [示例](examples/sandbox_offline.py) 与 [验证](docs/validation/t10a-runtime-sandbox.md)，需显式配置 Docker 和固定镜像。可选 E2B adapter 已接入相同 Runtime，实际验证及限制见 [T-10C](docs/validation/t10c-e2b.md) 与 [ADR-0023](docs/decisions/0023-e2b-single-execution.md)；范围见 [ADR-0016](docs/decisions/0016-sandbox-artifacts-and-backends.md)，当前状态见 progress。
 - 本地工作台用于呈现上述能力；复杂集成按需安装。
 
 以上是产品目标，不代表已经实现，也不代表已证明优于其他框架。

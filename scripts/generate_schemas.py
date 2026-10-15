@@ -11,6 +11,7 @@ from drov.artifacts import ArtifactInfo, ArtifactLimits, ArtifactRef
 from drov.artifacts.records import ARTIFACT_DDL
 from drov.auth import ArtifactResource, Resource, ToolResource
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
+from drov.integrations.e2b import E2BLimits
 from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
 from drov.runtime import AgentRegistration
 from drov.sandbox import SandboxLimits, SandboxResult
@@ -69,6 +70,7 @@ def schema_text() -> str:
         "ArtifactLimits": ArtifactLimits,
         "ArtifactResource": ArtifactResource,
         "SandboxLimits": SandboxLimits,
+        "E2BLimits": E2BLimits,
         "SandboxResult": SandboxResult,
     }
     bundle = {
@@ -99,6 +101,7 @@ def main() -> None:
         (
             root / "storage-sandbox-schema-v1.sql",
             "-- Explicit sandbox lease extension v1.\n"
+            "-- E2B opts into metadata sandbox_schema=2; same DDL, remote payload fields.\n"
             + ";\n\n".join(statement.strip() for statement in SANDBOX_DDL)
             + ";\n",
         ),

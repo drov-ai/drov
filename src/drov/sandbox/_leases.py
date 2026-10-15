@@ -1,8 +1,8 @@
 """Sandbox SQL extension: durable ownership survives lost control replies and restarts."""
 
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, SerializerFunctionWrapHandler, model_serializer, model_validator
 
 from drov._json import StrictJson
 from drov.artifacts.records import ArtifactGrant
@@ -46,13 +46,29 @@ class SandboxLease(WireModel):
     exec_create_intent: bool = False
     exec_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     exec_start_intent: bool = False
+    remote_id: str | None = Field(default=None, pattern=r"^[a-zA-Z0-9_-]{1,128}$")
+    remote_start_intent: bool = False
     observation: dict[str, StrictJson] | None = None
     stage_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
     destroyed: bool = False
     error_code: Identifier | None = None
 
+    @model_serializer(mode="wrap")
+    def serialize_backend(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if self.backend_config.get("backend") != "e2b":
+            # Preserve v1 Docker payloads byte-for-byte; only explicit E2B
+            # storage bindings opt into extension v2 and its remote fields.
+            data.pop("remote_id", None)
+            data.pop("remote_start_intent", None)
+        return data
+
     @model_validator(mode="after")
     def consistent(self) -> "SandboxLease":
+        if (self.remote_id is not None or self.remote_start_intent) and self.backend_config.get(
+            "backend"
+        ) != "e2b":
+            raise ValueError("Remote evidence requires an E2B backend binding")
         if self.exec_create_intent and self.container_id is None:
             raise ValueError("Exec creation requires the original container identity")
         if self.exec_start_intent and self.exec_id is None:
@@ -61,8 +77,16 @@ class SandboxLease(WireModel):
             raise ValueError("Container acknowledgement requires a durable create intent")
         if self.exec_id is not None and not self.exec_create_intent:
             raise ValueError("Exec acknowledgement requires a durable exec create intent")
-        if self.observation is not None and not self.exec_start_intent:
+        if self.observation is not None and not (
+            self.exec_start_intent or self.remote_start_intent
+        ):
             raise ValueError("Code output requires an original start intent")
+        if self.remote_id is not None and not self.create_intent:
+            raise ValueError("Remote acknowledgement requires a durable create intent")
+        if self.remote_start_intent and self.remote_id is None:
+            raise ValueError("Remote start requires the original resource identity")
+        if self.remote_id is not None and self.container_id is not None:
+            raise ValueError("An execution cannot mix local and remote resources")
         if self.create_intent and not self.active and not self.destroyed:
             raise ValueError("Unconfirmed execution must retain its active lease")
         if any(item.run_id != self.run_id for item in self.inputs):
@@ -162,11 +186,12 @@ class LeaseTransaction:
                     "create_intent",
                     "exec_create_intent",
                     "exec_start_intent",
+                    "remote_start_intent",
                     "destroyed",
                 ):
                     if getattr(previous, field) and not getattr(lease, field):
                         raise Conflict("Sandbox execution facts cannot be rolled back")
-                for field in ("container_id", "exec_id", "observation", "stage_id"):
+                for field in ("container_id", "exec_id", "remote_id", "observation", "stage_id"):
                     original = getattr(previous, field)
                     if original is not None and getattr(lease, field) != original:
                         raise Conflict("Original sandbox execution evidence cannot change")

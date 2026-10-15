@@ -32,7 +32,7 @@ flowchart TD
     T --> SB[PythonSandbox 专用处理器]
     SB --> BP[执行/传输/查证/销毁协议：随真实实现建立]
     BP --> DB[Docker/Linux 默认必交：待实现]
-    BP --> CB[E2B 可选 T-10C：待实现]
+    BP --> CB[E2B 可选：独立 VM profile]
     SB --> AS[私有 ArtifactStore：待实现]
     AS --> S
     E --> O[可选观测导出器]
@@ -122,7 +122,7 @@ T-06 的 Session 消息按保存的 session_sequence（Session 版本）投影�
 
 ## 代码沙箱模块与归属（T-10A 部分实施）
 
-C-17 的 Docker 代码/受控文件/产物由 T-10A/T-10B 交付，可选 E2B 由 T-10C 交付，见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。sandbox/ 已交付内部本地控制/预检、固定 profile 与实际控制检查（ADR-0019），专用 PythonSandbox、Engine 执行/有界传输/只读查证/归属销毁及持久租约已按 ADR-0020 接通；artifacts/ 已管理私有字节与 ready 输入/Run 授予/授权读取与销毁后 ready 输出共同发布。integrations/e2b 在 T-10C 实际适配时建立。不接管 ModelAdapter 或另建 Agent 循环。
+C-17 的 Docker 代码/受控文件/产物由 T-10A/T-10B 交付，可选 E2B 由 T-10C 交付，见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。sandbox/ 已交付内部本地控制/预检、固定 profile 与实际控制检查（ADR-0019），专用 PythonSandbox、Engine 执行/有界传输/只读查证/归属销毁及持久租约已按 ADR-0020 接通；artifacts/ 已管理私有字节与 ready 输入/Run 授予/授权读取与销毁后 ready 输出共同发布。integrations/e2b 已按 ADR-0023 接入私有 SandboxBackend；费用准入沿原租约，云 SDK 不进入核心导入。不接管 ModelAdapter 或另建 Agent 循环。
 
 | 边界 | 唯一责任 | 不能代替的边界 |
 | --- | --- | --- |

@@ -11,6 +11,7 @@ from drov.artifacts.types import ArtifactInput, ArtifactLimits, file_path
 from drov.errors import ConfigurationError
 from drov.sandbox._docker import ControlError, DockerPreflight, _settle
 from drov.sandbox._engine import EngineError, UnixEngine
+from drov.sandbox._interface import SandboxBackend
 from drov.sandbox._leases import SandboxLease
 from drov.sandbox._png import validate_png
 from drov.sandbox._profile import INPUT_TMPFS, ExecutionProfile, configuration_hash, require
@@ -19,7 +20,7 @@ from drov.sandbox._runner import EXPORT, INSTALL, SUPERVISOR, WORKLOAD
 FactWriter = Callable[[dict[str, Any]], Awaitable[SandboxLease]]
 
 
-class DockerBackend(DockerPreflight):
+class DockerBackend(DockerPreflight, SandboxBackend):
     """Private until the Runtime descriptor and resource ownership are connected."""
 
     async def open(self) -> None:
@@ -38,6 +39,12 @@ class DockerBackend(DockerPreflight):
                 ("install", INSTALL),
             )
         }
+
+    @property
+    def binding(self) -> dict[str, Any]:
+        self._require_loop()
+        require(self.is_open and self._binding is not None, "Docker backend is not open")
+        return dict(cast(dict[str, Any], self._binding))
 
     async def revalidate(self) -> None:
         self._require_loop()
