@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 
 from drov import DrovApp, Limits, Runtime
-from drov.models import ScriptedModel, ScriptedStep
+from drov.models import ScriptedStep
 from drov.models.protocol import ModelComplete, ModelDelta
 from drov.server import ServerLimits
 from tests.test_agent_runs import GateModel, final
@@ -223,28 +223,34 @@ async def test_send_timeout_closes_subscription_and_retains_execution() -> None:
 
 @pytest.mark.asyncio
 async def test_stream_deltas_have_no_cursor_and_gap_does_not_drop_durable_events() -> None:
-    model = ScriptedModel(
-        [
-            ScriptedStep(
-                events=(
-                    ModelDelta(text="one"),
-                    ModelDelta(text="two"),
-                    ModelDelta(text="three"),
-                    ModelComplete(response=final()),
-                )
+    model = GateModel()
+    model._steps = (
+        ScriptedStep(
+            events=(
+                ModelDelta(text="one"),
+                ModelDelta(text="two"),
+                ModelDelta(text="three"),
+                ModelComplete(response=final()),
             )
-        ]
+        ),
     )
     app = service(definition(model))
     async with network(app) as connection:
         ref = await connection.post("/v1/runs", json=body())
-        response = await connection.get(
-            f"/v1/runs/{ref.json()['run_id']}/events?include_content=true"
-        )
-        assert response.status_code == 200
-        for frame in response.text.split("\n\n"):
-            if "event: token.delta" in frame or "event: stream.gap" in frame:
-                assert "id: " not in frame
+        async with connection.stream(
+            "GET", f"/v1/runs/{ref.json()['run_id']}/events?include_content=true"
+        ) as response:
+            assert response.status_code == 200
+            lines = response.aiter_lines()
+            async for line in lines:
+                if line.startswith("id: "):
+                    break
+            model.release.set()
+            text = "\n".join([line async for line in lines])
+            assert text.count("event: token.delta") == 3
+            for frame in text.split("\n\n"):
+                if "event: token.delta" in frame or "event: stream.gap" in frame:
+                    assert "id: " not in frame
 
 
 @pytest.mark.asyncio

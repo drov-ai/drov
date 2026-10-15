@@ -94,9 +94,25 @@ def _route(decorator: Any) -> Callable[[F], F]:
 
 def install(service: "DrovApp") -> None:
     app, runtime = service._app, service.runtime
+    # Explicit text avoids Python HTTPStatus phrase changes altering the generated contract.
+    descriptions = {
+        400: "Invalid request",
+        401: "Authentication required",
+        403: "Permission denied",
+        404: "Resource unavailable",
+        409: "Conflict",
+        410: "Content unavailable",
+        411: "Content length required",
+        413: "Request body too large",
+        415: "Unsupported media type",
+        422: "Invalid request fields",
+        429: "Capacity exhausted",
+        500: "Internal error",
+        503: "Service unavailable",
+    }
     errors: dict[int | str, dict[str, Any]] = {
-        status: {"model": ErrorEnvelope}
-        for status in (400, 401, 403, 404, 409, 410, 413, 415, 422, 429, 503)
+        status: {"model": ErrorEnvelope, "description": description}
+        for status, description in descriptions.items()
     }
 
     @_route(app.exception_handler(HTTPFailure))

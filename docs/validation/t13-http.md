@@ -40,3 +40,6 @@ python scripts/check_installed_server.py --uv .drov/tooling/bin/uv --python 3.11
 收尾前修正：core-only严格mypy发现可选依赖缺失时继承StreamingResponse成为Any基类。订阅所有权改由外层DrovApp ASGI请求的finally持有/关闭，返回普通StreamingResponse，避免核心类型检查依赖Web安装；两套严格类型（150文件）及59项HTTP回归均通过（4.49s），接口/行为未改。初批完整回归3.11 **1129+61skip，290.58s**；3.14 **1130+59skip/1失败，317.06s**。失败是既有Responses Retry-After日期在收集时生成，长回归运行到该用例时已老化超过原100s窗口；改为该用例开始时生成，保留真实官方客户端/HTTP日期解析与数值区间，生产适配不改。原失败日志保留，修正后两套HTTP+Responses专项均 **120 passed（5.15s/4.67s）**。追加文件发送中途撤权及未知/不符长度测试后，当前完整收集 **1192项**，新增HTTP **64项（61离线/传输+3真实Docker）**；最终全库另记，不把旧59项/初批构件冒充最终。
 
 初批两解释器wheel/sdist重建、四套core-only新环境安装/示例及两套独立server安装后的真实HTTP/SSE三场景均通过，`.drov/t13-{package,installed}{311,314}.log`。该wheel在订阅所有权修正之前，只作历史检查点；最终构件/安装随后补记。core-only严格mypy150文件通过，`.drov/t13-core-types-fixed.log`，含extras版本同样通过。原T-12旧wheel实际仓库外安装后拒绝新upload_schema=1样本库（IncompatibleStorage），主DB前后SHA256均 **8ed238a0736bcaa3415112528a136b382f761b39ef04fae6d2f89333135924e8**，未修改原库；原本无上传扩展的旧库回归由现有存储测试覆盖。
+
+
+首个推送20eb133的CI实际HTTP测试通过，但Python3.13/3.14在OpenAPI快照检查失败：FastAPI默认取标准库HTTPStatus描述，3.11的413/422短语与新Python不同。对比两份完整JSON，仅错误description不同。已将错误描述在真实路由中显式固定（同时补411/500文档），两解释器生成逐字一致；没有忽略快照差异或跳过平台。原CI为核心38726688899/Docker38726689008，作为历史检查点，不用于关闭最终卡。运行代码的安全错误形状/数值状态未变。另加强真实SSE测试：实际先订阅再释放模型，必须收到三个token.delta并逐帧检查无id，避免模型过快完成造成空断言；测试数量不变。

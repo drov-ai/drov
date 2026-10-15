@@ -2107,7 +2107,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -2117,7 +2117,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -2127,7 +2127,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -2137,7 +2137,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -2157,7 +2157,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -2167,7 +2177,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -2177,7 +2187,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -2187,7 +2197,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -2197,7 +2207,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -2207,7 +2227,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Upload"
@@ -2256,7 +2276,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -2266,7 +2286,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -2276,7 +2296,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -2286,7 +2306,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -2306,7 +2326,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -2316,7 +2346,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -2326,7 +2356,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -2336,7 +2366,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -2346,7 +2376,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -2356,7 +2396,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Artifact"
@@ -2396,7 +2436,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -2406,7 +2446,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -2416,7 +2456,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -2426,7 +2466,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -2446,7 +2486,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -2456,7 +2506,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -2466,7 +2516,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -2476,7 +2526,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -2486,7 +2536,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -2496,7 +2556,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Content"
@@ -2534,7 +2594,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -2544,7 +2604,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -2554,7 +2614,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -2564,7 +2624,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -2584,7 +2644,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -2594,7 +2664,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -2604,7 +2674,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -2614,7 +2684,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -2624,7 +2694,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -2634,7 +2714,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Start"
@@ -2711,7 +2791,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -2721,7 +2801,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -2731,7 +2811,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -2741,7 +2821,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -2761,7 +2841,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -2771,7 +2861,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -2781,7 +2871,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -2791,7 +2881,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -2801,7 +2891,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -2811,7 +2911,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Inspect"
@@ -2860,7 +2960,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -2870,7 +2970,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -2880,7 +2980,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -2890,7 +2990,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -2910,7 +3010,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -2920,7 +3030,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -2930,7 +3040,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -2940,7 +3050,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -2950,7 +3060,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -2960,7 +3080,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Cancel"
@@ -3018,7 +3138,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -3028,7 +3148,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -3038,7 +3158,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -3048,7 +3168,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -3068,7 +3188,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -3078,7 +3208,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -3088,7 +3218,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -3098,7 +3228,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -3108,7 +3238,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -3118,7 +3258,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Context"
@@ -3199,7 +3339,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -3209,7 +3349,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -3219,7 +3359,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -3229,7 +3369,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -3249,7 +3389,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -3259,7 +3409,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -3269,7 +3419,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -3279,7 +3429,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -3289,7 +3439,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -3299,7 +3459,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Events"
@@ -3348,7 +3508,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -3358,7 +3518,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -3368,7 +3528,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -3378,7 +3538,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -3398,7 +3558,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -3408,7 +3578,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -3418,7 +3588,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -3428,7 +3598,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -3438,7 +3608,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -3448,7 +3628,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Recover"
@@ -3497,7 +3677,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -3507,7 +3687,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -3517,7 +3697,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -3527,7 +3707,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -3547,7 +3727,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -3557,7 +3747,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -3567,7 +3757,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -3577,7 +3767,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -3587,7 +3777,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -3597,7 +3797,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Respond"
@@ -3646,7 +3846,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -3656,7 +3856,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -3666,7 +3866,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -3676,7 +3876,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -3696,7 +3896,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -3706,7 +3916,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -3716,7 +3926,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -3726,7 +3936,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -3736,7 +3946,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -3746,7 +3966,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Verify"
@@ -3804,7 +4024,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -3814,7 +4034,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -3824,7 +4044,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -3834,7 +4054,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -3854,7 +4074,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -3864,7 +4094,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -3874,7 +4104,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -3884,7 +4114,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -3894,7 +4124,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -3904,7 +4144,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Sessions"
@@ -3971,7 +4211,7 @@
                 }
               }
             },
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "401": {
             "content": {
@@ -3981,7 +4221,7 @@
                 }
               }
             },
-            "description": "Unauthorized"
+            "description": "Authentication required"
           },
           "403": {
             "content": {
@@ -3991,7 +4231,7 @@
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "Permission denied"
           },
           "404": {
             "content": {
@@ -4001,7 +4241,7 @@
                 }
               }
             },
-            "description": "Not Found"
+            "description": "Resource unavailable"
           },
           "409": {
             "content": {
@@ -4021,7 +4261,17 @@
                 }
               }
             },
-            "description": "Gone"
+            "description": "Content unavailable"
+          },
+          "411": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Content length required"
           },
           "413": {
             "content": {
@@ -4031,7 +4281,7 @@
                 }
               }
             },
-            "description": "Request Entity Too Large"
+            "description": "Request body too large"
           },
           "415": {
             "content": {
@@ -4041,7 +4291,7 @@
                 }
               }
             },
-            "description": "Unsupported Media Type"
+            "description": "Unsupported media type"
           },
           "422": {
             "content": {
@@ -4051,7 +4301,7 @@
                 }
               }
             },
-            "description": "Unprocessable Entity"
+            "description": "Invalid request fields"
           },
           "429": {
             "content": {
@@ -4061,7 +4311,17 @@
                 }
               }
             },
-            "description": "Too Many Requests"
+            "description": "Capacity exhausted"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Internal error"
           },
           "503": {
             "content": {
@@ -4071,7 +4331,7 @@
                 }
               }
             },
-            "description": "Service Unavailable"
+            "description": "Service unavailable"
           }
         },
         "summary": "Session"
