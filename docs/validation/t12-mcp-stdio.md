@@ -36,3 +36,18 @@ python scripts/check_installed_mcp.py --uv .drov/tooling/bin/uv --python 3.11 --
 
 
 最终负载检查点：两套全库与两套打包/安装并发时，3.11有两项MCP测试因测试配置1s启动期限过短，在discover/open阶段超时（不是预期RPC错误/坏输出路径），其余1065通过、61skip，`.drov/t12-accepted-full311.log`。修正为非超时案例采用产品默认10s，专门hang案例5s；发现错误案例不再允许TimeoutError冒充目标错误，超时案例额外检查真实start/list屏障。SDK运行代码/默认值不改。该失败检查点不能写成最终全库通过；修正后结果见后续记录。
+
+## 最终本地与构件证据
+
+- 完整extras收集 **1128项**，新增 **66项MCP**，`.drov/t12-collection.log`。3.14运行代码最终检查点 **1069 passed /59 skipped，309.42s**（含99真实Docker），`.drov/t12-accepted-full314.log`。上述测试期限修正后两解释器MCP均 **66 passed**：3.11 **63.64s**、3.14 **70.38s**，`.drov/t12-timeout-fixed311.log`、314.log。3.11修正后全库结果在下面追加；不把此前两项启动超时写成全库通过。59项skip全部为本轮未授权/未配置的真实E2B云例，3.11另有两项Python3.12+ API适用跳过。
+- Ruff、格式（含Markdown Python片段）、严格mypy **136文件**、生成schema均通过，`.drov/t12-accepted-quality.log`。独立core-only环境实际没有mcp/jsonschema/openai/e2b，严格mypy136文件通过，`.drov/t12-core-quality.log`；不通过把可选依赖装入核心来修复类型检查。
+- 两解释器各完成wheel/sdist构建、从sdist重建payload比对、两套全新非editable核心安装/依赖兼容/六核心示例普通与stream：`.drov/t12-accepted-package311.log`、314.log和对应dist目录（共四套核心安装）。核心导入与MCPStdio构造在禁止可选导入/副作用的审计下通过。两解释器独立mcp extra安装后的真实普通/stream例均通过：`.drov/t12-installed311.log`、314.log；每个例两页发现、审批前0/批准后1调用、两个进程退出，协议2025-11-25，real_model=false。
+- 最终测试修正提交c786fdc仅改测试期限和验证文档；运行源码保持046bf6c。最终构件 `.drov/t12-head-dist/` wheel SHA256 **fd698fab19da44fb5f18d1bed6fb42624adc2eee0154413db9010d5d02bcb63c**，sdist **445bcac36f7550892f9695708fce4a4e00f772c728e15b550b472c8180c9f070**。最终wheel全部payload与前述四套核心/两套mcp安装的wheel相等，69个Drov文件逐字节等于当前src；Twine strict通过，`.drov/t12-head-{artifacts.json,build.log,twine.log}`、`t12-wheel-source.json`。本节及后续Markdown补记不在该sdist内，不将文档补记冒充旧构件内容。
+- 源码046bf6c和测试修正c786fdc均已推送origin/main。最终远程验收目标为完整 **c786fdc6542d95d815649c759bc41520e0dc6915**，核心38713669518、Docker38713669476；目前进行中，不能用旧提交的CI关闭本卡。前一046bf6c的CI仅作为历史检查点。
+
+最终本地3.11修正后完整回归 **1067 passed /61 skipped，271.00s**，含99项真实Docker，`.drov/t12-accepted-fixed-full311.log`；与3.14的1069+59skip对应同一1128项完整extras收集。测试期限修正后两解释器66项MCP均通过，运行源码无后续变更。
+
+
+最终c786fdc远程Docker4 jobs全部success；核心Windows3.11前置在已有Memory测试 `test_best_effort_next_step_can_retrieve_after_skipped_call` 失败（719通过/258skip/1失败，MCP extra尚未安装），日志 `.drov/t12-win311-job.log`。第二次合法best-effort检索也可能超过该测试的10ms期限，不能要求必定included。仅修正测试：首读用Event等待实际超时取消，检索期限1s以保证下一步的成功断言不依赖Windows调度tick；仍检查首次timeout、次步included、两次实际检索、首模型无记忆/次模型含记忆。生产检索代码/默认值不改。修正后两解释器Memory回归与最终CI另记，不把该失败忽略或重跑碰运气当验收。
+
+上述Memory测试修正后，完整Memory模块在3.11 **56 passed，5.80s**、3.14 **56 passed，6.09s**，`.drov/t12-memory-fixed311.log`、314.log。MCP运行源码及已有两套66项证据均未变化；新提交将重新核对完整远程核心/安装和Docker矩阵。

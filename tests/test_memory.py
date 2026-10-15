@@ -652,7 +652,8 @@ async def test_best_effort_next_step_can_retrieve_after_skipped_call() -> None:
         nonlocal reads
         reads += 1
         if reads == 1:
-            await asyncio.sleep(1)
+            # Keep the first read pending until the real retrieval timeout cancels it.
+            await asyncio.Event().wait()
         return await original(self, *args, **kwargs)
 
     model = ScriptedModel([plan("lookup"), final()])
@@ -660,7 +661,8 @@ async def test_best_effort_next_step_can_retrieve_after_skipped_call() -> None:
         model,
         tools=[lookup],
         memory=Memory(retrieval="best_effort"),
-        limits=Limits(memory_best_effort_seconds=0.01),
+        # The next successful read must not race Windows scheduling ticks.
+        limits=Limits(memory_best_effort_seconds=1.0),
     )
     async with Runtime(agents=[agent]) as runtime:
         await seed(runtime.storage, content="next-step")
