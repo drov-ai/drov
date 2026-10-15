@@ -19,7 +19,7 @@
 | --- | --- |
 | 前置全库含真实Docker | 895 passed /2 skipped，210.88s；`.drov/t11-baseline.log`，仅Python3.12+ API不适用 |
 | 初批HTTP/SSE | 44 passed；扩充后57项，再加phase/大协议预算专项；不使用HTTP MockTransport代替本地连接 |
-| 首次综合专项 | 修正夹具后59 passed /3.66s，包含2项实际Docker；`.drov/t11-adapter-final2.log`；此后新增phase/预算/缺extra，最终结果待下方追加 |
+| 首次综合专项 | 修正夹具后59 passed /3.66s，包含2项实际Docker；`.drov/t11-adapter-final2.log`；此后新增phase/预算/缺extra，最终结果见下方追加 |
 | 公开协议/extra缺失专项 | 68 passed /1.16s，`.drov/t11-protocol-final.log` |
 | 静态/schema检查点 | Ruff180 files、mypy115 files、schema check通过；无extra的独立3.14 mypy亦已通过，最终再次核对 |
 | 本地示例 | SDK/stream各实际2次loopback请求，工具返回36、Report(total=36)，real_model=false；无外部模型 |
@@ -27,7 +27,7 @@
 | 最终全库3.14含真实Docker | **959 passed，228.06s**；`.drov/t11-full314.log` |
 | 两解释器构件/核心安装 | wheel/sdist及重建逐文件比对，4套core-only安装、六示例各SDK/stream通过；`.drov/t11-package311.log` /314.log |
 | extra干净安装 | 2套仓库外非editable wheel+openai 3.29.0，各SDK/stream2次loopback请求、Report36；`.drov/t11-installed-openai311.log` /314.log |
-| 最终静态/文档 | Ruff181 files、mypy115 files、schema、Twine strict、66文档/540相对链接/14 AST错误0；git diff --check通过 |
+| 最终静态/文档 | Ruff181 files、mypy115 files、schema、Twine strict、66文档/544相对链接/14 AST错误0；git diff --check通过 |
 
 主要命令：
 
@@ -51,8 +51,24 @@ DROV_DOCKER_TEST_CONFIG="$PWD/.drov/sandbox-environment.json" .drov/check-py314/
 
 ## 最终本地验收与远程核对
 
-新增 **62**：OpenAI HTTP/SSE/Runtime/BackendFixture/phase/B-15共 **59**、缺extra核心测试 **1**、实际Docker **2**。全库 **959**；真实Docker组由97增为99，3.11仍仅两个Python3.12+ API不适用。默认无extra核心CI会明确跳过两个适配文件，不把skip当专项通过；extra阶段实际执行59项HTTP/Runtime，Docker工作流实际执行99项。最终本地全库均无新增失败/警告。
+新增 **62**：OpenAI HTTP/SSE/Runtime/BackendFixture/phase/B-15共 **59**、缺extra核心测试 **1**、实际Docker **2**。全库 **959**；真实Docker组由97增为99，3.11仍仅两个Python3.12+ API不适用。默认无extra核心CI会明确跳过两个适配文件，不把skip当专项通过；extra阶段POSIX实际执行59项HTTP/Runtime，Windows57 passed /2 skipped（POSIX字节适用）；Docker工作流实际执行99项。最终本地全库均无新增失败/警告。
 
 两解释器构件一致：wheel `191af16bcb9f29c72f521b61f66528b3477ea8ffcf3356a0068e13a168ce6c12`，sdist `7592b70686ca6a4f68fa8f3c77cc87ebbf5b3201b20e952f5b9257d6b874b73d`。wheel全部63项drov文件逐字节等于最终src；构件在最终验证/进度补记前产生，sdist不冒充后续文档相同hash。新增extra安装脚本首次用相对uv路径切换临时目录失败，改为绝对路径后两套实际安装通过；这项检查脚本修正和最终文档在旧sdist之后，SDK wheel内容没有变化。最终远程使用新提交重新构建/安装。
 
-本地整卡范围已通过；最终源码提交/远程CI结果核对后追加，不把前置9a4fba1的CI视为本卡证据。没有真实模型smoke/质量、其他SDK/compatible服务/E2B/MCP/HTTP/工作台/维护验收；首版发布条件仍按原任务链。原SQLite/bytes/阶段记录及Docker配置保留，不清空生产或未知租约。
+**T-11整卡已完整验收。** 最终源码f87b595657fa36cd5d57840d27648eb9b9fc19c8已提交/推送main；下面为本次远程证据，不使用前置9a4fba1的CI代替。没有真实模型smoke/质量、其他SDK/compatible服务/E2B/MCP/HTTP/工作台/维护验收；首版发布条件仍按原任务链。原SQLite/bytes/阶段记录及Docker配置保留，不清空生产或未知租约。
+
+## 最终远程与保存状态
+
+最终源码 **f87b595657fa36cd5d57840d27648eb9b9fc19c8**，两工作流headSha逐项核实一致：
+
+| 工作流 | 实际结果 |
+| --- | --- |
+| [核心CI38663394874](https://github.com/drov-ai/drov/actions/runs/38663394874) | quality、Linux3.11–3.14、macOS/Windows3.11/3.14与3.15 advisory共 **10 jobs全部success**；3.15仍不扩大支持承诺 |
+| [Docker38663395005](https://github.com/drov-ai/drov/actions/runs/38663395005) | Ubuntu24.04原生AMD64/3.11–3.14共 **4 jobs全部success**；每套 **99 passed /860 deselected，无skip**；固定分析构建、core wheel/sdist安装和安装后标准库/分析SDK+stream均通过 |
+| extra阶段 | 六套受支持POSIX矩阵各 **59 passed**，两套Windows各 **57 passed /2 skipped**（仅BackendFixture依赖POSIX字节层）；八套平台均实际安装独立OpenAI extra wheel并在仓库外SDK/stream各访问本地HTTP成功 |
+
+普通无extra核心矩阵：Linux/macOS3.11 **799+101 skip**，其余受支持POSIX **801+99 skip**；Windows3.11 **694+206 skip**、3.14 **696+204 skip**。其中97个Docker需显式配置，两个新适配文件在缺SDK时以模块skip另计，两个3.12+ API在3.11不适用；Windows另有105项POSIX限制。新Docker2项在缺extra时随模块skip，原生专项安装extra后确实执行99项，不能把默认core的绿色当Docker或适配专项通过。
+
+四套Docker专项耗时3.11 **150.03s**、3.12 **113.36s**、3.13 **172.60s**、3.14 **177.74s**。远程完整非秘密日志 `.drov/t11-core-ci-final.log`、`.drov/t11-docker-ci-final.log`，head/job状态 `.drov/t11-{core,docker}-ci.json`。Windows3.14核心545.19s、构件/安装完成后extra专项3.24s；等待期间没有跳过检查或重启源码。CLI watch有一次GitHub API连接timeout，后续run详情和完整日志确认服务端success；这不是CI失败。并行缓存保存冲突只影响缓存，不影响任一job结论。
+
+最后补记仅Markdown（包括三个文档更新日期），与f87b595之间没有SDK/测试/工作流/schema/依赖变化；最终文档链接/AST与git diff --check再核对，补记单独skip ci提交/推送，实际HEAD由git log维护。没有上传PyPI/镜像、创建发布版本、部署站点或调用真实模型。下一项T-12的完成标准、资源准备和New Chat建议见progress。
