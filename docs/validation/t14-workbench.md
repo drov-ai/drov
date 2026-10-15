@@ -1,6 +1,6 @@
 # T-14 本地工作台验证
 
-日期：2026-10-15（Asia/Shanghai）。起点 `/Users/yanlong/projects/drov`，main / cf6c8cd；工作区干净，与 origin/main 同步。已读 AGENTS/progress/导航/handoff、T-14任务卡、API/运行/工程/质量及ADR-0025。实际查询前置26b97ee的核心38746896113与Docker38746896088，均completed/success、head_sha相符，分别10/4个job；元数据存于`.drov/t14-prerequisite-{core,docker}.json`。T-13无剩余验收缺项，没有重开一般规划。
+日期：2026-10-15开始、2026-10-16收尾（Asia/Shanghai）。起点 `/Users/yanlong/projects/drov`，main / cf6c8cd；工作区干净，与 origin/main 同步。已读 AGENTS/progress/导航/handoff、T-14任务卡、API/运行/工程/质量及ADR-0025。实际查询前置26b97ee的核心38746896113与Docker38746896088，均completed/success、head_sha相符，分别10/4个job；元数据存于`.drov/t14-prerequisite-{core,docker}.json`。T-13无剩余验收缺项，没有重开一般规划。
 
 ## 实际交付与边界
 
@@ -76,3 +76,27 @@ Python历史全库检查点（查询入口前）3.11为**1137通过/61skip，305
 
 
 06455ff的最终核心11 jobs全部success，Docker attempt2的3.12重跑也success，其他三个首轮已成功；该源码的15个job均有完成证据（`.drov/t14-06455ff-core-ci.json`、`t14-06455ff-docker-retry.json`）。这支持原Python/HTTP实现与23项UI的检查点，不用于替代后续同页身份修正的新静态资源。新24项初轮为23通过/1测试失败：关闭正文后提示区已被清空并hidden，测试用默认可见role定位导致未找到元素；改为检查保留的DOM节点文本确实为空，未放宽“不含旧证据”的要求（`.drov/t14-final-identity311.log`）。
+
+
+最终同页身份修正源码为 **5228c57743e23554ff9e5a32e0ec4525bc93944c**（已推送）。最终资源的两解释器Playwright均**24全通过**：3.11为16.4s（`.drov/t14-identity-accepted311.log`）、3.14为16.1s（314.log），均含真实Docker，新增延迟verify回执的逐次DOM观察；同页注销后旧会话表单值不可见，关闭正文后提示区DOM文本为空。原首次带重导航的跨归属测试通过记录`.drov/t14-logout-before.log`不能覆盖同页切换；改成同页才复现两个缺口，随后实际修复。
+
+最终两套wheel/sdist、sdist重建/四套core-only安装、两套独立server安装后实际HTTP/SSE与5个资产、Twine strict均通过：`.drov/t14-5228c57-{package,installed}{311,314}.log` / twine.log。新wheel SHA256 **55fd0fda20b2952f2358355a9bc9bae12d34dac665966566b11cf80b1b829e89**，sdist SHA256 **6830cd3a3435cc1b914dbf30cee74881de607b0091c43f8b17938d17c70c3510**，两解释器一致；全部81个SDK/资源文件与当前跟踪src逐字相等（`.drov/t14-5228c57-artifacts.json`）。这才是身份修正后的构件，不复用旧JS构件。后续仅Markdown补记，不伪称包含于这些sdist。
+
+从06455ff到5228c57的Python/pyproject/uv.lock/schema/OpenAPI变更为**0**（`.drov/t14-5228c57-python-same.json`），因此1145项全库是相同Python实现的证据；新JS/HTML由上述24项浏览器和最新构件另验。最新HTTP/例子/静态专项73通过（4.52s，`.drov/t14-identity-http311.log`）。最终远程[核心38763139995](https://github.com/drov-ai/drov/actions/runs/38763139995) / [Docker38763139909](https://github.com/drov-ai/drov/actions/runs/38763139909) 的实际结论稍后补记；前端job已success，重生成/格式/构建后与Git资源比较一致。
+
+
+最终5228c57的[Docker38763139909](https://github.com/drov-ai/drov/actions/runs/38763139909)已completed/success，四个原生Linux3.11–3.14 jobs均success，无本次重跑。每套**102项真实Docker通过/3个未安装其他extra的收集skip/1008 deselected**（191.64/204.27/187.03/201.31s）；每套随后完成core-only安装后的标准库/分析镜像SDK+stream与字节读取。3.11额外以实际浏览器运行**24全通过（30.2s）**，包含真实DockerCSV/PNG和同页身份/延迟回执。完整日志`.drov/t14-5228c57-docker-ci.log`和对应SHA/job元数据已保留。原06455ff的10秒超时及重跑仍保留为历史，不掩盖也不改限制。
+
+
+## 最终验收结论（2026-10-16）
+
+**最终运行源码/资源5228c57743e23554ff9e5a32e0ec4525bc93944c的核心11/Docker4 jobs全部completed/success，SHA逐字核对。** 核心元数据与完整逐步日志在`.drov/t14-5228c57-core-{ci.json,ci.log}`，Docker同名记录；这才是关闭本轮验收的远程检查点。
+
+- Linux3.11–3.14、macOS3.11/3.14的HTTP/静态/无损查询各**72通过**；Windows3.11/3.14各**59通过/13跳过**，13项沿原POSIX文件层限制，不冒充Windows文件支持。八套都通过实际OpenAPI检查、核心回归/构建和独立server安装后的三场景HTTP/SSE与5个静态资产。Python3.15仅advisory，不扩充支持矩阵。
+- 前端独立job以精确npm锁重新生成类型、检查格式、构建并比较Git资源一致，浏览器**23通过/1无Docker配置适用skip（21.7s）**；真实Docker专属job则**24全通过（30.2s）**。本地两解释器最终各24项也均实际含Docker，没有以skip替代。
+- 最终全库证据为同一Python实现1145通过/59未授权E2B skip；最终JS/HTML、两套构件/安装、81文件逐字节比对/许可和生成检查另有上述对应证据。历史3.11/3.14检查点、旧构件、例子/身份失败和3.12控制超时完整保留，不串换“最终”的对象。
+- 最终本地Drov归属执行容器0。原品牌素材、uv.lock/DDL/P4指纹与用户私有环境/字节/租约/云台账保留。没有读真实Key、付费模型/云调用或公开发布包/镜像/站点。
+
+上述满足T-14任务卡；实际任务状态、未实现的T-15及用户准备/换会话建议统一见[progress](../planning/progress.md)。工作台实验性、Chromium/移动视口、单worker/POSIX、T-15维护和T-16真实模型等边界仍见本记录“验收范围及未验证”。收尾仅Markdown，不重新包装已验收sdist；源码/测试/锁/工作流已经推送，最终文档另存skip ci检查点，实际HEAD以Git为准。
+
+收尾文档复核：74份Markdown、628个相对链接、15段Python说明片段AST，错误0；跟踪差异凭据模式0，记录`.drov/t14-doc-check.json`。该检查只验证文档/跟踪范围，不替代上述运行结果。

@@ -1,14 +1,14 @@
 # 当前进度与下一轮
 
-更新：2026-10-15（Asia/Shanghai）。
+更新：2026-10-16（Asia/Shanghai；本轮从10月15日接续）。
 
 ## 当前状态
 
-- 阶段：P1至P4、T-01至T-13（含T-10A/T-10B/T-10C）已完整验收。**T-14本地工作台正在实施/验收，未提前关闭整卡**；T-13历史源码26b97ee已推送，新增65项HTTP测试（62传输/离线+3真实Docker）。最终两解释器含Docker全库1132+61skip /1134+59skip通过；同一源码的核心10与Docker4个远程job全部success。SSE认证期间撤权已复现并修正，具体失败/构件/平台证据见 [本轮验证](../validation/t13-http.md)。
+- 阶段：P1至P4、T-01至T-14（含T-10A/T-10B/T-10C）已完整验收。**T-14本地工作台整卡已关闭，下一项T-15数据维护与兼容**。最终运行源码/资源5228c57已推送，核心11与Docker4个远程job全部success；新增11项Python和24项Playwright。Python实现全库1145+59skip、最终两解释器浏览器24项（均含真实Docker）及构件/仓库外安装通过，准确检查点/身份修复/失败与重跑见[本轮验证](../validation/t14-workbench.md)。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
-- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；工作台代码已接入，最终构件/平台验收进行中；未验收：T-14至T-18，维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
-- 本轮T-14仅本地合成身份/文件/模型输出、真实loopback HTTP/SSE及原Docker环境；未读真实Key、调用付费模型/云、上传私有资料或公开发布/部署。T-10C历史云授权/预留与边界见其验证记录，本轮未动用该云预算。
+- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；实验性工作台已完整验收；未验收：T-15至T-18，维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
+- 本轮T-14使用合成身份/文件/模型输出、实际loopback/浏览器及本地/CI Docker；未读真实Key、调用付费模型/云、上传私有资料或公开发布/部署。T-10C历史云授权/预留与边界见其验证记录，本轮未动用该云预算。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 - 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
 - 2026-10-14 首版范围文档轮起点（历史）：同一 `/Users/yanlong/projects/drov`、main / 8f3c5e0，工作区干净且与 origin/main 同步。本轮仅修改规划、协作/开发说明与验证文档；未改 SDK 源码、测试、schema、依赖锁、DDL 或品牌，未运行/拉取容器或调用模型。文档检查点以本轮 Git 提交和下述验证记录为准。
@@ -17,11 +17,17 @@
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 本轮交付：T-14 本地工作台（验收中）
+## 本轮交付：T-14 本地工作台（完整验收）
 
-起点main/cf6c8cd，干净且远端同步；前置26b97ee的核心10/Docker4 jobs已实查success。按[ADR-0026](../decisions/0026-local-workbench.md)接通同源登录/固定资源/认证目录、会话与运行/上下文/交互/取消恢复/事件重连、原上传和安全PNG/附件。页面接入发现合法会话ID的路径表示缺口，新增查询入口与原函数共用授权；原Runtime/DDL/uv.lock/P4和品牌原素材不改。最终本地23项Playwright（4协议/19浏览器，含真实Docker）全部通过，Python HTTP+资源/查询72项通过。d2914ca的两解释器构件/安装、核心前端与Docker四项已通过；示例同会话结果引用另有1项已复现/修正回归，make_app三场景及同一会话两次实际分析镜像CSV/PNG已通过。同页身份切换新增2项实际失败后已修正表单/游标/旧DOM与核查回执隔离，最终静态资源重新验收中；最新源码/构件/CI核验尚在收尾，**整卡未关闭，不能进入T-15**。实际失败修正和证据见[本轮验证](../validation/t14-workbench.md)。
+起点main/cf6c8cd，干净且与远端同步；前置26b97ee核心10/Docker4 jobs已实查success。按[ADR-0026](../decisions/0026-local-workbench.md)交付[工作台源码与启动说明](../../workbench/README.md)：同源登录/内存凭据/固定静态资产、认证Agent目录、会话和Run/上下文/事件、原审批/输入/核查/取消/恢复、认证fetch重连、原上传消费及安全PNG/附件。合法会话ID另加查询入口，与原读取共用授权；原Runtime/DDL/uv.lock/P4和品牌原素材未改。
 
-无真实Key/付费模型/云调用或公开发布/部署。当前无需用户新增仓库、账号、model ID或预算；保留Docker和原私有数据。完成最终检查后再更新下一项。
+新增11项Python（10项HTTP/静态/无损会话查询、1项同会话CSV例子回归），最终24项Playwright（4协议/20浏览器）。同页身份切换旧表单和延迟verify回执的缺口已实际复现并修正，同时清除提示区正文并固定文件Client/AbortSignal；同会话连续两次分析镜像CSV/PNG及本次产物引用通过。最新Python实现3.14含真实Docker全库**1145通过/59skip（307.05s，1204项）**；此后仅JS/HTML/文档修正，Python/契约指纹相同，最终HTTP/例子/资源73项及两解释器真实Docker浏览器各**24项全通过（16.4/16.1s）**另验。原3.11全库与每一源码检查点的范围、全部失败和修正见[验证](../validation/t14-workbench.md)，不把旧检查点写成新源码全跑。
+
+两解释器wheel/sdist重建、四套core-only安装/六例SDK和stream、两套独立server安装后的真实HTTP/SSE三场景与5个资产、Twine/静态/格式/严格类型/schema/OpenAPI通过，全部81个SDK/资源文件与最终src逐字节相等。最终源码**5228c57**的[核心38763139995](https://github.com/drov-ai/drov/actions/runs/38763139995) **11 jobs**和[Docker38763139909](https://github.com/drov-ai/drov/actions/runs/38763139909) **4 jobs**全部success；Linux3.11–3.14每套102项真实Docker/安装通过，3.11还实际通过24项浏览器；八套支持平台HTTP/资产/OpenAPI/安装通过。旧06455ff一次Docker3.12预检10s超时与新runner重跑已保留，不修改原期限，也不作为最终5228c57的失败或通过替身。
+
+**T-14整卡完整验收并关闭，无剩余任务卡缺项。** 工作台仍实验性；浏览器仅Chromium/移动尺寸视口，非所有引擎/真实设备或外部使用者体验验证；单worker、POSIX字节层、暂存T-15维护、真实模型和E2B跨HTTP/UI未验证边界不变。默认元数据；空闲页面不即时知道宿主撤权，下一次同步/操作清除正文，已下载的字节不能撤回。
+
+本轮没有读真实Key/私有env、付费模型/云调用或公开发布包/镜像/站点。原Docker/SQLite/bytes/租约/模板/云台账保留；最终只读清点本地Drov执行容器0。代码/测试/锁/工作流已提交推送，收尾仅Markdown，以skip ci保存，实际HEAD/同步以Git为准。当前无需新仓库/账号/Key/model ID/预算；下一项T-15和完成条件见文末，建议New Chat，继续同一Local checkout。
 
 ## 历史验收：T-13 HTTP 与身份边界（完整验收）
 
@@ -302,14 +308,13 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 - 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
-## 下一项：T-14 本地工作台
+## 下一项：T-15 数据维护与兼容
 
-T-13前置已完整验收。按 [任务卡](implementation-plan.md) 实施本地工作台，复用现有HTTP schema、原品牌素材与同一Runtime，不重开一般规划，不建立第二套Agent循环。
+T-13前置和T-14均已完整验收。按[任务卡](implementation-plan.md)与release-policy实施，不重新规划，也不对现有用户库默认执行清理。
 
-1. 实现页面、会话/Run/上下文检查、审批/输入/核查、取消与SSE断连重连；静态资产纳入wheel，并验证仓库外安装可使用。
-2. 接通受控上传、代码/输入清单、有界文本、退出/清理状态与产物列表；安全预览PNG，附件经已有授权接口下载。权限不足时不显示正文/文件名，HTML/SVG不自动内联执行；查看/下载不重新运行代码。
-3. 三个参考应用、真实Docker CSV/图表、拒绝/失败/重连须在页面可操作，原审批/取消/归属边界不被绕过；UI自动检查、安装后资产/入口与必要核心回归通过，才关闭T-14。离线合成模型足够，不依赖付费模型。
-4. 当前无需新仓库/账号/Key/model ID/预算；执行者准备本地页面验证环境，保护已有品牌素材。保留现有Docker Desktop和`.drov`数据；T-16 smoke前才另行确认真实模型服务、固定ID、能力依据与费用上限。
+1. 先交付离线维护预览、Session/Artifact/上传暂存的引用和租约依赖、墓碑子范围。以临时样本库验证：dry-run不改原数据；运行中/未结束/未知操作与未确认清理的沙箱拒绝破坏；共享引用仍受保护，原request_key不能重建；中断回收有可恢复台账。
+2. 再完成SQLite+blob配对的一致备份/恢复与barrier、旧记录/版本拒绝、正文导出授权和兼容/故障矩阵。整卡所有完成条件通过才关闭T-15，未完成时记录已验收子范围及恢复步骤。
+3. 本轮无需用户新增仓库/账号/模型ID/Key/预算。执行者创建临时库/文件/备份夹具；继续保留原Docker Desktop和`.drov`/私有env/SQLite/bytes/租约/云台账。真实模型服务/固定ID/能力依据与预算在T-16 smoke前另行确认，凭据仅本地安全配置。
 
 ## 用户准备事项
 
@@ -321,7 +326,8 @@ T-13前置已完整验收。按 [任务卡](implementation-plan.md) 实施本地
 | T-10C 可选 E2B | 整卡已验收；实际`.env.local`安全显式加载，Key不显示/入库/上传。固定私有分析模板保留，T-10C收尾清点时活动/暂停实例0，本轮未查询云；当时保守累计预留4.831美元，实际余额/扣费到控制台核对。无需额外材料或继续云调用；保留账号权限/凭据/模板build和忽略的原台账。区域按截图声明，SDK不能证明驻留，强区域要求拒绝 |
 | T-12 MCP stdio | 整卡已验收，无需补充材料；若以后指定真实现成服务，再提供其仓库/绝对启动命令和允许工具。凭据只在宿主安全配置，不贴聊天/Git |
 | T-13 HTTP/身份/文件 | 整卡已验收，无需补充材料；实际组织身份系统在需要对接时再明确配置，无需本轮部署公网 |
-| T-14 本地工作台 | 无需新仓库/账号/模型ID/Key/预算；沿用原品牌和本地HTTP身份，执行者准备页面/断连重连/附件验证。保留原Docker和私有数据；无需公开部署 |
+| T-14 本地工作台 | 整卡已验收；无需补充材料。启动与实验性限制见workbench/README；原品牌素材保留，公开包/站点前再核对来源/使用范围 |
+| T-15 维护/备份/兼容 | 现在无需新仓库、账号、模型ID、Key或预算。执行者用临时样本库/bytes/备份夹具实现和验收；保留原数据、Docker及私有环境，不把真实用户库当破坏性夹具 |
 | 模型服务、可访问 model ID、密钥和总预算 | T-16 smoke/live 前提供可访问服务/model ID 并批准共同费用上限；工程执行者先按新增代码任务量估价。Key 仅本地环境/忽略配置或凭据管理，聊天/Git 不贴密钥；未授权预算前不付费调用 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
 | Cloudflare drop.dev、账号范围、品牌来源与公开使用范围 | 官网/素材初次公开前核实；现有素材保留本地，当前不部署 |
@@ -330,7 +336,7 @@ T-13前置已完整验收。按 [任务卡](implementation-plan.md) 实施本地
 
 ## 会话切换建议
 
-T-13已完整验收，下一轮转为前端交互与安装资产，**建议New Chat实施T-14**，继续Local `/Users/yanlong/projects/drov`。先核对实际Git、26b97ee最终两套CI及 [T-13验证](../validation/t13-http.md)，不沿用旧聊天推断状态。原`.env.local`、`.drov`的SQLite/bytes/租约/模板/费用台账继续保留。下一轮本地工作台不需要新账号、模型Key/ID或预算；T-16前再确认真实模型服务/固定ID/能力来源、安全凭据配置和调用预算。
+T-14已完整验收，下一轮转为离线数据维护和备份，**建议New Chat实施T-15**，继续Local `/Users/yanlong/projects/drov`。先读当前progress/任务卡/handoff，并核对实际Git、5228c57最终核心11/Docker4 jobs和[T-14验证](../validation/t14-workbench.md)；收尾仅Markdown，实际HEAD以Git为准。原`.env.local`、`.drov`的SQLite/bytes/租约/模板/费用台账继续保留。T-15无需新账号、模型Key/ID或预算；T-16前才确认真实模型服务/固定ID、能力来源和费用上限，由本地忽略配置/凭据管理安全提供，不贴聊天或Git。
 
 ## 阶段记录
 
@@ -362,5 +368,6 @@ T-13已完整验收，下一轮转为前端交互与安装资产，**建议New C
 | 2026-10-15 | T-10C可选E2B整卡验收 | 用户插入补做；新增103（44离线/59真实云）、完整收集1062；最终清理修正40项云回归、两解释器安装后SDK/stream和763c25d核心10+Docker4 jobs成功；0活动/暂停实例，保守预留4.831美元，整卡关闭；恢复T-12，建议New Chat |
 | 2026-10-15 | T-12 MCP stdio整卡验收 | 新增66、完整收集1128；两解释器含Docker全库1067+61skip/1069+59skip、四套核心/两套mcp安装；修正Windows环境/原生CI命令失败判定/退出观察及既有测试问题，最终3a013be核心10+Docker4 jobs全部success；下一项T-13，建议New Chat |
 | 2026-10-15 | T-13 HTTP与身份整卡验收 | 新增65、完整收集1193；两解释器含102真实Docker全库1132+61skip/1134+59skip、四套core/两套server安装与实际HTTP/SSE；修正跨Python OpenAPI与SSE认证期间撤权，最终26b97ee核心10+Docker4 jobs全部success；下一项T-14，建议New Chat，真实模型未验证 |
+| 2026-10-16 | T-14本地工作台整卡验收 | 新增11项Python与24项Playwright；同页身份/延迟回执缺口和示例历史引用已复现修正；1145+59skip全库、两解释器实际Docker浏览器24/构件/安装通过；最终5228c57核心11+Docker4 jobs全部success；下一项T-15，建议New Chat，真实模型未验证 |
 
 2026-10-15 准备轮历史补记：当时用户咨询可选T-10C材料，核对任务卡/release-policy与E2B官方quickstart/网络/价格资料；该准备轮仅文档变更，尚未安装SDK/读取凭据/调用云。其后用户明确授权本轮实施，现状以上方T-10C完整验收为准。
