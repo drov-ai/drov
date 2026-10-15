@@ -1,6 +1,6 @@
 # 产品定义
 
-状态：方向已确认；首期范围由 [能力表](capability-matrix.md) 维护，当前实施状态见 [progress](progress.md)。2026-10-14 用户确认首版包含“生成并执行代码”，后续采纳受控文件/产物和可选 E2B，工作决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)；沙箱尚未实现。
+状态：方向已确认；首期范围由 [能力表](capability-matrix.md) 维护，当前实施状态见 [progress](progress.md)。2026-10-14 用户确认首版包含“生成并执行代码”，后续采纳受控文件/产物和可选 E2B，工作决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。
 
 ## 定位
 

@@ -61,3 +61,29 @@ Windows日志复核发现4ebedb7的job“success”不能作为验收：PowerShe
 
 
 OS环境修正dd73a0a后，真实MCP前置门禁在Windows3.14成功；Windows3.11为 **65 passed /1 failed**，失败是stubborn样本在SDK返回后立即查询一个父PID仍未signalled，`.drov/t12-os-env-win311-failed.log`。已改为5s内持续观察全部已记录父/子PID，必须实际消失，超时仍失败，不以SDK Task结束替代OS退出。依据微软 [TerminateProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-terminateprocess) 的异步终止/待完成I/O说明（查阅2026-10-15）；是否属于退出通知竞态由下一轮Windows真实测试确认，未直接认定已修复。生产关闭代码不因这一测试调整而改动。
+
+系统环境最终修正后两套完整extras/Docker回归重新通过：3.11 **1067 passed /61 skipped，282.79s**，3.14 **1069 passed /59 skipped，304.67s**，`.drov/t12-env-final-full311.log`、314.log。MCP专项分别66项通过（62.71s/70.90s），5s OS退出观察测试本地66项也通过（62.17s）。两解释器再次完成构建/从sdist重建/四套core-only安装与普通/stream示例，`.drov/t12-platform-package311.log`、314.log；独立mcp安装后的真实stdio例和E2B离线安装probe均通过，`t12-platform-{mcp,e2b}-installed{311,314}.log`，real_cloud=false。
+
+该批wheel SHA256 **0adf28f05a5cbb25962087a27bb74cb879587aee8d74235a221dfccf6525dd0c**，sdist **5128b0612d1904febee02be088d15590c4850ef338e84b0d65f7622225791800**；Twine strict通过，构件位于 `.drov/t12-platform-dist311/`、314/。这批构件含OS白名单修正，后续只改OS观察测试/验证文字，不将旧fd698构件冒充新环境语义。
+
+3a013be 的独立MCP前置步骤在Windows3.11/3.14均已success，实际66项与5s父子PID退出核实通过，证明上一检查点的退出通知竞态已由真实OS观察解决；没有把测试改为只看Task状态或跳过Windows。最终目标是完整 **3a013be1e7c8668c98def8f8a1fd5350cf8e6a71**：[核心38718551848](https://github.com/drov-ai/drov/actions/runs/38718551848)、[Docker38718551936](https://github.com/drov-ai/drov/actions/runs/38718551936)，核心其余完整流程尚待最终确认。
+
+## 最终验收与交接
+
+**T-12整卡已完整验收并关闭。** 最终检查点为已推送的 **3a013be1e7c8668c98def8f8a1fd5350cf8e6a71**。再次实查确认 [核心38718551848](https://github.com/drov-ai/drov/actions/runs/38718551848) 与 [Docker38718551936](https://github.com/drov-ai/drov/actions/runs/38718551936) 的headSha均为该完整值，status=completed、conclusion=success，全部10+4 jobs均success。元数据 `.drov/t12-exit-observed-{core,docker}-ci.json`；逐job日志 `.drov/t12-ci-logs/`，实际测试汇总 `.drov/t12-ci-test-summary.json`。不采用旧4ebedb7的false-green或其它head代替。
+
+| 最终远程范围 | 实际结果 |
+| --- | --- |
+| MCP独立前置 | Linux3.11–3.14、macOS3.11/3.14、Windows3.11/3.14，每套 **66 passed**，均无MCP跳过。Windows分别132.10s/103.29s，含5s内实查父/子PID退出、SDK/stream/原审批恢复/保锁 |
+| 核心无extras | POSIX3.11：825+153skip，其余827+151skip；Windows3.11：720+258skip，3.14：722+256skip。MCP在该阶段按未安装extra跳过，不能代替上项真实连接证据 |
+| 可选安装/协议 | 八套支持平台均完成核心wheel/sdist重建/非editable安装，独立mcp extra普通/stream真实服务及Responses本地HTTP例。Responses POSIX59、Windows57+2skip；E2B离线POSIX44、Windows37+7skip，安装probe真实通过且real_cloud=false；各native检查独立步骤，失败不能被后续0退出码覆盖 |
+| Docker Linux3.11–3.14 | 每套 **99 passed /3 skipped /935 deselected**；3skip为未安装的可选模块，不是跳过99项Docker。每套还完成core-only安装后标准/分析镜像的实际SDK/stream执行/产物读取 |
+| 质量/下一版Python | 严格静态/类型/schema通过；Python3.15 advisory也success，但不扩大3.11–3.14支持承诺 |
+
+最终MCP运行源码为dd73a0a的OS白名单/环境策略修正，3a013be只补OS退出观察与验证文字。本地最终完整extras1128项中，3.11 **1067+61skip**、3.14 **1069+59skip** 均有系统环境修正后的实际全库证据；完整包/安装、69个Drov wheel文件与当前src逐字节相等及Twine证据以上述0adf28构件为准。后续收尾仅Markdown，不伪称旧sdist包含本节文字，不重跑未改SDK的矩阵。产品定义中遗留“沙箱未实现”措辞已去除，状态继续由progress唯一维护。
+
+未读真实密钥、未调用付费模型或云、未访问私有MCP服务、未上传PyPI/公开镜像或部署站点。MCP仅支持当前API/ADR的initialize握手/schema/text与JSON子集；OS白名单是环境传递规则，不是宿主文件/网络沙箱。解析后限额也不等于原始stdout硬内存上限。没有未完成的T-12验收子范围；更广协议/schema/媒体/远程认证仍按能力表后续范围处理，不混记为本卡缺项或已支持。
+
+下一项 **T-13 HTTP与身份边界**：DrovApp/lifespan、可信身份与Authorizer、同一Runtime的运行/交互/inspection/SSE、有界上传/同scope消费/文件授权下载，完成三参考场景及SDK/stream/HTTP对照、SSE背压/断连/关闭和撤权/跨归属/未ready/重复接收错误路径才关闭。现在不需新仓库、账号、模型ID、Key或预算；本地合成服务与身份夹具由执行者准备。保持Docker Desktop与原`.drov`/私有env、SQLite/bytes/租约/云模板和预算台账，T-16前才另行确认模型服务/固定ID/能力依据与费用上限，凭据仅宿主安全配置。建议 **New Chat**，继续当前Local checkout，先核对实际Git与本节两套最终CI。
+
+收尾文档检查：**71份Markdown、587个相对链接、15个Python片段AST，0错误**；格式检查207文件、Git差异空白检查通过，修改范围凭据模式0命中，`.env`/`.env.local`/`.drov`仍忽略且未跟踪，无品牌/DDL/schema/已验收源码改动。证据 `.drov/t12-doc-check.json`、`t12-track-check.json`。最终收尾仅product/progress/本记录三份Markdown，以skip ci提交推送；实际最终HEAD/同步状态以Git为准。
