@@ -128,10 +128,11 @@ class FileDemoModel:
                 response=ModelResponse(message="代码计划未执行成功", finish_reason="completed")
             )
             return
+        current = request.model_copy(update={"messages": request.messages[first:]})
         model = self._factory(chart=True)
         if previous:
-            model.calls.append(request)
-        async for event in model.generate(request):
+            model.calls.append(current)
+        async for event in model.generate(current):
             yield event
 
     async def aclose(self) -> None:

@@ -19,7 +19,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 ## 本轮交付：T-14 本地工作台（验收中）
 
-起点main/cf6c8cd，干净且远端同步；前置26b97ee的核心10/Docker4 jobs已实查success。按[ADR-0026](../decisions/0026-local-workbench.md)接通同源登录/固定资源/认证目录、会话与运行/上下文/交互/取消恢复/事件重连、原上传和安全PNG/附件。页面接入发现合法会话ID的路径表示缺口，新增查询入口与原函数共用授权；原Runtime/DDL/uv.lock/P4和品牌原素材不改。最终本地23项Playwright（4协议/19浏览器，含真实Docker）全部通过，Python HTTP+资源/查询72项通过。两解释器全库/最终构件/安装与CI核验尚在收尾，**整卡未关闭，不能进入T-15**。实际失败修正和证据见[本轮验证](../validation/t14-workbench.md)。
+起点main/cf6c8cd，干净且远端同步；前置26b97ee的核心10/Docker4 jobs已实查success。按[ADR-0026](../decisions/0026-local-workbench.md)接通同源登录/固定资源/认证目录、会话与运行/上下文/交互/取消恢复/事件重连、原上传和安全PNG/附件。页面接入发现合法会话ID的路径表示缺口，新增查询入口与原函数共用授权；原Runtime/DDL/uv.lock/P4和品牌原素材不改。最终本地23项Playwright（4协议/19浏览器，含真实Docker）全部通过，Python HTTP+资源/查询72项通过。d2914ca的两解释器构件/安装、核心前端与Docker四项已通过；示例同会话结果引用另有1项已复现/修正回归，make_app三场景及同一会话两次实际分析镜像CSV/PNG已通过。最新源码/构件/CI核验尚在收尾，**整卡未关闭，不能进入T-15**。实际失败修正和证据见[本轮验证](../validation/t14-workbench.md)。
 
 无真实Key/付费模型/云调用或公开发布/部署。当前无需用户新增仓库、账号、model ID或预算；保留Docker和原私有数据。完成最终检查后再更新下一项。
 

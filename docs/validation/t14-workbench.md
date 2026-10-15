@@ -44,3 +44,19 @@ python scripts/check_installed_server.py --uv .drov/tooling/bin/uv --python 3.11
 最终代码检查点（提交/CI另补）：**23项Playwright全部通过（17.6s）**，其中4项协议/字节、19项浏览器流程，真实Docker必跑（DROV_REQUIRE_DOCKER=1），`.drov/t14-ui-complete311.log`。Docker用例还在已预览后撤销view_content，后续下载拒绝并清除文件名/图片；核查/取消/拒绝/查看均有真实计数断言。补测输入草稿/焦点在同Run补读时保留，第一次测试误把形成暂停所需的SSE转移也阻住而超时，改为先等待实际暂停后触发补读（原日志`.drov/t14-ui-accepted311.log`），没有改内核或延长期限。
 
 Python历史全库检查点（查询入口前）3.11为**1137通过/61skip，305.86s**（`.drov/t14-full311.log`）；不得把该结果当新增查询入口的整库结果。新增5项查询和原HTTP/资源已**72通过，5.02s**，最终全库/构件/平台另补。当前状态与未完成项统一见 [progress](../planning/progress.md)。
+
+
+### d2914ca 构件与安装检查点
+
+源码/测试/锁/工作流已提交推送 **d2914caf942043a01b5cfc118eaed536b85b0018**；后续收尾只补Markdown。该提交的两解释器wheel/sdist、sdist重建载荷比对、四套core-only安装及六例普通/stream通过，`.drov/t14-d2914ca-package{311,314}.log`。两套独立server安装后，三场景实际HTTP/SSE和全部5个工作台资源/认证边界通过，`.drov/t14-d2914ca-installed{311,314}.log`；安装用户无需Node。Twine strict通过，`.drov/t14-d2914ca-twine.log`。
+
+两解释器构件逐字一致，wheel SHA256 **051439d08f00904a5c29230286df255d0456be7476335919ea439d1d3f9dce64**，sdist SHA256 **7f676bd6ccc63df38e1d60554d58fcf9919926136d572d540cecff9cd82404f9**。wheel中全部**81个Git跟踪的Drov源码/资源文件**与该提交逐字节相等，`.drov/t14-d2914ca-artifacts.json`。首次载荷辅助脚本误纳入本机忽略的.DS_Store而报KeyError，改为Git跟踪集合后比对0差异；没有把OS元文件打包或忽略实际源码差异。构建之后补记不伪称已包含在该sdist。
+
+含extras与core-only严格mypy各155文件通过，Ruff/231文件格式、生成schema/OpenAPI、文档74份/相对链接626个/15个Python片段AST、差异空白与凭据模式检查通过。凭据模式、uv.lock/三份原DDL/P4/品牌原素材变更均0，选定品牌副本SHA256为cc60756d84916ea18118eae48a3b78ca8e0145d6da94fdbb0b96afe07464b9ad；`.drov/t14-doc-check.json`。AST不代表SDK可运行；运行证据以上述实际示例为准。
+
+最终Python3.14 HTTP/静态/查询专项**72通过（4.58s）**，`.drov/t14-http-query314.log`，OpenAPI与3.11相同。3.14实际浏览器同一最终静态资产**22通过/1无Docker配置适用skip（14.7s）**，`.drov/t14-d2914ca-ui314.log`；真实Docker浏览器由3.11的23全通过覆盖。明确复现原a/b会话被start接收202、路径读取404、查询读取200且ID完整，`.drov/t14-session-path-repro.json`；原入口保留，查询形式支持完整SDK合法ID，不修改标识符契约。
+
+远程 [核心38758057652](https://github.com/drov-ai/drov/actions/runs/38758057652) 与 [Docker38758057752](https://github.com/drov-ai/drov/actions/runs/38758057752) 已对应该SHA启动。前端锁安装/类型生成/格式/构建后Git资源比较和无Docker浏览器job已success；其他job最终结论及本地最终全库稍后补记。不能以这一步的success关闭整卡。
+
+
+示例收尾审查另发现FileDemoModel的单次FixtureModel会在带历史的会话中取第一个旧tool结果。新增纯协议回归先实际失败（`.drov/t14-example-history-before.log`），随后只把例子的输入限定到当前轮次，原请求不变；SDK/HTTP/工作台运行源码与静态资产不变。修正后协议/HTTP专项**73通过**（`.drov/t14-example-history-fixed311.log`）；实际make_app三场景及同一会话连续两次分析镜像CSV→400×300 PNG全部通过，最终输出引用必须与本次实际工具产物一致、active lease=0，`.drov/t14-demo-smoke-repeated.log`/json。此例子修正需另存源码检查点并核对其构件/CI，不能把d2914ca整套证据冒充更新后的提交。
