@@ -27,3 +27,5 @@ T-10C仍未实施。前置T-10B已完成，T-11也已完成；T-10C独立可选�
 下一步仍由用户选择是否插入T-10C；现有默认下一项T-12保持。进入任一新实施模块均建议New Chat、同一Local checkout；没有准备好E2B资源也能先实施其离线子范围，不能据此关闭整卡。
 
 本轮实际文档检查：2份变更文档、45条相对链接均存在；发布策略锚点按实际第6节标题复核；git diff --check通过。未执行SDK/E2B测试，未调用任何模型或云服务。
+
+用户后续询问E2B_API_KEY定义位置：建议当前checkout根目录 `/Users/yanlong/projects/drov/.env.local`，用户自行填写并设私有权限；项目现有.gitignore的.env.*覆盖该位置。当前没有自动dotenv加载能力，T-10C实施时由授权的宿主验收入口显式加载，不向沙箱注入。已读.gitignore和依赖/开发约定、再次核对官方quickstart；未创建/读取凭据文件或检查真实密钥。仅补充文档，git diff --check通过。
