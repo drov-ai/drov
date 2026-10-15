@@ -33,3 +33,6 @@ python scripts/check_installed_mcp.py --uv .drov/tooling/bin/uv --python 3.11 --
 首轮测试夹具调用了不存在的journal.list，随后局部变量覆盖helper；按实际get接口修正。Ruff检查Markdown示例格式、严格类型检查SDK的snake_case参数/可选模块也已修正；这些失败没有被记成通过。初始化无tools时，原owner错误会使后续aclose重复报初始化错误；改为在owner内部记录初始化失败，让外层stdio正常清理，只把仍未结束/未确认的清理作为ShutdownIncomplete。未启动的缺可执行文件明确归为配置失败。另补打开完成前is_open不得为true。收尾审查改为原始session分页，避免高层Client重复吸收分页导致输出schema隐式重新发现；结果codec改用不可变JSON模板重建，防止共享字典使变更校验失效，并补缺extra在进程启动前明确提示。最终专项增加到66项，以下方最终实际结果为准。
 
 发现/运行使用两个独立进程，服务启动本身必须可安全预检。关闭故障连接也会中断同连接其他调用，不自动重连。旧协议中列工具与调用不是原子事务；每次重读防止观察到的schema变化，不冻结远端实现。输入schema仅支持API列明子集，structuredContent仅有限JSON对象/null，媒体与资源拒绝。stdout由官方SDK解析，分页/结果字节限制是解析后限制；不声称恶意服务的硬内存或守护进程沙箱隔离。borrowed正常关闭由宿主负责，但调用故障会中止连接。真实模型质量、HTTP/UI、公开发布/部署均未做。
+
+
+最终负载检查点：两套全库与两套打包/安装并发时，3.11有两项MCP测试因测试配置1s启动期限过短，在discover/open阶段超时（不是预期RPC错误/坏输出路径），其余1065通过、61skip，`.drov/t12-accepted-full311.log`。修正为非超时案例采用产品默认10s，专门hang案例5s；发现错误案例不再允许TimeoutError冒充目标错误，超时案例额外检查真实start/list屏障。SDK运行代码/默认值不改。该失败检查点不能写成最终全库通过；修正后结果见后续记录。

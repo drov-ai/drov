@@ -223,7 +223,7 @@ async def test_invalid_arguments_never_reach_process(tmp_path: Path, args: dict[
 async def test_errors_disconnect_timeout_never_retry_write(
     tmp_path: Path, mode: str, effect: str
 ) -> None:
-    connection = server(tmp_path, timeout_seconds=1)
+    connection = server(tmp_path, timeout_seconds=5 if mode == "hang" else 10)
     tool = choose(
         await connection.discover(policies={"echo/name": MCPToolPolicy(effect=cast(Any, effect))})
     )
@@ -257,12 +257,16 @@ async def test_errors_disconnect_timeout_never_retry_write(
     ],
 )
 async def test_discovery_failure_closes_child(tmp_path: Path, mode: str) -> None:
-    connection = server(tmp_path, mode, timeout_seconds=1)
-    with pytest.raises((ConfigurationError, UnsupportedSchema, TimeoutError)):
+    connection = server(tmp_path, mode, timeout_seconds=5 if mode.endswith("hang") else 10)
+    expected = TimeoutError if mode.endswith("hang") else ConfigurationError
+    with pytest.raises(expected):
         await connection.discover()
     assert not ledger(tmp_path, "call")
     await connection.aclose()
     assert connection._preflight is not None and connection._preflight.task.done()
+    assert ledger(tmp_path, "start")
+    if mode == "list-hang":
+        assert ledger(tmp_path, "list")
 
 
 @pytest.mark.asyncio
