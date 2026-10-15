@@ -51,3 +51,10 @@ python scripts/check_installed_mcp.py --uv .drov/tooling/bin/uv --python 3.11 --
 最终c786fdc远程Docker4 jobs全部success；核心Windows3.11前置在已有Memory测试 `test_best_effort_next_step_can_retrieve_after_skipped_call` 失败（719通过/258skip/1失败，MCP extra尚未安装），日志 `.drov/t12-win311-job.log`。第二次合法best-effort检索也可能超过该测试的10ms期限，不能要求必定included。仅修正测试：首读用Event等待实际超时取消，检索期限1s以保证下一步的成功断言不依赖Windows调度tick；仍检查首次timeout、次步included、两次实际检索、首模型无记忆/次模型含记忆。生产检索代码/默认值不改。修正后两解释器Memory回归与最终CI另记，不把该失败忽略或重跑碰运气当验收。
 
 上述Memory测试修正后，完整Memory模块在3.11 **56 passed，5.80s**、3.14 **56 passed，6.09s**，`.drov/t12-memory-fixed311.log`、314.log。MCP运行源码及已有两套66项证据均未变化；新提交将重新核对完整远程核心/安装和Docker矩阵。
+
+当前验收目标（待下节最终确认）：测试修正 **4ebedb782c9140be5e5a4024f27d0ac81a25e126**，已推送origin/main；[核心38714978847](https://github.com/drov-ai/drov/actions/runs/38714978847) / [Docker38714978829](https://github.com/drov-ai/drov/actions/runs/38714978829)。c786fdc核心随后因新提交取消，不能写为success；其Docker4套success仅是历史检查点。若中断，保留当前checkout与忽略台账，先核实这两个headSha/全部jobs和Windows3.11的Memory→MCP→安装流程，失败修复后再关闭整卡，不跳到T-13。
+
+4ebedb7本机构件 `.drov/t12-accepted-head-dist/`：wheel仍为 **fd698fab19da44fb5f18d1bed6fb42624adc2eee0154413db9010d5d02bcb63c**，sdist **5cf58563c3b6bb983ecbe1b81ab579fc2b06ecb69b2879666d46f584c5035d6a**；wheel全部payload逐字节等于已做两解释器核心/extra安装的wheel，Twine strict通过，`.drov/t12-accepted-head-{artifacts.json,build.log,twine.log}`。新sdist含Memory测试修正，本段及最后验收文字是构件后的Markdown补记。没有新增发布动作。
+
+
+Windows日志复核发现4ebedb7的job“success”不能作为验收：PowerShell多条native命令让前面失败被后面Responses安装的0退出码覆盖。Windows3.11实际 **52 failed /14 passed** MCP，安装例也失败；另有既存E2B安装probe左侧resolve长路径、右侧sys.prefix仍8.3短路径而断言失败。日志 `.drov/t12-win311-accepted.log`。已拆为独立CI步骤，并将真实MCP专项前置到构建前，避免旧false-green；E2Bprobe同时resolve两侧路径。MCP启动根因方向为覆盖SDK OS变量至空，违背Windows有效SystemRoot要求；恢复固定SDK OS白名单并保留模型Key/任意变量不继承，版本化环境策略进入MCP source_hash，API/ADR同轮同步。后续真实Windows通过前不宣称修复已验收；以前全部绿色Windows步骤记录作废，不关闭T-12。

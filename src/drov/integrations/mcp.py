@@ -218,15 +218,15 @@ class _Session:
         try:
             from mcp import Client
             from mcp.client.stdio import (
-                DEFAULT_INHERITED_ENV_VARS,
                 StdioServerParameters,
+                get_default_environment,
                 stdio_client,
             )
 
             server = self.server
-            # Override SDK safe defaults too: the child receives only the host's explicit
-            # whitelist. Do not mutate the host environment or inherit model credentials.
-            environment = dict.fromkeys(DEFAULT_INHERITED_ENV_VARS, "")
+            # Preserve the pinned SDK's OS-only whitelist (not arbitrary host env).
+            # Windows needs a valid SystemRoot for Python/DLL initialization.
+            environment = get_default_environment()
             environment.update(server._environment)
             parameters = StdioServerParameters(
                 command=server._command, args=list(server._args), env=environment, cwd=server._cwd
@@ -363,6 +363,7 @@ class MCPStdio(MCPConnection):
                 "command": command,
                 "args": list(args),
                 "cwd": self._cwd,
+                "environment_policy": "mcp-2.3.0-os-whitelist-v1",
                 "env_names": sorted(environment),
                 "timeout": timeout_seconds,
             }

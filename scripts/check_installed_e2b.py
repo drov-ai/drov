@@ -14,7 +14,7 @@ from unittest.mock import patch
 from types import SimpleNamespace
 from drov.integrations.e2b import E2BSandbox
 import drov,e2b
-assert pathlib.Path(drov.__file__).resolve().is_relative_to(pathlib.Path(sys.prefix))
+assert pathlib.Path(drov.__file__).resolve().is_relative_to(pathlib.Path(sys.prefix).resolve())
 assert importlib.metadata.version('e2b')=='2.56.0'
 async def ready(info,**opts):
     assert opts['api_key']=='synthetic-installed-credential' and opts['retries']==0

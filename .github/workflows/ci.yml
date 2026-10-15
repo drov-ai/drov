@@ -49,20 +49,26 @@ jobs:
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           python-version: ${{ matrix.python }}
+      - run: uv sync --locked --extra mcp
+      - name: Real MCP stdio integration
+        run: uv run --locked --extra mcp pytest tests/test_mcp_stdio.py
       - run: uv sync --locked
       - run: uv run --locked pytest
       - run: uv run --locked python scripts/check_package.py
       - run: uv run --locked twine check --strict dist/*.whl dist/*.tar.gz
       - run: uv sync --locked --all-extras
       - run: uv run --locked --all-extras python -I -B scripts/check_installed.py
-      - name: Offline official clients and installed examples
-        run: |
-          uv run --locked --all-extras pytest tests/test_openai_responses.py
-          uv run --locked --all-extras pytest tests/test_mcp_stdio.py
-          uv run --locked --all-extras python scripts/check_installed_mcp.py --wheel dist/drov-0.1.0a0-py3-none-any.whl
-          uv run --locked --all-extras pytest tests/test_e2b_contracts.py tests/test_e2b.py
-          uv run --locked --all-extras python scripts/check_installed_e2b.py --python ${{ matrix.python }} --wheel dist/drov-0.1.0a0-py3-none-any.whl
-          uv run --locked --all-extras python scripts/check_installed_openai.py --wheel dist/drov-0.1.0a0-py3-none-any.whl
+      # Each native command is its own step so PowerShell cannot hide an earlier failure.
+      - name: Offline official Responses client
+        run: uv run --locked --all-extras pytest tests/test_openai_responses.py
+      - name: Installed MCP extra and stdio examples
+        run: uv run --locked --all-extras python scripts/check_installed_mcp.py --wheel dist/drov-0.1.0a0-py3-none-any.whl
+      - name: Offline E2B adapter
+        run: uv run --locked --all-extras pytest tests/test_e2b_contracts.py tests/test_e2b.py
+      - name: Installed E2B extra without cloud calls
+        run: uv run --locked --all-extras python scripts/check_installed_e2b.py --python ${{ matrix.python }} --wheel dist/drov-0.1.0a0-py3-none-any.whl
+      - name: Installed Responses extra and loopback examples
+        run: uv run --locked --all-extras python scripts/check_installed_openai.py --wheel dist/drov-0.1.0a0-py3-none-any.whl
 
   python-next:
     # Advisory only; Python 3.15 is not in the supported matrix.

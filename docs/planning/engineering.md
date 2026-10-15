@@ -40,7 +40,7 @@ src/drov/
   models/                     协议、脚本替身、OpenAI 适配器
   sandbox/                    T-10A：Python 工具/后端协议/Docker 执行
   artifacts/                  T-10A：私有字节、暂存与引用存储
-  integrations/mcp/           可选 MCP 客户端
+  integrations/mcp.py         可选 MCP stdio 客户端
   integrations/e2b/           T-10C：可选 adapter，当前不创建
   server/                     可选 HTTP、认证边界、静态资源
   cli.py                      轻量启动/诊断/离线维护入口

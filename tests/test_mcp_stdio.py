@@ -287,6 +287,8 @@ async def test_environment_whitelist_and_namespace_identity(
     connection = server(tmp_path)
     tools = await connection.discover()
     assert ledger(tmp_path, "start")[0]["inherited_test_secret"] is False
+    if os.name == "nt":
+        assert ledger(tmp_path, "start")[0]["systemroot_present"] is True
     assert len({tool.name for tool in tools}) == 2
     other = MCPStdio(
         namespace="other",

@@ -29,7 +29,12 @@ async def main() -> None:
     parser.add_argument("--control", type=Path)
     parser.add_argument("--mode", default="normal")
     options = parser.parse_args()
-    record(options.ledger, "start", inherited_test_secret="DROV_MCP_TEST_SECRET" in os.environ)
+    record(
+        options.ledger,
+        "start",
+        inherited_test_secret="DROV_MCP_TEST_SECRET" in os.environ,
+        systemroot_present=bool(os.environ.get("SYSTEMROOT")),
+    )
 
     if options.mode == "stubborn":
         if os.name == "posix":

@@ -459,7 +459,7 @@ runtime = Runtime(
 
 `discover(policies={remote_name: MCPToolPolicy(effect="read", approval="policy")})` 只接受应用显式策略；未映射工具默认 unknown/policy，通常持久审批。readOnlyHint/idempotentHint 不授予权限。`tools` 是固定 tuple，每个定义的 `remote_name` 对应原名，`name` 是含 namespace 与远端名hash的Drov逻辑名，`revision` 为宿主服务revision。可从tuple选择子集注册；模型只能使用注册的逻辑名。`dependency` 是 `mcp.<namespace>`；owned/factory 自动打开未打开的连接并关闭，borrowed 需先 await server.open，由宿主最终 aclose。构造/发现/打开分别有明确边界；discover/open 单次使用，服务变化用新对象/新revision。临时 Agent.run 不含所需dependency，须使用显式Runtime。
 
-`command`/`cwd` 为绝对路径，`args` 为字符串列表；不从模型文本启动命令或shell。`env` 显式给值、`inherit_env` 显式选择宿主变量名，默认不继承宿主环境。Windows服务若依赖系统/临时目录变量，由宿主按需白名单传入。环境值不进入指纹，服务/环境语义变化需revision；秘密仅由宿主安全配置，不能写进args、工具描述或Git。stdio服务本身与启动行为是可信宿主程序，不是代码沙箱。
+`command`/`cwd` 为绝对路径，`args` 为字符串列表；不从模型文本启动命令或shell。`env` 显式给值、`inherit_env` 显式选择额外宿主变量名；默认仅继承固定SDK的OS白名单（包括Windows必须的SYSTEMROOT），完整名单见ADR-0024。其余宿主变量不继承，不默认传递模型Key；可由env显式覆盖OS默认项。环境值不进入指纹，服务/环境语义变化需revision；秘密仅由宿主安全配置，不能写进args、工具描述或Git。stdio服务本身与启动行为是可信宿主程序，不是代码沙箱。
 
 支持固定分页发现、SDK initialize握手版本（本地实测2025-11-25）、闭合JSON Schema输入子集。支持有限标量/enum/对象/数组/nullable/已有数值与长度约束；未写additionalProperties时收紧为false，`$ref/$defs`、开放字典及其他关键字明确拒绝。可选字段缺省仍缺省，default不注入；严格JSON边界拒绝重复键/非有限值，之后按2020-12校验，不强转Python类型。服务outputSchema由SDK校验。结果为 `{"content": [{"type": "text", "text": "..."}], "structuredContent": object_or_null}`；非text内容/非对象structuredContent不可用，不转换为Artifact或抓取资源。更广schema、媒体结果与2026现代协议尚不支持。
 
