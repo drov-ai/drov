@@ -57,3 +57,6 @@ uv run --locked python examples/operations_offline.py --stream
 ## MCP stdio 离线闭环
 
 安装mcp extra后运行 `python examples/mcp_stdio_offline.py` 或加 `--stream`。示例由 [本地官方SDK服务](mcp_stdio_fixture.py) 提供两页工具，使用确定性ScriptedModel；默认unknown工具先持久暂停、批准后只调用一次，退出关闭预检/运行两个进程。无真实模型、账号或费用。该服务只含合成资料，带故障模式供测试，不是生产MCP服务。API/限制见 [MCP接口](../docs/planning/api-draft.md#mcp-stdio-toolst-12)。
+
+
+HTTP服务安装`drov[server]`后运行`python examples/http_offline.py`或加`--stream`。示例在进程内启动真实127.0.0.1服务，使用本次随机头令牌驱动检索/Memory/人工输入与审批三场景，关闭时释放自有Runtime；不打印令牌、不读取Key、不调用模型服务。与SDK/stream及CSV/PNG的实际对照见 [T-13验证](../docs/validation/t13-http.md)，工作台另属T-14。

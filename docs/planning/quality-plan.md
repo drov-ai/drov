@@ -181,3 +181,8 @@ T-10C追加拒绝组：真实创建后受控SDK应答返回坏网络配置，代
 
 
 T-12 MCPFixture 已落地为 [官方SDK服务](../../examples/mcp_stdio_fixture.py) 与 [真实子进程测试](../../tests/test_mcp_stdio.py)：分页/重复/循环/限额、默认unknown审批/拒绝/原计划重开、schema变化、成功/工具错误/非法结果/断连/卡住/超时/取消、进程树退出、owned/borrowed/factory/启动失败及ShutdownIncomplete保锁。SDK-only核心安装不加载MCP；独立extra安装后普通/stream实际启动stdio服务。B-12/X-02的MCP部分以 [验证记录](../validation/t12-mcp-stdio.md) 的实际平台为准；无真实模型/私有MCP服务结论，HTTP仍待T-13。
+
+
+## T-13 HTTP 验证落地
+
+实际矩阵和最终状态见 [本轮验证](../validation/t13-http.md)。`test_http*`覆盖合成可信身份/任意头和body伪造/Host-Origin/猜ID与跨归属/撤权、三参考场景SDK-stream-HTTP对照、原审批/输入/核查响应及持久回执/重开恢复、签名scope/query分页、完整SSE游标和元数据投影；真实loopback连接退出与ASGI2.0/2.4的阻塞发送、临时有界队列/持久补读、显式取消及借用关闭。上传覆盖预留/大小/未完成/过期/重复接收、同scope事务消费失败回滚与并发去重、HTML安全附件/失去字节410与动态权限；真实Docker三入口使用实际CSV统计与PNG绘图，批准前0创建、销毁后/重开无后端HTTP下载hash。生成OpenAPI与独立server安装进入平台CI；已有SDK原故障矩阵仍保留，不以HTTP脚本成功替代隔离或真实模型质量。T-15再检验上传回收/备份一致性，T-14检验UI安全预览。

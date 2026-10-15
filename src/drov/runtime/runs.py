@@ -228,6 +228,7 @@ class RunController:
         limits: Limits | None = None,
         content: bool = False,
         artifacts: Sequence[ArtifactInput | ArtifactRef] = (),
+        _upload_ids: tuple[str, ...] = (),
     ) -> RunRef:
         self.runtime._require_open()
         self.executable(agent)
@@ -235,6 +236,14 @@ class RunController:
             controller = self.runtime._sandboxes
             await self.control(lambda: controller.precheck(agent))
         inputs, declarations = self.runtime._files.normalize(artifacts)
+        if len(set(_upload_ids)) != len(_upload_ids):
+            raise ConfigurationError("Run inputs repeat an upload ID")
+        if (
+            _upload_ids
+            and len(inputs) + len(_upload_ids) > self.runtime._files.store().limits.max_input_files
+        ):
+            raise CapacityExceeded("Run input files exceed configured limits")
+        declarations.extend({"kind": "upload", "upload_id": item} for item in _upload_ids)
         context = RunContext.model_validate(context)
         selected = self.effective_limits(agent, limits)
         validate_input(input, selected)
@@ -290,6 +299,30 @@ class RunController:
                         session_id=session_id,
                         run_id=new_run_id,
                     )
+                    if _upload_ids:
+                        from drov.artifacts.uploads import Uploads
+
+                        file_records.extend(
+                            await Uploads(self.runtime).consume(
+                                tx,
+                                context,
+                                _upload_ids,
+                                agent_name=identity.name,
+                                revision=identity.revision,
+                                session_id=session_id,
+                                run_id=new_run_id,
+                            )
+                        )
+                        names = [item.name for item in file_records]
+                        store = self.runtime._files.store()
+                        if len(set(names)) != len(names):
+                            raise ConfigurationError("Run inputs repeat a normalized name")
+                        if (
+                            len(file_records) > store.limits.max_input_files
+                            or sum(item.ref.size_bytes for item in file_records)
+                            > store.limits.max_input_bytes
+                        ):
+                            raise CapacityExceeded("Run input files exceed configured limits")
                     ref = await tx.start(
                         request,
                         max_unfinished=self.runtime.limits.unfinished_runs,

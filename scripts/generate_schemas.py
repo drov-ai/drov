@@ -9,6 +9,7 @@ from pydantic import TypeAdapter
 
 from drov.artifacts import ArtifactInfo, ArtifactLimits, ArtifactRef
 from drov.artifacts.records import ARTIFACT_DDL
+from drov.artifacts.uploads import UPLOAD_DDL, UploadReceipt
 from drov.auth import ArtifactResource, Resource, ToolResource
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.integrations.e2b import E2BLimits
@@ -16,6 +17,7 @@ from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
 from drov.runtime import AgentRegistration
 from drov.sandbox import SandboxLimits, SandboxResult
 from drov.sandbox._leases import SANDBOX_DDL
+from drov.server.types import ResponseBody, ServerLimits, StartBody, VerifyBody
 from drov.storage.sqlite import DDL, RECORD_VERSION, SCHEMA_VERSION
 from drov.tools import PermissionPolicy
 from drov.tools.permissions import PermissionDecision
@@ -69,6 +71,11 @@ def schema_text() -> str:
         "ArtifactInfo": ArtifactInfo,
         "ArtifactLimits": ArtifactLimits,
         "ArtifactResource": ArtifactResource,
+        "HTTPStart": StartBody,
+        "HTTPResponse": ResponseBody,
+        "HTTPVerify": VerifyBody,
+        "ServerLimits": ServerLimits,
+        "UploadReceipt": UploadReceipt,
         "SandboxLimits": SandboxLimits,
         "E2BLimits": E2BLimits,
         "SandboxResult": SandboxResult,
@@ -98,6 +105,12 @@ def main() -> None:
     for target, expected in (
         (root / "schema-v1.json", schema_text()),
         (root / "storage-schema-v1.sql", sql),
+        (
+            root / "storage-uploads-schema-v1.sql",
+            "-- Explicit HTTP upload extension v1; core/Artifact schema remain 1.\n"
+            + ";\n\n".join(statement.strip() for statement in UPLOAD_DDL)
+            + ";\n",
+        ),
         (
             root / "storage-sandbox-schema-v1.sql",
             "-- Explicit sandbox lease extension v1.\n"

@@ -642,12 +642,15 @@ async def test_duplicate_calls_and_truncated_tool_plans_do_not_execute() -> None
         ({"Retry-After": "NaN"}, None),
         ({"Retry-After": "-1"}, None),
         ({"Retry-After": "invalid"}, None),
-        ({"Retry-After": format_datetime(datetime.now(UTC) + timedelta(hours=1))}, "date"),
+        ({"Retry-After": "generated-at-call"}, "date"),
     ],
 )
 async def test_retry_after_header_mapping(
     header: dict[str, str], expected: float | str | None
 ) -> None:
+    if expected == "date":
+        # A long full-suite run must not age the header from collection time.
+        header = {"Retry-After": format_datetime(datetime.now(UTC) + timedelta(hours=1))}
     async with fixture([Reply({}, 429, header)]) as (_, _, adapter):
         with pytest.raises(TransientModelError) as caught:
             await collect_response(adapter.generate(request()))

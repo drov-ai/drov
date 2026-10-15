@@ -804,6 +804,448 @@
       "title": "E2BLimits",
       "type": "object"
     },
+    "HTTPResponse": {
+      "$defs": {
+        "ApprovalDecision": {
+          "additionalProperties": false,
+          "properties": {
+            "approved": {
+              "title": "Approved",
+              "type": "boolean"
+            },
+            "comment": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Comment"
+            },
+            "kind": {
+              "const": "approval",
+              "default": "approval",
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          "required": [
+            "approved"
+          ],
+          "title": "ApprovalDecision",
+          "type": "object"
+        },
+        "InputResponse": {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "input",
+              "default": "input",
+              "title": "Kind",
+              "type": "string"
+            },
+            "value": {
+              "$ref": "#/$defs/JsonValue"
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "title": "InputResponse",
+          "type": "object"
+        },
+        "JsonValue": {},
+        "ReconciliationDecision": {
+          "additionalProperties": false,
+          "properties": {
+            "evidence": {
+              "minLength": 1,
+              "title": "Evidence",
+              "type": "string"
+            },
+            "kind": {
+              "const": "reconciliation",
+              "default": "reconciliation",
+              "title": "Kind",
+              "type": "string"
+            },
+            "resolution": {
+              "enum": [
+                "applied",
+                "not_applied",
+                "unresolved"
+              ],
+              "title": "Resolution",
+              "type": "string"
+            },
+            "result": {
+              "$ref": "#/$defs/JsonValue",
+              "default": null
+            }
+          },
+          "required": [
+            "resolution",
+            "evidence"
+          ],
+          "title": "ReconciliationDecision",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "response": {
+          "discriminator": {
+            "mapping": {
+              "approval": "#/$defs/ApprovalDecision",
+              "input": "#/$defs/InputResponse",
+              "reconciliation": "#/$defs/ReconciliationDecision"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ApprovalDecision"
+            },
+            {
+              "$ref": "#/$defs/InputResponse"
+            },
+            {
+              "$ref": "#/$defs/ReconciliationDecision"
+            }
+          ],
+          "title": "Response"
+        }
+      },
+      "required": [
+        "request_id",
+        "response"
+      ],
+      "title": "ResponseBody",
+      "type": "object"
+    },
+    "HTTPStart": {
+      "$defs": {
+        "Limits": {
+          "additionalProperties": false,
+          "properties": {
+            "active_slots": {
+              "default": 8,
+              "exclusiveMinimum": 0,
+              "title": "Active Slots",
+              "type": "integer"
+            },
+            "advance_seconds": {
+              "default": 120.0,
+              "exclusiveMinimum": 0,
+              "title": "Advance Seconds",
+              "type": "number"
+            },
+            "approval_timeout_seconds": {
+              "default": 86400.0,
+              "exclusiveMinimum": 0,
+              "title": "Approval Timeout Seconds",
+              "type": "number"
+            },
+            "expires_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Expires At"
+            },
+            "input_timeout_seconds": {
+              "default": 86400.0,
+              "exclusiveMinimum": 0,
+              "title": "Input Timeout Seconds",
+              "type": "number"
+            },
+            "max_arguments_bytes": {
+              "default": 65536,
+              "exclusiveMinimum": 0,
+              "title": "Max Arguments Bytes",
+              "type": "integer"
+            },
+            "max_delta_bytes": {
+              "default": 32768,
+              "exclusiveMinimum": 0,
+              "title": "Max Delta Bytes",
+              "type": "integer"
+            },
+            "max_input_bytes": {
+              "default": 65536,
+              "exclusiveMinimum": 0,
+              "title": "Max Input Bytes",
+              "type": "integer"
+            },
+            "max_input_tokens": {
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Max Input Tokens"
+            },
+            "max_memory_bytes": {
+              "default": 16384,
+              "exclusiveMinimum": 0,
+              "title": "Max Memory Bytes",
+              "type": "integer"
+            },
+            "max_model_steps": {
+              "default": 20,
+              "exclusiveMinimum": 0,
+              "title": "Max Model Steps",
+              "type": "integer"
+            },
+            "max_page_size": {
+              "default": 500,
+              "exclusiveMinimum": 0,
+              "title": "Max Page Size",
+              "type": "integer"
+            },
+            "max_tool_calls": {
+              "default": 40,
+              "exclusiveMinimum": 0,
+              "title": "Max Tool Calls",
+              "type": "integer"
+            },
+            "max_tool_result_bytes": {
+              "default": 262144,
+              "exclusiveMinimum": 0,
+              "title": "Max Tool Result Bytes",
+              "type": "integer"
+            },
+            "memory_best_effort_seconds": {
+              "default": 0.1,
+              "exclusiveMinimum": 0,
+              "title": "Memory Best Effort Seconds",
+              "type": "number"
+            },
+            "memory_required_seconds": {
+              "default": 2.0,
+              "exclusiveMinimum": 0,
+              "title": "Memory Required Seconds",
+              "type": "number"
+            },
+            "model_retries": {
+              "default": 1,
+              "minimum": 0,
+              "title": "Model Retries",
+              "type": "integer"
+            },
+            "model_timeout_seconds": {
+              "default": 60.0,
+              "exclusiveMinimum": 0,
+              "title": "Model Timeout Seconds",
+              "type": "number"
+            },
+            "output_reserve_tokens": {
+              "default": 2048,
+              "exclusiveMinimum": 0,
+              "title": "Output Reserve Tokens",
+              "type": "integer"
+            },
+            "page_size": {
+              "default": 100,
+              "exclusiveMinimum": 0,
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "read_tool_retries": {
+              "default": 1,
+              "minimum": 0,
+              "title": "Read Tool Retries",
+              "type": "integer"
+            },
+            "reconciliation_reminder_seconds": {
+              "default": 86400.0,
+              "exclusiveMinimum": 0,
+              "title": "Reconciliation Reminder Seconds",
+              "type": "number"
+            },
+            "retry_backoff_seconds": {
+              "default": 1.0,
+              "exclusiveMinimum": 0,
+              "title": "Retry Backoff Seconds",
+              "type": "number"
+            },
+            "run_active_seconds": {
+              "default": 300.0,
+              "exclusiveMinimum": 0,
+              "title": "Run Active Seconds",
+              "type": "number"
+            },
+            "shutdown_grace_seconds": {
+              "default": 10.0,
+              "exclusiveMinimum": 0,
+              "title": "Shutdown Grace Seconds",
+              "type": "number"
+            },
+            "subscription_buffer": {
+              "default": 256,
+              "exclusiveMinimum": 0,
+              "title": "Subscription Buffer",
+              "type": "integer"
+            },
+            "tool_preview_bytes": {
+              "default": 16384,
+              "exclusiveMinimum": 0,
+              "title": "Tool Preview Bytes",
+              "type": "integer"
+            },
+            "tool_queue_size": {
+              "default": 16,
+              "exclusiveMinimum": 0,
+              "title": "Tool Queue Size",
+              "type": "integer"
+            },
+            "tool_threads": {
+              "default": 4,
+              "exclusiveMinimum": 0,
+              "title": "Tool Threads",
+              "type": "integer"
+            },
+            "tool_timeout_seconds": {
+              "default": 30.0,
+              "exclusiveMinimum": 0,
+              "title": "Tool Timeout Seconds",
+              "type": "number"
+            },
+            "unfinished_runs": {
+              "default": 1000,
+              "exclusiveMinimum": 0,
+              "title": "Unfinished Runs",
+              "type": "integer"
+            },
+            "verify_timeout_seconds": {
+              "default": 10.0,
+              "exclusiveMinimum": 0,
+              "title": "Verify Timeout Seconds",
+              "type": "number"
+            },
+            "write_tool_retries": {
+              "const": 0,
+              "default": 0,
+              "title": "Write Tool Retries",
+              "type": "integer"
+            }
+          },
+          "title": "Limits",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "agent_name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Agent Name",
+          "type": "string"
+        },
+        "artifact_ids": {
+          "items": {
+            "pattern": "^art_[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "maxItems": 256,
+          "title": "Artifact Ids",
+          "type": "array"
+        },
+        "input": {
+          "minLength": 1,
+          "title": "Input",
+          "type": "string"
+        },
+        "limits": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Limits"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "request_key": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Key"
+        },
+        "revision": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "session_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "upload_ids": {
+          "items": {
+            "pattern": "^upl_[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "maxItems": 256,
+          "title": "Upload Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "agent_name",
+        "revision",
+        "session_id",
+        "input"
+      ],
+      "title": "StartBody",
+      "type": "object"
+    },
+    "HTTPVerify": {
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_id"
+      ],
+      "title": "VerifyBody",
+      "type": "object"
+    },
     "InteractionRequest": {
       "$defs": {
         "ApprovalRequest": {
@@ -4942,6 +5384,48 @@
       "title": "SandboxResult",
       "type": "object"
     },
+    "ServerLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_connections": {
+          "default": 128,
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Max Connections",
+          "type": "integer"
+        },
+        "max_json_bytes": {
+          "default": 262144,
+          "maximum": 16777216,
+          "minimum": 1,
+          "title": "Max Json Bytes",
+          "type": "integer"
+        },
+        "send_seconds": {
+          "default": 10.0,
+          "exclusiveMinimum": 0,
+          "maximum": 300,
+          "title": "Send Seconds",
+          "type": "number"
+        },
+        "upload_concurrency": {
+          "default": 4,
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Upload Concurrency",
+          "type": "integer"
+        },
+        "upload_seconds": {
+          "default": 30.0,
+          "exclusiveMinimum": 0,
+          "maximum": 300,
+          "title": "Upload Seconds",
+          "type": "number"
+        }
+      },
+      "title": "ServerLimits",
+      "type": "object"
+    },
     "SessionPage": {
       "$defs": {
         "SessionSummary": {
@@ -5418,6 +5902,27 @@
         "data"
       ],
       "title": "UnknownDurableEvent",
+      "type": "object"
+    },
+    "UploadReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "upload_id": {
+          "pattern": "^upl_[0-9a-f]{32}$",
+          "title": "Upload Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "upload_id",
+        "expires_at"
+      ],
+      "title": "UploadReceipt",
       "type": "object"
     }
   }

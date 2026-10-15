@@ -19,7 +19,7 @@ remain applicable. The OpenAI extra implements a Responses adapter using the sep
 official openai 3.29.0 client (Apache-2.0) and its httpx2 2.13.1 transport
 (BSD-3-Clause); no SDK source is copied. The MCP extra implements stdio tools with the separately installed official
 mcp 2.3.0 and mcp-types 2.3.0 clients (MIT), using jsonschema 4.26.0 (MIT).
-Only the server extra still installs dependencies without a Drov service implementation. Protocol sources and actual offline validation are recorded in
+The server extra implements a lifespan-owned or borrowed Runtime HTTP/SSE transport using separately installed FastAPI 0.143.0 (MIT), Starlette 1.7.0 (BSD-3-Clause) and Uvicorn 0.54.0 (BSD-3-Clause). No upstream server source is copied. Protocol sources and actual offline validation are recorded in
 `docs/decisions/0022-openai-responses-adapter.md` and
 `docs/validation/t11-openai-responses.md`.
 
@@ -141,3 +141,14 @@ vendored or modified. Drov's connection owner, frozen definitions, policy mappin
 and synthetic fixture are project code. Protocol references and compatibility
 limits are recorded in ADR-0024 and the T-12 validation record; using this SDK does
 not imply all MCP protocol versions or capabilities are supported.
+
+
+## T-13 HTTP transport
+
+Inspected installed metadata/source on 2026-10-15 for the locked FastAPI 0.143.0,
+Starlette 1.7.0 and Uvicorn 0.54.0 lifespan, streaming responses and flow control.
+Their original licenses remain in their distributions. Drov's authorization,
+route mapping, upload ledger and fixtures are original integration code; protocol
+sources are linked in ADR-0025. httpx 0.28.1 (BSD-3-Clause), already locked through
+other extras, is now explicitly a development test requirement; the server extra
+does not require it. No third-party code or built frontend assets were vendored.

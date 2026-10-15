@@ -4,6 +4,7 @@ from drov.agent import Agent
 from drov.auth import OwnerAuthorizer
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.runtime import ResourceBinding, Runtime
+from drov.server import DrovApp
 from drov.storage import MemoryStorage, SQLiteStorage
 from drov.tools import PermissionPolicy, tool
 from drov.tools.human import HumanInput
@@ -27,6 +28,7 @@ __all__ = [
     "Cancelled",
     "Completed",
     "ContextPolicy",
+    "DrovApp",
     "Failed",
     "HumanInput",
     "InputResponse",

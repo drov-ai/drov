@@ -238,6 +238,11 @@ class SQLiteStorage(Storage):
                             raise IncompatibleStorage("Sandbox storage extension is unsupported")
                         expected_names.add("sandbox_leases")
                         await self._validate_sandbox_schema()
+                    if "upload_schema" in values:
+                        if values["upload_schema"] != "1":
+                            raise IncompatibleStorage("Upload storage extension is unsupported")
+                        expected_names.add("artifact_uploads")
+                        await self._validate_upload_schema()
                     if names != expected_names:
                         raise IncompatibleStorage("Database tables do not match its schema version")
                     if values.get("format") != "drov.sqlite" or values.get("record_schema") != str(
@@ -357,6 +362,34 @@ class SQLiteStorage(Storage):
             rows, _ = await self._sql("SELECT sql FROM sqlite_master WHERE name=?", (name,))
             if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(statement.split()):
                 raise IncompatibleStorage("Artifact extension tables/index are invalid")
+
+    async def _bind_uploads(self) -> None:
+        self._require_open()
+        self._check_lifecycle()
+        async with self._gate:
+            try:
+                await self._begin()
+                rows, _ = await self._sql("SELECT value FROM metadata WHERE key='upload_schema'")
+                if not rows:
+                    from drov.artifacts.uploads import UPLOAD_DDL
+
+                    for statement in UPLOAD_DDL:
+                        await self._sql(statement)
+                    await self._sql("INSERT INTO metadata VALUES ('upload_schema','1')")
+                elif rows[0][0] != "1":
+                    raise IncompatibleStorage("Upload storage extension is unsupported")
+                await self._validate_upload_schema()
+                await self._finish(True)
+            except BaseException:
+                await self._finish(False)
+                raise
+
+    async def _validate_upload_schema(self) -> None:
+        from drov.artifacts.uploads import UPLOAD_DDL
+
+        rows, _ = await self._sql("SELECT sql FROM sqlite_master WHERE name='artifact_uploads'")
+        if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(UPLOAD_DDL[0].split()):
+            raise IncompatibleStorage("Upload extension table is invalid")
 
     async def _bind_sandbox(self, *, version: int = 1) -> None:
         """Explicit sandbox resources enable their extension, without altering records DDL."""

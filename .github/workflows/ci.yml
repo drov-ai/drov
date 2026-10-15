@@ -49,6 +49,10 @@ jobs:
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           python-version: ${{ matrix.python }}
+      - run: uv sync --locked --extra server
+      - name: HTTP identity, real loopback SSE and file boundaries
+        run: uv run --locked --extra server pytest tests/test_http.py tests/test_http_transport.py tests/test_http_artifacts.py tests/test_http_scenarios.py
+      - run: uv run --locked --extra server python scripts/generate_openapi.py --check
       - run: uv sync --locked --extra mcp
       - name: Real MCP stdio integration
         run: uv run --locked --extra mcp pytest tests/test_mcp_stdio.py
@@ -63,6 +67,8 @@ jobs:
         run: uv run --locked --all-extras pytest tests/test_openai_responses.py
       - name: Installed MCP extra and stdio examples
         run: uv run --locked --all-extras python scripts/check_installed_mcp.py --wheel dist/drov-0.1.0a0-py3-none-any.whl
+      - name: Installed server extra and real loopback HTTP/SSE examples
+        run: uv run --locked --all-extras python scripts/check_installed_server.py --wheel dist/drov-0.1.0a0-py3-none-any.whl
       - name: Offline E2B adapter
         run: uv run --locked --all-extras pytest tests/test_e2b_contracts.py tests/test_e2b.py
       - name: Installed E2B extra without cloud calls

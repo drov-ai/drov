@@ -24,7 +24,7 @@
 
 Python 导入名使用 `drov`；PyPI 分发名暂定 `drov`，占用和控制权待发布准备核实。若不可用，变更分发名不自动变更导入名。npm 组织保留，v0.1 不为凑产品线发布 JS SDK。
 
-T-01 已声明 extras：`openai`、`mcp`、`server`，T-11 已实现 openai 离线协议适配，T-12 已实现 mcp stdio tools，server 仍只有依赖声明。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；T-09 已实现显式恢复调度。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。E2B experimental extra 已在 T-10C 实际接入，版本与远端证据见 ADR-0023。
+T-01 已声明 extras：`openai`、`mcp`、`server`，T-11 已实现 openai 离线协议适配，T-12 已实现 mcp stdio tools，T-13 server已接入DrovApp，验收状态见progress。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；T-09 已实现显式恢复调度。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。E2B experimental extra 已在 T-10C 实际接入，版本与远端证据见 ADR-0023。
 
 以下是完整首版的目标布局。T-01 只建立元数据包、测试/构建检查和 CI，其他模块按任务创建，不以空壳占位：
 
@@ -247,3 +247,20 @@ Sandbox SQL extension v1 在显式资源装配时启用；lease 关联完整非�
 
 
 执行前的能力检查与清理身份检查分开：前者严格核对全部VM/网络/期限控制；后者仍严格匹配原配置hash、template、完整metadata和ID，但不因控制配置异常阻止销毁已证实归属的资源。坏配置不会启动代码，也不会发布成功产物。
+
+
+## T-13 服务落地与默认限额
+
+DrovApp导入不加载Web栈，构造需server extra；已锁FastAPI0.143.0/Starlette1.7.0/Uvicorn0.54.0，实际安装组合和独立server证据见T-13验证。dev组显式加入已锁httpx0.28.1作HTTP夹具，SDK/core/server运行不新增httpx强制依赖。路由不使用multipart解析器或Host文件路径，原始有界流在已认证后处理；完整JSON在验证前受下表上限，拒绝重复键/非有限值。
+
+| ServerLimits字段 | 默认 | 含义 |
+| --- | --- | --- |
+| max_json_bytes | 262144 | 所有非上传请求的总正文上限 |
+| max_connections | 128 | 已认证活动HTTP请求/订阅总数，满时429 |
+| upload_concurrency | 4 | 同一服务的原始文件接收并发，满时429 |
+| upload_seconds | 30s | 接收请求体的期限 |
+| send_seconds | 10s | 单次ASGI发送期限；过期解除订阅，不取消Run |
+
+上传TTL沿第9节1h，只拒绝新消费、不后台删除；需要准确Content-Length，字节大小仍受ArtifactLimits。上传先预留原store/owner容量（含私有manifest额度），失败/中断仍计容量，T-15离线维护回收；单文件接收缓冲受已预留大小约束。下载先在内核上限内读取/hash校验，再按64KiB块动态授权发送；原生ASGI帧在服务器交付之前的缓冲由Uvicorn流控负责，不把应用上限称作恶意宿主ASGI实现的硬内存隔离。
+
+新增upload_schema=1独立表，与原records/Artifact/Sandbox版本分离；仅带store的服务启用。`serve()`单worker/无reload/不信任代理头；应用认证非本地须显式Authorizer和精确同源Host/Origin，TLS由宿主接入。安装server不自动启动监听或读取模型凭据。生成OpenAPI需server extra，`scripts/generate_openapi.py --check`在CI server步骤运行；core schema生成仍不需要Web依赖。

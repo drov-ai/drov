@@ -27,7 +27,7 @@ dependencies = [
   "typing-extensions>=4.16.0,<5",
 ]
 
-# Optional clients stay outside core imports; HTTP server follows T-13.
+# Optional clients and HTTP stack stay outside core imports.
 [project.optional-dependencies]
 openai = ["openai>=3.29.0,<4"]
 e2b = ["e2b==2.56.0"]
@@ -37,6 +37,7 @@ server = ["fastapi>=0.143.0,<0.144", "uvicorn>=0.54.0,<0.55"]
 [dependency-groups]
 dev = [
   "hatchling==1.32.4",
+  "httpx>=0.28.1,<0.29",
   "mypy>=2.4.0,<3",
   "pytest>=9.1.1,<10",
   "pytest-asyncio>=1.4.0,<2",
@@ -72,7 +73,7 @@ strict = true
 files = ["src", "tests", "scripts", "examples"]
 
 [[tool.mypy.overrides]]
-module = ["openai", "openai.*", "httpx2", "httpx2.*", "e2b", "e2b.*", "httpx", "httpx.*", "mcp", "mcp.*", "jsonschema", "jsonschema.*"]
+module = ["openai", "openai.*", "httpx2", "httpx2.*", "e2b", "e2b.*", "httpx", "httpx.*", "mcp", "mcp.*", "jsonschema", "jsonschema.*", "fastapi", "fastapi.*", "starlette", "starlette.*", "uvicorn", "uvicorn.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

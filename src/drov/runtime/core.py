@@ -46,6 +46,8 @@ from drov.types import (
     RunRef,
     RunSnapshot,
     ScopedIdentifier,
+    SessionPage,
+    SessionView,
 )
 
 T = TypeVar("T")
@@ -204,6 +206,7 @@ class Runtime:
         self.limits = Limits.from_json((limits or Limits()).model_dump_json())
         self._policy = PermissionPolicy.from_json((policy or PermissionPolicy()).model_dump_json())
         self._authorizer = authorizer if authorizer is not None else OwnerAuthorizer()
+        self._explicit_authorizer = authorizer is not None
         if not callable(getattr(self.authorizer, "authorize", None)):
             raise ConfigurationError("authorizer must implement Authorizer")
         self._agents: dict[tuple[str, str], Agent[Any]] = {}
@@ -409,6 +412,25 @@ class Runtime:
         return await self._runs.get_context(
             run_id, model_call_id, context=context, include_content=include_content
         )
+
+    async def sessions(
+        self, *, context: RunContext, after: str | None = None, limit: int = 100
+    ) -> SessionPage:
+        from drov.runtime.sessions import sessions
+
+        return await self._runs.control(lambda: sessions(self, context, after, limit))
+
+    async def session(
+        self,
+        session_id: str,
+        *,
+        context: RunContext,
+        after: str | None = None,
+        limit: int = 100,
+    ) -> SessionView:
+        from drov.runtime.sessions import session
+
+        return await self._runs.control(lambda: session(self, session_id, context, after, limit))
 
     def _require_loop(self) -> asyncio.AbstractEventLoop:
         loop = asyncio.get_running_loop()

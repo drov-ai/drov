@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；T-10A 文件/代码沙箱公共接口与 Runtime 闭环已实现；OpenAI Responses离线适配及MCP stdio tools已实现；真实模型未验证，HTTP/工作台尚未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-15。
+状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；T-10A 文件/代码沙箱公共接口与 Runtime 闭环已实现；OpenAI Responses离线适配及MCP stdio tools已实现；真实模型未验证，HTTP按ADR-0025接通，工作台尚未实施。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-15。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -45,7 +45,7 @@ run/wait/resume/stream/recover(wait=True) 返回正文，预检 read 与 view_co
 
 verify 需要核查响应权限及 read/view_content，以原执行者当前权限进行只读查询；同一 operation 同时至多一个 verifier 调用，占用活动容量并保留资源所有权。它不接受模型传来的新查询目标，也不执行写入。查询期间原请求被其他合法响应消费时，迟到建议不能再用于推进旧请求。
 
-T-06 已实现表中的 start/run/wait/cancel/inspect/events/stream 与 Agent.run/run_sync。T-07 已实现 get_context；T-09 子范围已实现 HumanInput、respond/resume 的 approval/input 路径，见 [ADR-0014](../decisions/0014-durable-approval-input.md)。T-09 已实现 verify/recover 与 reconciliation 响应；sessions/session 仍未实现。显式 Runtime 接收 callable Python 工具（read/write/unknown）、HumanInput 及配置 Memory 的 Agent；ASK 保存原计划并 suspended/approval。临时 Agent.run 遇到 ASK/input 仍 failed/interaction_unavailable；外部 write/unknown 按权限/审批单次派发，未知结果暂停核查。inspect.context_manifests 只返回本次事件页中 context.prepared 对应的摘要（sources=[]、content_visible=False），沿事件游标可遍历全部索引；get_context 返回完整来源清单，include_content=True 返回选入内容/预览，provider 正文始终不可见。旧完整轮次确定性选取，保护项无法装入时提前失败；清单预算/粗估包括协议和 schema，供应商已报告用量单独关联。默认查询按 context 的 tenant/user 隔离；同 tenant 跨用户查看/响应须由应用 Authorizer 分别授予，工具继续使用原用户身份。跨 tenant 无法定位。
+T-06 已实现表中的 start/run/wait/cancel/inspect/events/stream 与 Agent.run/run_sync。T-07 已实现 get_context；T-09 子范围已实现 HumanInput、respond/resume 的 approval/input 路径，见 [ADR-0014](../decisions/0014-durable-approval-input.md)。T-09 已实现 verify/recover 与 reconciliation 响应；sessions/session按ADR-0025已接通授权分页。显式 Runtime 接收 callable Python 工具（read/write/unknown）、HumanInput 及配置 Memory 的 Agent；ASK 保存原计划并 suspended/approval。临时 Agent.run 遇到 ASK/input 仍 failed/interaction_unavailable；外部 write/unknown 按权限/审批单次派发，未知结果暂停核查。inspect.context_manifests 只返回本次事件页中 context.prepared 对应的摘要（sources=[]、content_visible=False），沿事件游标可遍历全部索引；get_context 返回完整来源清单，include_content=True 返回选入内容/预览，provider 正文始终不可见。旧完整轮次确定性选取，保护项无法装入时提前失败；清单预算/粗估包括协议和 schema，供应商已报告用量单独关联。默认查询按 context 的 tenant/user 隔离；同 tenant 跨用户查看/响应须由应用 Authorizer 分别授予，工具继续使用原用户身份。跨 tenant 无法定位。
 
 Runtime 的有效限额从 Agent 默认与管理员上限取较严格值，显式 Limits 仅覆盖设置过的字段且不得放宽管理员上限；Agent.run 临时环境由应用配置限额。ScriptedModel/ScriptedStep 可从 drov.models 导入，用预定响应或事件/异常及输入检查构建离线序列，不调用外部模型。
 
@@ -261,7 +261,7 @@ Memory 工具仍受用户作用域与应用权限限制；allow 只在该配置�
 ## 应用服务与资源
 
 ```python
-# API 设计片段：映射键与 Agent.name 一致。
+# T-13 实际装配：映射键与 Agent.name 一致；认证由应用提供。
 service_agent = Agent(name="assistant", revision="1", model=model, tools=[search])
 app = DrovApp(
     agents={"assistant": service_agent},
@@ -293,7 +293,7 @@ DrovApp 在服务生命周期内管理其创建的 Runtime；也允许接收外�
 
 ## 首期公共字段约定
 
-T-02 已将下列 DTO/配置与模型协议落成 Python 类型，并生成 [schema 文档集合](../reference/schema-v1.json)；T-13 才生成 OpenAPI，目前没有可调用服务。实际模块导出见 [定义参考](../reference/README.md)。数据值不允许任意 Python 对象；类型子集与严格校验见 [工程方案](engineering.md) / [ADR-0006](../decisions/0006-python-contracts.md)。运行入口按上文实施状态使用，含 Memory/审批/服务的片段仍为设计。
+T-02 已将下列 DTO/配置与模型协议落成 Python 类型，并生成 [schema 文档集合](../reference/schema-v1.json)；T-13 的实际路由生成 [OpenAPI](../reference/openapi-v1.json)，实施验收状态见progress。实际模块导出见 [定义参考](../reference/README.md)。数据值不允许任意 Python 对象；类型子集与严格校验见 [工程方案](engineering.md) / [ADR-0006](../decisions/0006-python-contracts.md)。运行入口按上文实施状态使用，含 Memory/审批/服务的片段仍为设计。
 
 ### 公共配置与标识
 
@@ -348,7 +348,7 @@ Memory 模型导出名映射、JSON schema 可空/默认转换遵守工程方案
 
 ### HTTP 请求与错误
 
-POST /v1/runs 的基础 JSON 字段为 agent_name、revision、session_id、input，以及可选 request_key/limits；T-13 的 artifact_ids/upload_ids 扩展见下文文件接口草案，当前服务尚未实现；服务从已注册定义选择 Agent，拒绝上传工具代码/模型凭据/Agent 定义。缺失 session_id 不自动创建匿名持久会话。响应与事件读取分离。
+POST /v1/runs 的基础 JSON 字段为 agent_name、revision、session_id、input，以及可选 request_key/limits；artifact_ids/upload_ids 扩展见下文文件接口；服务从已注册定义选择 Agent，拒绝上传工具代码/模型凭据/Agent 定义。缺失 session_id 不自动创建匿名持久会话。响应与事件读取分离。
 
 POST responses 的字段为 request_id、response（上述判别 union）；POST verify 只收 request_id 并执行已注册的只读 verifier；cancel/recover 不接受新执行身份或工具参数。会话由首次 start 原子创建；GET /v1/sessions 与 GET /v1/sessions/{session_id} 提供分页查看；GET /v1/runs/{id}/contexts/{model_call_id} 提供授权的清单查看。维护清理/迁移不开放普通 HTTP 路由。
 
@@ -426,7 +426,7 @@ T-13 的 HTTP 同一入口扩展：POST /v1/runs 新增可选 artifact_ids，仅
 
 `from drov.integrations.e2b import E2BSandbox, E2BLimits` 提供可选实验性真实后端。构造参数为 `template_id`、不可变 `build_id`、非秘密 `credential_ref`、宿主 `resolve_credential(ref) -> str`、项目声明 `region`、显式 `cloud_data_policy="allow"`、独立 `budget_id`、`max_cost_micro_usd`、`rate_micro_usd_per_second`，以及可选 `limits`。没有自动读取环境/配置文件；构造无 I/O，open 只读固定 build。`require_region_attestation=True` 因 SDK 不支持区域证明而前置拒绝。E2BLimits 与 Docker SandboxLimits 分开，实际 VM/工作负载/文件/时间与预算语义见工程第10节和 ADR-0023；复用原 PythonSandbox/Artifact DTO/默认审批，不新增模型控制字段。E2B 显式 Runtime 绑定启用 sandbox_schema=2，core-only 可授权读取销毁后产物，旧 SDK 拒绝该扩展版本。实际任务验收状态见 progress。
 
-显式 allow 只授权已配置的代码工具；业务写入仍单独审批。代码生成/消费结果沿现有 ModelAdapter，没有自动代写/修复/执行循环。SandboxLimits/Result 已加入生成 schema；HTTP 等未实现符号不提前增加；E2BLimits 已加入生成 schema。
+显式 allow 只授权已配置的代码工具；业务写入仍单独审批。代码生成/消费结果沿现有 ModelAdapter，没有自动代写/修复/执行循环。SandboxLimits/Result 已加入生成 schema；HTTP DTO在T-13随实际接口加入；E2BLimits 已加入生成 schema。
 
 当前输出集合的 basename 也须唯一；PNG 验证接受有界非交错静态 profile，限制/代价见工程第 9 节与 ADR-0020。核查中的沙箱人工 response 不替代资源/结果事实；使用 recover 查询/销毁并恢复原可靠暂存，verify 仅只读。
 
@@ -464,3 +464,16 @@ runtime = Runtime(
 支持固定分页发现、SDK initialize握手版本（本地实测2025-11-25）、闭合JSON Schema输入子集。支持有限标量/enum/对象/数组/nullable/已有数值与长度约束；未写additionalProperties时收紧为false，`$ref/$defs`、开放字典及其他关键字明确拒绝。可选字段缺省仍缺省，default不注入；严格JSON边界拒绝重复键/非有限值，之后按2020-12校验，不强转Python类型。服务outputSchema由SDK校验。结果为 `{"content": [{"type": "text", "text": "..."}], "structuredContent": object_or_null}`；非text内容/非对象structuredContent不可用，不转换为Artifact或抓取资源。更广schema、媒体结果与2026现代协议尚不支持。
 
 每次打开与调用前复核完整发现快照；变更拒绝，不替换原审批或重发。每个SDK原始tools/call只发一次，无自动input-required回合、sampling/roots/elicitation或任务执行；task-required定义在发现时拒绝。断连/工具错误/无效结果/超时和取消关闭整个连接，不自动重连。未知写入沿原reconciliation处理，不因SDK取消确认远端效果撤销。关闭尚未结束时报ShutdownIncomplete并保留所有权，可再次aclose等待原清理；细节见 [运行契约](runtime-contract.md) 与 [ADR-0024](../decisions/0024-mcp-stdio-tools.md)。
+
+
+## T-13 HTTP 实际接口
+
+`from drov import DrovApp` / `from drov.server import DrovApp, ServerLimits`；安装server extra后构造ASGI对象。`agents`映射及storage/artifacts/policy/authorizer/dependencies/limits由宿主装配，或只传已打开的`runtime`借用。认证二选一：`local=True`（默认host=127.0.0.1/port=8000，本次lifespan token由宿主读`local_token`）或`auth=AuthAdapter`。非本地host还要求显式Authorizer、精确allowed_hosts/allowed_origins；两个列表为同源authority/origin，不含通配符。`await app.serve()`使用固定单worker；可调用ASGI对象供支持lifespan的宿主使用。不得从请求改变绑定/资源/策略。
+
+所有接口使用`Authorization: Bearer ...`，包括`GET /openapi.json`；身份不从body或任意用户头读取。`GET /v1/runs/{id}`返回`RunInspection`，`include_content=false`默认隐藏正文。`POST cancel/recover` body是`{}`，recover固定wait=False；终态recover按内核拒绝409。`POST responses`返回ResponseReceipt，verify不消费请求。分页limit/after、上下文正文与内核接口同义；新增`Runtime.sessions(*,context,after=None,limit=100)`、`Runtime.session(session_id,*,context,after=None,limit=100)`与HTTP共用授权分页。Session游标绑定原身份/查询和存储secret，不用于授权。
+
+SSE支持`Last-Event-ID`或`after`，同时提供必须一致。durable帧含id/event/data；token.delta/gap/error无id。头前非法或超前游标400；头后错误是无id的stream.error。关闭HTTP等待/订阅不取消Run，显式cancel走原内核。实际正文/事件上限由Runtime/ServerLimits控制。
+
+`POST /v1/artifacts`使用`Content-Type: application/octet-stream`与明确`Content-Length`；query为`UploadTarget`的agent_name/revision/session_id/name/media_type。返回201 `UploadReceipt(upload_id,expires_at)`，不是可读ArtifactRef。Run JSON的upload_ids按顺序跟在artifact_ids后；组合输入重名/重复ID拒绝，容量/数量仍受ArtifactLimits；同request_key/相同声明复用RunRef，已消费ID另开接收冲突409。上传未完整409、已过期410、未知长度411、传输超大413、错误媒体415；失效已消费事实不因TTL重新执行。GET文件元数据/下载使用ready ID，临时upload_id不可读。
+
+下载统一octet-stream/attachment、编码后的filename*、nosniff/CSP，按64KiB块复核认证与正文权限，内容不可用410、存储暂不可用503。源运行/代码/文件逻辑名不通过默认元数据投影泄露。无路径/镜像/挂载/凭据HTTP接口。上传台账兼容、所有权和传输取舍见 [ADR-0025](../decisions/0025-http-identity-and-uploads.md)；暂存回收和数据清理仍按T-15实施，不由HTTP后台自动执行。

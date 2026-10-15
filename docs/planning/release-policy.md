@@ -122,3 +122,6 @@ T-10C 不作为不含 E2B 的 Docker v0.1 发布前置；未完成 adapter 可�
 云调用前单独授权服务、账号/区域/template、允许上传资料和沙箱总预算（含失败/必要收尾预留），与模型预算分别记账；只用合成资料开始。凭据仅宿主安全引用，日志不 dump provider 正文或密钥。远端停止/销毁是运行资源事实，不保证供应商保留副本或物理擦除；上传前核对实际服务的数据/保留条件。无账号或费用条件不阻塞 Docker 实施，不能擅自创建云资源、调用付费模型、公开镜像/extra 或部署。
 
 ADR-0023 兼容补充：只有显式 E2B 绑定启用 sandbox_schema=2；表 DDL 沿v1，增加远端事实的payload。旧 SDK 在 open 拒绝2，新 SDK 可读取旧Docker v1；单独Docker不升级、序列化不加远端字段，已有v2不降级。E2B凭据/原模板build/预算ID及价格假设的非秘密配置随租约备份，真实Key独立安全保存。预算是按完整寿命累计的保守准入，不等同于实付余额/赠金资格，跨SQLite与模板构建需独立宿主总账；区域为项目声明，当前SDK无法证明驻留，强区域配置拒绝。实际证据和剩余发布条件见progress/T-10C验证。
+
+
+T-13 按 [ADR-0025](../decisions/0025-http-identity-and-uploads.md) 在带ArtifactStore的服务显式启用独立upload_schema=1。旧SDK因未知扩展表拒绝打开且不得改库；原records/Artifact/Sandbox DDL与版本未变。HTTP暂存receiving/staged/consumed均须进入T-15备份/回收审查：原SQLite+bytes+消费事实共同保留；过期未消费只允许持排他锁的显式维护回收，不自动删除；已消费字节视同原输入，不能按上传TTL清除或重新授予另一Run。服务当前无清理/迁移HTTP路由。

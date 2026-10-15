@@ -87,3 +87,6 @@ T-10 的真实 SDK 硬终止、SQLite 提交/只读/页数耗尽故障、部分�
 
 
 T-12 的固定MCP发现、同一权限/审批、单次调用和owner task关闭决定见 [ADR-0024](../decisions/0024-mcp-stdio-tools.md)，实际本地进程/安装与支持平台证据见 [验证](../validation/t12-mcp-stdio.md)。状态仍只维护在progress。
+
+
+T-13 服务的身份/所有权、同一Runtime路由/SSE、私有上传接收与兼容决定见 [ADR-0025](../decisions/0025-http-identity-and-uploads.md)，实际传输/三场景/Docker/安装与平台证据见 [T-13验证](../validation/t13-http.md)。当前状态仍只在progress维护。

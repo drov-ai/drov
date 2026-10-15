@@ -83,6 +83,7 @@ def main() -> None:
         import drov
         import drov.artifacts
         import drov.sandbox
+        import drov.server
         from drov.config import ModelCapabilities
         from drov.integrations.e2b import E2BLimits, E2BSandbox
         from drov.models.openai import OpenAIResponses

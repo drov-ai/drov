@@ -1,6 +1,6 @@
 # 架构与模块边界
 
-状态：P4 实施基线；T-02 至 T-08 已实现定义/协议、事务存储、Runtime 注册/资源、只读 Agent、上下文选择/清单和内置事务 Memory；T-09 审批/输入子范围已实现；T-09 已接入外部未知效果/显式恢复；T-10A 文件/代码沙箱闭环已接通；服务尚未实现。更新：2026-10-14。
+状态：P4 实施基线；T-02 至 T-08 已实现定义/协议、事务存储、Runtime 注册/资源、只读 Agent、上下文选择/清单和内置事务 Memory；T-09 审批/输入子范围已实现；T-09 已接入外部未知效果/显式恢复；T-10A 文件/代码沙箱闭环已接通；HTTP按ADR-0025接入，工作台尚未实施。更新：2026-10-14。
 
 本文定义职责、依赖和数据归属。[行为契约](runtime-contract.md) 是状态、恢复、权限和生命周期规则的唯一详细定义；[API 草案](api-draft.md) 描述用户入口，不能独立改变这些规则。
 
@@ -31,9 +31,9 @@ flowchart TD
     T --> EXT[Python 工具 / MCP 适配器]
     T --> SB[PythonSandbox 专用处理器]
     SB --> BP[执行/传输/查证/销毁协议：随真实实现建立]
-    BP --> DB[Docker/Linux 默认必交：待实现]
+    BP --> DB[Docker/Linux 默认必交]
     BP --> CB[E2B 可选：独立 VM profile]
-    SB --> AS[私有 ArtifactStore：待实现]
+    SB --> AS[私有 ArtifactStore]
     AS --> S
     E --> O[可选观测导出器]
 ```
@@ -142,3 +142,6 @@ Artifact 字节保存在显式私有本地目录，SQLite 负责 ready 元数据
 
 
 T-12 MCP适配实际结构：`integrations._mcp_tool` 是无可选依赖的定义/资源边界；`integrations.mcp` 在显式发现/打开时加载官方SDK与JSON Schema校验。短暂发现先固定Agent工具，运行连接沿Runtime dependencies/ResourceBinding；内部owner task独占SDK上下文的进入/退出。执行仍进入原PythonTool dispatcher和OperationJournal，不建立第二套权限/审批循环。配置/快照/协议只扩展MCP工具指纹，不改公共DTO/SQLite格式；实际决定见 [ADR-0024](../decisions/0024-mcp-stdio-tools.md)。
+
+
+T-13 的 `server` 模块仅持有传输连接/身份与拥有或借用的Runtime；`runtime.sessions`负责授权分页，`artifacts.uploads`维护独立SQLite暂存元数据并由RunController原接收事务消费，字节继续归LocalArtifacts。服务不访问模型循环或另设工具权限。UploadReceipt不是ArtifactRef，未消费上传不属于可读产物。所有权/兼容与取舍见 [ADR-0025](../decisions/0025-http-identity-and-uploads.md)。

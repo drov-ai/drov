@@ -530,6 +530,7 @@ server = [
 [package.dev-dependencies]
 dev = [
     { name = "hatchling" },
+    { name = "httpx" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -554,6 +555,7 @@ provides-extras = ["e2b", "mcp", "openai", "server"]
 [package.metadata.requires-dev]
 dev = [
     { name = "hatchling", specifier = "==1.32.4" },
+    { name = "httpx", specifier = ">=0.28.1,<0.29" },
     { name = "mypy", specifier = ">=2.4.0,<3" },
     { name = "pytest", specifier = ">=9.1.1,<10" },
     { name = "pytest-asyncio", specifier = ">=1.4.0,<2" },

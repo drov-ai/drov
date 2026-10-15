@@ -1,6 +1,6 @@
 # 运行行为契约 v3
 
-状态：P4 实施基线；T-03 至 T-08 已本地验证事务存储、资源/任务、只读 Agent 闭环、正文授权、SDK 订阅、上下文选择/清单及内置 Memory；T-09 审批/输入子范围已实现；T-09 已实现外部未知效果与显式恢复；T-10A 文件/代码沙箱闭环已实现；HTTP 和真实模型尚未实现。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
+状态：P4 实施基线；T-03 至 T-08 已本地验证事务存储、资源/任务、只读 Agent 闭环、正文授权、SDK 订阅、上下文选择/清单及内置 Memory；T-09 审批/输入子范围已实现；T-09 已实现外部未知效果与显式恢复；T-10A 文件/代码沙箱闭环已实现；HTTP按ADR-0025接入同一Runtime，真实模型尚未验证。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-14。
 
 本文是 Drov 自己拟采用的行为规则，不是竞品能力声明或已通过的测试报告。关联 C-01 至 C-15、C-17 和 Q-API-01 至 Q-API-08；模块归属见 [架构](architecture.md)，用户调用见 [API](api-draft.md)，默认数值见 [工程方案](engineering.md)。子运行内容为后续 C-16 契约，v0.1 不提供该能力。
 
@@ -8,7 +8,7 @@
 
 所有入口使用同一执行内核。`Runtime.start` 接收并保存运行后返回 RunRef；`run` 是 start + wait，`stream` 是 start + subscribe；HTTP 使用 start 后以独立请求取得事件或结果。
 
-Runtime 拥有执行任务并保留强引用；等待层须隔离调用者取消向执行任务的直接传播。调用者取消等待、关闭流订阅或 HTTP 断连，均只解除订阅/等待，不等于取消执行；必须显式 `cancel`。Runtime 退出时执行第 9 节的关闭协议，不能产生无人管理的执行任务。Python 语义依据为 [E-07](evidence.md)，T-04 已验证私有内核任务/等待/真实底层调用引用；T-06 已验证 SDK wait/stream 退出与显式 cancel；HTTP 断连由 T-13 验证。
+Runtime 拥有执行任务并保留强引用；等待层须隔离调用者取消向执行任务的直接传播。调用者取消等待、关闭流订阅或 HTTP 断连，均只解除订阅/等待，不等于取消执行；必须显式 `cancel`。Runtime 退出时执行第 9 节的关闭协议，不能产生无人管理的执行任务。Python 语义依据为 [E-07](evidence.md)，T-04 已验证私有内核任务/等待/真实底层调用引用；T-06 已验证 SDK wait/stream 退出与显式 cancel；HTTP断连/逐帧授权/发送背压见ADR-0025与T-13验证。
 
 `Agent.run` 创建临时内存运行环境，默认无会话延续、长期记忆或可恢复交互。配置持久化 Memory 时提前抛出 ConfigurationError，要求显式 Runtime。T-10A 的 PythonSandbox 也要求显式 Runtime 与 SQLiteStorage；其资源/进程恢复不得隐式退回临时内存运行。已接通该显式配置，详见第 13 节。动态遇到审批/补充输入时，返回 `failed / interaction_unavailable`，附非可恢复的交互说明；对应待授权工具不执行，不生成暗示可恢复的 request_id。此前已发生的合法操作仍保留在结果说明中。
 
@@ -197,7 +197,7 @@ forget 使对应当前记忆不再参与后续检索，不等于删除既有对�
 
 凭据不进入普通消息、操作参数和导出器；内容脱敏、授权、保留与删除规则在 [维护策略](release-policy.md)。删除恢复必需数据后明确将对应运行标记为不可恢复，不静默编造缺失内容。
 
-T-06 的正文查询按 context 的 tenant/user 作用域，包含结果投影和每次事件发送的动态复核；T-09 已接入同 tenant 经应用授权的跨用户查看/响应；服务身份解析尚未交付。SDK 订阅只将临时增量放入有界队列，durable 事件从存储分页补读，至多 50ms 轮询活动执行的提交；追平当前暂停/终态才结束。未知事件不展示任意载荷。显式 Runtime 的 ASK 保存持久审批，HumanInput 保存补充输入；临时入口仍 failed/interaction_unavailable，无实际交互 ID。T-09 外部未知效果与显式恢复已实施；硬崩溃专项仍由 T-10 验收。
+T-06 的正文查询按 context 的 tenant/user 作用域，包含结果投影和每次事件发送的动态复核；T-09 已接入同 tenant 经应用授权的跨用户查看/响应；服务身份解析沿ADR-0025的显式模式接入。SDK 订阅只将临时增量放入有界队列，durable 事件从存储分页补读，至多 50ms 轮询活动执行的提交；追平当前暂停/终态才结束。未知事件不展示任意载荷。显式 Runtime 的 ASK 保存持久审批，HumanInput 保存补充输入；临时入口仍 failed/interaction_unavailable，无实际交互 ID。T-09 外部未知效果与显式恢复已实施；硬崩溃专项仍由 T-10 验收。
 
 ## 8. 进程恢复与版本兼容
 
@@ -354,3 +354,10 @@ MCP元数据与annotations不授予effect/权限；默认unknown→ASK。工具�
 连接的SDK上下文由同一个owner task进入/退出。异常或取消发起整个stdio连接清理，其他未完成调用也失败；连接单次使用，不自动重连或接收新调用。SDK/进程退出尚未完成时调用/清理task持有引用，Runtime关闭超期保留资源和存储锁并报ShutdownIncomplete，后续aclose等待同一次清理。borrowed正常关闭只解除Runtime引用，宿主负责最终aclose；实际调用失败仍须中止故障连接。受测SDK进程树清理不等于恶意守护程序隔离，MCP不继承Docker保证；分页/结果限额是解析后校验，不是stdout硬内存上限。
 
 当前仅传输有界text/JSON结果，schema子集与字段形状由 [API](api-draft.md) 维护；不自动调用resources/prompts、执行媒体、抓取URI或发布Artifact。API与DTO/SQLite DDL无新增存储版本；未使用MCP的指纹保持原算法。
+
+
+## T-13 传输落地
+
+[ADR-0025](../decisions/0025-http-identity-and-uploads.md) 细化身份/HTTP传输：DrovApp管理自建Runtime的lifespan或借用已打开实例；HTTP请求认证后只委托同内核。头前校验SSE完整游标与授权，durable帧使用run_id:seq，临时帧不带id；头后错误以非durable stream.error结束。每次发送前按当前身份/权限复核，超时/断连/关闭订阅不产生cancel，不自动recover或重执行。
+
+上传记录归原owner/Agent配置/目标session/配对store；receiving→staged→consumed，只有原接收事务能把staged授予Run并共同发布ready元数据/去重事实。未完成/过期/未知字节不消费，重复相同接收键复用原Run，已消费ID另建Run冲突。TTL不删除字节或清除消费事实。上传预留同样计入owner/store；中断后仍保留台账，维护清理属于T-15。下载先校验ready/hash和正文授权，再逐块认证/授权，已发送数据不在撤权可回收范围。HTTP不暴露宿主路径或后端配置。

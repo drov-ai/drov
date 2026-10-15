@@ -9,14 +9,14 @@ T-10A 的文件通道、公共沙箱定义与 Runtime 专用执行路径已实�
 | 入口 | 已实现内容 |
 | --- | --- |
 | drov | Agent 定义、Limits/ModelCapabilities/ContextPolicy/Memory 配置描述、RunContext/ToolContext、四类结果、三类交互响应、Runtime/ResourceBinding、HumanInput、tool/PermissionPolicy/OwnerAuthorizer |
-| drov.runtime | Runtime open/aclose/异步上下文、registration/validate_record、storage/dependencies/active_slots；AgentRegistration/ResourceBinding；start/run/wait/cancel/inspect/events/stream/get_context 已实现；respond/resume 的 approval/input 子范围已实现；verify/recover 已实现；sessions/session 尚未实现 |
+| drov.runtime | Runtime open/aclose/异步上下文、registration/validate_record、storage/dependencies/active_slots；AgentRegistration/ResourceBinding；start/run/wait/cancel/inspect/events/stream/get_context 已实现；respond/resume 的 approval/input 子范围已实现；verify/recover 已实现；sessions/session 已接通同scope授权分页 |
 | drov.types | 状态/结果/交互/事件/上下文/分页 DTO、Usage、RunError、parse_outcome/parse_response/parse_event、outcome_adapter |
 | drov.models | ScriptedModel/ScriptedStep 离线预设序列；额外调用拒绝，不使用 Key |
 | drov.models.openai | OpenAIResponses；显式 model/capabilities，惰性自有或借用 AsyncOpenAI，工具/严格输出/有序协议历史/用量/错误归一；见 ADR-0022 |
 | drov.models.protocol | ModelAdapter、ModelRequest/Response、消息/工具调用、delta/complete、collect_response |
 | drov.tools.schema | compile_tool、compile_type、compile_output、strict_schema、ToolDefinition/JsonCodec |
 | drov.tools | @tool/不可变 PythonTool/PermissionPolicy；compile_tool 仍是 schema-only；真实派发只由私有内核接点使用 |
-| drov.auth / drov.errors | Authorizer/AuthAdapter、ToolResource/OwnerAuthorizer、错误与 TransientToolError；HTTP 认证仍未实现 |
+| drov.auth / drov.errors | Authorizer/AuthAdapter、ToolResource/OwnerAuthorizer、错误与 TransientToolError；HTTP认证见ADR-0025 |
 | drov.storage | MemoryStorage / SQLiteStorage；异步 open/aclose、start/查询、原子 transaction 接点；内部协议尚不稳定 |
 | drov.artifacts | ArtifactInput/Ref/Info/Limits 与 LocalArtifacts POSIX 私有字节层；Runtime 资源装配、文件接收/Run 授予/去重、ready 输入/产物与 get/read_artifact 动态授权；私有 stage 不可读 |
 | drov.integrations.mcp | MCPStdio/MCPTool/MCPToolPolicy；显式短暂发现、固定schema/配置、Runtime owned/borrowed/factory连接，原dispatcher/审批/unknown与实际stdio清理，见ADR-0024 |
@@ -40,7 +40,7 @@ uv run --locked python scripts/generate_schemas.py --check
 
 JSON 输入使用 WireModel.from_json 或 parse_*；工具使用 codec.parse/bind_arguments。这些入口拒绝重复键、非有限数字和类型强转。直接调用继承的 Pydantic 解析接口不承担 Drov 的重复键拒绝保证。
 
-ArtifactResource/Ref/Info/Limits 已加入生成 schema；ArtifactInput 是宿主 bytes，data 不进入 JSON/repr，没有 HTTP 上传。LocalArtifacts 私有阶段方法不可作为应用 API。Artifact SQL 扩展参考见 [storage-artifacts-schema-v1.sql](storage-artifacts-schema-v1.sql)，由显式 store 配对启用；上下文有文件用 v2、无文件 v1，新版兼容旧记录。实际入口/授权/兼容与限制见 [ADR-0018](../decisions/0018-artifact-input-admission.md) 和 [文件通道示例](../../examples/artifact_inputs_offline.py)。
+ArtifactResource/Ref/Info/Limits 已加入生成 schema；ArtifactInput 是宿主 bytes，data 不进入 JSON/repr，HTTP上传使用独立短期UploadReceipt并在start原子消费。LocalArtifacts 私有阶段方法不可作为应用 API。Artifact SQL 扩展参考见 [storage-artifacts-schema-v1.sql](storage-artifacts-schema-v1.sql)，由显式 store 配对启用；上下文有文件用 v2、无文件 v1，新版兼容旧记录。实际入口/授权/兼容与限制见 [ADR-0018](../decisions/0018-artifact-input-admission.md) 和 [文件通道示例](../../examples/artifact_inputs_offline.py)。
 
 ```python
 from drov import ApprovalDecision, Limits
@@ -68,3 +68,10 @@ assert "result" not in evidence.model_dump()
 ## 可运行审批与输入子范围
 
 `from drov import HumanInput` 可注册固定答案 schema；显式 Runtime 对外部 PythonTool/内置 Memory 的 ASK 保存 ApprovalRequest，对 HumanInput 保存 InputRequest。respond 返回不可变回执，resume 接着等待下一暂停/终态；两个入口均继续原计划、不重做已有工具。参数/归属/当前权限、到期与容量在消费前校验，临时入口保持 failed/interaction_unavailable。外部 write/unknown、verify/recover 已实现，使用范围见 API 的具体状态。实际跨进程/安装检查见 [示例](../../examples/interactions_offline.py) 和 [T-09 验证](../validation/t09-interactions.md)。
+
+
+## HTTP / SSE
+
+`from drov import DrovApp`或`from drov.server import DrovApp, ServerLimits`。核心导入不加载FastAPI/Uvicorn，构造服务需server extra。实际字段/端点为 [OpenAPI](openapi-v1.json)，通过`scripts/generate_openapi.py`从真实路由生成（需server extra）；服务的`GET /openapi.json`也需认证。默认正文不可见，错误不回显输入/异常细节，所有运行/交互/分页均委托同一Runtime。实际装配/认证/上传/流语义见 [API](../planning/api-draft.md) 与 [ADR-0025](../decisions/0025-http-identity-and-uploads.md)。
+
+HTTP JSON DTO/ServerLimits/UploadReceipt加入核心可生成schema。独立 [上传扩展DDL](storage-uploads-schema-v1.sql) 仅服务带ArtifactStore时启用；旧SDK拒绝含此表的库，原格式库不变。未消费暂存不返回ready引用或可下载字节；TTL到期仅拒绝新消费，维护回收后续T-15。三场景loopback普通/SSE例见 [http_offline.py](../../examples/http_offline.py)，不调用真实模型。
