@@ -4,10 +4,10 @@
 
 ## 当前状态
 
-- 阶段：P1 至 P4、T-01 至 T-10、T-10A、T-10B 已完整验收。T-10B 新增93（88个真实Docker、5个API范围契约），全库897；最终含真实Docker：3.11 **895 passed /2 skipped**，3.14 **897 passed**；静态/schema、四套构件安装、两套 core-only wheel安装后8次真实Docker、Linux3.11–3.14每套97专项全部通过。最终源码 [9a4fba1](https://github.com/drov-ai/drov/commit/9a4fba12d09ffd02f194936fa2caf635b7cf6b03) 的 [核心CI38600296733](https://github.com/drov-ai/drov/actions/runs/38600296733) 10 jobs 与 [Docker专项38600296414](https://github.com/drov-ai/drov/actions/runs/38600296414) 4 jobs 全部 success。实际范围/限制见 [本轮验证](../validation/t10b-sandbox-faults.md) 和 ADR-0021；下一项 T-11，尚未开始。
+- 阶段：P1 至 P4、T-01 至 T-10、T-10A、T-10B 已完整验收；T-11 OpenAI Responses 已完成实施与本地验收，最终远程CI核对中，暂不关闭。本轮新增62、全库959；含真实Docker：Python3.11 **957 passed /2 skipped**，3.14 **959 passed**；静态/schema、四套core-only安装、两套extra安装后SDK/stream通过。实际范围/日志见 [T-11验证](../validation/t11-openai-responses.md) 与 [ADR-0022](../decisions/0022-openai-responses-adapter.md)。下一项在本卡收尾后为 T-12，不把T-10C列为必交前置。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
-- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。未验收：T-10C、T-11 至 T-18、模型/MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
+- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；未验收：T-10C、T-12 至 T-18，MCP/HTTP/工作台/维护尚未开始；多 Agent/Skill/持久工作区等后续，无空壳。
 - 无模型 Key、私有数据或付费调用；未上传 PyPI、部署官网或发布版本。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 - 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
@@ -17,7 +17,17 @@
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 本轮交付：T-10B 文件隔离、资源与故障完整验收
+## 本轮交付：T-11 OpenAI Responses 离线适配
+
+起点 Local `/Users/yanlong/projects/drov`、main / aeea557，干净且远端同提交；T-10B最终两套远程CI success复核后，前置本地含Docker复跑895+2 skip。没有上项未验收缺口，直接实施T-11。按 [ADR-0022](../decisions/0022-openai-responses-adapter.md) 交付实际可选适配器：显式model/capabilities、惰性自有/借用官方客户端、工具名/严格schema、流/非流完整计划、原位置provider bundle往返、reasoning/phase、用量/脱敏错误、单层重试/Retry-After与关闭。模型ID/输出上限进入公开配置指纹，旧适配器不变；接口/运行/工程/质量/案例/依赖说明同轮同步。
+
+新增62，全库959；最终本地3.11 **957 passed /2 skipped，214.91s**，3.14 **959 passed，228.06s**，均含99项真实Docker（其中新增2项Responses→审批→实际Python/CSV→销毁/hash读取→同一适配器）。新增项具体分类见验证记录，不将脚本服务输出当作真实模型质量。静态/类型/schema、两解释器wheel/sdist与重建比对、四套核心安装/六示例SDK+stream、两套独立openai extra安装/仓库外SDK+stream、Twine均通过。完整失败/修正、构件hash与实际日志维护在 [T-11验证](../validation/t11-openai-responses.md)。公共DTO/schema、SQLite DDL/扩展、uv.lock、历史P4指纹、品牌未改。
+
+本地验收已完成，保存源码提交并核对远程核心/原生Docker CI；实际Git提交与最终CI完成后补记，不用旧CI关闭新卡。没有读真实Key、调用付费模型/云、发布包/镜像或部署。自有/借用客户端与模型能力均有离线证据，未列任何已通过真实服务的模型ID。
+
+下一项 **T-12 MCP stdio适配**：按官方SDK/锁实现分页发现、固定名称/schema与revision、受控调用、断连/超时/退出清理；本地真实stdio server的成功/错误/卡住、审批不绕过、关闭所有权和安装隔离均通过才关闭。现在无需新仓库/账号/模型ID/预算；确定性stdio夹具由执行者准备，若要接特定现成MCP服务，届时只需提供仓库/启动命令和允许能力，不提前索取凭据。T-16 smoke前再确认服务、可访问固定model ID、能力来源/上下文窗口和费用上限；Key只在本地环境或宿主借用客户端安全配置，不贴聊天/入库。建议 **New Chat**，继续当前Local checkout，原因是本轮模型协议已形成独立验收节点，下一轮切换进程集成模块。
+
+## 历史验收：T-10B 文件隔离、资源与故障完整验收
 
 起点 main / dbd2a40，干净；前置 T-10A 复跑802+2 skip、最终CI核对后实施。按 [ADR-0021](../decisions/0021-sandbox-fault-boundaries.md) 与任务卡完成真实输入/宿主/网络哨兵、CPU/OOM/PID/盘/文本/文件/路径竞态、取消/脱离组子进程、受控创建/执行/导出/销毁丢应答、SQLite/ENOSPC/丢文件/hash损坏，以及58个SDK/stream进程/保留关闭边界测试。完整原暂存可以恢复；未确认清理继续占容量和锁；丢失/损坏/超限输出不可重算或发布。
 
@@ -304,3 +314,4 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | 2026-10-14 | T-10A 第三批检查点 | 私有 Docker 控制/预检、74 项新增与两种镜像两次控制探针、四套安装；0780093 的 10 个远程 CI job success，整卡尚未关闭 |
 | 2026-10-14 | T-10A Runtime 闭环 | 45 项新增、真实审批/代码/输入/CSV/PNG/下载/两次独立与取消、原发布恢复，本地804用例；最终独立两解释器/包/安装后8次Docker及2d768f7的10项远程CI通过，整卡关闭；下一项T-10B |
 | 2026-10-15 | T-10B 整卡验收 | 新增93、全库897，两解释器/构件/安装后实际Docker；原生Linux3.11–3.14每套97专项与最终9a4fba1的核心10+Docker4 jobs成功；下一项T-11，建议New Chat |
+| 2026-10-15 | T-11离线适配本地验收 | 新增62、全库959，两解释器含Docker/核心与extra安装通过；保存提交并核对最终远程CI，真实模型未验收 |

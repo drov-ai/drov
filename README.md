@@ -2,7 +2,7 @@
 
 面向 Python 开发者的通用 Agent 框架，目标是以少量核心概念提供完整、可组合的能力，并让开发、调试和服务化使用一致的运行机制。
 
-**开发版本 `0.1.0a0`；T-10A/T-10B 的 Docker Python、文件与故障专项已验收。** Runtime 支持受控文件输入、代码审批、实际单次执行、CSV/PNG 持久产物与授权下载。完整任务状态和下一项以 [progress](docs/planning/progress.md) 为准；受测隔离/资源/SDK硬终止、原生Linux3.11–3.14 Docker专项与安装证据见 [T-10B 验证](docs/validation/t10b-sandbox-faults.md)。包另提供模型协议、事务存储、工具/权限、Agent 循环、上下文/Memory 和持久交互/恢复。真实模型适配与服务尚未实现；尚未公开发布包或获得真实模型评测结果。
+**开发版本 `0.1.0a0`；T-10A/T-10B 的 Docker Python、文件与故障专项已验收。** Runtime 支持受控文件输入、代码审批、实际单次执行、CSV/PNG 持久产物与授权下载。完整任务状态和下一项以 [progress](docs/planning/progress.md) 为准；受测隔离/资源/SDK硬终止、原生Linux3.11–3.14 Docker专项与安装证据见 [T-10B 验证](docs/validation/t10b-sandbox-faults.md)。包另提供模型协议、事务存储、工具/权限、Agent 循环、上下文/Memory 和持久交互/恢复。OpenAI Responses 已实现离线协议适配，MCP/HTTP/工作台尚未实现；尚未公开发布包或获得真实模型评测结果。
 
 P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-08 验证记录](docs/validation/t08-memory.md)。本轮证据见 [T-09 子范围验证](docs/validation/t09-interactions.md)，完整证据见 [核查/恢复验证](docs/validation/t09-reconciliation-recovery.md)，T-10 已验收，见 [专项验证](docs/validation/t10-faults-cancellation.md)；下一项及资源准备见 progress；换会话方法见 [交接说明](docs/handoff.md)。
 
@@ -32,7 +32,14 @@ uv run --locked python examples/research_offline.py --stream
 
 预设回答只验证运行契约，不证明模型推理质量。外部 Python 工具已支持 read/write/unknown；内置 Memory 使用专用事务工具与限时检索。显式 Runtime 的 ASK 保存审批并支持原子响应，临时 Agent.run 仍 failed/interaction_unavailable；外部 write/unknown 单次派发，未知效果须显式核查，不承诺外部 exactly-once。上下文/记忆来源可由 get_context 核对。
 
-这些操作不需要 API Key。构件生成在本地 `dist/`，不会发布到 PyPI。extras 当前仅声明依赖，尚无对应适配器实现。
+这些操作不需要 API Key。构件生成在本地 `dist/`，不会发布到 PyPI。openai extra 已提供 [Responses 离线适配](docs/decisions/0022-openai-responses-adapter.md)；mcp/server 仍只有依赖声明。
+
+官方客户端的本地 HTTP/SSE 示例（不读取真实凭据）：
+
+```sh
+uv run --locked --extra openai python examples/openai_responses_offline.py
+uv run --locked --extra openai python examples/openai_responses_offline.py --stream
+```
 
 ## 项目方向
 

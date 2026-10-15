@@ -1,6 +1,6 @@
 # 三类参考应用与跨入口案例
 
-状态：P4 案例设计；S-01-A/C 和 S-02 的 SDK/stream 离线路径已运行，T-09 审批/输入子范围已有实际离线证据；T-09 外部写入/核查案例已离线验证；T-10 硬崩溃专项已验收；文件/代码沙箱及真实模型质量仍未验收，状态见 progress。更新：2026-10-14。
+状态：P4 案例设计；S-01-A/C 和 S-02 的 SDK/stream 离线路径已运行，T-09 审批/输入子范围已有实际离线证据；T-09 外部写入/核查案例已离线验证；T-10 硬崩溃专项已验收；文件/代码沙箱已由 T-10A/B 验收，真实模型质量仍未验收，状态见 progress。更新：2026-10-14。
 
 这些案例用来检验通用框架，不限制 Drov 的业务范围。使用契约来自 [API 草案](api-draft.md)，各段按实际状态标注；可运行教程在 examples，本文件保留说明片段和待实施案例。模型参数在离线验证中使用 ScriptedModel，真实验证使用显式配置的 OpenAIResponses；知识检索是合成夹具或应用自己的工具，Memory 为内置事务存储。详见 [工程方案](engineering.md) / [质量计划](quality-plan.md)。所有场景遵守 [行为契约](runtime-contract.md)，不能单独放宽规则。
 
@@ -68,7 +68,7 @@ async def research_example(model, knowledge):
 | S-01-D | 资料不足 | 明确说明证据不足；不能靠输出 schema 正确就判定任务成功 |
 | S-01-E | 受控合成 CSV → 模型生成 Python 数据分析 → 汇总 CSV 与 PNG | 核对输入引用/hash、合计/均值 oracle、实际代码/退出/文本与 final 报告；summary.csv 内容正确、chart.png 实际可解码且对应数据，容器销毁后下载/hash 一致；未交付实际文件或预设替代答案均失败 |
 
-T-06 已交付 [离线可运行例子](../../examples/README.md) / [research_offline.py](../../examples/research_offline.py)：真实合成语料检索、ScriptedModel 工具结果检查、Report 严格输出及实际引用集合核对，SDK/stream 共用内核。该例回答为预设夹具，验收 S-01-A 离线契约。T-07 的 [context_preview_offline.py](../../examples/context_preview_offline.py) 验收 S-01-C：实际长工具结果、带引用/版本的预览、get_context 清单核对及 full_document_read=False；SDK/stream 共用内核。完整历史组选取/排除与预算失败另由 [test_context.py](../../tests/test_context.py) 验证，真实模型质量仍待 T-11/T-16。
+T-06 已交付 [离线可运行例子](../../examples/README.md) / [research_offline.py](../../examples/research_offline.py)：真实合成语料检索、ScriptedModel 工具结果检查、Report 严格输出及实际引用集合核对，SDK/stream 共用内核。该例回答为预设夹具，验收 S-01-A 离线契约。T-07 的 [context_preview_offline.py](../../examples/context_preview_offline.py) 验收 S-01-C：实际长工具结果、带引用/版本的预览、get_context 清单核对及 full_document_read=False；SDK/stream 共用内核。完整历史组选取/排除与预算失败另由 [test_context.py](../../tests/test_context.py) 验证，真实模型质量仍待 T-16 的授权评测；T-11 仅验收离线协议机制。
 
 ## S-02：跨会话个人助手
 
@@ -288,7 +288,7 @@ T-05 已验证 S-01-B 的只读瞬态重试/超时及 S-03-A/C 的权限否决�
 
 ## 代码沙箱变体的交付边界
 
-S-01-E/S-02-E/S-03-F/X-03 按 ADR-0016 加强文件/产物要求，已有 sandbox/artifacts 源码和 [真实 SDK 示例](../../examples/sandbox_offline.py)，证据见 [本轮验证](../validation/t10a-runtime-sandbox.md)。配置用法见 API 草案，语义见运行契约第 13 节；T-10A 已接通实际标准库/固定分析镜像、CSV/PNG、默认审批/产物读取与两次独立环境/显式复用；T-10B 深度故障和 T-16 三类真实模型任务仍需验收。输入位置保留 /work/inputs/<id>/<name>，输出 basename 唯一，PNG 按工程有界 profile 验证；恢复使用原阶段且人工核查不能代替资源事实。T-10C 复用相同案例与断言，使用 ScriptedModel 在真实 E2B 验证 adapter，不据此增加模型评分样本或假设两种后端逐字相同。ScriptedModel 用固定代码验证机制；T-16 才验证真实模型生成代码、运行与使用结果，不能相互代替。
+S-01-E/S-02-E/S-03-F/X-03 按 ADR-0016 加强文件/产物要求，已有 sandbox/artifacts 源码和 [真实 SDK 示例](../../examples/sandbox_offline.py)，证据见 [本轮验证](../validation/t10a-runtime-sandbox.md)。配置用法见 API 草案，语义见运行契约第 13 节；T-10A 已接通实际标准库/固定分析镜像、CSV/PNG、默认审批/产物读取与两次独立环境/显式复用；T-10B 深度故障已独立验收，T-16 三类真实模型任务仍需验收。输入位置保留 /work/inputs/<id>/<name>，输出 basename 唯一，PNG 按工程有界 profile 验证；恢复使用原阶段且人工核查不能代替资源事实。T-10C 复用相同案例与断言，使用 ScriptedModel 在真实 E2B 验证 adapter，不据此增加模型评分样本或假设两种后端逐字相同。ScriptedModel 用固定代码验证机制；T-16 才验证真实模型生成代码、运行与使用结果，不能相互代替。
 
 T-09 的实际 [interactions_offline.py](../../examples/interactions_offline.py) 为安全的只读演练：每个批准/拒绝案例用四个新进程先提出 HumanInput、提交合法回答生成固定 read_item 候选、审批并读取/拒绝，再重复原响应验证旧回执和计数。两种入口核对实际原计划、返回值与 1/0 次独立工具计数。另有两后端 Memory ASK 原子写入与取消保留事实测试。它们交付审批/输入机制及 S-03-E 的补充输入子路径，完整 S-03 的外部业务写入、响应丢失核查与 recover 证据见下段。
 

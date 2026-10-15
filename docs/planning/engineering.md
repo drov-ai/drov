@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：工程选择与默认值由本页维护；当前任务状态统一见 [progress](progress.md)，T-10 完整证据见 [专项验证](../validation/t10-faults-cancellation.md)。文件/代码沙箱闭环已按 ADR-0020 实现；T-10B 受测专项证据见 [验证](../validation/t10b-sandbox-faults.md)；E2B、真实适配器和服务仍未验收。更新：2026-10-15。
+状态：工程选择与默认值由本页维护；当前任务状态统一见 [progress](progress.md)，T-10 完整证据见 [专项验证](../validation/t10-faults-cancellation.md)。文件/代码沙箱闭环已按 ADR-0020 实现；T-10B 受测专项证据见 [验证](../validation/t10b-sandbox-faults.md)；E2B、真实模型质量和服务仍未验收；Responses 离线适配见 ADR-0022。更新：2026-10-15。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 
@@ -24,7 +24,7 @@
 
 Python 导入名使用 `drov`；PyPI 分发名暂定 `drov`，占用和控制权待发布准备核实。若不可用，变更分发名不自动变更导入名。npm 组织保留，v0.1 不为凑产品线发布 JS SDK。
 
-T-01 已声明 extras：`openai`、`mcp`、`server`，目前只安装依赖，没有对应 Drov 适配器。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；T-09 已实现显式恢复调度。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。E2B experimental extra e2b 只在 T-10C 真实适配时新增，当前并未声明或安装。
+T-01 已声明 extras：`openai`、`mcp`、`server`，T-11 已实现 openai 离线协议适配，mcp/server 仍只有依赖声明。核心依赖为 Pydantic、aiosqlite、portalocker、typing-extensions；目标是 SQLite 开箱可用，无需额外数据库服务，T-03 已实现事务存储，T-04 已实现 Runtime 生命周期，T-06/07 已实现只读 Agent/上下文；T-09 已实现显式恢复调度。extras 只选择依赖，不生成不同内容的 wheel；T-14 后统一 wheel 携带预构建工作台静态文件，`server` 增加运行 HTTP 服务所需依赖，SDK-only 导入不加载它们。开发依赖放 dev group，文档/评测组在对应任务引入，不成为 SDK 必装依赖。首版不拆多个协同发版的 Python 包。E2B experimental extra e2b 只在 T-10C 真实适配时新增，当前并未声明或安装。
 
 以下是完整首版的目标布局。T-01 只建立元数据包、测试/构建检查和 CI，其他模块按任务创建，不以空壳占位：
 
@@ -93,11 +93,13 @@ Memory 保存 key、content、version、时间和来源，写入使用 expected_
 
 ## 5. 首个模型与 MCP 路径
 
-OpenAI 适配器拟名 `OpenAIResponses`，从 `drov.models.openai` 导入。必须显式传 model ID；不硬编码“最新模型”或替用户选择付费档位。ModelCapabilities 明确 text/tools/structured_output/streaming/context_window；未知窗口必须由应用填写输入上限。模型与价格在真实评测时固定，记录官方能力来源和实际测试结果。
+OpenAI 适配器名为 `OpenAIResponses`，从 `drov.models.openai` 导入。必须显式传 model ID；不硬编码“最新模型”或替用户选择付费档位。ModelCapabilities 明确 text/tools/structured_output/streaming/context_window；未知窗口必须由应用填写输入上限。模型与价格在真实评测时固定，记录官方能力来源和实际测试结果。
 
-采用官方异步客户端，Drov 管理请求预算；关闭 SDK 内部自动重试，避免双层重试。使用 Responses 的 function calling 与 structured output；工具始终由 Drov 授权后在本地分发，不启用供应商托管工具。显式 `store=False`、禁用自动截断，不使用远程 conversation/previous_response_id 代替本地历史；保留需要往返的响应项。需要 encrypted reasoning 项的模型只能在往返测试通过后列入支持；不将该内容解密或展示为思维链。`store=False` 不等于供应商零保留承诺，后者取决于服务政策与账户。[E-11](evidence.md)
+实际开发/协议锁为 openai 3.29.0、httpx2 2.13.1（最低声明版本与锁相同）；更高范围尚未逐版本验收。采用官方异步客户端，Drov 管理请求预算；关闭 SDK 内部自动重试，避免双层重试。使用 Responses 的 function calling 与 structured output；工具始终由 Drov 授权后在本地分发，不启用供应商托管工具。显式 `store=False`、禁用自动截断，不使用远程 conversation/previous_response_id 代替本地历史；保留需要往返的响应项。需要 encrypted reasoning 项的模型只能在往返测试通过后列入支持；不将该内容解密或展示为思维链。`store=False` 不等于供应商零保留承诺，后者取决于服务政策与账户。[E-11](evidence.md)
 
 通过 `parallel_tool_calls=False` 与 Drov 顺序计划共同限制派发；即使供应商返回多个调用，也不得在完整计划提交前执行。部分流、未知输出项、refusal、incomplete、429/5xx/超时均有适配测试。兼容某个 HTTP URL 不等于已经兼容所有 OpenAI-compatible 服务；额外供应商逐个通过契约测试再列支持。
+
+T-11 的配置/生命周期、严格工具名/schema、按助手位置重放的 provider bundle、唯一完整提交和 Retry-After 细则见 [ADR-0022](../decisions/0022-openai-responses-adapter.md)。公共 DTO/DDL/uv.lock 未改变；导入/构造不依赖 SDK 安装，generate 缺 extra 明确拒绝。未列出已通过真实服务的模型或其他 compatible 服务。
 
 MCP 先连接应用显式配置的本地 stdio 服务，完成初始化、分页发现、调用、超时和退出；记录协商协议版本。客户端构造在 Runtime 生命周期内，工具名映射含 server namespace。初始 schema 固定到注册 revision；运行中服务工具改变需新注册，不能改变待审批操作。MCP annotations 只作提示，effect/权限由应用明确映射；默认 unknown/ask。禁止从模型文本启动任意命令；应用配置可执行文件与环境白名单，默认不把模型 API Key 传给子进程。
 

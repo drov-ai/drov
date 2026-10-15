@@ -2,11 +2,11 @@
 
 import hashlib
 import inspect
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import Field, TypeAdapter
 
-from drov._json import canonical_json
+from drov._json import canonical_json, load_json
 from drov.agent import Agent
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.errors import ConfigurationError
@@ -120,6 +120,14 @@ def fingerprint(agent: Agent[Any]) -> AgentRegistration:
         "limits": checked.limits.model_dump(mode="json"),
         "required_dependencies": sorted(checked.required_dependencies),
     }
+    adapter_config = getattr(agent.model, "registration_config", None)
+    if adapter_config is not None:
+        # Adapter-declared public configuration only. Never inspect client internals.
+        if type(adapter_config) is not dict:
+            raise ConfigurationError("Invalid adapter registration configuration")
+        cast(dict[str, Any], payload["model"])["adapter_config"] = load_json(
+            canonical_json(adapter_config)
+        )
     return AgentRegistration(
         name=name,
         revision=revision,

@@ -302,6 +302,7 @@ T-02 已将下列 DTO/配置与模型协议落成 Python 类型，并生成 [sch
 - Agent：name/revision 在持久化注册时必填，临时定义可都省略；两者须成对提供。T-02 model 接收 ModelAdapter 实例，集成/资源描述由后续任务装配；tools 接受 ToolDefinition（仅 schema）或 @tool 产生的 PythonTool；进入执行配置时必须具备真实 callable。instructions 默认空串、tools 默认空集合、output_type 默认 str，memory 默认 None，context_policy/limits 使用工程默认值。相同对象可在各入口复用，但同一有状态客户端的所有权不能隐式转移。
 - Runtime：agents、storage、policy、authorizer、dependencies、limits；dependencies 默认空映射、policy 默认保守规则、默认 authorizer 只允许本人记录/控制。跨用户 reviewer 必须由应用 authorizer 明确允许。资源只在进入 Runtime 时打开。
 - ModelCapabilities：text、tools、structured_output、streaming 为 bool，context_window 为正整数或 None；未知能力不得默认为支持。OpenAIResponses 显式传 model 与 capabilities，密钥仅环境/借用客户端配置，不能作为可持久化 Agent 字段。
+- T-11 的 `drov.models.openai.OpenAIResponses(*, model, capabilities, client=None, max_output_tokens=2048)` 已有离线适配；client 为借用 AsyncOpenAI，自有客户端首次 generate 才创建，需由 Runtime owned_models 或宿主 aclose 关闭。可选适配器 hook `validate_configuration(*, tools, output_schema)` 在 Agent 构造/注册前校验；`registration_config` 仅声明可入指纹的公开配置，旧适配器无需实现。TransientModelError 可附 retry_after_seconds，ModelProviderError 表示供应商确定拒绝/失败。版本/历史配对和限制见 [ADR-0022](../decisions/0022-openai-responses-adapter.md)；未知模型能力/窗口仍需显式声明，不据离线成功宣称某个真实模型已支持。
 - Limits 字段对应工程默认表；时间/大小/容量/步骤限额为正数，模型/只读重试次数为非负整数（0 表示不重试），v0.1 write_tool_retries 只允许 0，只有字段明确可选时才允许 None。NaN/Infinity、非法类型、超出管理员上限的值拒绝。服务端 `limits` 只收紧，不允许启用后端未配置的能力。
 
 ### 状态与数据对象

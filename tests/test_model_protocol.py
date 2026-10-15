@@ -70,6 +70,29 @@ async def test_adapter_failure_keeps_failure() -> None:
         await collect_response(adapter.generate(request()))
 
 
+@pytest.mark.asyncio
+async def test_openai_module_and_definition_need_no_extra_and_missing_extra_has_hint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import builtins
+
+    from drov.models.openai import OpenAIResponses
+
+    original = builtins.__import__
+
+    def without_openai(name: str, *args: object, **kwargs: object) -> object:
+        if name == "openai":
+            raise ModuleNotFoundError("Optional client intentionally unavailable")
+        return original(name, *args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(builtins, "__import__", without_openai)
+    adapter = OpenAIResponses(model="offline", capabilities=ModelCapabilities(text=True))
+    assert adapter._client is None
+    with pytest.raises(ConfigurationError, match=r"drov\[openai\]"):
+        await collect_response(adapter.generate(request()))
+    await adapter.aclose()
+
+
 def test_tool_plan_and_message_validation() -> None:
     call = ToolCall(call_id="a", name="query", arguments={})
     with pytest.raises(ValidationError):

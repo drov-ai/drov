@@ -15,8 +15,12 @@ before publication. They are excluded from the Python distributions.
 Direct requirements are declared in `pyproject.toml`. Exact resolved versions, transitive
 dependencies, artifacts and hashes are recorded in `uv.lock`. Packages are installed
 separately; their code is not vendored in Drov's wheel. Their own licenses and notices
-remain applicable. Adapter extras currently install dependencies only; no Drov adapter
-API is implemented.
+remain applicable. The OpenAI extra implements a Responses adapter using the separately installed
+official openai 3.29.0 client (Apache-2.0) and its httpx2 2.13.1 transport
+(BSD-3-Clause); no SDK source is copied. MCP/server extras still install
+dependencies only. Protocol sources and actual offline validation are recorded in
+`docs/decisions/0022-openai-responses-adapter.md` and
+`docs/validation/t11-openai-responses.md`.
 
 | Package | Role | Upstream license | Source |
 | --- | --- | --- | --- |

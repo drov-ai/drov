@@ -1,6 +1,6 @@
 # 已实现的定义与数据契约
 
-T-02 至 T-08 提供类型/schema、协议、事务存储、Runtime 生命周期、工具权限、只读 Agent 循环、正文投影、上下文选择/清单及事务 Memory；T-09 审批/输入子范围已实现；T-09 外部未知效果/显式恢复已实现；真实模型适配器仍未实现。公共入口语义见 [API](../planning/api-draft.md)，T-06 细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
+T-02 至 T-08 提供类型/schema、协议、事务存储、Runtime 生命周期、工具权限、只读 Agent 循环、正文投影、上下文选择/清单及事务 Memory；T-09 审批/输入子范围已实现；T-09 外部未知效果/显式恢复已实现；OpenAI Responses 已有官方客户端的离线 HTTP/SSE 适配，真实模型 smoke/质量尚未验证。公共入口语义见 [API](../planning/api-draft.md)，T-06 细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
 
 ## 模块入口
 
@@ -12,6 +12,7 @@ T-10A 的文件通道、公共沙箱定义与 Runtime 专用执行路径已实�
 | drov.runtime | Runtime open/aclose/异步上下文、registration/validate_record、storage/dependencies/active_slots；AgentRegistration/ResourceBinding；start/run/wait/cancel/inspect/events/stream/get_context 已实现；respond/resume 的 approval/input 子范围已实现；verify/recover 已实现；sessions/session 尚未实现 |
 | drov.types | 状态/结果/交互/事件/上下文/分页 DTO、Usage、RunError、parse_outcome/parse_response/parse_event、outcome_adapter |
 | drov.models | ScriptedModel/ScriptedStep 离线预设序列；额外调用拒绝，不使用 Key |
+| drov.models.openai | OpenAIResponses；显式 model/capabilities，惰性自有或借用 AsyncOpenAI，工具/严格输出/有序协议历史/用量/错误归一；见 ADR-0022 |
 | drov.models.protocol | ModelAdapter、ModelRequest/Response、消息/工具调用、delta/complete、collect_response |
 | drov.tools.schema | compile_tool、compile_type、compile_output、strict_schema、ToolDefinition/JsonCodec |
 | drov.tools | @tool/不可变 PythonTool/PermissionPolicy；compile_tool 仍是 schema-only；真实派发只由私有内核接点使用 |

@@ -78,6 +78,8 @@ HTTP SSE 使用 `run_id:seq` 作为持久化事件游标，可重送，由客户
 
 ## 4. 工具执行、重试与未知结果
 
+T-11 模型适配遵循 [ADR-0022](../decisions/0022-openai-responses-adapter.md)：供应商 SDK 重试关闭；仅 Runtime 按原保存输入执行有界模型重试，等待取本地 backoff 与有效 Retry-After 的较大者并受剩余时间限制。完整流正常结束且唯一终止响应验证后才提交计划；refusal/incomplete/畸形或中断流均不能派发工具。历史 provider bundle 按原助手响应位置重放，保留 reasoning/phase/调用顺序；缺失、不匹配或不兼容时在供应商调用前拒绝。供应商错误正文不写入 RunError，未知用量不填零。此规则不增加工具写入重试。
+
 T-05 已实现 @tool/PythonTool 和私有只读派发接点：同步工具先有界排队再派发，异步工具保留真实 Task；OperationJournal 同事务保存操作/Run 摘要、检查点、事件和 tool_dispatch_count 预算预留。每个重试只有显式 TransientToolError 才允许，超时/非法输出不重试。已有 operation_id 返回旧事实，不自动批准或重做；T-06 已接入完整计划提交与只读 Run 收尾；T-09 已接入审批/输入子范围；外部未知写入与显式恢复由 T-09 本轮交付，逐故障边界硬崩溃另在 T-10 验收。T-09 已接入外部 write/unknown 单次派发与核查；T-08 内置 Memory 使用第 7.3 节的专用事务路径。
 
 工具先完成 schema 校验和权限判断，再执行。参数被校验后规范化为确定性的 JSON 值：键排序、禁止 NaN/Infinity、保留值类型；首期不隐式转换 datetime 等非 JSON 类型，应用须显式转为受支持的表示。调用摘要包含工具名/版本、参数、归属和目标操作标识；不能仅 hash 提示词。

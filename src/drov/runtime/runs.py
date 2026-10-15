@@ -1027,7 +1027,7 @@ class RunController:
                         response = await self.model_call(
                             agent, request, work, min(allowance, end - loop.time()), record=record
                         )
-                    except TransientModelError:
+                    except TransientModelError as exc:
                         attempt_count += 1
                         await self.step(
                             run_id,
@@ -1048,7 +1048,13 @@ class RunController:
                         if attempt >= record.limits.model_retries:
                             raise _RunFailure("transient_model_error", "model") from None
                         await asyncio.sleep(
-                            min(record.limits.retry_backoff_seconds, max(0, end - loop.time()))
+                            min(
+                                max(
+                                    record.limits.retry_backoff_seconds,
+                                    exc.retry_after_seconds or 0,
+                                ),
+                                max(0, end - loop.time()),
+                            )
                         )
                         continue
                     except PersistenceUnavailable:

@@ -1,5 +1,7 @@
 """Pre-run/control exceptions. Recorded execution errors use RunError."""
 
+import math
+
 
 class DrovError(Exception):
     code = "drov_error"
@@ -15,6 +17,10 @@ class UnsupportedSchema(ConfigurationError):
 
 class ModelProtocolError(DrovError):
     code = "model_protocol_error"
+
+
+class ModelProviderError(DrovError):
+    code = "model_provider_error"
 
 
 class PersistenceUnavailable(DrovError):
@@ -83,3 +89,13 @@ class TransientModelError(DrovError):
     """Adapter-declared transient failure; permits only bounded model retries."""
 
     code = "transient_model_error"
+
+    def __init__(self, message: str = "", *, retry_after_seconds: float | None = None) -> None:
+        super().__init__(message)
+        self.retry_after_seconds = (
+            retry_after_seconds
+            if retry_after_seconds is not None
+            and math.isfinite(retry_after_seconds)
+            and retry_after_seconds >= 0
+            else None
+        )

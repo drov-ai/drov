@@ -1,6 +1,6 @@
 # 实施前规划导航
 
-实施状态、下一项与用户准备统一见 [progress](progress.md)。T-10B 已完整验收，下一项以progress为准；T-09 全路径证据与 T-10 硬终止/故障矩阵分别维护，首版代码/受控文件/产物与可选 E2B 见 ADR-0016、必交 T-10A/T-10B 和独立可选 T-10C。日期：2026-10-14（Asia/Shanghai）。
+实施状态、下一项与用户准备统一见 [progress](progress.md)。模型适配的协议历史、工具映射与单层重试见 [ADR-0022](../decisions/0022-openai-responses-adapter.md)，当前阶段与下一项以progress为准；T-09 全路径证据与 T-10 硬终止/故障矩阵分别维护，首版代码/受控文件/产物与可选 E2B 见 ADR-0016、必交 T-10A/T-10B 和独立可选 T-10C。日期：2026-10-14（Asia/Shanghai）。
 
 ## 当前共识
 

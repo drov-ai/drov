@@ -11,7 +11,7 @@ from drov._json import StrictJson, canonical_json, load_json
 from drov.artifacts.types import ArtifactInput, ArtifactRef
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
 from drov.errors import ConfigurationError
-from drov.models.protocol import ModelAdapter
+from drov.models.protocol import ModelAdapter, ModelTool
 from drov.tools.schema import ToolDefinition, compile_output
 from drov.types import RunContext, RunOutcome, ScopedIdentifier
 
@@ -86,6 +86,15 @@ class Agent(Generic[T]):
         self.output_type = output_type
         self.output_codec = compile_output(output_type)
         self.memory = memory
+        validate_model = getattr(model, "validate_configuration", None)
+        if validate_model is not None:
+            validate_model(
+                tools=[
+                    ModelTool(name=t.name, description=t.description, parameters=t.parameters)
+                    for t in self._execution_tools
+                ],
+                output_schema=None if output_type is str else self.output_codec.schema,
+            )
         self.context_policy = (
             ContextPolicy()
             if context_policy is None

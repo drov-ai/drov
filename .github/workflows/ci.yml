@@ -55,6 +55,10 @@ jobs:
       - run: uv run --locked twine check --strict dist/*.whl dist/*.tar.gz
       - run: uv sync --locked --all-extras
       - run: uv run --locked --all-extras python -I -B scripts/check_installed.py
+      - name: Offline official Responses client and installed example
+        run: |
+          uv run --locked --all-extras pytest tests/test_openai_responses.py
+          uv run --locked --all-extras python scripts/check_installed_openai.py --wheel dist/drov-0.1.0a0-py3-none-any.whl
 
   python-next:
     # Advisory only; Python 3.15 is not in the supported matrix.

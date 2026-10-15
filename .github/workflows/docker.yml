@@ -47,7 +47,7 @@ jobs:
         run: |
           uv run --locked python scripts/prepare_analysis_image.py --docker "$(command -v docker)" --host unix:///var/run/docker.sock --platform linux/amd64 --work-directory .drov/analysis --curl /usr/bin/curl
       - name: Actual Docker isolation, client/storage faults and SDK hard kills
-        run: uv run --locked pytest -m docker --junitxml=.drov/docker-tests.xml
+        run: uv run --locked --extra openai pytest -m docker --junitxml=.drov/docker-tests.xml
       - name: Core wheel and sdist installations
         run: uv run --locked python scripts/check_package.py
       - name: Installed core-only wheel with actual stdlib/analysis SDK and stream

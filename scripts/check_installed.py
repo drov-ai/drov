@@ -83,11 +83,15 @@ def main() -> None:
         import drov
         import drov.artifacts
         import drov.sandbox
+        from drov.config import ModelCapabilities
+        from drov.models.openai import OpenAIResponses
         from drov.sandbox import DockerSandbox, PythonSandbox, SandboxLimits, SandboxResult
         from drov.sandbox._docker import DockerPreflight
         from drov.sandbox._profile import PROFILE_SHA256, DockerLimits
 
         assert "LocalArtifacts" in drov.artifacts.__all__
+        adapter = OpenAIResponses(model="offline-import", capabilities=ModelCapabilities(text=True))
+        assert adapter._client is None
         # Even private backend construction is inert in a core-only installation.
         preflight = DockerPreflight(
             image="sha256:" + "a" * 64,

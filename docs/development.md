@@ -1,6 +1,6 @@
 # 本地开发
 
-包版本为 `0.1.0a0`。已有模型协议、事务存储、Runtime/Agent、工具/权限、上下文/Memory、交互及 verify/recover。T-10A 已接通文件输入、PythonSandbox 审批/实际执行、有界导出及销毁后原工具结果/ready 共同发布，[真实 Docker 示例](../examples/sandbox_offline.py) 可运行；完整隔离/故障矩阵、真实模型适配与服务/CLI 尚未验收。任务状态见 [progress](planning/progress.md)，实际证据见 [本轮验证](validation/t10a-runtime-sandbox.md)。
+包版本为 `0.1.0a0`。已有模型协议、事务存储、Runtime/Agent、工具/权限、上下文/Memory、交互及 verify/recover。T-10A 已接通文件输入、PythonSandbox 审批/实际执行、有界导出及销毁后原工具结果/ready 共同发布，[真实 Docker 示例](../examples/sandbox_offline.py) 可运行；T-10B 完整隔离/故障已验收；OpenAI Responses 离线协议适配见 ADR-0022，真实模型质量与服务/CLI 尚未验收。任务状态见 [progress](planning/progress.md)，实际证据见 [本轮验证](validation/t10a-runtime-sandbox.md)。
 
 ## 环境与安装
 
@@ -71,7 +71,7 @@ uv run --locked twine check --strict dist/*.whl dist/*.tar.gz
 uv run --locked python scripts/check_package.py --python /path/to/python
 ```
 
-`openai`、`mcp`、`server` extras 目前仅声明未来适配器的依赖。安装它们不代表已能创建对应 Drov 客户端。`uv sync --locked --all-extras` 只用于依赖组合检查，仍不读取或调用模型 Key。
+`openai` extra 已提供 `drov.models.openai.OpenAIResponses`；`mcp`、`server` 仍只有依赖声明。使用 `uv run --locked --extra openai pytest tests/test_openai_responses.py` 验证官方客户端对本地 HTTP/SSE；`examples/openai_responses_offline.py` 及 `--stream` 不读取真实凭据，`scripts/check_installed_openai.py --wheel <本地wheel>` 检查干净 extra 安装。核心 CI 明确跳过缺 extra 的适配专项，extras 阶段实际执行；mypy 允许缺可选模块，完整类型检查使用 `uv run --locked --extra openai mypy`。`uv sync --locked --all-extras` 只用于依赖组合检查，仍不读取或调用模型 Key。
 
 ## CI 与变更记录
 

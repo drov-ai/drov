@@ -23,6 +23,8 @@ T-09 外部路径补充独立进程非幂等 ItemService、写入后断连/非�
 
 ## 2. 固定夹具
 
+T-11 的 Responses 夹具必须使用官方 AsyncOpenAI 访问随机 loopback 端口的真实 HTTP/SSE，关闭代理继承、只用显式合成凭据；断言原始请求和实际请求数。覆盖流/非流、严格工具与最终 schema、sandbox.run_python 名称还原、encrypted reasoning/phase 的完整有序重放、未知/重复/截断/拒绝、token 缺值、HTTP/连接/超时、单层重试与 Retry-After、自有/借用关闭。参数 delta 不成为计划，非法/不完整计划的实际工具执行数为0；SDK/stream 审批及产物结果沿同一 Runtime。B-15 继续检查完整历史组与 provider 项共同裁剪、计入估算并保持源值；无 extra 核心安装与安装 extra 后仓库外示例均需检查。具体实现选择见 [ADR-0022](../decisions/0022-openai-responses-adapter.md)，本地协议成功不作为 T-16 的模型分数。
+
 | 夹具 | 内容 | 能检验什么 |
 | --- | --- | --- |
 | ScriptedModel | 输入期望、预定消息/工具调用/增量/错误，拒绝未预计调用 | 确定步骤、重试数、提交前不派发、入口等价；不声称是智能模型 |
