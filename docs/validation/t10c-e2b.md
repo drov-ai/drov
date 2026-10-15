@@ -57,3 +57,12 @@ DROV_E2B_TEST_CONFIG="$PWD/.drov/t10c-live-config.json" .venv/bin/python -m pyte
 ```
 
 云入口必须继续使用原独立总账，不能删台账或复制SQLite重置费用/执行事实；普通CI不设置上述E2B变量。
+
+最终独立Python3.14全库检查点 **1002 passed /57 skipped，224.40s**，`.drov/t10c-full314.log`；57为当时收集的云组，后加1项已单独真实通过。Python3.11/3.14最终wheel各SDK/stream两次真实E2B均通过，记录在 `.drov/t10c-final-installed311.log`、314.log，产物在对应同名目录；每次2个模型fixture步骤、sum60/CSV/400×300PNG、确认销毁后新Runtime下载/hash。两套均为仓库外非editable安装，官方SDK真实请求，模型始终是确定性本地夹具。
+
+最终云清单 `.drov/t10c-cloud-final.json`：**活动/暂停实例0、本次Drov实例0、模板public=false**。独立总账125次沙箱寿命预留与2次模板构建预留合计 **4.2625美元**，低于本轮自定5美元保守上限；这不是实付账单，未查询余额/赠金资格，未动用模型费用。固定私有模板留作后续显式调用，实例已收尾。
+
+源码检查点043a66b已推送；首轮核心CI的quality仅在无可选依赖时因mypy无法导入云测试的httpx失败。未把httpx装进核心，改为与其他可选模块一致的缺失导入规则；独立core-only环境（无E2B/httpx）严格mypy130文件实际通过，`.drov/t10c-core-quality-mypy.log`。修正778ff3d已提交/推送，运行SDK源码/模板/锁未变；最终两套CI以该精确head重新核对，不能用043a66b的其他绿色job替代。
+
+
+收尾审查追加：此前resource查询复用了执行能力检查，导致坏控制应答也会阻止销毁已经确认归属的原VM。已拆开执行前能力校验与清理身份核对；原host hash/template/完整metadata/ID仍严格，能力失配时0代码、无暂存/产物，真实销毁后failed_known。新增离线拒绝/清理测试后44项通过；新增真实SDK坏应答测试已通过（只篡改返回对象，没有把真实VM网络放开）。为在原5美元保守总账内重跑9类故障+30个SDK/stream硬终止及该新例，本次回归显式选用已允许的120s provider寿命；execution/control仍20/40s，预算逐次预留12100 micro-USD。默认180s不改，最终wheel安装仍按180s实跑。最终源码/CI会重新核对，不以上一个提交的绿色关闭本卡。

@@ -42,7 +42,11 @@ def configured(config: dict[str, Any], **changes: Any) -> E2BSandbox:
         budget_id="t10c-acceptance-v1",
         max_cost_micro_usd=4_000_000,
         rate_micro_usd_per_second=100,
-        limits=E2BLimits(execution_seconds=20, control_seconds=40),
+        limits=E2BLimits(
+            execution_seconds=20,
+            control_seconds=40,
+            lifetime_seconds=config.get("lifetime_seconds", 180),
+        ),
     )
     return E2BSandbox(**(options | changes))
 

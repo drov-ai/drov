@@ -148,3 +148,52 @@ async def test_actual_remote_faults_never_recreate_or_reexecute(
     finally:
         active = False
         await runtime.aclose()
+
+
+@pytest.mark.asyncio
+async def test_actual_owned_invalid_controls_are_cleaned_without_code(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = configuration()
+    import e2b
+
+    original = e2b.AsyncSandbox.get_info
+    original_program = e2b.AsyncSandbox.create
+    resources = []
+
+    async def creating(*args: Any, **opts: Any) -> Any:
+        value = await original_program(*args, **opts)
+        resources.append(value.sandbox_id)
+        return value
+
+    async def invalid(target: Any, **opts: Any) -> Any:
+        identifier = target if isinstance(target, str) else target.sandbox_id
+        info = await original(identifier, **opts)
+        info.network = {
+            "allow_public_traffic": True
+        }  # Corrupt the reply, never expose the real VM.
+        return info
+
+    monkeypatch.setattr(e2b.AsyncSandbox, "get_info", invalid)
+    monkeypatch.setattr(e2b.AsyncSandbox, "create", creating)
+    directory = Path(config["record_dir"]) / ("invalid-controls-" + uuid4().hex)
+    directory.mkdir(mode=0o700, parents=True)
+    backend = configured(config)
+    reserve(config, directory.name, backend.reservation_micro_usd)
+    agent, _ = definition({"code": CODE, "outputs": ["result.csv"]})
+    async with runtime_for(directory, agent, backend, allow=True) as runtime:
+        outcome = await runtime.run(
+            agent, "invalid provider reply", session_id="s", context=CONTEXT
+        )
+        run = await runtime.storage.get_run(CONTEXT, outcome.run_id)
+        op = run.state.operations[0]
+        assert op.status == "failed_known"
+        async with runtime.storage.transaction() as tx:
+            lease = await LeaseTransaction(tx).get(OWNER, outcome.run_id, op.operation_id)
+        assert lease is not None and lease.destroyed and not lease.active
+        assert (
+            not lease.remote_start_intent and lease.observation is None and lease.stage_id is None
+        )
+        assert len(resources) == 1
+        with pytest.raises(e2b.SandboxNotFoundException):
+            await original(resources[0], **backend._opts())

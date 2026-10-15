@@ -242,3 +242,6 @@ Sandbox SQL extension v1 在显式资源装配时启用；lease 关联完整非�
 凭据仅通过宿主 resolver 按 credential_ref 解析；未实现自动 dotenv，验收脚本显式 `--env-file` 加载单个 E2B_API_KEY，要求 POSIX 当前用户私有文件，不执行 shell 或复制该文件。`.env.local`/`.local.env` 都忽略，Key 不进绑定、审批、模型/代码环境、文件或报告。SDK 控制请求 retries=0；没有自动重新 create/执行代码。当前 region 字段不构成数据驻留证明，报价/保守预留不构成供应商实付账单。
 
 每 operation 新资源，metadata 绑定 execution/owner/config；原 ID/启动 intent 保存在租约。已知 ID 不存在和无应答创建查空是不同事实；后者保留 unknown/名额/锁。SDK 退出、连接断开、pause 或计时推测不能代替清理。共用原 Artifact 暂存→确认销毁→ready/原结果事务，不另建 Agent 循环。E2B 数据库显式 sandbox_schema=2（与v1相同 DDL），旧 SDK open 拒绝；Docker 单独配置仍为v1、旧 JSON 不加远端字段，不改核心 records/user_version。
+
+
+执行前的能力检查与清理身份检查分开：前者严格核对全部VM/网络/期限控制；后者仍严格匹配原配置hash、template、完整metadata和ID，但不因控制配置异常阻止销毁已证实归属的资源。坏配置不会启动代码，也不会发布成功产物。

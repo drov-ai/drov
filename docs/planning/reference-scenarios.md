@@ -295,3 +295,6 @@ T-09 的实际 [interactions_offline.py](../../examples/interactions_offline.py)
 T-09 完整 [operations_offline.py](../../examples/operations_offline.py) 使用独立进程非幂等事项服务：批准/拒绝、审批期间新进程、重复回执、补充输入、成功回包丢失和未知时取消五组。每组 3–4 个独立 SDK 进程，普通/stream 各复跑，服务自身记录实际写次数 1/0；核查按原 operation 查询，确认后不多写，取消组无后续模型。S-03-C 的错误身份/参数/撤权、B-07 的已保存输入/结果/预算与修复环境见对应集成测试。T-10 的真实硬终止矩阵见专项验证，T-16 才评测真实模型选目标与解释。
 
 T-10C 的 S-01-E/S-02-E/S-03-F/X-03 SDK/stream 复用同一 CSV/PNG 数值、审批、清理后授权/hash 断言；实际 E2B 与故障/SDK硬终止证据见 [T-10C](../validation/t10c-e2b.md)。VM/工作负载 profile 与区域声明限制见 ADR-0023/工程第10节，不把这些确定性代码归为真实模型评测。
+
+
+E2B控制应答失配变体：配置检查失败不执行原代码，原资源归属可证时仍清理；归属失配不能控制他人资源。确认销毁后失败结果与没有ready产物分别断言，不把控制失败写成计算成功。

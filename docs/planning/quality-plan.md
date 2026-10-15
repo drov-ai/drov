@@ -175,3 +175,6 @@ T-10 新增 120 项真实 SDK 硬终止、逐语义提交失败/丢应答、SQLi
 T-10B 的真实文件隔离/硬资源、客户端故障、SQLite/磁盘失败及 SDK/stream 硬终止屏障见 [专项验证](../validation/t10b-sandbox-faults.md)；恢复事件与原结果限额按 ADR-0021 保持一致。普通核心 skip 不代替专项，完整备份/维护仍由 T-15 验收。
 
 T-10C 实际验证入口：`tests/test_e2b_contracts.py`（core-only）、`test_e2b.py`（明确的供应商替身，仅证明协议/事务）、显式启用的 `test_e2b_live*.py`（真实远端）。额外检查 E2B-only 扩展v2、旧Docker v1 payload不变、保守预算跨Runtime不退款、强区域要求拒绝和匿名403/宿主token200对照。真实运行/硬终止、失败/修正、账本与安装证据统一见 [本轮验证](../validation/t10c-e2b.md)，远程普通CI不加载本地凭据、不运行云端组。
+
+
+T-10C追加拒绝组：真实创建后受控SDK应答返回坏网络配置，代码start intent/程序/暂存计数均0，仍可按原归属查询并实际销毁，结果failed_known且租约释放；不能为了清理放松template/完整metadata/原ID检查。

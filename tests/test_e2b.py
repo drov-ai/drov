@@ -251,7 +251,7 @@ async def test_actual_provider_controls_are_verified(cloud: Cloud, field: str, w
         setattr(cloud.items[obj.sandbox_id], field, wrong)
         lease = lease.model_copy(update={"remote_id": obj.sandbox_id})
         with pytest.raises(ConfigurationError):
-            await value.resource(lease)
+            value._check_info(cloud.items[obj.sandbox_id], lease)
 
 
 @pytest.mark.asyncio
@@ -317,3 +317,23 @@ async def test_borrowed_backend_remains_open_and_is_exclusive(tmp_path: Path, cl
             with pytest.raises(ConfigurationError, match="another Runtime"):
                 await second.open()
         assert value.is_open and cloud.creates == 0
+
+
+@pytest.mark.asyncio
+async def test_invalid_controls_refuse_execution_but_allow_owned_cleanup(
+    tmp_path: Path, cloud: Cloud, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original = cloud.create
+
+    async def invalid(*args: Any, **opts: Any) -> Any:
+        result = await original(*args, **opts)
+        cloud.items[result.sandbox_id].network = {"allow_public_traffic": True}
+        return result
+
+    monkeypatch.setattr(sdk.AsyncSandbox, "create", invalid)
+    agent, _ = definition()
+    async with runtime_for(tmp_path, agent, backend(), allow=True) as runtime:
+        outcome = await runtime.run(agent, "invalid controls", session_id="s", context=CONTEXT)
+        run = await runtime.storage.get_run(CONTEXT, outcome.run_id)
+        assert run.state.operations[0].status == "failed_known"
+    assert cloud.creates == cloud.kills == 1 and cloud.runs == 0 and not cloud.items

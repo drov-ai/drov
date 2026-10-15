@@ -429,3 +429,6 @@ T-13 的 HTTP 同一入口扩展：POST /v1/runs 新增可选 artifact_ids，仅
 显式 allow 只授权已配置的代码工具；业务写入仍单独审批。代码生成/消费结果沿现有 ModelAdapter，没有自动代写/修复/执行循环。SandboxLimits/Result 已加入生成 schema；HTTP 等未实现符号不提前增加；E2BLimits 已加入生成 schema。
 
 当前输出集合的 basename 也须唯一；PNG 验证接受有界非交错静态 profile，限制/代价见工程第 9 节与 ADR-0020。核查中的沙箱人工 response 不替代资源/结果事实；使用 recover 查询/销毁并恢复原可靠暂存，verify 仅只读。
+
+
+E2B的执行能力校验与清理身份核对分别处理；坏控制配置不执行代码，但归属可证的原资源仍可销毁。该修正不增加工具参数、调用次数或可下载成功产物。

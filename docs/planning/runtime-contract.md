@@ -340,3 +340,6 @@ E2B 的模板/构建、凭据引用、数据上传许可、网络/公开访问�
 
 
 T-10C 落地补充（ADR-0023）：同一 SandboxBackend 接入上述权限、执行键、原阶段暂存/销毁/发布和恢复。E2B create/start intent 与原 ID 分开持久化；丢创建应答按完整 metadata 有界查询原资源，查空仍 unknown，已知 ID 的404才可用于确认不存在。无原观察/可靠导出则失败，不重新执行。独立费用完整寿命预留与派发 intent 同事务，已销毁不退款；同 SQLite/budget_id 累计，跨库/模板由宿主另控总账。区域只记录项目声明，要求强区域证明前置拒绝。E2B 显式 sandbox_schema=2，旧 SDK 启动拒绝；未选云的 Docker v1 payload 不增加远端字段。实际数值仅见工程第10节，已跑/未跑证据只见本轮验证与progress。
+
+
+T-10C清理修正：执行前能力检查保持严格；查询/销毁只在原host配置hash、template、完整metadata和原ID匹配时操作。供应商控制配置失配须拒绝代码，但原资源归属可证时仍执行清理；确认销毁且无原输出为failed_known，归属不明或清理不明继续unknown并持有租约。

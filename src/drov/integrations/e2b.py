@@ -263,11 +263,15 @@ class E2BSandbox(SandboxBackend):
             "drov_config": lease.backend_hash,
         }
 
-    def _check_info(self, info: Any, lease: SandboxLease) -> None:
+    def _check_info(self, info: Any, lease: SandboxLease, *, controls: bool = True) -> None:
         require(
             info.metadata == self._metadata(lease) and info.template_id == self._template,
             "Original E2B resource ownership differs",
         )
+        if lease.remote_id is not None:
+            require(info.sandbox_id == lease.remote_id, "Original E2B resource ID differs")
+        if not controls:
+            return  # Cleanup authenticates ownership, even when execution controls are invalid.
         require(
             info.cpu_count == 2
             and info.memory_mb == 2048
@@ -281,8 +285,6 @@ class E2BSandbox(SandboxBackend):
             (info.end_at - info.started_at).total_seconds() <= self._limits.lifetime_seconds + 1,
             "E2B resource lifetime exceeds its reservation",
         )
-        if lease.remote_id is not None:
-            require(info.sandbox_id == lease.remote_id, "Original E2B resource ID differs")
 
     async def resource(self, lease: SandboxLease) -> dict[str, Any] | None:
         self._require_loop()
@@ -294,7 +296,7 @@ class E2BSandbox(SandboxBackend):
                 return None
             except Exception:
                 raise ConfigurationError("Original E2B query is unavailable") from None
-            self._check_info(info, lease)
+            self._check_info(info, lease, controls=False)
             return {"id": info.sandbox_id}
         paginator = self._sdk.AsyncSandbox.list(
             query=self._sdk.SandboxQuery(metadata=metadata), limit=100, **self._opts()
@@ -313,7 +315,7 @@ class E2BSandbox(SandboxBackend):
         info = await self._call(
             self._sdk.AsyncSandbox.get_info(found[0].sandbox_id, **self._opts())
         )
-        self._check_info(info, lease)
+        self._check_info(info, lease, controls=False)
         return {"id": info.sandbox_id}
 
     async def destroy(self, lease: SandboxLease, fact: FactWriter) -> SandboxLease:
