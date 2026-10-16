@@ -1,0 +1,113 @@
+{
+  "reviewer": "Maintainer-side Codex inspection of saved synthetic observations; no independent participant or competitive/LLM-as-judge claim. No provider or tool rerun.",
+  "failures": [
+    {
+      "batch_directory": "t16-memory-clarified-smoke",
+      "trial": "S01-09-1",
+      "raw_trial_sha256": "9242c484369f03dddb6b5491df124cd6811808fa1dab02e38374e817834dcb57",
+      "disposition": "keep_failed",
+      "review": "Correct actual CSV 60.0/PNG/generated code/post-close bytes; original int(text) oracle ValueError. Keep original failed result; corrected diagnostic separate."
+    },
+    {
+      "batch_directory": "t16-numeric-formal",
+      "trial": "S01-01-3",
+      "raw_trial_sha256": "5423b8161ee2142e749b64d19b8d57d97f4a173523cadacc2f53bdcdd2f56023",
+      "disposition": "keep_failed",
+      "review": "Search succeeded; second response exactly2048 output tokens, incomplete and no final schema."
+    },
+    {
+      "batch_directory": "t16-numeric-formal",
+      "trial": "S01-09-3",
+      "raw_trial_sha256": "3d5f71bce32baf1f3c31d98e131687b8bc856b23dd0f3d1b70a5f46f44bce51b",
+      "disposition": "keep_failed",
+      "review": "First response exactly2048 output tokens, incomplete; no complete code plan dispatched."
+    },
+    {
+      "batch_directory": "t16-numeric-formal",
+      "trial": "S02-04-1",
+      "raw_trial_sha256": "b3dfb3e4cf804ba55f7dd00d01dbf2d813482f6d032a4b7f9e567307db947fe4",
+      "disposition": "keep_failed",
+      "review": "Save prelookup+CAS+answer used3 requests; first two foreign reads2 each; last foreign response required ninth, locally refused. Actual saved mutation and no observed scope leak; task incomplete, not pass."
+    },
+    {
+      "batch_directory": "t16-cas-smoke",
+      "trial": "S01-01-1",
+      "raw_trial_sha256": "95c6f531d64af29846da2342babd18bcb8de26459b8be820e344d2efae259cc1",
+      "disposition": "keep_failed",
+      "review": "All concrete fields and real search correct; status insufficient differs from preregistered sufficient. No protocol/limit failure. Possible sufficiency-scope ambiguity is a hypothesis, not a scoring change."
+    }
+  ],
+  "formal_successes": [
+    {
+      "scenario": "S-01",
+      "trial": "S01-01-1",
+      "raw_trial_sha256": "c9c998e910f040e25e9083910e86959d5da660e8f7350b85a49bc76b4b24957f",
+      "review": "One actual search, exact cache-a/cache-b facts, full_text_read true and both actual source IDs."
+    },
+    {
+      "scenario": "S-01",
+      "trial": "S01-06-1",
+      "raw_trial_sha256": "699ff717e44fa96694280778fba6c6e780bafea42a562d23a970f4f4ef9fd228",
+      "review": "One actual search; cache-b-v1/v2 conflict retained, b_shared null, three actual source IDs."
+    },
+    {
+      "scenario": "S-01",
+      "trial": "S01-09-1",
+      "raw_trial_sha256": "5e66c237b4c0442a067b0a7add089db743d43159abee3c9e98d7b19829615f10",
+      "review": "Original model-generated code read granted CSV. Correct summary3/60/20, inspected400x300 bar chart12/18/30, actual post-close download/hash/other-scope refusal and two delivered references."
+    },
+    {
+      "scenario": "S-02",
+      "trial": "S02-01-1",
+      "raw_trial_sha256": "6de55975ccea5cb148fb605978702c55200697b66c4099aec3311b8b4080b2da",
+      "review": "Different save/read processes; one remember mutation, stored concise Chinese v1, reader used exactly that content/version."
+    },
+    {
+      "scenario": "S-02",
+      "trial": "S02-02-1",
+      "raw_trial_sha256": "05adde94bf14ab76ff630cccb78677677320cc8240f84fb5e8fe318b8cc8eb8c",
+      "review": "Seedv1, explicit remember update and single mutation to detailed Chinese v2, different reader process got v2 unchanged."
+    },
+    {
+      "scenario": "S-02",
+      "trial": "S02-03-1",
+      "raw_trial_sha256": "48247061ab8566ca379ab49ceea7838f3fc5bdc0ffa8753a361d10b69350b659",
+      "review": "Actual forget mutation produced tombstonev2 with no content; separate reader recalled tombstone and answered absent/null. No claim that all history was erased."
+    }
+  ],
+  "smoke_actions": [
+    {
+      "trial": "S03-01-1",
+      "suite": "smoke, not formal",
+      "writes": 1,
+      "preapproval_counts": [
+        0
+      ],
+      "output": {
+        "status": "applied",
+        "item_id": "item-01"
+      },
+      "not_counted_as_formal_success_sample": true
+    },
+    {
+      "trial": "S03-02-1",
+      "suite": "smoke, not formal",
+      "writes": 0,
+      "preapproval_counts": [
+        0,
+        0
+      ],
+      "output": {
+        "status": "denied",
+        "item_id": "item-01"
+      },
+      "not_counted_as_formal_success_sample": true
+    }
+  ],
+  "formal_success_sampling_complete": false,
+  "missing": "No S-03 formal trial was reached; cannot claim 3 formal successes per every scenario or complete 81-trial quality.",
+  "supplementary_mutation_claim_audit": {
+    "violations": [],
+    "scope": "All completed phases in this follow-up; actual operation and mutation event required for successful save/update/forget claims."
+  }
+}

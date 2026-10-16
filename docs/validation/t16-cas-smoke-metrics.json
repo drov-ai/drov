@@ -1,0 +1,69 @@
+{
+  "scope": "Saved observations only; no provider, tool or sandbox execution. Timing includes host buffering; not time-to-first-token.",
+  "batch_hash": "ff90c04695522c11f7c770b71f3dc89c51280e7c560f8c2e86577677cf524dd9",
+  "suite": "smoke",
+  "trial_latency": {
+    "count": 1,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 19.317254833877087,
+    "p95_seconds": 19.317254833877087,
+    "total_seconds": 19.317254833877087
+  },
+  "model_request_latency": {
+    "count": 2,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 4.017927332781255,
+    "p95_seconds": 14.71015008399263,
+    "total_seconds": 18.728077416773885
+  },
+  "paid_requests": 2,
+  "normalized_model_invocations": 2,
+  "observed_model_retries": 0,
+  "observed_external_tool_retries": 0,
+  "ordinary_tool_dispatched_events": 1,
+  "recorded_operations_including_builtin_memory_and_sandbox": 1,
+  "operation_statuses": {
+    "succeeded": 1
+  },
+  "usage": {
+    "input_tokens": 1764,
+    "output_tokens": 1485,
+    "total_tokens": 3249,
+    "cached_input_tokens": 1536
+  },
+  "cost_upper_cny": "0.0426078",
+  "all_history_accounting": {
+    "attempts": 183,
+    "status_counts": {
+      "settled": 183
+    },
+    "cost_upper_cny": "1.80000140",
+    "ceiling_cny": "13",
+    "usable_cny": "11",
+    "stopped": null
+  },
+  "not_provider_bill_or_balance": true,
+  "failed_trials": [
+    {
+      "trial": "S01-01-1",
+      "score": {
+        "passed": false,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": false,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    }
+  ],
+  "model_generated_code": [],
+  "raw_report_sha256": "7b8e46aa5d19564769b47407e3c9801f5a04f3a810a0baaedc1241e62d74c8c2"
+}

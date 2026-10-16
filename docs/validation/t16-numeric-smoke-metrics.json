@@ -19,8 +19,6 @@
   "paid_requests": 22,
   "normalized_model_invocations": 22,
   "observed_model_retries": 0,
-  "observed_tool_retries": 0,
-  "observed_tool_dispatches": 4,
   "usage": {
     "input_tokens": 26718,
     "output_tokens": 7244,
@@ -59,5 +57,12 @@
       }
     }
   ],
-  "raw_report_sha256": "559df0cfe7330d29a37943c7b56e425afb471fbf944dd97470b6f6036e0ced54"
+  "raw_report_sha256": "559df0cfe7330d29a37943c7b56e425afb471fbf944dd97470b6f6036e0ced54",
+  "ordinary_tool_dispatched_events": 4,
+  "observed_external_tool_retries": 0,
+  "recorded_operations_including_builtin_memory_and_sandbox": 11,
+  "operation_statuses": {
+    "succeeded": 9,
+    "not_executed": 2
+  }
 }

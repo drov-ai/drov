@@ -69,3 +69,27 @@ Python3.11含Docker最终定向90项通过（20.09s）。受影响sdist重新构
 这是见过v6失败后的联合策略/参数接续，不是盲测或单变量效果证明；旧37项和所有历史失败/费用不替换。先提交/新指纹登记，再显式reviewed_trial_limit复核后新目录完整7+81；SDK默认2048和公共语义不改。
 
 v7最终源码的三入口离线各27/27、schema25/25、代码3/3、零安全失败，见[摘要](t16-cas-final-offline.json)。两个解释器含真实Docker定向各92通过（3.11 21.87s / 3.14 23.46s），含4000输出的实际官方客户端loopback结算和错额度零HTTP/零预留负向例。286文件ruff静态/格式、mypy192源、93份Markdown/846本地链接/16片段AST通过，保护文件/可识别凭据模式均0。
+
+## v7 smoke首项状态判定失败，停止新增付费
+
+源码 `987fe4700eaf92db4e70eecd78332831faf53782` 已推送main；[事前登记](t16-preregistration-cas.json)随后提交/推送，指纹ff90c04695522c11f7c770b71f3dc89c51280e7c560f8c2e86577677cf524dd9。原181次全部settled后，以reviewed_trial_limit=True显式新登记，旧v6 trial和费用/上限保留。
+
+新目录`.drov/t16-cas-smoke`首项S01-01实际检索1次、模型2请求，Run completed/schema有效；来源与三项布尔事实/full_text_read正确，但status=insufficient，原期望sufficient，按原规则0/1失败并停止，见[原报告](t16-cas-smoke.json)/[计量](t16-cas-smoke-metrics.json)。没有达到4096、没有请求上限或协议失败，也没有安全失败。其余6 smoke/本配置81正式均未执行，**新CAS策略的真实Memory路径尚未验收**；不能用v6先前的7/7代替v7前置。
+
+离线复核发现需要独立厘清的可能歧义：题目问A/B跨进程及重启保留，合成资料明确A进程重启丢失与B为独立共享服务，但没有明确B自身重启后的持久性；schema仅含a_survives_restart，未定义status充分性是否只覆盖具名字段。当前仅能确认状态不符合预注册期望，不能据此断言模型正确、oracle错误或供应商内部原因。不在本轮改资料/期望/状态评分来“修成通过”，也不重抽原smoke。下一步先对照质量计划离线确定状态定义与任务边界，有确切契约缺项才记录新登记。
+
+至此本轮新增139次付费请求、历史累计**183次全部settled、峰值费用上界1.80000140元**；本轮增量1.55417040元。可用11元估算余量9.19999860元，另保留2元；不是供应商账单/余额，无需充值。当前账本无stopped/pending/unknown，停止原因是smoke评分失败；允许结算不等于允许重复抽样。[完整会计快照](t16-followup-accounting.json)保留各请求价格/用量/登记审核。没有新增E2B/其他服务调用、公开发布或部署。
+
+正式v6的37个观察样本任务耗时p50/p95与用量见计量JSON（nearest rank）；它不是完整81项分布或最终质量分数。每次真实模型/外部工具重试均为0，重复新工具计划不称重试。汇总里ordinary_tool_dispatched_events只计普通工具事件，另列包含内置Memory/沙箱的完整操作库存，避免把内置事务未发普通派发事件误写为没有执行。
+
+最终源码受影响sdist已重建并逐字核对evals及新增测试，排除私有环境/数据/品牌，SHA256=0b72b16e027d3cec0d6ec5717a3bb2add1f7f915b4dce49739ffbba801afc14a（构建时文档快照）。SDK源码、依赖锁、SQL、品牌与Moby保护文件未改；不重复声称本轮新做了未变化wheel安装全矩阵。最终只读清点dev.drov.execution容器0，原非Drov容器/SQLite/bytes/租约/云台账保留。
+
+## 收尾检查与边界
+
+最终源码987fe47的[Docker38930298815](https://github.com/drov-ai/drov/actions/runs/38930298815)四jobs全部success；[核心38930298760](https://github.com/drov-ai/drov/actions/runs/38930298760)收尾检查时7/11 jobs成功、macOS/Windows四jobs仍运行，不能报完整平台通过。中间fc42ea7的核心38928474126最终11/11 success、Docker38928474041四jobs success；不替代987fe47。本轮临时codex/t16-evaluation分支在自身CI结束后已删除，源码在main历史保留；未创建PR。[状态快照](t16-followup-ci.json)保留准确SHA/job状态。
+
+本轮五个新失败全部逐项复核，S01/S02各3正式成功复核，另核对smoke独立事项1/0写入；[复核清单](t16-followup-review.json)明确S03正式抽查缺失。所有已完成阶段的保存/更新/删除自述额外检查实际操作与mutation事件，无无据成功；不将“未观察到”写成完整安全证明。
+
+最终文档检查93份Markdown/856本地链接/16说明片段AST通过，diff空白检查与凭据/保护文件检查通过。复用旧检查脚本时，其固定输出路径覆盖了忽略目录中的旧t16-final-doc-check.json本地摘要；旧已提交验证文档未改，旧摘要原字节未恢复，不伪造为历史原收据。现已另存独立t16-followup-doc-check.py/json，避免继续覆盖，后续精确计数以新输出为准。
+
+**本轮只验收实现/离线/失败诊断及部分真实评测子范围，T-16整卡未验收。** 下一项与恢复、具体资源和New Chat建议只维护在progress；不进入T-17。

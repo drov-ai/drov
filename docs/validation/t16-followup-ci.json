@@ -1,0 +1,154 @@
+{
+  "previous_numeric_core": {
+    "conclusion": "success",
+    "headSha": "fc42ea702e69e5229a736777af6f45457e4a662c",
+    "jobs": [
+      {
+        "conclusion": "success",
+        "name": "workbench",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "python-next",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (macos-latest, 3.14)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "quality",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (macos-latest, 3.11)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (ubuntu-latest, 3.11)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (ubuntu-latest, 3.13)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (ubuntu-latest, 3.14)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (windows-latest, 3.14)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (ubuntu-latest, 3.12)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (windows-latest, 3.11)",
+        "status": "completed"
+      }
+    ],
+    "status": "completed"
+  },
+  "final_core": {
+    "conclusion": "",
+    "headSha": "987fe4700eaf92db4e70eecd78332831faf53782",
+    "jobs": [
+      {
+        "conclusion": "success",
+        "name": "python-next",
+        "status": "completed"
+      },
+      {
+        "conclusion": "",
+        "name": "package (macos-latest, 3.11)",
+        "status": "in_progress"
+      },
+      {
+        "conclusion": "success",
+        "name": "workbench",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (ubuntu-latest, 3.12)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (ubuntu-latest, 3.13)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "",
+        "name": "package (windows-latest, 3.14)",
+        "status": "in_progress"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (ubuntu-latest, 3.14)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "",
+        "name": "package (windows-latest, 3.11)",
+        "status": "in_progress"
+      },
+      {
+        "conclusion": "success",
+        "name": "quality",
+        "status": "completed"
+      },
+      {
+        "conclusion": "",
+        "name": "package (macos-latest, 3.14)",
+        "status": "in_progress"
+      },
+      {
+        "conclusion": "success",
+        "name": "package (ubuntu-latest, 3.11)",
+        "status": "completed"
+      }
+    ],
+    "status": "in_progress"
+  },
+  "final_docker": {
+    "conclusion": "success",
+    "headSha": "987fe4700eaf92db4e70eecd78332831faf53782",
+    "jobs": [
+      {
+        "conclusion": "success",
+        "name": "sandbox (3.11)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "sandbox (3.14)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "sandbox (3.12)",
+        "status": "completed"
+      },
+      {
+        "conclusion": "success",
+        "name": "sandbox (3.13)",
+        "status": "completed"
+      }
+    ],
+    "status": "completed"
+  },
+  "scope": "Read-only CI snapshots at follow-up closeout; final_core was still running, never substitute another SHA. Temporary codex/t16-evaluation branch removed after its own checks completed; commits remain on main."
+}

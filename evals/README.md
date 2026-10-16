@@ -35,4 +35,4 @@ CSV数值评分使用精确有限Decimal等值，合法整数/小数/科学记�
 协议诊断与费用独立：评测宿主有界缓冲同一SSE应答（2MiB），只保留终端数字usage/id/model，原字节仍由官方SDK严格校验。提前协议拒绝也可以结算完整收据，始终不接受该计划；没有完整收据仍停止。该模式的耗时包括缓冲，不可用来宣称首字/实时流延迟。原始推理不会进入error诊断或提交的汇总。
 
 
-跨阶段累计达到单任务8次请求上限会持久记录trial_model_limit，和预算不足/缺用量不同。默认amend仍拒绝所有stopped。只有离线复核完成、全部旧费用已settled、明确新指纹与原因，宿主才能显式使用Ledger.amend(..., reviewed_trial_limit=True)登记新批次并在审计中保留reviewed_stop；原attempt/单任务计数/费用/13与11元上限不变，不允许继续原试验。budget_exhausted、其他停止原因或任一pending/unknown不能通过该参数恢复。当前本地账本保持trial_model_limit，执行器不会自动恢复。
+跨阶段累计达到单任务8次请求上限会持久记录trial_model_limit，和预算不足/缺用量不同。默认amend仍拒绝所有stopped。只有离线复核完成、全部旧费用已settled、明确新指纹与原因，宿主才能显式使用Ledger.amend(..., reviewed_trial_limit=True)登记新批次并在审计中保留reviewed_stop；原attempt/单任务计数/费用/13与11元上限不变，不允许继续原试验。budget_exhausted、其他停止原因或任一pending/unknown不能通过该参数恢复。实际停止状态只见progress，执行器不会自动恢复。
