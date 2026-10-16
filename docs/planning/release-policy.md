@@ -38,7 +38,7 @@ view_content 覆盖 SDK 结果、HTTP 快照、持久化事件、临时 token、
 
 ## 3. 版本与兼容
 
-T-10A 第二批的实际增量见 ADR-0018：core records/user_version=1 不改，显式 ArtifactStore 配对启用 artifact_schema=1 与两张扩展表；新版读旧库，旧 SDK 会拒绝扩展库，不能混用或仅复制 SQLite/字节之一。Artifact 来源枚举进入 ContextManifest v2，无文件仍 v1，新版兼容 v1/v2，未知版本/boolean 拒绝。完整扩展/字节/台账备份与回收仍待 T-15，不从单个输入重开测试推断完整备份安全。
+T-10A 第二批的实际增量见 ADR-0018：core records/user_version=1 不改，显式 ArtifactStore 配对启用 artifact_schema=1 与两张扩展表；新版读旧库，旧 SDK 会拒绝扩展库，不能混用或仅复制 SQLite/字节之一。Artifact 来源枚举进入 ContextManifest v2，无文件仍 v1，新版兼容 v1/v2，未知版本/boolean 拒绝。该批单输入重开不等于完整备份验收；后续T-15成对备份/台账回收的实际边界见ADR-0028/0030及本页末尾。
 
 ADR-0020 增加显式 sandbox_schema=1 / sandbox_leases 表及 active 索引，仅装配沙箱资源时启用；records DDL/user_version/record schema=1 不改。新 SDK 可读旧普通库；旧 SDK 拒绝未知扩展，禁止降级写入扩展库。Run 无沙箱时不写 sandbox_bindings，旧接收摘要保持；沙箱 Run 固定非秘密 backend hash/config 与 ArtifactStore，恢复需原配置。lease 与原阶段/观察/销毁证据必须随数据库和私有字节共同保留。T-10B 扩展真实硬终止验证，T-15 实施完整维护/迁移/barrier，不由当前恢复夹具推断物理断电安全。
 
