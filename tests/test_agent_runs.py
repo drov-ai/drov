@@ -543,8 +543,12 @@ async def test_explicit_cancel_is_durable_and_terminal_cancel_idempotent() -> No
 
 
 @pytest.mark.asyncio
-async def test_cancelled_actual_thread_retains_slot_and_sqlite_lock(tmp_path: Path) -> None:
+@pytest.mark.parametrize("delayed_notification", [False, True])
+async def test_cancelled_actual_thread_retains_slot_and_sqlite_lock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, delayed_notification: bool
+) -> None:
     entered, release = asyncio.Event(), threading.Event()
+    delivered = asyncio.Event()
     loop = asyncio.get_running_loop()
 
     @tool(name="search", effect="read")
@@ -563,6 +567,18 @@ async def test_cancelled_actual_thread_retains_slot_and_sqlite_lock(tmp_path: Pa
     try:
         ref = await runtime.start(agent, "one", session_id="one", context=ALICE)
         await asyncio.wait_for(entered.wait(), 1)
+        if delayed_notification:
+            work = runtime._runs.works[ref.run_id]
+            original = work._call_done
+
+            def notify_later(call: Any) -> None:
+                def deliver() -> None:
+                    original(call)
+                    delivered.set()
+
+                loop.call_later(1.1, deliver)
+
+            monkeypatch.setattr(work, "_call_done", notify_later)
         await runtime.cancel(ref.run_id, context=ALICE)
         assert (await runtime.wait(ref.run_id, context=ALICE)).status == "cancelled"
         with pytest.raises(ShutdownIncomplete):
@@ -572,10 +588,9 @@ async def test_cancelled_actual_thread_retains_slot_and_sqlite_lock(tmp_path: Pa
             await SQLiteStorage(path).open()
     finally:
         release.set()
-        while runtime.active_slots:
-            runtime._changed.clear()
-            await asyncio.wait_for(runtime._changed.wait(), 1)
         await close_released_runtime(runtime)
+    if delayed_notification:
+        assert delivered.is_set()
     async with SQLiteStorage(path) as storage:
         record = await storage.get_run(ALICE, ref.run_id)
         assert record.state.status == "cancelled"
@@ -844,9 +859,6 @@ async def test_noncooperative_model_keeps_slot_after_timeout_until_actual_stop()
             await runtime.aclose()
     finally:
         model.release.set()
-        while runtime.active_slots:
-            runtime._changed.clear()
-            await asyncio.wait_for(runtime._changed.wait(), 1)
         await close_released_runtime(runtime)
 
 
