@@ -45,11 +45,15 @@ class RecordedModel:
         batch_hash: str = "",
         trial: str = "",
         wire_receipt: WireReceipt | None = None,
+        max_output_tokens: int = 2048,
     ) -> None:
         self.source, self.directory, self.ledger = source, directory, ledger
         self.batch_hash, self.trial = batch_hash, trial
         self.calls: list[ModelRequest] = []
         self.wire_receipt = wire_receipt
+        if type(max_output_tokens) is not int or max_output_tokens <= 0:
+            raise ValueError("Expected positive output reservation")
+        self.max_output_tokens = max_output_tokens
 
     @property
     def capabilities(self) -> ModelCapabilities:
@@ -73,12 +77,14 @@ class RecordedModel:
         identifier = None
         if self.ledger is not None:
             body = self.source._body(request)  # type: ignore[attr-defined]
+            if body.get("max_output_tokens") != self.max_output_tokens:
+                raise ValueError("Provider output allowance differs from cost reservation")
             identifier = self.ledger.reserve(
                 batch_hash=self.batch_hash,
                 trial=self.trial,
                 request_hash=hashlib.sha256(request_json.encode()).hexdigest(),
                 input_bytes=len(canonical_json(body).encode()) + 1024,
-                max_output_tokens=2048,
+                max_output_tokens=self.max_output_tokens,
             )
         started = time.monotonic()
         started_at = datetime.now(UTC).isoformat()

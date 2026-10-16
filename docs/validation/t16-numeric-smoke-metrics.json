@@ -1,0 +1,63 @@
+{
+  "scope": "Saved observations only; no provider, tool or sandbox execution. Timing includes host buffering; not time-to-first-token.",
+  "batch_hash": "c888d19fbbc94e00b1494720324fbe5628e97406c7d6062285c39495a98b865a",
+  "suite": "smoke",
+  "trial_latency": {
+    "count": 7,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 16.77901495900005,
+    "p95_seconds": 22.305868334136903,
+    "total_seconds": 100.09263416798785
+  },
+  "model_request_latency": {
+    "count": 22,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 2.435400791000575,
+    "p95_seconds": 11.976407083682716,
+    "total_seconds": 92.84353857999668
+  },
+  "paid_requests": 22,
+  "normalized_model_invocations": 22,
+  "observed_model_retries": 0,
+  "observed_tool_retries": 0,
+  "observed_tool_dispatches": 4,
+  "usage": {
+    "input_tokens": 26718,
+    "output_tokens": 7244,
+    "total_tokens": 33962,
+    "cached_input_tokens": 22272
+  },
+  "cost_upper_cny": "0.2422836",
+  "all_history_accounting": {
+    "attempts": 88,
+    "status_counts": {
+      "settled": 88
+    },
+    "cost_upper_cny": "0.71136980",
+    "ceiling_cny": "13",
+    "usable_cny": "11",
+    "stopped": null
+  },
+  "not_provider_bill_or_balance": true,
+  "failed_trials": [],
+  "model_generated_code": [
+    {
+      "trial": "S01-09-1",
+      "phase": "run",
+      "response": "model-01.response.json",
+      "call_id": "call_00_yRdYO4sYWhUiHDHZlNmb9806",
+      "code_sha256": "d4175bb5bd7f0afc3e1054424f35a81c235aa77505041b6e18366b2930d6677c",
+      "arguments": {
+        "code": "import csv, os\nfrom collections import Counter\nimport matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\n\ninput_dir = '/work/inputs/art_86668181185444b39907704a0721a469'\nout_dir = '/work/outputs'\nos.makedirs(out_dir, exist_ok=True)\n\nwith open(os.path.join(input_dir, 'numbers.csv'), newline='') as f:\n    rows = list(csv.DictReader(f))\n\n# If DictReader returns no fieldnames or 'value' not present, fallback to positional/headerless\nvalues = []\nif rows and 'value' in rows[0]:\n    for r in rows:\n        values.append(float(r['value']))\nelse:\n    # fallback: assume no header or single column\n    with open(os.path.join(input_dir, 'numbers.csv'), newline='') as f:\n        reader = csv.reader(f)\n        raw = list(reader)\n    header = raw[0] if raw else []\n    if header and header[0].strip().lower() == 'value':\n        data = raw[1:]\n    else:\n        data = raw\n    for r in data:\n        if r:\n            values.append(float(r[0]))\n\ncount = len(values)\ntotal = sum(values)\nmean = total/count if count else 0.0\n\nwith open(os.path.join(out_dir, 'summary.csv'), 'w', newline='') as f:\n    w = csv.writer(f)\n    w.writerow(['count', 'sum', 'mean'])\n    w.writerow([count, total, mean])\n\n# Bar chart of actual value(s)\nfig, ax = plt.subplots(figsize=(4, 3), dpi=100)\nlabels = [f'v{i+1}' for i in range(count)]\nax.bar(labels, values)\nax.set_xlabel('value')\nax.set_ylabel('value')\nax.set_title('Actual value bar chart')\nfig.tight_layout()\nfig.savefig(os.path.join(out_dir, 'chart.png'), format='png')\nplt.close(fig)\n\nprint({'count': count, 'sum': total, 'mean': mean, 'values': values})\n",
+        "inputs": [
+          "art_86668181185444b39907704a0721a469"
+        ],
+        "outputs": [
+          "summary.csv",
+          "chart.png"
+        ]
+      }
+    }
+  ],
+  "raw_report_sha256": "559df0cfe7330d29a37943c7b56e425afb471fbf944dd97470b6f6036e0ced54"
+}

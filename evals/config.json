@@ -1,6 +1,6 @@
 {
-  "version": 6,
-  "amendment": "Correct CSV numerical oracle after v5 smoke produced correct sum 60.0 rejected by int(text). Exact finite Decimal equality for count/sum/mean and proposal total, no rounding or tolerance. Same model, prompts, corpus, expected numerical facts, thresholds and limits; original 6/7 report retained. New complete smoke and formal batch, adaptive follow-up.",
+  "version": 7,
+  "amendment": "Evidence-based follow-up to incomplete v6 formal 34/37: use optimistic CAS version 0 for explicitly requested new memory before any version lookup, query after actual conflict; raise reasoning-inclusive output allowance from 2048 to 4096 after two exhausted-output failures. Provider/model/high, corpus, numerical oracle, thresholds and 8-request/16-tool trial limits unchanged. Preserve all old samples and costs; new complete smoke and formal, adaptive not blind.",
   "provider": "DeepSeek official",
   "endpoint": "https://api.deepseek.com",
   "model": "deepseek-v4-pro",
@@ -8,7 +8,7 @@
   "protocol": "drov.deepseek.responses.v1",
   "streaming": true,
   "reasoning_effort": "high",
-  "max_output_tokens": 2048,
+  "max_output_tokens": 4096,
   "context_window": 1000000,
   "model_retries": 0,
   "read_tool_retries": 0,

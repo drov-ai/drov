@@ -1,10 +1,10 @@
 # 当前进度与下一轮
 
-更新：2026-10-16（Asia/Shanghai；T-16 接续数值评分器修复后重新评测，尚未整卡验收）。
+更新：2026-10-17（Asia/Shanghai；T-16 v6正式34/37触及单任务上限；v7乐观CAS/4096候选准备，尚未整卡验收）。
 
 ## 当前状态
 
-- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-16已交付固定任务/执行器/DeepSeek适配与失败诊断子范围，真实smoke未通过，整卡保持进行中。** T-15最终源码49ac27481f926f4fc8fa48c68f445a4d30d23415的核心11/Docker4 jobs全部success已复核，无前项缺口。T-16的SDK源码1297c4808b6e0910b4a5ea89ff8c57e3b263b5fa核心11/Docker4 jobs全部success；随后仅评测控制修复与配置/文档变化，相关两解释器回归已通过。评测控制最终d07446d的核心38926025096/Docker38926025085仍排队/运行，尚未全平台验收；最终检查点及本地证据见[本轮记录](../validation/t16-evaluation.md)；实际HEAD/同步状态以Git为准。
+- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-16 v6完整真实smoke7/7，但正式34/37后单任务请求限额停止，尚未整卡验收，不进入T-17。** 2个2048输出未完成、1个隔离保存先查版本多用请求；原报告/失败/费用保留。v7仅增加无已知版本新记忆先CAS的操作策略及4096输出，绑定上下文/费用预留，门槛/8请求上限不变，离线验证后重新登记完整7+81。证据见[接续验证](../validation/t16-followup.md)。原d07446d核心11/Docker4最终success（Docker同SHA一次失败job复跑）；fc42ea7 Docker4全success、核心仍运行，实际CI状态以最终记录为准。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；实验性工作台已完整验收；T-15的SQLiteMaintenance/CLI、逻辑清理/墓碑、显式字节回收/中断台账、data_abandoned、一致备份/恢复屏障、实际历史v1字段迁移与授权导出均已验收。未验收：T-16至T-18；多 Agent/Skill/持久工作区等后续，无空壳。
@@ -19,11 +19,11 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 ## 当前交付：T-16 实施中
 
-按[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)实现[27项manifest](../../evals/manifest.json)、[固定配置](../../evals/config.json)、真实Runtime/新进程Memory/独立事项服务/Docker事实评分执行器、持久总费用账本及DeepSeek专用Responses方言。两种Responses的Memory重开客户端组合缺口已复现并修复；Pro实际返回完整明文加额外opaque字符串，续接使用完整明文并移除额外字段，原OpenAI加密规则不变。最终三入口离线均27/27、schema25/25、代码3/3、零安全失败；它们是脚本替身结构验证，不是模型质量。
+27项manifest、SDK/stream/HTTP真实Runtime/独立进程/事项服务/Docker执行器、累计费用账本及DeepSeek独立Responses方言已交付。旧Flash/Pro失败/协议修复/44次费用全部保留，见[原验证](../validation/t16-evaluation.md)。新一轮离线审计没有发现Memory精确键空结果丢失，v5澄清读取策略后S02-04四进程8请求实际通过；原完整smoke6/7因合法CSV `60.0`被int解析误拒绝，未重算。
 
-真实失败按登记独立保留：Flash v1为0/1，v2一次提示澄清后3/4（S02-04无工具却自述保存）；Pro前三个检查点首项协议拒绝，明文兼容Pro/low在S01-01连续8次检索后limit_exceeded、0/1；最后Pro/high已3/4通过，S02-04保存成功但foreign读取累计8次模型请求后第9次预留本地拒绝，other-agent无最终回答，整项失败。没有完整7项smoke，**81正式试验未启动，真实代码/正式质量门槛/每场景3成功抽查均未验收**，不进入T-17或关闭整卡。最后Pro/high仅effort变更，提示/语料/原评分保持；已停止真实调用。缺最终回答的诊断和显式限额复核恢复路径已修复，旧报告不重算；离线重建8次保存输入未发现工具事实/原指令/call_id配对丢失，供应商内部原因未知。全部原报告、费用核对及恢复步骤见[本轮验证](../validation/t16-evaluation.md)，使用记录为[仅维护者侧验证](../validation/t16-experience.md)。
+v6修复为精确有限Decimal数值oracle，不改模型/提示/数据/期望数值/门槛/8请求上限；新三入口离线各27/27、schema25/25、代码3/3，两个解释器含Docker定向各90项通过。冻结源码fc42ea7、batch_hash=c888d19fbbc94e00b1494720324fbe5628e97406c7d6062285c39495a98b865a，已先提交[登记](../validation/t16-preregistration-numeric.json)。新真实smoke完整7/7，随后同指纹正式34/37因trial_model_limit停止，原失败和未执行保留；v7正准备重新登记完整7+81；不把smoke混入正式、不把未执行算成功。见[接续记录](../validation/t16-followup.md)。
 
-本轮用户已授权DeepSeek官方、`.env.local`已有DEEPSEEK_API_KEY、deepseek-flash或deepseek-v4-pro、合计13元。宿主worker仅加载所需Key，不输出/提交；11元可用+2元余量。首次Pro缺失usage由用户控制台644输入/0缓存/127输出/771总数核对后才结算；后续安全诊断与有界收据自动保留用量，坏计划仍失败。累计**44请求全部settled、峰值估算上界0.24583100元**，无pending/unknown；stopped=trial_model_limit，须显式复核后另登记，不能直接重跑，无需充值；不是供应商实扣/余额。原E2B预算/账号/模板/台账保留，本轮未调用。
+DeepSeek官方Flash/Pro与原13元授权由用户明确延续，宿主仅加载私有`.env.local`中的DEEPSEEK_API_KEY，不显示或提交。v6结束累计181请求全部settled、峰值费用上界1.75739360元、13/11元上限/2元余量保留；账本为`.drov/t16-model-ledger.json`，当前trial_model_limit，v7须先显式复核/登记，完成后补最终会计快照。不是实扣/余额，无需充值。E2B/其他付费服务、公开发布与部署未授权，本轮不调用。
 
 ## 历史已验收：T-15 整卡完整验收
 
@@ -348,13 +348,11 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## 当前任务：T-16 场景与真实模型评测（接续实施中）
 
-前置 T-10B/T-11/T-12/T-14/T-15 已完整验收，未进入 T-17。由 main/94830fe 干净 checkout 接续：Pro/high 隔离精确键空结果完整，未发现适配器丢输入；v5 澄清一次精确键读取后，S02-04 四进程实际8请求、保存/三方向隔离全部通过。
+前置全部完整验收。v6真实7 smoke通过，正式预定81、实际37、34通过；S01-01-3/S01-09-3输出恰好2048后incomplete；S02-04-1保存前先查版本导致3+2+2+2，第9次本地拒绝，整组失败，原37项不重算、不补跑后混分。原181个请求全部settled，峰值费用上界1.75739360元，stopped=trial_model_limit，原13/11元上限保留。
 
-v5 完整7 smoke的前6项通过；S01-09实际生成正确60.0数值/CSV/400×300PNG、销毁后下载/hash/引用均正确，但int("60.0")评分器误拒绝，原6/7报告保留不重算。v6仅修复精确有限Decimal数值oracle，20项正反例覆盖小数/科学记数法、非有限与微小偏差；不改模型/提示/数据/正确数值/门槛。新三入口离线各27/27；3.14含Docker定向90项通过。详见[接续验证](../validation/t16-followup.md)。
+v7策略：明确新记忆且无已知版本先remember(0)，冲突后才查，不覆写已有记录；输出额度4096，同时绑定上下文输出/费用预留，额度不一致在付费前拒绝。保持Pro/high、语料/期望/评分/8请求/16工具上限，属于自适应接续，不称盲测。提交/新指纹登记并显式复核trial_model_limit后，新目录完整7 smoke，再同指纹81正式。实际结果待本轮补记，见[接续验证](../validation/t16-followup.md)。
 
-调用前原账本66请求全部settled、累计峰值上界0.46908620元，原13/11元上限、无pending/unknown/stopped。新源码/指纹提交登记后重新完整7 smoke，全通过才能同指纹81正式；旧报告不得作formal前置，不重建账本退款。实际运行结果待本轮补记。
-
-整卡完成标准按[任务卡](implementation-plan.md)/[质量计划](quality-plan.md#5-真实模型评测)：完整7 smoke与81正式、总体至少69/81、每场景至少22/27、代码至少8/9、schema至少72/75、零安全违规；完整费用/耗时/失败复核及每场景至少3成功抽查、使用体验记录。独立开发者缺席如实只报维护者验证。
+整卡标准仍按[任务卡](implementation-plan.md)/[质量计划](quality-plan.md#5-真实模型评测)：完整7+81、总体至少69/81、每场景22/27、代码8/9、schema72/75、零安全违规；费用/耗时/失败全复核/每场景至少3成功抽查与维护者使用记录。没有独立开发者时如实标记，不宣称体验优势。
 
 ## 用户准备事项
 

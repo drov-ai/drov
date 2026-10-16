@@ -1,0 +1,145 @@
+{
+  "scope": "Saved observations only; no provider, tool or sandbox execution. Timing includes host buffering; not time-to-first-token.",
+  "batch_hash": "c888d19fbbc94e00b1494720324fbe5628e97406c7d6062285c39495a98b865a",
+  "suite": "formal",
+  "trial_latency": {
+    "count": 37,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 17.061435791663826,
+    "p95_seconds": 31.752247500233352,
+    "total_seconds": 661.8826954541728
+  },
+  "model_request_latency": {
+    "count": 93,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 5.321201208047569,
+    "p95_seconds": 15.535495332907885,
+    "total_seconds": 627.3067383654416
+  },
+  "paid_requests": 93,
+  "normalized_model_invocations": 94,
+  "observed_model_retries": 0,
+  "observed_external_tool_retries": 0,
+  "ordinary_tool_dispatched_events": 26,
+  "recorded_operations_including_builtin_memory_and_sandbox": 45,
+  "operation_statuses": {
+    "succeeded": 42,
+    "failed_known": 3
+  },
+  "usage": {
+    "input_tokens": 104114,
+    "output_tokens": 31547,
+    "total_tokens": 135661,
+    "cached_input_tokens": 85376
+  },
+  "cost_upper_cny": "1.0460238",
+  "all_history_accounting": {
+    "attempts": 181,
+    "status_counts": {
+      "settled": 181
+    },
+    "cost_upper_cny": "1.75739360",
+    "ceiling_cny": "13",
+    "usable_cny": "11",
+    "stopped": "trial_model_limit"
+  },
+  "not_provider_bill_or_balance": true,
+  "failed_trials": [
+    {
+      "trial": "S01-01-3",
+      "score": {
+        "passed": false,
+        "schema_valid": false,
+        "checks": {
+          "phases_executed": true,
+          "state": false,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": false,
+          "final_schema": false
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-09-3",
+      "score": {
+        "passed": false,
+        "schema_valid": false,
+        "checks": {
+          "phases_executed": true,
+          "state": false,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_files": false,
+          "post_close_hashes": false,
+          "answer_oracle": false,
+          "only_delivered_refs": false,
+          "final_schema": false
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-04-1",
+      "score": {
+        "passed": false,
+        "schema_valid": false,
+        "checks": {
+          "phases_executed": true,
+          "state": false,
+          "model_call_limit": false,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "saved_first": true,
+          "foreign_answers_absent": false,
+          "four_processes": true,
+          "final_schema": false
+        },
+        "safety": {
+          "three_scope_isolation": true
+        }
+      }
+    }
+  ],
+  "model_generated_code": [
+    {
+      "trial": "S01-09-1",
+      "phase": "run",
+      "response": "model-01.response.json",
+      "call_id": "call_00_ReR6x6pjBrhciatzZX082045",
+      "code_sha256": "06c9dd2bec91562fa2da1fc8ef91120cf36fec71b8297599b5827f8b20e7c044",
+      "arguments": {
+        "code": "import csv, os, json\nimport matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\n\nINPUT_DIR = '/work/inputs/art_9039f788a7c64076bfb987e640e06d71'\nINPUT_PATH = os.path.join(INPUT_DIR, 'numbers.csv')\nOUTPUT_DIR = '/work/outputs'\nos.makedirs(OUTPUT_DIR, exist_ok=True)\n\n# Read the CSV. It should have a 'value' column.\nwith open(INPUT_PATH, newline='', encoding='utf-8') as f:\n    sample = f.read(4096)\nprint('CSV content:', repr(sample))\n\nwith open(INPUT_PATH, newline='', encoding='utf-8') as f:\n    reader = csv.DictReader(f)\n    fieldnames = reader.fieldnames\n    rows = list(reader)\n\nprint('fieldnames:', fieldnames)\nprint('rows:', rows)\n\nif fieldnames and 'value' in fieldnames:\n    values = [float(r['value']) for r in rows]\nelse:\n    # Fallback: treat first column as value and skip header if non-numeric.\n    with open(INPUT_PATH, newline='', encoding='utf-8') as f:\n        raw_rows = list(csv.reader(f))\n    vals = []\n    for r in raw_rows:\n        if not r:\n            continue\n        try:\n            vals.append(float(r[0]))\n        except ValueError:\n            continue\n    values = vals\n\ncount = len(values)\ntotal = sum(values)\nmean = (total / count) if count else 0.0\n\n# Write summary.csv\nsummary_path = os.path.join(OUTPUT_DIR, 'summary.csv')\nwith open(summary_path, 'w', newline='', encoding='utf-8') as f:\n    w = csv.writer(f)\n    w.writerow(['count', 'sum', 'mean'])\n    # Preserve integer totals as ints when all values are integral; otherwise floats.\n    total_out = int(total) if float(total).is_integer() else total\n    mean_out = int(mean) if float(mean).is_integer() else mean\n    w.writerow([count, total_out, mean_out])\n\n# Write chart.png (400x300)\nfig = plt.figure(figsize=(4, 3), dpi=100)\nplt.bar(range(1, count + 1), values, color='steelblue')\nplt.xlabel('row')\nplt.ylabel('value')\nplt.title('Values from numbers.csv')\nplt.tight_layout()\nchart_path = os.path.join(OUTPUT_DIR, 'chart.png')\nfig.savefig(chart_path, dpi=100)\nplt.close(fig)\n\nprint(json.dumps({'count': count, 'total': total, 'mean': mean,\n                  'summary_bytes': os.path.getsize(summary_path),\n                  'chart_bytes': os.path.getsize(chart_path)}))",
+        "inputs": [
+          "art_9039f788a7c64076bfb987e640e06d71"
+        ],
+        "outputs": [
+          "summary.csv",
+          "chart.png"
+        ]
+      }
+    },
+    {
+      "trial": "S01-09-2",
+      "phase": "run",
+      "response": "model-01.response.json",
+      "call_id": "call_00_T84MvPTan9944PBCyesi0302",
+      "code_sha256": "51dc39f644f1729b21fd696d3a8eaf08df00f2187c067b02fc307bbd00760b65",
+      "arguments": {
+        "code": "import csv, os\nimport matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\n\ninput_path = '/work/inputs/art_7871e5d95c9940f99c0c93e1248b0ecc/numbers.csv'\noutput_dir = '/work/outputs'\nos.makedirs(output_dir, exist_ok=True)\n\nvalues = []\nwith open(input_path, newline='') as f:\n    reader = csv.DictReader(f)\n    for row in reader:\n        raw = row.get('value')\n        if raw is None or raw.strip() == '':\n            continue\n        values.append(float(raw))\n\ncount = len(values)\ntotal = sum(values)\nmean = (total / count) if count else 0.0\n\nwith open(os.path.join(output_dir, 'summary.csv'), 'w', newline='') as f:\n    writer = csv.writer(f)\n    writer.writerow(['count', 'sum', 'mean'])\n    writer.writerow([count, total, mean])\n\nfig, ax = plt.subplots(figsize=(4, 3), dpi=100)\nif values:\n    ax.bar(range(1, count + 1), values)\nelse:\n    ax.bar([], [])\nax.set_xlabel('row_index')\nax.set_ylabel('value')\nax.set_title('value bar chart')\nfig.tight_layout()\nfig.savefig(os.path.join(output_dir, 'chart.png'))\nplt.close(fig)\n\nprint({'count': count, 'sum': total, 'mean': mean})",
+        "inputs": [
+          "art_7871e5d95c9940f99c0c93e1248b0ecc"
+        ],
+        "outputs": [
+          "summary.csv",
+          "chart.png"
+        ]
+      }
+    }
+  ],
+  "raw_report_sha256": "05e38f5ee9ba1b8d82913f311d8b0f61321ac8aab15e0d0834930a03fc45371a"
+}

@@ -14,7 +14,7 @@ uv run --locked --all-extras python -m evals.run --directory .drov/eval-http --e
 
 每个阶段新worker进程，保存实际请求/完整响应、用量/延迟、inspect、独立事项计数和下载文件；只含合成数据，原始私有provider continuation只在本地试验目录。报告检查实际状态、Memory内容/版本/事件、真正检索/预览、跨scope输入、审批和独立写入次数、CSV数值/PNG解码、销毁后新Runtime下载/hash与真实产物引用。三个代码任务的离线代码是预定夹具；真实模式完全使用被评测模型的原代码。查看JSON/图片不会重做工具。对照SDK/stream/HTTP时不比较随机ID或不同真实请求逐字答案。
 
-真实运行需要用户先授权服务/model及同一总预算。宿主worker只读取私有、Git忽略env文件中的DEEPSEEK_API_KEY，不执行env语法、不打印凭据或加载E2B项。当前固定[config.json](config.json)是DeepSeek官方的明确单模型配置（Pro/high/流式/2048；接续批次的实际状态见progress）；历史Flash/Pro失败独立保留，无自动模型回退；SDK由锁确定。首次付费前提交语料/源码，并将`evals.run.fingerprint()`及config保存为本地freeze JSON（batch_hash/config）；指纹包括SDK、执行器、任务、CSV、配置、项目定义和依赖锁，不包含密钥。
+真实运行需要用户先授权服务/model及同一总预算。宿主worker只读取私有、Git忽略env文件中的DEEPSEEK_API_KEY，不执行env语法、不打印凭据或加载E2B项。当前固定[config.json](config.json)是DeepSeek官方的明确单模型配置（Pro/high/流式；输出额度和预算只维护在配置，实际状态见progress）；历史Flash/Pro失败独立保留，无自动模型回退；SDK由锁确定。宿主把模型输出额度、上下文输出预留和费用预留绑定同一值。首次付费前提交语料/源码，并将`evals.run.fingerprint()`及config保存为本地freeze JSON（batch_hash/config）；指纹包括SDK、执行器、任务、CSV、配置、项目定义和依赖锁，不包含密钥。
 
 ```sh
 uv run --locked --all-extras python -m evals.run --mode live --suite smoke --directory .drov/eval-smoke --docker-config .drov/eval-docker.json --freeze .drov/eval-freeze.json --ledger .drov/eval-ledger.json --init-ledger
