@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Self
 from drov.agent import Agent
 from drov.artifacts.types import ArtifactInput, ArtifactRef
 from drov.config import Limits
-from drov.errors import ConfigurationError
+from drov.errors import ConfigurationError, ContentGone, CursorExpired
 from drov.types import (
     DurableEvent,
     RunContext,
@@ -47,7 +47,12 @@ class RunEvents:
     async def __aenter__(self) -> Self:
         if self._opened or self._closed:
             raise ConfigurationError("Subscription is single-use")
-        await self.controller.visible(self.run_id, self.context, self.include_content)
+        try:
+            await self.controller.visible(self.run_id, self.context, self.include_content)
+        except ContentGone:
+            if self.after is not None:
+                raise CursorExpired("Deleted event history is unavailable") from None
+            raise
         self.controller.cursor(self.run_id, self.after)
         self.controller.subscribers.setdefault(self.run_id, set()).add(self)
         self._opened = True

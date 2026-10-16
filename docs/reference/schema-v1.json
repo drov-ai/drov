@@ -5468,6 +5468,99 @@
       "title": "ServerLimits",
       "type": "object"
     },
+    "SessionDeletionPlan": {
+      "$defs": {
+        "SessionScope": {
+          "additionalProperties": false,
+          "properties": {
+            "session_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Session Id",
+              "type": "string"
+            },
+            "tenant_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Tenant Id",
+              "type": "string"
+            },
+            "user_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tenant_id",
+            "user_id",
+            "session_id"
+          ],
+          "title": "SessionScope",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Authorized host-local preview. No prompts, names, arguments or results.",
+      "properties": {
+        "blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blockers",
+          "type": "array"
+        },
+        "bytes_reclaimed": {
+          "default": 0,
+          "title": "Bytes Reclaimed",
+          "type": "integer"
+        },
+        "cleared_artifacts": {
+          "title": "Cleared Artifacts",
+          "type": "integer"
+        },
+        "counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Counts",
+          "type": "object"
+        },
+        "fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Fingerprint",
+          "type": "string"
+        },
+        "include_memory": {
+          "title": "Include Memory",
+          "type": "boolean"
+        },
+        "retained_artifacts": {
+          "title": "Retained Artifacts",
+          "type": "integer"
+        },
+        "scope": {
+          "$ref": "#/$defs/SessionScope"
+        },
+        "unreferenced_stages": {
+          "title": "Unreferenced Stages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scope",
+        "include_memory",
+        "fingerprint",
+        "counts",
+        "blockers",
+        "retained_artifacts",
+        "cleared_artifacts",
+        "unreferenced_stages"
+      ],
+      "title": "SessionDeletionPlan",
+      "type": "object"
+    },
     "SessionPage": {
       "$defs": {
         "SessionSummary": {

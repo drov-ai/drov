@@ -1,6 +1,10 @@
 """Pre-run/control exceptions. Recorded execution errors use RunError."""
 
 import math
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from drov.auth import Resource
 
 
 class DrovError(Exception):
@@ -53,6 +57,14 @@ class InvalidCursor(DrovError, ValueError):
 
 class CursorExpired(DrovError):
     code = "cursor_expired"
+
+
+class ContentGone(DrovError):
+    code = "content_gone"
+
+    def __init__(self, message: str, *, resource: "Resource | None" = None) -> None:
+        super().__init__(message)
+        self.resource = resource
 
 
 class PermissionDenied(DrovError):

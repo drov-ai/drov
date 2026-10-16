@@ -17,6 +17,8 @@ from drov.errors import (
     CapacityExceeded,
     ConfigurationError,
     Conflict,
+    ContentGone,
+    CursorExpired,
     DrovError,
     InvalidCursor,
     ModelProtocolError,
@@ -168,11 +170,20 @@ class RunController:
             run_id=record.state.run_id,
         )
 
+    async def locate_in(self, tx: Transaction, context: RunContext, run_id: str) -> RunRecord:
+        try:
+            return await tx._locate_run(context, run_id)
+        except ContentGone as exc:
+            if exc.resource is None:
+                raise RecordNotFound("Run is unavailable") from None
+            await self.authorize(context, exc.resource, ("read",))
+            raise
+
     async def visible(self, run_id: str, context: RunContext, content: bool) -> RunRecord:
         self.runtime._require_open()
         context = RunContext.model_validate(context)
         async with self.storage.transaction() as tx:
-            record = await tx._locate_run(context, run_id)
+            record = await self.locate_in(tx, context, run_id)
         await self.authorize(
             context, self.resource(record), ("read", "view_content") if content else ("read",)
         )
@@ -1406,7 +1417,7 @@ class RunController:
     async def cancel(self, run_id: str, *, context: RunContext) -> CancelReceipt:
         self.runtime._require_open()
         async with self.storage.transaction() as tx:
-            record = await tx._locate_run(context, run_id)
+            record = await self.locate_in(tx, context, run_id)
         await self.authorize(context, self.resource(record), ("cancel",))
         owner = self.resource(record).owner
 
@@ -1510,7 +1521,12 @@ class RunController:
         limit: int = 100,
         include_content: bool = False,
     ) -> RunInspection:
-        visible = await self.visible(run_id, context, include_content)
+        try:
+            visible = await self.visible(run_id, context, include_content)
+        except ContentGone:
+            if after is not None:
+                raise CursorExpired("Deleted event history is unavailable") from None
+            raise
         owner = self.resource(visible).owner
         if type(limit) is not int or not 1 <= limit <= min(500, self.runtime.limits.max_page_size):
             raise ValueError("Invalid page size")

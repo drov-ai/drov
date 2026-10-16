@@ -275,3 +275,16 @@ TypeScript/Vite 的实际开发组合固定为 Node 24.14.0、npm 11.9.0、TypeS
 静态服务只映射固定构建文件，CSP脚本/样式/连接同源、图片self/blob，禁止内联HTML执行及外部资源。默认正文关闭；动态授权拒绝取消旧视图/订阅、清除正文和Blob。每次文件下载/预览获取原授权元数据，读取时长度/hash校验，展示前再次授权；PNG签名/IHDR/像素/浏览器解码通过后才建立image/png Blob，其余字节为下载附件。没有SVG/HTML/PDF内联、Markdown执行、raw provider展示或云后端控制。空闲页面不保证立即感知宿主撤权，下一次同步/操作时清除；旧下载不可撤回。
 
 实现边界见 [ADR-0026](../decisions/0026-local-workbench.md)，构建/操作见 [workbench](../../workbench/README.md)，真实浏览器/安装/平台证据见 [验证](../validation/t14-workbench.md)。单worker、POSIX文件层和暂存T-15维护边界不变。
+
+## 离线维护入口（T-15 首批）
+
+可信宿主管理员使用 `python -m drov.storage.maintenance`，不开放 HTTP 路由。先停止 Runtime/工作台；SQLite锁与配对字节锁均必须取得。只管理显式指定的现有库/原字节目录，配对缺失/失配拒绝，不能创建替代目录。core-only可用；配对字节沿原POSIX限制，带自定义 ArtifactLimits 的库可通过 Python API 传入同配置的 LocalArtifacts。
+
+```sh
+python -m drov.storage.maintenance preview-session --database /private/drov/state.db --artifacts /private/drov/files --tenant tenant --user alice --session session
+python -m drov.storage.maintenance delete-session --database /private/drov/state.db --artifacts /private/drov/files --tenant tenant --user alice --session session --fingerprint <原预览的fingerprint>
+```
+
+无 Artifact 的库省略 --artifacts。命令是用法说明，本轮不对真实库执行。删除必须指定完全相同的原预览摘要；变更即重新预览，有 blockers 始终拒绝，错误只输出code并非成功退出。--include-memory 显式涵盖该用户/Agent整个scope，默认不删Memory。宿主文件访问是管理员能力，不把此接口挂给未信任请求；当前没有新增普通用户权限或审批流程。
+
+预览扫描全库及阶段清单，产生HMAC，暂不宣称大库性能。retention_schema=1仅实际删除时同事务启用，独立DDL见 [参考](../reference/storage-retention-schema-v1.sql)。所有原SQLite/Artifact/Sandbox/Upload格式保持；最小墓碑/来源证明与保留费用金额的语义由运行契约/维护策略维护。bytes_reclaimed=0，真实字节/stage.json和容量保留，unreferenced_stages仅报告潜在无引用阶段；没有自动TTL回收。后续跨介质回收、备份/恢复/barrier、迁移与正文导出仍按T-15任务卡实施，不提供可误用的空入口。

@@ -239,8 +239,13 @@ class E2BSandbox(SandboxBackend):
             isinstance(tx._driver, SQLiteDriver), "E2B requires the durable SQLite lease ledger"
         )
         driver = cast(SQLiteDriver, tx._driver)
+        from drov.storage._retention import cost_key, retained_cost
+
+        retained, _ = await driver.execute(
+            "SELECT value FROM metadata WHERE key=?", (cost_key(tx._secret, self._budget),)
+        )
         rows, _ = await driver.execute("SELECT payload FROM sandbox_leases WHERE active IN (0,1)")
-        total = self.reservation_micro_usd
+        total = self.reservation_micro_usd + (retained_cost(retained[0][0]) if retained else 0)
         for (payload,) in rows:
             previous = SandboxLease.from_json(cast(str, payload))
             config = previous.backend_config

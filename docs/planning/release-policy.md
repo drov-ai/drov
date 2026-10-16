@@ -125,3 +125,5 @@ ADR-0023 兼容补充：只有显式 E2B 绑定启用 sandbox_schema=2；表 DDL
 
 
 T-13 按 [ADR-0025](../decisions/0025-http-identity-and-uploads.md) 在带ArtifactStore的服务显式启用独立upload_schema=1。旧SDK因未知扩展表拒绝打开且不得改库；原records/Artifact/Sandbox DDL与版本未变。HTTP暂存receiving/staged/consumed均须进入T-15备份/回收审查：原SQLite+bytes+消费事实共同保留；过期未消费只允许持排他锁的显式维护回收，不自动删除；已消费字节视同原输入，不能按上传TTL清除或重新授予另一Run。服务当前无清理/迁移HTTP路由。
+
+T-15 首批落地补充（[ADR-0027](../decisions/0027-offline-session-retention.md)）：当前离线入口仅完成数据库逻辑清理与墓碑、共享来源证明和累计费用保留；首次删除启用独立retention_schema=1，原库仅预览不升级，旧SDK拒绝扩展库。bytes_reclaimed=0，阶段字节、stage.json的逻辑名与容量仍保留，不能宣称完整个人数据删除或实际回收。已销毁E2B租约的预算预留转存到按预算ID的HMAC索引金额，新的准入同时计入该金额；原未确认租约不能删除。前述完整回收、abandonment、一致备份/恢复/barrier、实际迁移和导出规则仍是T-15后续验收，不从本批测试推断已实现。实际子范围/下一步统一见progress。

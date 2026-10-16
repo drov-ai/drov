@@ -18,6 +18,8 @@ from drov.errors import (
     CapacityExceeded,
     ConfigurationError,
     Conflict,
+    ContentGone,
+    CursorExpired,
     InvalidCursor,
     PersistenceUnavailable,
     RecordNotFound,
@@ -196,6 +198,11 @@ class Transaction:
         rows = await self._select(kind, scope, namespace=namespace, key=key, limit=2)
         if len(rows) > 1:
             raise PersistenceUnavailable("Stored identity is ambiguous")
+        if not rows:
+            tenant, user = _identity(scope)
+            await self._driver.check_retained(
+                Query(kind, tenant, user, namespace=namespace, key=key)
+            )
         return _decode(model, rows[0]) if rows else None
 
     async def get_run(self, scope: RunContext, run_id: str) -> RunRecord:
@@ -229,6 +236,9 @@ class Transaction:
         TypeAdapter(Identifier).validate_python(run_id, strict=True)
         rows = await self._driver.select(Query("run", actor.tenant_id, None, key=run_id, limit=2))
         if len(rows) != 1:
+            await self._driver.check_retained(
+                Query("run", actor.tenant_id, actor.user_id, key=run_id)
+            )
             raise RecordNotFound("Run is unavailable")
         return _decode(RunRecord, rows[0])
 
@@ -253,7 +263,12 @@ class Transaction:
     ) -> list[EventRecord]:
         self._page_limit(limit)
         TypeAdapter(NonNegativeInt).validate_python(after, strict=True)
-        run = await self.get_run(scope, run_id)
+        try:
+            run = await self.get_run(scope, run_id)
+        except ContentGone:
+            if after:
+                raise CursorExpired("Deleted event history is unavailable") from None
+            raise
         if after > run.last_seq:
             raise InvalidCursor("Event cursor exceeds stored sequence")
         rows = await self._select(
@@ -347,6 +362,14 @@ class Transaction:
         """Check dedup before Runtime reserves a slot, within the same transaction."""
         self._check()
         request = StartRequest.model_validate(request)
+        await self._driver.check_retained(
+            Query(
+                "session",
+                request.scope.tenant_id,
+                request.scope.user_id,
+                key=request.scope.session_id,
+            )
+        )
         key_hash, fingerprint = self._start_identity(request)
         if key_hash is not None:
             previous = await self._get(

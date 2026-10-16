@@ -14,6 +14,9 @@ class MemoryDriver:
     def __init__(self, rows: dict[Key, Row]) -> None:
         self.rows = rows
 
+    async def check_retained(self, query: Query) -> None:
+        pass  # Offline maintenance is an explicit SQLite capability.
+
     async def unfinished_count(self) -> int:
         return sum(row.key.kind == "run" and row.state in UNFINISHED for row in self.rows.values())
 

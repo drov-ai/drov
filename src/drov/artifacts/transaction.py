@@ -5,7 +5,8 @@ from functools import wraps
 from typing import ParamSpec, TypeVar, cast
 
 from drov.artifacts.records import ArtifactGrant, ArtifactRecord
-from drov.errors import ConfigurationError, PersistenceUnavailable, RecordNotFound
+from drov.errors import ConfigurationError, ContentGone, PersistenceUnavailable, RecordNotFound
+from drov.storage._driver import Query
 from drov.storage.sqlite import SQLiteDriver
 from drov.storage.transaction import Transaction
 from drov.types import RunContext
@@ -43,6 +44,9 @@ class ArtifactTransaction:
             (context.tenant_id, artifact_id),
         )
         if len(rows) != 1:
+            await self.driver.check_retained(
+                Query("artifact", context.tenant_id, context.user_id, key=artifact_id)
+            )
             raise RecordNotFound("Artifact is unavailable")
         try:
             record = ArtifactRecord.from_json(rows[0][0])
@@ -55,7 +59,20 @@ class ArtifactTransaction:
                 record.version,
             ) != tuple(rows[0][1:]) or record.ref.artifact_id != artifact_id:
                 raise ValueError("Artifact payload differs from its index")
-            origin = await self.tx.get_run(record.owner, record.run_id)
+            try:
+                origin = await self.tx.get_run(record.owner, record.run_id)
+            except ContentGone:
+                from drov.storage._retention import origin_identity
+
+                proof, _ = await self.driver.execute(
+                    "SELECT 1 FROM retention_tombstones WHERE kind='origin' AND identity=?",
+                    (origin_identity(self.tx._secret, record),),
+                )
+                if not proof:
+                    raise PersistenceUnavailable(
+                        "Retained artifact source proof is missing"
+                    ) from None
+                return record
             if origin.agent_name != record.owner.agent_name:
                 raise ValueError("Artifact source Agent does not match")
             if record.operation_id is None and record.ref not in origin.artifact_inputs:

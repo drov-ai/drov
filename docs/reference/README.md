@@ -80,3 +80,9 @@ HTTP JSON DTO/ServerLimits/UploadReceipt加入核心可生成schema。独立 [�
 ## 本地工作台
 
 DrovApp默认提供实验性 `/workbench/`，可用 `workbench=False` 关闭。固定登录壳/资源允许无认证读取；全部数据接口仍认证，新增 `/v1/agents` 只返回已注册name/revision的AgentCatalog。用户安装无需Node；schema与静态资产归属见 [ADR-0026](../decisions/0026-local-workbench.md)，启动/开发与限制见 [工作台说明](../../workbench/README.md)。页面复用原HTTP，不更改Runtime/DDL；无损会话名使用`GET /v1/session?session_id=...`，同原路径入口的授权/分页。
+
+## 离线维护子范围
+
+`drov.storage.maintenance.SQLiteMaintenance/SessionDeletionPlan` 已有现有库的异步离线预览、数据库Session逻辑清理、墓碑与共享来源保护；CLI为`python -m drov.storage.maintenance`。此入口面向可信宿主管理员，无HTTP路由；API/保留语义分别见 [API](../planning/api-draft.md) / [维护策略](../planning/release-policy.md)。SessionDeletionPlan已加入生成schema，实际独立扩展DDL见 [storage-retention-schema-v1.sql](storage-retention-schema-v1.sql)。原库仅预览不启用；首次删除启用retention_schema=1，旧SDK拒绝，原core/Artifact/Sandbox/Upload版本不变。
+
+真实字节、stage.json及容量仍保留，bytes_reclaimed恒为0。完整字节回收/备份/恢复/barrier/迁移/导出/data_abandoned尚需T-15后续子范围，当前没有其API空壳。可运行合成例见 [maintenance_offline.py](../../examples/maintenance_offline.py)，实际验证与下一步分别见 [记录](../validation/t15-maintenance.md) / [progress](../planning/progress.md)。

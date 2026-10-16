@@ -8,10 +8,15 @@ import pytest
 
 from drov import Agent, DrovApp, ResourceBinding, Runtime, SQLiteStorage
 from drov.artifacts import ArtifactInput, LocalArtifacts
+from drov.errors import ContentGone
+from drov.models import ScriptedModel
 from drov.models.protocol import ModelComplete, ModelEvent, ModelRequest, ModelResponse
 from drov.sandbox import DockerSandbox, PythonSandbox
 from drov.sandbox._png import validate_png
+from drov.storage.maintenance import SQLiteMaintenance
+from drov.storage.records import SessionScope
 from examples.sandbox_offline import CSV, FixtureModel
+from tests.test_agent_runs import final
 from tests.test_http import ALICE, Auth, body, client
 from tests.test_sandbox_docker import config as config
 
@@ -166,3 +171,51 @@ async def test_actual_file_execution_entry_equivalence_and_post_close_download(
                 response = await connection.get(f"/v1/artifacts/{ref.artifact_id}/content")
                 assert response.status_code == 200 and response.content == expected
                 assert hashlib.sha256(response.content).hexdigest() == ref.sha256
+
+    # Explicitly share both real outputs, then delete the origin. Inspection of
+    # the surviving Run uses retained provenance, with no backend/model replay.
+    reuse: Agent[str] = Agent(
+        name="assistant", revision="reader", model=ScriptedModel([final("retained files")])
+    )
+    async with Runtime(
+        agents=[reuse],
+        storage=SQLiteStorage(tmp_path / "state.db"),
+        artifacts=LocalArtifacts(directory=tmp_path / "files"),
+    ) as reader:
+        reused = await reader.run(
+            reuse, "retain both files", session_id="reuse", context=ALICE, artifacts=refs
+        )
+        assert reused.status == "completed"
+    async with SQLiteMaintenance(
+        tmp_path / "state.db", artifacts=LocalArtifacts(directory=tmp_path / "files")
+    ) as maintenance:
+        plan = await maintenance.preview_session(SessionScope(**ALICE.model_dump(), session_id="s"))
+        assert plan.retained_artifacts == 2 and plan.cleared_artifacts == 1
+        await maintenance.delete_session(plan)
+    async with Runtime(
+        agents=[],
+        storage=SQLiteStorage(tmp_path / "state.db"),
+        artifacts=LocalArtifacts(directory=tmp_path / "files"),
+    ) as reader:
+        assert (
+            await reader.inspect(reused.run_id, context=ALICE, include_content=True)
+        ).snapshot.status == "completed"
+        for ref, expected in zip(refs, downloaded, strict=True):
+            assert await reader.read_artifact(ref, context=ALICE) == expected
+    async with SQLiteMaintenance(
+        tmp_path / "state.db", artifacts=LocalArtifacts(directory=tmp_path / "files")
+    ) as maintenance:
+        plan = await maintenance.preview_session(
+            SessionScope(**ALICE.model_dump(), session_id="reuse")
+        )
+        assert plan.cleared_artifacts == 2 and plan.bytes_reclaimed == 0
+        await maintenance.delete_session(plan)
+    async with Runtime(
+        agents=[],
+        storage=SQLiteStorage(tmp_path / "state.db"),
+        artifacts=LocalArtifacts(directory=tmp_path / "files"),
+    ) as reader:
+        for ref in refs:
+            with pytest.raises(ContentGone):
+                await reader.read_artifact(ref, context=ALICE)
+    assert len(model.calls) == 2

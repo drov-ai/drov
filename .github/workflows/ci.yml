@@ -81,7 +81,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: uv sync --locked --extra server
       - name: HTTP identity, real loopback SSE and file boundaries
-        run: uv run --locked --extra server pytest tests/test_http.py tests/test_http_transport.py tests/test_http_artifacts.py tests/test_http_scenarios.py tests/test_workbench.py
+        run: uv run --locked --extra server pytest tests/test_http.py tests/test_http_transport.py tests/test_http_artifacts.py tests/test_http_scenarios.py tests/test_workbench.py tests/test_maintenance_http.py
       - run: uv run --locked --extra server python scripts/generate_openapi.py --check
       - run: uv sync --locked --extra mcp
       - name: Real MCP stdio integration

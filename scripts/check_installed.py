@@ -90,6 +90,7 @@ def main() -> None:
         from drov.sandbox import DockerSandbox, PythonSandbox, SandboxLimits, SandboxResult
         from drov.sandbox._docker import DockerPreflight
         from drov.sandbox._profile import PROFILE_SHA256, DockerLimits
+        from drov.storage.maintenance import SQLiteMaintenance
 
         assert "LocalArtifacts" in drov.artifacts.__all__
         adapter = OpenAIResponses(model="offline-import", capabilities=ModelCapabilities(text=True))
@@ -107,6 +108,8 @@ def main() -> None:
             limits=E2BLimits(),
         )
         assert not cloud.is_open
+        maintenance = SQLiteMaintenance(Path(sys.prefix) / "inert-maintenance.db")
+        assert not maintenance._opened
         # Even private backend construction is inert in a core-only installation.
         preflight = DockerPreflight(
             image="sha256:" + "a" * 64,

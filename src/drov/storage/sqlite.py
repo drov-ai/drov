@@ -13,6 +13,7 @@ import aiosqlite
 
 from drov.errors import (
     Conflict,
+    ContentGone,
     IncompatibleStorage,
     PersistenceUnavailable,
     ShutdownIncomplete,
@@ -74,8 +75,66 @@ async def _settle(awaitable: Awaitable[T]) -> Settled[T]:
 
 
 class SQLiteDriver:
-    def __init__(self, execute: Callable[..., Awaitable[tuple[list[Any], int]]]) -> None:
+    def __init__(
+        self,
+        execute: Callable[..., Awaitable[tuple[list[Any], int]]],
+        *,
+        retention_secret: bytes | None = None,
+    ) -> None:
         self.execute = execute
+        self.retention_secret = retention_secret
+
+    async def check_retained(self, query: Query) -> None:
+        if self.retention_secret is None or query.tenant_id is None or query.user_id is None:
+            return
+        if query.key is None:
+            return
+        from drov.auth import ArtifactResource, Resource
+        from drov.storage._retention import Tombstone, identity
+        from drov.types import RunContext
+
+        digest = identity(
+            self.retention_secret,
+            query.kind,
+            query.tenant_id,
+            query.user_id,
+            query.key,
+            query.namespace or "",
+        )
+        rows, _ = await self.execute(
+            "SELECT payload FROM retention_tombstones WHERE kind=? AND identity=?",
+            (query.kind, digest),
+        )
+        if rows:
+            try:
+                fact = Tombstone.from_json(rows[0][0])
+                if query.kind in ("run", "session") and fact.resource_id != query.key:
+                    raise ValueError("Retention identity differs")
+                if query.kind == "session" and fact.session_id != query.key:
+                    raise ValueError("Retention session differs")
+                if query.kind == "run" and fact.session_id is None:
+                    raise ValueError("Retention Run has no source session")
+                owner = RunContext(tenant_id=query.tenant_id, user_id=query.user_id)
+                resource: Resource = Resource(
+                    owner=owner,
+                    run_id=fact.resource_id if query.kind == "run" else None,
+                    session_id=fact.session_id,
+                )
+                if query.kind == "artifact":
+                    if fact.agent_name is None or fact.resource_id != query.key:
+                        raise ValueError("Invalid artifact retention fact")
+                    resource = ArtifactResource(
+                        owner=owner,
+                        artifact_id=query.key,
+                        agent_name=fact.agent_name,
+                        run_id=fact.source_run_id,
+                        operation_id=fact.operation_id,
+                    )
+            except (ValueError, TypeError) as exc:
+                raise PersistenceUnavailable("Retention fact is invalid") from exc
+            raise ContentGone(
+                "Content was explicitly deleted; identifiers cannot be reused", resource=resource
+            )
 
     async def unfinished_count(self) -> int:
         rows, _ = await self.execute(
@@ -163,6 +222,7 @@ class SQLiteStorage(Storage):
         self._ownership: FileOwnership | None = None
         self._in_transaction = False
         self.info: dict[str, str | int] = {}
+        self._retention_enabled = False
 
     async def _raw(self, sql: str, parameters: tuple[Any, ...] = ()) -> tuple[list[Any], int]:
         connection = self._connection
@@ -214,6 +274,7 @@ class SQLiteStorage(Storage):
                     raise IncompatibleStorage("SQLite 3.35 or later is required")
                 schema, _ = await self._sql("PRAGMA user_version")
                 schema_version = int(schema[0][0])
+                self._retention_enabled = False
                 tables, _ = await self._sql("SELECT name FROM sqlite_master WHERE type='table'")
                 names = {row[0] for row in tables}
                 if schema_version == 0 and names:
@@ -243,6 +304,12 @@ class SQLiteStorage(Storage):
                             raise IncompatibleStorage("Upload storage extension is unsupported")
                         expected_names.add("artifact_uploads")
                         await self._validate_upload_schema()
+                    if "retention_schema" in values:
+                        if values["retention_schema"] != "1":
+                            raise IncompatibleStorage("Retention storage extension is unsupported")
+                        expected_names.add("retention_tombstones")
+                        await self._validate_retention_schema()
+                        self._retention_enabled = True
                     if names != expected_names:
                         raise IncompatibleStorage("Database tables do not match its schema version")
                     if values.get("format") != "drov.sqlite" or values.get("record_schema") != str(
@@ -315,7 +382,19 @@ class SQLiteStorage(Storage):
             self._error(settled.error)
         if settled.cancelled:
             raise asyncio.CancelledError
-        return SQLiteDriver(self._sql)
+        if self._opened:
+            retained, _ = await self._sql("SELECT value FROM metadata WHERE key='retention_schema'")
+            self._retention_enabled = bool(retained)
+        return SQLiteDriver(
+            self._sql, retention_secret=self._secret if self._retention_enabled else None
+        )
+
+    async def _validate_retention_schema(self) -> None:
+        from drov.storage._retention import RETENTION_DDL
+
+        rows, _ = await self._sql("SELECT sql FROM sqlite_master WHERE name='retention_tombstones'")
+        if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(RETENTION_DDL[0].split()):
+            raise IncompatibleStorage("Retention extension table is invalid")
 
     async def _bind_artifacts(self, store_id: str) -> None:
         """Pair one private byte directory with this database; no record/DDL migration."""

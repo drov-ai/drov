@@ -304,3 +304,5 @@ T-13 的 [实际loopback示例](../../examples/http_offline.py) 用research/Memo
 
 
 T-14 的三个参考形态由 [工作台离线例](../../examples/workbench_offline.py) 注册到同一DrovApp，浏览器通过原HTTP完成检索、Memory、输入/审批/拒绝和unknown核查。X-03 的浏览器专项实际沿受控上传/原代码批准/Docker/销毁后CSV下载与PNG解码检查，查看不增加模型调用；数据/代码均为固定合成计划，不限定产品业务边界，也不作为真实模型质量分数。实际验收矩阵见 [T-14](../validation/t14-workbench.md)。
+
+T-15 首批为S-02-D/B-02/07/10/11/18补充真实离线维护变体：默认保留Memory，显式scope删除保护其他未结束/未知Run；Session正文逻辑清理后原键/换键/无键均不能重建旧ID。X-03的三条实际Docker路径另验证CSV/PNG跨Session显式复用、删除来源后当前授权/hash读取与最后引用ContentGone，查看/清理不增加原模型或代码执行次数。文件字节/容量仍保留，完整备份、物理回收和真实模型分数不由此推断，证据见 [T-15验证](../validation/t15-maintenance.md)。

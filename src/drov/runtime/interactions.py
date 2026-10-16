@@ -167,7 +167,7 @@ class InteractionController:
         runs.runtime._require_open()
         context = RunContext.from_json(context.model_dump_json())
         async with runs.storage.transaction() as tx:
-            record = await tx._locate_run(context, run_id)
+            record = await self.runs.locate_in(tx, context, run_id)
         await runs.authorize(context, runs.resource(record), ("respond",))
         response = TypeAdapter(InteractionResponse).validate_python(response)
         response = TypeAdapter(InteractionResponse).validate_json(response.model_dump_json())

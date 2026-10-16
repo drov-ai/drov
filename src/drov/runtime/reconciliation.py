@@ -276,7 +276,7 @@ class ReconciliationController:
     ) -> ResponseReceipt:
         runs = self.runs
         async with runs.storage.transaction() as tx:
-            record = await tx._locate_run(context, run_id)
+            record = await self.runs.locate_in(tx, context, run_id)
         await runs.authorize(context, runs.resource(record), ("respond",))
         owner = runs.resource(record).owner
         payload = response.model_dump(mode="json")

@@ -18,6 +18,8 @@ from drov.runtime import AgentRegistration
 from drov.sandbox import SandboxLimits, SandboxResult
 from drov.sandbox._leases import SANDBOX_DDL
 from drov.server.types import AgentCatalog, ResponseBody, ServerLimits, StartBody, VerifyBody
+from drov.storage._retention import RETENTION_DDL
+from drov.storage.maintenance import SessionDeletionPlan
 from drov.storage.sqlite import DDL, RECORD_VERSION, SCHEMA_VERSION
 from drov.tools import PermissionPolicy
 from drov.tools.permissions import PermissionDecision
@@ -80,6 +82,7 @@ def schema_text() -> str:
         "SandboxLimits": SandboxLimits,
         "E2BLimits": E2BLimits,
         "SandboxResult": SandboxResult,
+        "SessionDeletionPlan": SessionDeletionPlan,
     }
     bundle = {
         "schema_version": 1,
@@ -106,6 +109,12 @@ def main() -> None:
     for target, expected in (
         (root / "schema-v1.json", schema_text()),
         (root / "storage-schema-v1.sql", sql),
+        (
+            root / "storage-retention-schema-v1.sql",
+            "-- Explicit offline retention extension v1; core records/user_version remain 1.\n"
+            + ";\n\n".join(statement.strip() for statement in RETENTION_DDL)
+            + ";\n",
+        ),
         (
             root / "storage-uploads-schema-v1.sql",
             "-- Explicit HTTP upload extension v1; core/Artifact schema remain 1.\n"

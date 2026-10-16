@@ -15,6 +15,7 @@ from drov.errors import (
     ArtifactUnavailable,
     CapacityExceeded,
     ConfigurationError,
+    ContentGone,
     PermissionDenied,
     PersistenceUnavailable,
     RecordNotFound,
@@ -30,6 +31,15 @@ if TYPE_CHECKING:
 class ArtifactController:
     def __init__(self, runtime: "Runtime") -> None:
         self.runtime = runtime
+
+    async def locate(self, tx: Transaction, actor: RunContext, artifact_id: str) -> ArtifactRecord:
+        try:
+            return await ArtifactTransaction(tx).locate(actor, artifact_id)
+        except ContentGone as exc:
+            if not isinstance(exc.resource, ArtifactResource):
+                raise RecordNotFound("Artifact is unavailable") from None
+            await self.authorize(actor, exc.resource, content=False)
+            raise
 
     def store(self) -> LocalArtifacts:
         if self.runtime._artifacts is None:
@@ -153,11 +163,10 @@ class ArtifactController:
         if len(inputs) > store.limits.max_input_files or size > store.limits.max_input_bytes:
             raise CapacityExceeded("Run input files exceed configured limits")
         records: dict[str, ArtifactRecord] = {}
-        art = ArtifactTransaction(tx)
         for item in inputs:
             if not isinstance(item, ArtifactRef):
                 continue
-            original = await art.locate(actor, item.artifact_id)
+            original = await self.locate(tx, actor, item.artifact_id)
             await self.authorize(
                 actor,
                 self.resource(
@@ -279,7 +288,7 @@ class ArtifactController:
         art = ArtifactTransaction(tx)
         grants = await art.grants(run.scope, run.state.run_id)
         for grant in grants:
-            original = await art.locate(run.scope, grant.ref.artifact_id)
+            original = await self.locate(tx, actor or run.scope, grant.ref.artifact_id)
             if original.ref != grant.ref or original.name != grant.name:
                 raise PersistenceUnavailable("Granted artifact metadata changed")
             if original.state != "ready":
@@ -308,10 +317,10 @@ class ArtifactController:
         async def query() -> ArtifactInfo:
             assert self.runtime._storage is not None
             async with self.runtime._storage.transaction() as tx:
-                record = await ArtifactTransaction(tx).locate(context, artifact_id)
+                record = await self.locate(tx, context, artifact_id)
             await self.authorize(context, self.resource(record), content=include_content)
             async with self.runtime._storage.transaction() as tx:
-                record = await ArtifactTransaction(tx).locate(context, artifact_id)
+                record = await self.locate(tx, context, artifact_id)
             await self.authorize(context, self.resource(record), content=include_content)
             return ArtifactInfo(
                 **record.ref.model_dump(),
@@ -344,7 +353,7 @@ class ArtifactController:
         async def query() -> bytes:
             assert self.runtime._storage is not None
             async with self.runtime._storage.transaction() as tx:
-                record = await ArtifactTransaction(tx).locate(context, artifact_id)
+                record = await self.locate(tx, context, artifact_id)
             await self.authorize(context, self.resource(record), content=True)
             if expected is not None and record.ref != expected:
                 raise RecordNotFound("Artifact reference differs from saved metadata")
@@ -355,7 +364,7 @@ class ArtifactController:
                     await ArtifactTransaction(tx).unavailable(record)
                 raise PersistenceUnavailable("Artifact bytes are unavailable") from None
             async with self.runtime._storage.transaction() as tx:
-                current = await ArtifactTransaction(tx).locate(context, artifact_id)
+                current = await self.locate(tx, context, artifact_id)
             await self.authorize(context, self.resource(current), content=True)
             if current != record:
                 raise PersistenceUnavailable("Artifact availability changed during reading")

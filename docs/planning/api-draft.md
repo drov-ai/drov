@@ -484,3 +484,26 @@ SSE支持`Last-Event-ID`或`after`，同时提供必须一致。durable帧含id/
 `DrovApp(..., workbench=True)` 默认提供 `/workbench/`，`/`、`/workbench` 跳转到该地址；`workbench=False` 关闭页面而保留HTTP。无认证只允许固定页面/静态资源 GET/HEAD，仍验证Host/Origin/本地连接；没有token bootstrap或任意文件目录。浏览器在登录表单提交本地token或宿主应用credential，只在内存保存。`GET /v1/agents -> AgentCatalog(items=[AgentSummary(name, revision)])` 经认证及应用级read后返回当前注册名/版本，不暴露配置，也不替代start授权。字段/schema/OpenAPI已由实际类型生成。
 
 新增`GET /v1/session?session_id=...`与原路径接口同语义、同授权/分页，工作台采用查询形式无损传递包含斜杠/点段/保留字符的合法会话ID。页面复用前述会话/Run分页、inspection/context、responses/verify/cancel/recover、原上传消费和附件接口，没有新运行状态或存储字段。默认元数据，显式正文；清单中的provider内容仍不可见。重连不提交任务；未知start/response回执显式复用原请求重试。正文被拒绝时清除正文/文件名/Blob视图，后到旧请求不恢复内容。使用与数值限额见 [工作台说明](../../workbench/README.md) / [工程方案](engineering.md)，取舍和兼容边界见 [ADR-0026](../decisions/0026-local-workbench.md)。
+
+## 离线 Session 逻辑清理（T-15 首批）
+
+`from drov.storage.maintenance import SQLiteMaintenance, SessionDeletionPlan`。这是可信宿主管理员的文件能力，不接收普通服务端请求；显式提供现有库，带文件的库必须同时提供原 LocalArtifacts，并先停止 Runtime。构造无 I/O，进入异步上下文后取得原 SQLite/字节锁；冲突返回 StorageInUse，不强抢或关闭原持有者。
+
+```python
+from drov.storage.maintenance import SQLiteMaintenance
+from drov.storage.records import SessionScope
+
+
+async def clear_existing_session(database, scope: SessionScope, *, files=None):
+    async with SQLiteMaintenance(database, artifacts=files) as maintenance:
+        plan = await maintenance.preview_session(scope, include_memory=False)
+        if plan.blockers:
+            return plan
+        return await maintenance.delete_session(plan)
+```
+
+SessionDeletionPlan 包含 scope/include_memory、全库及阶段清单的 HMAC fingerprint、各类记录数量、blockers、保留/清理的 Artifact 数量、无引用阶段数量和 bytes_reclaimed=0；没有用户输入、文件名、参数或正文。删除在同一事务重算并完整比较 plan，过期/篡改返回 Conflict。默认保留 Memory；显式 include_memory=True 删除该用户/Agent 的整个 Memory scope，不仅是当前会话贡献，其他相关未结束/未知 Run 仍阻止此动作。
+
+delete_session/delete-session 这一批只删除数据库正文/引用并保留最小事实；阶段字节、stage.json 和容量仍保留，不是完整个人数据擦除或容量回收。已清理 Session ID 不复用，原 request_key、换键、无键均 ContentGone；需要新会话 ID。Run/Artifact 在原 owner 当前 read 通过后返回 ContentGone/HTTP410，其他身份猜测及撤权仍404。保留共享引用与来源证明不授予额外权限。后续完整维护边界见 [维护策略](release-policy.md)，实际任务状态见 [progress](progress.md)。
+
+无需账号/Key的实际合成例见 [maintenance_offline.py](../../examples/maintenance_offline.py)；CLI与当前限制见 [工程方案](engineering.md#离线维护入口t-15-首批)。

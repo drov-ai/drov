@@ -366,3 +366,7 @@ MCP元数据与annotations不授予effect/权限；默认unknown→ASK。工具�
 
 
 T-14 的登录壳、固定静态资产与认证目录边界见 [ADR-0026](../decisions/0026-local-workbench.md)。工作台默认元数据视图，显式读取正文；SSE 重连只补读原游标，start/response 丢应答保留原请求声明以显式重试，取消/恢复必须显式提交。仅内置 sandbox 的已发布成功结果支持“已确认销毁”展示，否则保留清理未确认。下载/预览仍走原授权接口，查看不触发代码；PNG 解码与其他附件策略由工程方案限定。
+
+T-15 首批的实际清理接点见 [ADR-0027](../decisions/0027-offline-session-retention.md)。离线预览不修改数据/扩展，数据库逻辑清理在排他锁和单一事务内复核完整快照；未结束/unknown/dispatched 操作与未确认销毁租约不因 Run 终态而失去保护。显式清理 Memory scope 还保护其他相关未结束/未知 Run。原 Session 墓碑在接收和文件暂存前检查，换键或无键不能复活；新 ID 才可创建新会话。原 owner 当前 read 通过后投影 ContentGone/410，其他身份或撤权仍404。
+
+共享 Artifact 保留最小来源证明，即使原 Run 正文已清理，已有授权引用仍可验证/读取；证明不授予额外权限。最后引用逻辑清理返回 ContentGone，阶段字节及其容量在本批全部保留。已销毁 E2B 租约的费用预留同事务转存，不因清理重新释放云准入额度。此接点尚不实现本节约定的 abandonment、完整字节回收、备份/barrier、迁移或导出，不能据 SQL 删除成功推断其通过；状态与下一步只见 progress。
