@@ -282,7 +282,7 @@ TypeScript/Vite 的实际开发组合固定为 Node 24.14.0、npm 11.9.0、TypeS
 
 ```sh
 python -m drov.storage.maintenance preview-session --database /private/drov/state.db --artifacts /private/drov/files --tenant tenant --user alice --session session
-python -m drov.storage.maintenance delete-session --database /private/drov/state.db --artifacts /private/drov/files --tenant tenant --user alice --session session --fingerprint <原预览的fingerprint>
+python -m drov.storage.maintenance delete-session --database /private/drov/state.db --artifacts /private/drov/files --tenant tenant --user alice --session session --fingerprint ORIGINAL_PREVIEW_FINGERPRINT
 ```
 
 无 Artifact 的库省略 --artifacts。命令是用法说明，本轮不对真实库执行。删除必须指定完全相同的原预览摘要；变更即重新预览，有 blockers 始终拒绝，错误只输出code并非成功退出。--include-memory 显式涵盖该用户/Agent整个scope，默认不删Memory。宿主文件访问是管理员能力，不把此接口挂给未信任请求；当前没有新增普通用户权限或审批流程。

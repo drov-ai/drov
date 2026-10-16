@@ -21,7 +21,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 起点 Local `/Users/yanlong/projects/drov`，main/213ab8b，工作区干净且与origin/main同步；T-14最终核心11/Docker4 jobs全部success复核后直接实施。按 [ADR-0027](../decisions/0027-offline-session-retention.md) 交付 [SQLiteMaintenance](../../src/drov/storage/maintenance.py)/CLI、无正文dry-run、同事务完整Session数据库清理、去重墓碑和原owner当前read；旧Session在旧键/换键/无键接收前返回ContentGone，跨归属和撤权仍404。保护未结束/未知操作与沙箱租约，显式Memory scope还保护其他相关会话。共享文件保留最小来源证明，原来源删除后继续按原授权/hash读取；最后引用逻辑清理返回Gone。已销毁E2B租约的累计费用预留转存，不错误退款。
 
-首次实际清理启用retention_schema=1独立表，原库仅预览不升级；core records/user_version/record_schema及Artifact/Sandbox/Upload DDL/版本不变。API/运行/工程/架构/维护/案例/质量/生成参考同轮同步，新增 [合成SDK/stream例](../../examples/maintenance_offline.py) 纳入core-only构件安装验证。具体测试、失败修正、最终构件/CI和未验证范围见 [本轮验证](../validation/t15-maintenance.md)，不引用旧T-14全库作为新实现通过。
+首次实际清理启用retention_schema=1独立表，原库仅预览不升级；core records/user_version/record_schema及Artifact/Sandbox/Upload DDL/版本不变。API/运行/工程/架构/维护/案例/质量/生成参考同轮同步，新增 [合成SDK/stream例](../../examples/maintenance_offline.py) 纳入core-only构件安装验证。收尾实际复现并修正跨tenant/user/Agent普通文本提及错误保留文件、Windows3.14测试清理等待超时；新增39项Python，扩展原3个实际Docker场景。最终代码/测试检查点 **9fd41701beb31b273bccda981d79e136c2d6b27e** 已推送；本地Python3.14含真实Docker全库 **1184通过/59skip（309.58s，1243项）**。该SHA的[核心CI](https://github.com/drov-ai/drov/actions/runs/38835428137)全部11个job、[Docker CI](https://github.com/drov-ai/drov/actions/runs/38835428057)全部4个job均completed/success；构件/安装/平台分项、历史失败和未验证范围见 [本轮验证](../validation/t15-maintenance.md)。收尾文档另行提交，不改此检查点的代码/测试/构件载荷。
 
 **本批只验收数据库逻辑清理，T-15整卡进行中。** `bytes_reclaimed=0`，阶段字节/stage.json（含逻辑名）和容量保留；显式物理/暂存回收及中断台账、data_abandoned、SQLite+blob一致备份/恢复/barrier、实际旧记录迁移与正文/文件导出仍缺。不能据本批SQL回滚/硬终止或旧格式拒绝提前关闭整卡；下一批先补清理跨介质边界，具体步骤见文末。当前不需新增仓库/账号/模型ID/Key/预算，继续保留原Docker与私有数据；建议继续本会话实施T-15下一批，同一Local checkout，不进入T-16。
 
@@ -379,6 +379,6 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | 2026-10-15 | T-13 HTTP与身份整卡验收 | 新增65、完整收集1193；两解释器含102真实Docker全库1132+61skip/1134+59skip、四套core/两套server安装与实际HTTP/SSE；修正跨Python OpenAPI与SSE认证期间撤权，最终26b97ee核心10+Docker4 jobs全部success；下一项T-14，建议New Chat，真实模型未验证 |
 | 2026-10-16 | T-14本地工作台整卡验收 | 新增11项Python与24项Playwright；同页身份/延迟回执缺口和示例历史引用已复现修正；1145+59skip全库、两解释器实际Docker浏览器24/构件/安装通过；最终5228c57核心11+Docker4 jobs全部success；下一项T-15，建议New Chat，真实模型未验证 |
 
-| 2026-10-16 | T-15 首批实施 | 离线预览/Session数据库逻辑清理、墓碑/共享来源/费用保留；实际验证见T-15记录；字节和容量仍保留，整卡进行中，下一批跨介质回收/abandonment/备份barrier，不进入T-16 |
+| 2026-10-16 | T-15 首批实施 | 离线预览/Session数据库逻辑清理、墓碑/共享来源/费用保留；新增39、全库1184+59skip，最终9fd4170核心11+Docker4 jobs全部success；字节和容量仍保留，整卡进行中，下一批跨介质回收/abandonment/备份barrier，不进入T-16 |
 
 2026-10-15 准备轮历史补记：当时用户咨询可选T-10C材料，核对任务卡/release-policy与E2B官方quickstart/网络/价格资料；该准备轮仅文档变更，尚未安装SDK/读取凭据/调用云。其后用户明确授权本轮实施，现状以上方T-10C完整验收为准。
