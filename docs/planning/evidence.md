@@ -81,3 +81,13 @@ H-01 至 H-04 的定义在 [产品定义](product.md)。所有假设当前均为
 | E-33 | E2B [计费/额度](https://docs.e2b.dev/billing)，滚动官方文档 | 用量计费、计划/账户限制、可设支出上限 | 不假设用户享有赠额或批准支出；真实接入先核实账户/模板/实际价格及独立沙箱预算，本轮无费用实验 |
 
 2026-10-14 范围采纳补记：用户采纳 E-29 至 E-33 支撑的具体审查建议，形成 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。受控文件必交/E2B 可选是 Drov 的工作决定，不是官方来源证明的 Drov 已支持能力；本次不追加未经验证的 SDK 版本、模板/digest 或远端实验。
+
+## 2026-10-16 DeepSeek候选服务核查
+
+以下为官方滚动文档，查阅日期2026-10-16；只作接入准备依据，不代表Drov已经接入或真实评测通过。具体本地差异见[准备核查](../validation/2026-10-16-deepseek-readiness.md)。
+
+| 标识 | 来源与版本 | 可支持的事实 | 使用边界 |
+| --- | --- | --- | --- |
+| E-34 | [模型与价格](https://api-docs.deepseek.com/quick_start/pricing/)、[首次调用](https://api-docs.deepseek.com/)、[更新记录](https://api-docs.deepseek.com/updates/)；当日表列DeepSeek-V4.1-Flash与DeepSeek-V4-Pro-0813 | 当前API名称`deepseek-flash`/`deepseek-v4-pro`；旧V4 Flash名称已转向V4.1 Flash；表列两者均有工具调用、JSON输出和Responses，Flash的列示token单价较低 | API名称不保证不可变模型快照；未核对用户实际可访问模型，价格须付费前重查，不由文档推断账户预算或质量高低 |
+| E-35 | [Responses指南](https://api-docs.deepseek.com/guides/responses_api/)、[接口参考](https://api-docs.deepseek.com/api/create-response/)；当日滚动协议 | 文档列出流式、function工具、最终json_schema；使用完整本地历史；不支持encrypted_content，忽略include/truncation/parallel_tool_calls等选项 | 与当前Drov的OpenAIResponses要求不同，不能从兼容名称推断无改动可用；实际schema、历史、用量与错误路径须离线/授权探针验证 |
+| E-36 | [工具调用](https://api-docs.deepseek.com/guides/tool_calls/)、[JSON输出](https://api-docs.deepseek.com/guides/json_mode/)；当日滚动协议 | Chat接口另列strict工具Beta及JSON模式；接口能力需按具体协议区分 | JSON合法不等于最终schema有效；工具strict不等于所有协议/schema受支持，不放宽Drov类型、权限、预算或恢复契约来换取通过 |
