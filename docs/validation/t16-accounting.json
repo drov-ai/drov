@@ -1,0 +1,621 @@
+{
+  "currency": "CNY",
+  "method": "registered peak-price upper estimates; not provider invoice or balance",
+  "authorized_ceiling": "13",
+  "usable_ceiling": "11",
+  "settlement_reserve": "2",
+  "attempt_count": 28,
+  "all_settled": true,
+  "cost_upper_cny": "0.11976080",
+  "remaining_usable_estimate": "10.88023920",
+  "registrations": [
+    {
+      "previous_hash": "f4da41fe72d1845d1692d182f2ffbff2aa2e14f2ed0ef975485c0e14c5a8997f",
+      "batch_hash": "5e1644d32a037aafcf49c30f5914f07a8b2e94cf0205f6e1a39703296e5ff593",
+      "reason": "v1 smoke stopped after duplicate retrieval and full_text_read error; clarify instructions; unchanged corpus/model/scoring; full v2 batch; retain all previous costs",
+      "retained_attempts": 2,
+      "retained_cost_upper_cny": "0.0033936"
+    },
+    {
+      "previous_hash": "5e1644d32a037aafcf49c30f5914f07a8b2e94cf0205f6e1a39703296e5ff593",
+      "batch_hash": "4a96bd1254d214eb51394d34f556f1690631c1848492e983092c187fe98587ef",
+      "reason": "Independent user-authorized Pro/low candidate; preserve Flash v1/v2 failures and costs; no prompt/corpus/scoring changes",
+      "retained_attempts": 17,
+      "previous_rates": {
+        "input_miss": "2",
+        "input_hit": "0.04",
+        "output": "8"
+      },
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "retained_cost_upper_cny": "0.02002400"
+    },
+    {
+      "previous_hash": "4a96bd1254d214eb51394d34f556f1690631c1848492e983092c187fe98587ef",
+      "batch_hash": "b908809e5c062e88d4cd1ec645efc64f1a5a562a8feb82e99e94b1b65df9f75d",
+      "reason": "Preserve all reconciled prior attempts; same Pro/low with safe protocol diagnostics and independent bounded terminal usage capture; no prompt or score changes",
+      "retained_attempts": 18,
+      "previous_rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "retained_cost_upper_cny": "0.02924900"
+    },
+    {
+      "previous_hash": "b908809e5c062e88d4cd1ec645efc64f1a5a562a8feb82e99e94b1b65df9f75d",
+      "batch_hash": "ab81972fceb2b136852dd1b78020975a8dd74574ab8578684ced22c91e34fc70",
+      "reason": "Same Pro/low, prompts/corpus/scoring; allow empty encrypted placeholder with mandatory plaintext only; safe field shapes verify actual receipt; preserve all previous failures",
+      "retained_attempts": 19,
+      "previous_rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "retained_cost_upper_cny": "0.03293300"
+    },
+    {
+      "previous_hash": "ab81972fceb2b136852dd1b78020975a8dd74574ab8578684ced22c91e34fc70",
+      "batch_hash": "390570e7d3b4778eeea913364c22f39425bc97d520142f950fedff30ec5e3fdc",
+      "reason": "Same Pro/low, prompts/corpus/scoring; authoritative complete plaintext continuation, opaque string metadata omitted from replay; preserve prior protocol failures",
+      "retained_attempts": 20,
+      "previous_rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "retained_cost_upper_cny": "0.03629300"
+    }
+  ],
+  "attempts": [
+    {
+      "id": "1e179eb8c48541418243da035c37072a",
+      "trial": "smoke:S01-01:1",
+      "request_hash": "f75df14d12336f6565e9dd23dbf579faf8d46c7c511a4a1c6d13954b04b729bc",
+      "status": "settled",
+      "reserved_cny": "0.021368",
+      "cost_upper_cny": "0.002406",
+      "usage": {
+        "input_tokens": 595,
+        "output_tokens": 152,
+        "cached_input_tokens": 0,
+        "total_tokens": 747,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "d8b61bb9b60f4d5cbb9006d36b89014e",
+      "trial": "smoke:S01-01:1",
+      "request_hash": "b6fc12119bd5009ebaede9d71768412db38d5168deeff3059cb7a71b663f9105",
+      "status": "settled",
+      "reserved_cny": "0.024662",
+      "cost_upper_cny": "0.0009876",
+      "usage": {
+        "input_tokens": 913,
+        "output_tokens": 52,
+        "cached_input_tokens": 640,
+        "total_tokens": 965,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "5794e11384e8476d9bab0c7c457665a9",
+      "trial": "5e1644d32a03:smoke:S01-01:1",
+      "request_hash": "1614911cb2934e1975b6c3fd6e28a46f19104db44e6cd46700ed748a018eb41c",
+      "status": "settled",
+      "reserved_cny": "0.021744",
+      "cost_upper_cny": "0.00199",
+      "usage": {
+        "input_tokens": 635,
+        "output_tokens": 90,
+        "cached_input_tokens": 0,
+        "total_tokens": 725,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "7f5453e8fb644a1898e76ca6a24c2c59",
+      "trial": "5e1644d32a03:smoke:S01-01:1",
+      "request_hash": "b7a201a4fbf8f7a21b3f70e7f84865720fc01754478cb49fc5e26b9a95183ce8",
+      "status": "settled",
+      "reserved_cny": "0.023658",
+      "cost_upper_cny": "0.0007816",
+      "usage": {
+        "input_tokens": 810,
+        "output_tokens": 52,
+        "cached_input_tokens": 640,
+        "total_tokens": 862,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "9fb105cdc13145a29c6d95c20b47261a",
+      "trial": "5e1644d32a03:smoke:S01-03:1",
+      "request_hash": "f7f3722691ccc3e0195aa673551391683bdef97583212b6333613332b75bdd31",
+      "status": "settled",
+      "reserved_cny": "0.021762",
+      "cost_upper_cny": "0.00115536",
+      "usage": {
+        "input_tokens": 634,
+        "output_tokens": 80,
+        "cached_input_tokens": 384,
+        "total_tokens": 714,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "25a61f8b943c459f87c0517e63dd7f9b",
+      "trial": "5e1644d32a03:smoke:S01-03:1",
+      "request_hash": "51b980d2107d55e66e566d724a40badd8e6f49c7fa15dea66eedc8db0091613b",
+      "status": "settled",
+      "reserved_cny": "0.02292",
+      "cost_upper_cny": "0.00092448",
+      "usage": {
+        "input_tokens": 772,
+        "output_tokens": 48,
+        "cached_input_tokens": 512,
+        "total_tokens": 820,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "aa96aa5b62fe4c4fb26f83a335e6180b",
+      "trial": "5e1644d32a03:smoke:S02-01:1",
+      "request_hash": "d88257ea0cac2ff150f14b1e0a3e0537b084eff04556add348d705e9b529f155",
+      "status": "settled",
+      "reserved_cny": "0.023556",
+      "cost_upper_cny": "0.002602",
+      "usage": {
+        "input_tokens": 877,
+        "output_tokens": 106,
+        "cached_input_tokens": 0,
+        "total_tokens": 983,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "5f0b1e26f9b74a1fabdc1de7d29f8e97",
+      "trial": "5e1644d32a03:smoke:S02-01:1",
+      "request_hash": "0d9b7f233d4be7e962f8730d5b0e3f0580ce02ba497729fb7fe8f8cf7216de60",
+      "status": "settled",
+      "reserved_cny": "0.025078",
+      "cost_upper_cny": "0.00087072",
+      "usage": {
+        "input_tokens": 1108,
+        "output_tokens": 20,
+        "cached_input_tokens": 768,
+        "total_tokens": 1128,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "5d73b8c60fb1474ab4562793dea3dcc8",
+      "trial": "5e1644d32a03:smoke:S02-01:1",
+      "request_hash": "e7f05b6a5641147172a2a2c1b39258bb27266b02a575749a9f2651ac40bf576f",
+      "status": "settled",
+      "reserved_cny": "0.024154",
+      "cost_upper_cny": "0.00123272",
+      "usage": {
+        "input_tokens": 969,
+        "output_tokens": 100,
+        "cached_input_tokens": 768,
+        "total_tokens": 1069,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "9a418f28492b443697633ce029b617e1",
+      "trial": "5e1644d32a03:smoke:S02-01:1",
+      "request_hash": "85c4fa0b62f9b9d9318f514bd17098059712760b61539eaba498cce31f16c27e",
+      "status": "settled",
+      "reserved_cny": "0.025418",
+      "cost_upper_cny": "0.00049296",
+      "usage": {
+        "input_tokens": 1174,
+        "output_tokens": 19,
+        "cached_input_tokens": 1024,
+        "total_tokens": 1193,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "58e28cd268b8437aa5ec63141e21a6eb",
+      "trial": "5e1644d32a03:smoke:S02-04:1",
+      "request_hash": "8b19f813fc5436b64dedb88c4948a92c08d01d4e6f3dc2183e85d3d6807a899f",
+      "status": "settled",
+      "reserved_cny": "0.023514",
+      "cost_upper_cny": "0.0006756",
+      "usage": {
+        "input_tokens": 873,
+        "output_tokens": 23,
+        "cached_input_tokens": 640,
+        "total_tokens": 896,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "18bebf155d574e34ad1a13011e9123d0",
+      "trial": "5e1644d32a03:smoke:S02-04:1",
+      "request_hash": "84138e410058126c3eb04f6851b6fd66731aa4a5f61f8b6be65b2d8643a026ed",
+      "status": "settled",
+      "reserved_cny": "0.02365",
+      "cost_upper_cny": "0.0013136",
+      "usage": {
+        "input_tokens": 884,
+        "output_tokens": 100,
+        "cached_input_tokens": 640,
+        "total_tokens": 984,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "f7d61d2d078d4bbc833dab5f4d757699",
+      "trial": "5e1644d32a03:smoke:S02-04:1",
+      "request_hash": "76a1a25ef636d948bcc5c2c54572fda15d5d3c77530375b6157845201d065438",
+      "status": "settled",
+      "reserved_cny": "0.024544",
+      "cost_upper_cny": "0.00065472",
+      "usage": {
+        "input_tokens": 1016,
+        "output_tokens": 16,
+        "cached_input_tokens": 768,
+        "total_tokens": 1032,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "eaa10c73bc69411f991741ca52517cff",
+      "trial": "5e1644d32a03:smoke:S02-04:1",
+      "request_hash": "04511fbc7488591c61538a19dd6a9f7da2a9d9e108325cbce24572851641f5a2",
+      "status": "settled",
+      "reserved_cny": "0.02365",
+      "cost_upper_cny": "0.0013136",
+      "usage": {
+        "input_tokens": 884,
+        "output_tokens": 100,
+        "cached_input_tokens": 640,
+        "total_tokens": 984,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "104ab50ce5474a38936f1758595fb6ed",
+      "trial": "5e1644d32a03:smoke:S02-04:1",
+      "request_hash": "9df7ca77527d73bd43366ac2c57236eeca5721a870d474cecfd7bb91fec10fdc",
+      "status": "settled",
+      "reserved_cny": "0.024544",
+      "cost_upper_cny": "0.00065472",
+      "usage": {
+        "input_tokens": 1016,
+        "output_tokens": 16,
+        "cached_input_tokens": 768,
+        "total_tokens": 1032,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "232b7fab9c95471a80586d76d65e94ae",
+      "trial": "5e1644d32a03:smoke:S02-04:1",
+      "request_hash": "4a4e7a28f1614ec1daf25a5b103840e5250b374868434d25b0dad6115e320e36",
+      "status": "settled",
+      "reserved_cny": "0.02365",
+      "cost_upper_cny": "0.0013136",
+      "usage": {
+        "input_tokens": 884,
+        "output_tokens": 100,
+        "cached_input_tokens": 640,
+        "total_tokens": 984,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "3229e287f92447d9930d4e5ef4c4985c",
+      "trial": "5e1644d32a03:smoke:S02-04:1",
+      "request_hash": "22b6e4da12b2b22169fbda131f138058f953465c68036ee3199a83d195f8c09d",
+      "status": "settled",
+      "reserved_cny": "0.024544",
+      "cost_upper_cny": "0.00065472",
+      "usage": {
+        "input_tokens": 1016,
+        "output_tokens": 16,
+        "cached_input_tokens": 768,
+        "total_tokens": 1032,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "28491cbffda7460189258fabd3f92ac3",
+      "trial": "4a96bd1254d2:smoke:S01-01:1",
+      "request_hash": "a5fbaaef638c7426012d5e3607e154292f68b7abef3ae316c570b0b6d9b8eeb9",
+      "status": "settled",
+      "reserved_cny": "0.079416",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.009225",
+      "usage": {
+        "input_tokens": 644,
+        "output_tokens": 127,
+        "cached_input_tokens": 0,
+        "total_tokens": 771,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "8bff44b8f9d241d68a5db830a24b21ac",
+      "trial": "b908809e5c06:smoke:S01-01:1",
+      "request_hash": "30df96762ac9482c96d607e3e3e6b403d151a1968594107117ea11a73618f029",
+      "status": "settled",
+      "reserved_cny": "0.079416",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.003684",
+      "usage": {
+        "input_tokens": 644,
+        "output_tokens": 128,
+        "cached_input_tokens": 640,
+        "total_tokens": 772,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "48203a34587d481fb16833b819ccba72",
+      "trial": "ab81972fceb2:smoke:S01-01:1",
+      "request_hash": "e24465a6b12b425fe116cb18b6988810016c270e6b09fff8521ba383f09e4407",
+      "status": "settled",
+      "reserved_cny": "0.079416",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.00336",
+      "usage": {
+        "input_tokens": 644,
+        "output_tokens": 116,
+        "cached_input_tokens": 640,
+        "total_tokens": 760,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "e58a6cef50a640289ec6c1a7a484e69d",
+      "trial": "390570e7d3b4:smoke:S01-01:1",
+      "request_hash": "6cf8c87c39353b8106b34c762b2cb3bf3f23810066d9f525355cfe382198d284",
+      "status": "settled",
+      "reserved_cny": "0.079416",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.003198",
+      "usage": {
+        "input_tokens": 644,
+        "output_tokens": 110,
+        "cached_input_tokens": 640,
+        "total_tokens": 754,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "ead929c934b74de48947fe98f39947a3",
+      "trial": "390570e7d3b4:smoke:S01-01:1",
+      "request_hash": "f6a8d3e23d1ce60fdf70446eee7d339aad69860007f3c0f42d146ebeec5922f1",
+      "status": "settled",
+      "reserved_cny": "0.088353",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.024852",
+      "usage": {
+        "input_tokens": 839,
+        "output_tokens": 847,
+        "cached_input_tokens": 640,
+        "total_tokens": 1686,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "a4817d51aa5948338b650ebf49b22cc1",
+      "trial": "390570e7d3b4:smoke:S01-01:1",
+      "request_hash": "17921b9997e92fa3b686f3606775cb133588a7255a60d5aa30f9e018c8fa899c",
+      "status": "settled",
+      "reserved_cny": "0.125226",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.0043512",
+      "usage": {
+        "input_tokens": 1771,
+        "output_tokens": 107,
+        "cached_input_tokens": 1664,
+        "total_tokens": 1878,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "b282a3243d324e8bb586b56b080a4248",
+      "trial": "390570e7d3b4:smoke:S01-01:1",
+      "request_hash": "a5ca13287f79c6792915a535a9f889c3dd14c3d508a6037e5c4792043752ecf1",
+      "status": "settled",
+      "reserved_cny": "0.13356",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.0233796",
+      "usage": {
+        "input_tokens": 1963,
+        "output_tokens": 789,
+        "cached_input_tokens": 1792,
+        "total_tokens": 2752,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "d6a417107b964dce8376a2bb5d1cc168",
+      "trial": "390570e7d3b4:smoke:S01-01:1",
+      "request_hash": "a4a0d79efc7fd80d2198403082deed7169fb7949e1ef913c221a83d82ee9f5d5",
+      "status": "settled",
+      "reserved_cny": "0.170739",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.0044694",
+      "usage": {
+        "input_tokens": 2837,
+        "output_tokens": 86,
+        "cached_input_tokens": 2688,
+        "total_tokens": 2923,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "e8586e7b1bb244e68d3bb212998cd3f0",
+      "trial": "390570e7d3b4:smoke:S01-01:1",
+      "request_hash": "69a87fc1c500312ea5c4a9005636d44e9aa4b7d63ce23b42cb4654a9c5fa916f",
+      "status": "settled",
+      "reserved_cny": "0.177111",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.0098358",
+      "usage": {
+        "input_tokens": 3008,
+        "output_tokens": 269,
+        "cached_input_tokens": 2816,
+        "total_tokens": 3277,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "1dd2f107878c4620b06524269302192f",
+      "trial": "390570e7d3b4:smoke:S01-01:1",
+      "request_hash": "1bb0dcecd54cd3a5f24e88f4379635eebf2aa14fecdd394f21694172cd9eab22",
+      "status": "settled",
+      "reserved_cny": "0.192042",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.008223",
+      "usage": {
+        "input_tokens": 3362,
+        "output_tokens": 215,
+        "cached_input_tokens": 3200,
+        "total_tokens": 3577,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    },
+    {
+      "id": "ac5412a093b44affa12403d2d955d9ef",
+      "trial": "390570e7d3b4:smoke:S01-01:1",
+      "request_hash": "88acd12257f6c41a7060876ce4eafb6d15c5254079ef33bf0cc582363965079a",
+      "status": "settled",
+      "reserved_cny": "0.204597",
+      "rates": {
+        "input_miss": "9",
+        "input_hit": "0.30",
+        "output": "27"
+      },
+      "cost_upper_cny": "0.0051588",
+      "usage": {
+        "input_tokens": 3662,
+        "output_tokens": 84,
+        "cached_input_tokens": 3456,
+        "total_tokens": 3746,
+        "cost_amount": null,
+        "currency": null,
+        "complete": true
+      }
+    }
+  ]
+}

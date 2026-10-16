@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "mode": "live",
+  "suite": "smoke",
+  "batch_hash": "390570e7d3b4778eeea913364c22f39425bc97d520142f950fedff30ec5e3fdc",
+  "config": {
+    "version": 3,
+    "amendment": "Independent user-authorized Pro configuration after aborted Flash smoke; prompts/corpus/scoring unchanged; retain both Flash failures and costs.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "low",
+    "max_output_tokens": 2048,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-16",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "git_commit": "2f5ec877684c1322762dde79d94d52b2b871b4db",
+  "python": "3.14.3 (main, Feb  3 2026, 15:32:20) [Clang 17.0.0 (clang-1700.6.3.2)]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "sqlite": "3.52.0",
+  "dependencies": {
+    "drov": "0.1.0a0",
+    "pydantic": "2.14.1",
+    "aiosqlite": "0.22.1",
+    "portalocker": "4.4.0",
+    "openai": "3.29.0",
+    "httpx2": "2.13.1"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "results": [
+    {
+      "trial": "S01-01-1",
+      "task": "S01-01",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 33.181830916088074,
+      "phases": [
+        {
+          "task": "S01-01",
+          "phase": "run",
+          "pid": 1290,
+          "run_id": "acee83d1-9ad9-43c3-9a41-027be1607797",
+          "state": "failed",
+          "output": null,
+          "error_code": "limit_exceeded",
+          "schema_valid": false,
+          "model_calls": 8,
+          "model_calls_after_cancel": null,
+          "search_calls": 8,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "dc91b37d-c862-4d2f-a13f-727560eeecbf",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "c1806909-bdfc-45d3-abad-32ff9bbab738",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "4ac1b343-2b1b-4fc4-ae5b-1b068a580e44",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "fc3f7fdb-096c-46b1-9341-f1cced7fa0fb",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "ee8f527c-8cfd-4c86-b4d6-ec95de8454e1",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "660a6684-75ad-4b82-91c0-8db7039ca19e",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "3cce1f31-c6ed-45a8-8687-454702638cfd",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "20e19d62-a681-44c4-a6c7-3cb9ca726315",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled",
+            "disabled",
+            "disabled",
+            "disabled",
+            "disabled",
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "67169eb7-8525-4c4b-bb6a-2411d0eeeb68",
+            "905c1987-c5be-4e4e-aa78-05f2fadefacc",
+            "4b80e7da-259a-4e87-a683-83bc3d378df4",
+            "1a7e242a-79ce-4178-97a2-820dc2470f64",
+            "db6c1c73-d6ae-4b50-aa3c-7833f0779e4b",
+            "83b09664-7a24-4a95-8525-492787441f2a",
+            "7e4f628a-8f52-4298-9f84-1b40f13a99f1",
+            "e60a62eb-31df-4fd8-b85b-af6ab45cfef4"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": false,
+        "schema_valid": false,
+        "checks": {
+          "phases_executed": true,
+          "state": false,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": false,
+          "fact_and_sources": false,
+          "final_schema": false
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    }
+  ],
+  "summary": {
+    "complete": false,
+    "passed": 0,
+    "total": 1,
+    "schema_passed": 0,
+    "schema_total": 1,
+    "schema_required": 1,
+    "scenarios": {
+      "S-01": {
+        "passed": 0,
+        "total": 1
+      },
+      "S-02": {
+        "passed": 0,
+        "total": 0
+      },
+      "S-03": {
+        "passed": 0,
+        "total": 0
+      }
+    },
+    "code_passed": 0,
+    "code_total": 0,
+    "safety_failures": [],
+    "release_gate": false
+  }
+}

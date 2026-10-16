@@ -1,6 +1,6 @@
 # 本地开发
 
-包版本为 `0.1.0a0`。已有模型协议、事务存储、Runtime/Agent、工具/权限、上下文/Memory、交互及 verify/recover。T-10A 已接通文件输入、PythonSandbox 审批/实际执行、有界导出及销毁后原工具结果/ready 共同发布，[真实 Docker 示例](../examples/sandbox_offline.py) 可运行；T-10B 完整隔离/故障已验收；OpenAI Responses 离线协议适配见 ADR-0022，真实模型质量与服务/CLI 尚未验收。任务状态见 [progress](planning/progress.md)，实际证据见 [本轮验证](validation/t10a-runtime-sandbox.md)。
+包版本为 `0.1.0a0`。已有模型协议、事务存储、Runtime/Agent、工具/权限、上下文/Memory、交互及 verify/recover。T-10A 已接通文件输入、PythonSandbox 审批/实际执行、有界导出及销毁后原工具结果/ready 共同发布，[真实 Docker 示例](../examples/sandbox_offline.py) 可运行；T-10B 完整隔离/故障已验收；OpenAI Responses 离线协议适配见 ADR-0022，DeepSeek专用方言/固定任务见[评测说明](../evals/README.md)；真实模型质量尚未验收，HTTP/维护CLI的实际状态以progress为准。任务状态见 [progress](planning/progress.md)，实际证据见 [本轮验证](validation/t10a-runtime-sandbox.md)。
 
 ## 环境与安装
 

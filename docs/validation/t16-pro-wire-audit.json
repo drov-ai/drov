@@ -1,0 +1,102 @@
+{
+  "batch_hash": "390570e7d3b4778eeea913364c22f39425bc97d520142f950fedff30ec5e3fdc",
+  "scope": "offline reconstruction of all eight saved normalized inputs; no HTTP request or tool execution",
+  "inputs": [
+    {
+      "request": "model-01.request.json",
+      "previous_results": 0,
+      "checks": {
+        "original_system_instruction": true,
+        "call_output_ids_match": true,
+        "complete_tool_facts": true,
+        "plaintext_replay_only": true,
+        "output_schema_present": true,
+        "no_extra_requests": true
+      }
+    },
+    {
+      "request": "model-02.request.json",
+      "previous_results": 1,
+      "checks": {
+        "original_system_instruction": true,
+        "call_output_ids_match": true,
+        "complete_tool_facts": true,
+        "plaintext_replay_only": true,
+        "output_schema_present": true,
+        "no_extra_requests": true
+      }
+    },
+    {
+      "request": "model-03.request.json",
+      "previous_results": 2,
+      "checks": {
+        "original_system_instruction": true,
+        "call_output_ids_match": true,
+        "complete_tool_facts": true,
+        "plaintext_replay_only": true,
+        "output_schema_present": true,
+        "no_extra_requests": true
+      }
+    },
+    {
+      "request": "model-04.request.json",
+      "previous_results": 3,
+      "checks": {
+        "original_system_instruction": true,
+        "call_output_ids_match": true,
+        "complete_tool_facts": true,
+        "plaintext_replay_only": true,
+        "output_schema_present": true,
+        "no_extra_requests": true
+      }
+    },
+    {
+      "request": "model-05.request.json",
+      "previous_results": 4,
+      "checks": {
+        "original_system_instruction": true,
+        "call_output_ids_match": true,
+        "complete_tool_facts": true,
+        "plaintext_replay_only": true,
+        "output_schema_present": true,
+        "no_extra_requests": true
+      }
+    },
+    {
+      "request": "model-06.request.json",
+      "previous_results": 5,
+      "checks": {
+        "original_system_instruction": true,
+        "call_output_ids_match": true,
+        "complete_tool_facts": true,
+        "plaintext_replay_only": true,
+        "output_schema_present": true,
+        "no_extra_requests": true
+      }
+    },
+    {
+      "request": "model-07.request.json",
+      "previous_results": 6,
+      "checks": {
+        "original_system_instruction": true,
+        "call_output_ids_match": true,
+        "complete_tool_facts": true,
+        "plaintext_replay_only": true,
+        "output_schema_present": true,
+        "no_extra_requests": true
+      }
+    },
+    {
+      "request": "model-08.request.json",
+      "previous_results": 7,
+      "checks": {
+        "original_system_instruction": true,
+        "call_output_ids_match": true,
+        "complete_tool_facts": true,
+        "plaintext_replay_only": true,
+        "output_schema_present": true,
+        "no_extra_requests": true
+      }
+    }
+  ]
+}

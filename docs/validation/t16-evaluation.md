@@ -52,3 +52,21 @@ CSV字节规则修复时一度误覆盖.gitattributes原四条Moby逐字保护�
 
 
 空占位兼容登记后首项仍失败0/1，[原汇总](t16-pro-smoke-compatible.json)保留；安全形状明确encrypted_content为str/长度38、明文parts=1，非空而非空占位。输入644（缓存640）/输出116/总760用量自动settled，上界0.00336元，累计20请求0.036293元。上一次只支持空占位的假设不足，未把失败改成通过。最终按完整明文有效性校验，允许额外字符串/null作为私有元数据，发回供应商前移除该字段；仅加密/无明文、非法字段类型仍拒绝。新增实际客户端原额外字符串不重放及非法类型反例；模型/提示/语料/评分不变，再登记实际兼容检查点。
+
+
+## 最终明文兼容检查点：真实质量未通过
+
+源码1297c4808b6e0910b4a5ea89ff8c57e3b263b5fa与[登记](t16-preregistration-pro-plaintext.json)先提交/推送，fingerprint=390570e7d3b4778eeea913364c22f39425bc97d520142f950fedff30ec5e3fdc。Pro/low首项S01-01实际8个完整模型响应、8次search_docs成功，连续换查询直到limit_exceeded，没有最终输出；0/1通过，余6 smoke/81正式未执行，零已观察安全失败。[原汇总](t16-pro-smoke-plaintext.json)保留，未用新模型成功替换。完整工具结果和单次检索system要求都已进入规范化输入；[八输入离线重建审计](t16-pro-wire-audit.json)进一步检查了同源码官方请求体的call_id配对、完整事实、schema及明文续接；不是供应商接收回执，不断言其内部原因。本轮未发现可复现的本地输入丢失，不再自动改提示/评分重抽。
+
+全部历史28个请求已settled，累计人民币峰值上界**0.11976080元**，11元可用估算余量10.88023920元、另留2元收尾；[账费快照](t16-accounting.json)保留各模型价格/用量/登记审计。不是实际账单/余额，无需充值。模型重试为0，8次是模型连续提出的新检索计划，不是SDK自动重试。正式分母仍81/schema75，不能把未跑项删掉，未作正式通过率或p50/p95结论。
+
+最终源码三入口各完整27/27、schema25/25、代码3/3、零安全失败，报告分别为[SDK](t16-offline-sdk.json)、[stream](t16-offline-stream.json)、[HTTP](t16-offline-http.json)，原始目录`.drov/t16-plaintext-offline-{sdk,stream,http}`。各自release_gate=false；脚本生成代码在真实Docker执行/持久下载只能验证运行结构，不能替代正式被评测模型代码。最后适配专项80项通过（`t16-opaque-metadata-target.log`）、严格mypy192源通过；空占位测试最初错误访问ModelResponse.text，修正为原message字段，生产接口未改。
+
+两解释器最终构件均成功（`t16-plaintext-package{311,314}.log`），wheel/sdist重建及四套core-only新环境安装与普通/stream例子通过。两套产物字节一致：wheel SHA256=513d52c944a5ad178754835a751f60877ac39e830f250ed2e6f94e17a8bdab91；sdist=178532ca2ee0b88af47cfaef441c68e6a242a8f38330f6727abd57bf6dd1d217。该sdist对应构建时文档，不声称与后续补记文档的sdist相同。两解释器openai extra安装各四种OpenAI/DeepSeek×SDK/stream实际loopback通过；两解释器server安装实际HTTP/SSE与5静态资源通过（`t16-plaintext-installed-{openai,server}{311,314}.log`）。一次包脚本参数误写--output被解析器拒绝，没有构件生成，改用原--out-dir后成功。锁实际94包未变；schema/OpenAPI检查通过。原品牌/静态资源/Moby/历史SQL和基线字节保留，无E2B调用、公开包/站点发布或部署。
+
+[使用与失败复核](t16-experience.md)是维护者侧执行验证，无独立受试者/竞品对照。没有足够正式成功可作每场景至少3成功抽查，不能写已通过体验/真实质量。恢复步骤和下一轮精确目标只维护在progress：先复核首项循环；只有可复现缺陷才修协议，否则另明确候选配置事前登记，保持语料/评分与原累计预算。完整7 smoke后才81正式。**T-16仅子范围交付，整卡不关闭。**
+
+
+最终冻结源码本地Python3.14完整全库**1401通过/59skip（386.83s，共1460项）**，含明确配置的本地Docker，59为本轮未授权E2B，见`t16-plaintext-full314.log`。先前另一次1398/59全库执行期间文件仍在修正，不作为最终冻结源码验收，最终以本次为准。285文件ruff格式/静态、mypy192源、schema/OpenAPI与锁检查通过；91个Git跟踪SDK/资源载荷与最终wheel逐字一致，未将本机.DS_Store当作应打包源码。92份Markdown/829本地文件链接/16Python说明片段AST通过（`t16-final-doc-check.json`），可识别凭据模式0；AST检查不等同SDK运行。只读清点本地dev.drov.execution容器0，原非Drov数据库容器保留。
+
+最终精确源码1297c4808b6e0910b4a5ea89ff8c57e3b263b5fa的[Docker38922182332](https://github.com/drov-ai/drov/actions/runs/38922182332)全部4 jobs completed/success；[核心38922182329](https://github.com/drov-ai/drov/actions/runs/38922182329)quality/python-next/workbench已success，八套package尚在运行，最终结果待补，不把已通过部分当完整平台验收。
