@@ -1,0 +1,47 @@
+{
+  "version": 8,
+  "registered_at": "2026-10-16T23:48:54.293433+08:00",
+  "source_commit": "8cfee22069a1021b2a0465f3847ec8941c4cc552",
+  "batch_hash": "a23f8770cf29930780a6ecf0fde70091e4e46402aefbcc9cd7c82bbd78440f7e",
+  "manifest_sha256": "b1f62768489fc0f175e24cf16267a0de0752b7f700b5075c8f0e9f0910cd5677",
+  "config": {
+    "version": 5,
+    "amendment": "Follow-up Memory exact-key clarification after offline audit of all Pro/high isolation requests: one exact-key recall, successful empty result is authoritative, and mutation claims require tool success. Same Pro/high, corpus, scoring, 8-request trial limit and output limit; retain all historical failures and costs. Adaptive follow-up, not blind evaluation.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "high",
+    "max_output_tokens": 2048,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-16",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "planned_trials": {
+    "smoke": 7,
+    "formal": 81
+  },
+  "formal_schema_denominator": 75,
+  "authorization_total_cny": "13",
+  "paid_calls_before_registration": 44,
+  "previous_registration": "f4ecc6c05662f4608afb7e019460f43e6269d684d23434cfcec76192fc24e3b8",
+  "retained_cost_upper_cny": "0.24583100",
+  "reviewed_stop": "trial_model_limit",
+  "selection": "Follow-up Memory exact-key clarification after offline audit of all Pro/high isolation requests: one exact-key recall, successful empty result is authoritative, and mutation claims require tool success. Same Pro/high, corpus, scoring, 8-request trial limit and output limit; retain all historical failures and costs. Adaptive follow-up, not blind evaluation.",
+  "review_evidence": "docs/validation/t16-memory-isolation-audit.json; no local protocol defect; explicit new trial identities, old failed trial stays stopped at eight attempts"
+}
