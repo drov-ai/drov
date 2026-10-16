@@ -62,6 +62,30 @@ class Ledger:
                 }
             )
 
+    def amend(self, *, previous_hash: str, batch_hash: str, reason: str) -> None:
+        """Register a new experiment while retaining every cost and the original ceiling."""
+        if not reason.strip() or previous_hash == batch_hash:
+            raise ValueError("A distinct preregistration and a reason are required")
+        with portalocker.Lock(str(self.path) + ".lock", timeout=1):
+            data = json.loads(self.path.read_text(encoding="utf-8"))
+            if data["batch_hash"] != previous_hash or data.get("stopped"):
+                raise BudgetStop("Cannot amend a different or stopped budget")
+            if any(a["status"] != "settled" for a in data["attempts"]):
+                raise BudgetStop("Reconcile every unfinished paid attempt before amendment")
+            data.setdefault("registrations", []).append(
+                {
+                    "previous_hash": previous_hash,
+                    "batch_hash": batch_hash,
+                    "reason": reason,
+                    "retained_attempts": len(data["attempts"]),
+                    "retained_cost_upper_cny": str(
+                        sum((Decimal(a["cost_upper_cny"]) for a in data["attempts"]), Decimal(0))
+                    ),
+                }
+            )
+            data["batch_hash"] = batch_hash
+            self._write(data)
+
     def reserve(
         self,
         *,

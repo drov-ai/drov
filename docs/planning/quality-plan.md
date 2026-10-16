@@ -207,3 +207,5 @@ T-15备份专项（ADR-0030）验证实际SQLite backup API/原库不变、完�
 
 
 T-15迁移实际使用T-05历史开发SDK写出的v1 Run/事件/派发/去重夹具；验证真实字段变换、语义/版本/unknown/请求键不变、原始完整备份、未来版本拒绝、事务故障/丢回执/取消/真实进程kill回滚及CLI，不能只用版本拒绝替代迁移。导出覆盖SDK/stream×内存/SQLite、默认元数据/正文上下文、同tenant read与view_content分离/跨tenant/撤权/逐文件权限、仅选定来源、应用副本/附件hash、分页/限额/未知事件/Gone、源清理和恢复屏障后的共享文件及真实Docker三入口CSV/PNG。旧prepared在屏障下不能因cancel/放弃被错误记未派发。具体验收只见[本轮记录](../validation/t15-migration-export.md)。
+
+T-16首次smoke的实际失败和一次提示澄清重新登记见[验证](../validation/t16-evaluation.md)。88个试验上限按固定配置的7+81计；中止的旧配置结果不删除、不混分，所有登记仍累计在同一用户授权总预算中。不得通过换指纹/新建账本退款或绕过未知费用；澄清后的配置仍须完整smoke和正式任务，不把新样本替换进旧批次。

@@ -25,3 +25,5 @@ T-16 用户授权使用本地安全配置的 DeepSeek Key，优先 `deepseek-fla
 共用内部解析通过显式方言分支和窄hook实现，原OpenAI默认仍要求加密项。无新依赖/数据库版本/DDL或持久Run语义变更；已有OpenAI bundle不迁移为DeepSeek。公开参数/私有方言、测试、API/运行/工程/能力/质量同轮同步。官方滚动来源见[evidence](../planning/evidence.md)；它们不是不可变模型快照或Drov兼容/质量已成功的证明，实际失败/费用与验收见[验证](../validation/t16-evaluation.md)。
 
 组合验证另复现了原Responses将非字符串user内容拒绝的缺口：自动Memory注入按原契约是`{type:drov.memory,record:...}`的user数据。现在在供应商文本输入边界使用canonical JSON，保留原role、marker、版本和内容；普通文本保持原样，绝不将Memory提升为system指令。原协议和归属语义不变，两种适配器都以真实客户端/SQLite关闭后重开验证。它是本轮实际修复，不能倒推T-11当时已验收了该组合。
+
+2026-10-16真实smoke修订：v1首项模型重复检索并将完整可见资料标成未读全文，按旧规则失败并停止，保留完整记录。只澄清提示、不改变语料/评分/模型，v2重新登记并完整7+81；旧失败不混分。宿主Ledger.amend仅在旧请求全部settled时允许新指纹，保留旧attempt/费用/13元上限/2元余量，追加审计记录；未结算不得改登记。新/旧配置的trial标签独立，但总费用始终共用一个账本。固定配置单批最多88个试验，历史中止批次仍计总预算；不自动无限重登记。

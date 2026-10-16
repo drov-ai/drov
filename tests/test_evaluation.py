@@ -190,6 +190,37 @@ def test_scoring_cannot_accept_words_instead_of_persistence() -> None:
     assert not score(task, [phase], {})["passed"]
 
 
+def test_budget_amendment_preserves_cost_and_refuses_unsettled(tmp_path: Path) -> None:
+    ledger = Ledger(tmp_path / "ledger.json")
+    ledger.create(batch_hash="first")
+    identifier = ledger.reserve(
+        batch_hash="first", trial="old:t", request_hash="h", input_bytes=1000, max_output_tokens=100
+    )
+    with pytest.raises(BudgetStop):
+        ledger.amend(previous_hash="first", batch_hash="second", reason="new preregistration")
+    ledger.settle(
+        identifier,
+        Usage(
+            input_tokens=1000,
+            output_tokens=100,
+            total_tokens=1100,
+            cached_input_tokens=0,
+            complete=True,
+        ),
+    )
+    before = json.loads(ledger.path.read_text())
+    ledger.amend(previous_hash="first", batch_hash="second", reason="new preregistration")
+    after = json.loads(ledger.path.read_text())
+    assert after["attempts"] == before["attempts"]
+    assert after["ceiling"] == "13" and after["usable"] == "11"
+    assert after["registrations"][0]["retained_attempts"] == 1
+    assert after["registrations"][0]["retained_cost_upper_cny"] == "0.0028"
+    with pytest.raises(BudgetStop):
+        ledger.reserve(
+            batch_hash="first", trial="t", request_hash="h", input_bytes=1, max_output_tokens=1
+        )
+
+
 @pytest.mark.docker
 @pytest.mark.asyncio
 @pytest.mark.parametrize("identifier", ["S01-09", "S02-09", "S03-09"])

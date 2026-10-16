@@ -351,7 +351,8 @@ async def trial(options: argparse.Namespace, task: dict[str, Any], repeat: int) 
                 "--env-file",
                 options.env_file,
                 "--trial-label",
-                f"{getattr(options, 'suite', 'offline')}:{task['id']}:{repeat}",
+                f"{options.batch_hash[:12]}:{getattr(options, 'suite', 'offline')}:"
+                f"{task['id']}:{repeat}",
             ]
             process = await asyncio.create_subprocess_exec(
                 *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE

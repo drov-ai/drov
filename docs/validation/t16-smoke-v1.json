@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "mode": "live",
+  "suite": "smoke",
+  "batch_hash": "f4da41fe72d1845d1692d182f2ffbff2aa2e14f2ed0ef975485c0e14c5a8997f",
+  "config": {
+    "version": 1,
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-flash",
+    "reported_version": "DeepSeek-V4.1-Flash (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "none",
+    "max_output_tokens": 2048,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "2",
+      "input_hit": "0.04",
+      "output": "8"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-16",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "git_commit": "636dd84acaa51f07dca57c1b5eaf18396f5f7651",
+  "python": "3.14.3 (main, Feb  3 2026, 15:32:20) [Clang 17.0.0 (clang-1700.6.3.2)]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "sqlite": "3.52.0",
+  "dependencies": {
+    "drov": "0.1.0a0",
+    "pydantic": "2.14.1",
+    "aiosqlite": "0.22.1",
+    "portalocker": "4.4.0",
+    "openai": "3.29.0",
+    "httpx2": "2.13.1"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "results": [
+    {
+      "trial": "S01-01-1",
+      "task": "S01-01",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 3.0859680003486574,
+      "phases": [
+        {
+          "task": "S01-01",
+          "phase": "run",
+          "pid": 94952,
+          "run_id": "44e719b9-c31e-4cce-9366-4cc2ad40a306",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": false
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 2,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "a4679549-59e5-41c8-944a-ccc19157b5a2",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "3e5bdef8-83d7-48db-9609-f6f77c1ed46a",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "f048dc3a-9514-4470-9556-0a5d78dfca3b",
+            "cc723ae1-04ee-4cf7-ae90-db1e5bfe0726"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": false,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": false,
+          "fact_and_sources": false,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    }
+  ],
+  "summary": {
+    "complete": false,
+    "passed": 0,
+    "total": 1,
+    "schema_passed": 1,
+    "schema_total": 1,
+    "schema_required": 1,
+    "scenarios": {
+      "S-01": {
+        "passed": 0,
+        "total": 1
+      },
+      "S-02": {
+        "passed": 0,
+        "total": 0
+      },
+      "S-03": {
+        "passed": 0,
+        "total": 0
+      }
+    },
+    "code_passed": 0,
+    "code_total": 0,
+    "safety_failures": [],
+    "release_gate": false
+  }
+}

@@ -1,5 +1,6 @@
 {
-  "version": 1,
+  "version": 2,
+  "amendment": "Clarify one retrieval returning the entire corpus and full_text_read semantics; no scoring/manifest/model/price/threshold change. Preserve aborted v1 smoke and all costs.",
   "provider": "DeepSeek official",
   "endpoint": "https://api.deepseek.com",
   "model": "deepseek-flash",
