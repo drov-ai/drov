@@ -1,13 +1,13 @@
 # 当前进度与下一轮
 
-更新：2026-10-16（Asia/Shanghai；T-15 第二批实施与验证）。
+更新：2026-10-16（Asia/Shanghai；T-15 第二批验收，接续遗留运行放弃）。
 
 ## 当前状态
 
-- 阶段：P1至P4、T-01至T-14（含T-10A/T-10B/T-10C）已完整验收。**T-15数据维护与兼容进行中；首批逻辑清理已验收，第二批显式字节回收与中断台账已实现、正在验证，整卡未关闭，不进入T-16。** 本轮起点main/f991f41干净且与远端同步，前置9fd4170核心11/Docker4 jobs全部success；本轮范围见[回收记录](../validation/t15-reclamation.md)，首批历史见[T-15首批](../validation/t15-maintenance.md)。
+- 阶段：P1至P4、T-01至T-14（含T-10A/T-10B/T-10C）已完整验收。**T-15数据维护与兼容进行中；首批逻辑清理、第二批有效阶段显式字节回收与中断台账已验收，整卡未关闭，不进入T-16。** 本轮起点main/f991f41干净且与远端同步；最终ffec4d1核心11/Docker4 jobs全部success，范围见[回收记录](../validation/t15-reclamation.md)，首批历史见[T-15首批](../validation/t15-maintenance.md)。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
-- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；实验性工作台已完整验收；T-15首批已接通SQLiteMaintenance/CLI、同事务逻辑清理与墓碑保护；未验收：T-15整卡及T-16至T-18，完整字节回收/备份/barrier/迁移/导出未交付；多 Agent/Skill/持久工作区等后续，无空壳。
+- 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；实验性工作台已完整验收；T-15已接通SQLiteMaintenance/CLI、逻辑清理/墓碑与有效阶段显式字节回收/中断台账；未验收：T-15整卡及T-16至T-18，data_abandoned/一致备份/barrier/迁移/导出未交付；多 Agent/Skill/持久工作区等后续，无空壳。
 - 本轮T-15仅操作临时合成库/文件/模型输出与原本地Docker；不把真实用户库当破坏性夹具，原SQLite/bytes/租约/云台账保留。未读真实Key/私有env、调用付费模型/云、上传私有资料或公开发布/部署；T-10C历史预算未动用。
 - T-08 实施起点（历史）：`/Users/yanlong/projects/drov`，main / adc9793，工作区干净且比 origin/main 多一个 T-06/07 提交；先重跑 T-07 的 343 passed / 2 skipped 后实施 T-08。保持同一 checkout，保护品牌、uv.lock、历史基线和 SQLite DDL。实施 d997f17、跨平台检查修正 40160ff/5ff654c 已提交并推送；最终补记仅修改进度/验证文档，实际 HEAD 以 git log 为准。
 - 历史范围澄清（已由本轮用户要求替代）：T-08 交接时按旧 C-17 将沙箱说明为首版之后；当时仅修正状态表述。2026-10-14 用户确认首版“生成并执行代码”，现以前移后的 C-17、ADR-0013、T-10A/T-10B 为准，不能沿用旧后续排期。
@@ -21,7 +21,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 按[ADR-0028](../decisions/0028-resumable-byte-reclamation.md)在原SQLiteMaintenance新增preview_reclamation/reclaim/resume_reclamation；完整预览和精确owner/Agent，整阶段保留共享引用/未结束或未知执行/租约，过期未消费上传必须显式选择，已消费输入不按TTL删。先提交独立reclamation_schema=1的pending库存，再删原数据/清单、同步目录，最后确认done；中断期间普通SQLiteStorage/Runtime打开拒绝，离线只恢复原库存。原所有DDL/版本、字节格式/额度、Session逻辑删除的零字节语义和云费用预留保持。
 
-41项回收专项与三条原真实Docker SDK/stream/HTTP扩展已通过；最终专项、全库、构件/安装与远程检查在源码冻结后记录于[本轮验证](../validation/t15-reclamation.md)，不把局部通过当作全部验收。API/运行/工程/维护/架构/案例/质量/生成参考与core-only维护例子同轮同步。
+代码/测试检查点 **ffec4d12ed787dcf1e6d3b8a686677eefd25473e** 已推送；新增42项回收专项与三条原真实Docker SDK/stream/HTTP扩展已通过，两解释器相关维护/故障各161通过。Python3.14本地含真实Docker全库 **1226通过/59skip（326.64s，1285项）**，构件/四套core-only与两套独立server安装均成功；最终[核心11项](https://github.com/drov-ai/drov/actions/runs/38853895835)、[Docker4项](https://github.com/drov-ai/drov/actions/runs/38853895681)均completed/success，[本轮验证](../validation/t15-reclamation.md)绑定实际SHA/日志与平台边界。API/运行/工程/维护/架构/案例/质量/生成参考与core-only维护例子同轮同步。
 
 本批不交付data_abandoned、一致备份/恢复/barrier、实际迁移和授权导出；无有效原清单/可信归属且没有pending台账的旧孤儿保持拒绝，不猜测owner强删。原用户库/字节/租约/私有环境和品牌未作为删除夹具；当前无需新仓库/账号/模型ID/Key/预算。
 
@@ -328,7 +328,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 前置T-13/T-14完整验收，首批逻辑删除已验收；第二批有效阶段回收的最终检查点见上节与回收记录，不能跳到T-16。按 [原任务卡](implementation-plan.md) 和release-policy接续：
 
-1. 先完成第二批最终验证；继而补显式管理员data_abandoned及未知操作最小事实，不能将放弃写成核实或资源销毁。普通逻辑清理和有效阶段回收继续保护未知执行/未核销租约；缺清单/未知项无可信原库存时拒绝，不绕过pending或删除原用户台账。abandonment要实际验证accepted/running/suspended遗留、当前原进程锁、不可复活/重派发、清理后未知operation/tool/reason最小事实仍存和资源租约不核销。
+1. **下一项：显式管理员data_abandoned及未知操作最小事实。** 不能将放弃写成核实或资源销毁。普通逻辑清理和有效阶段回收继续保护未知执行/未核销租约；缺清单/未知项无可信原库存时拒绝，不绕过pending或删除原用户台账。实际验证accepted/running/suspended遗留、当前原进程锁、不可复活/重派发、清理后未知operation/tool/reason最小事实仍存和资源租约不核销，才验收该子范围。
 2. 再交付SQLite backup API + 原配对blob/清单/hash的一致备份与恢复；拒绝未完成/缺失/损坏/版本失配快照，恢复整个存储设置持久recovery barrier，阻止新start和外部派发，包括备份后完全缺失的Run/去重键。需独立业务/执行事实的人工核对，不因重拿锁清除屏障。
 3. 实际旧记录/事件/派发fixture迁移、未来版本/旧SDK拒绝和中断回滚；正文与显式文件导出逐项read/view_content，默认无正文/文件名，不能泄露宿主路径/控制ID。完成整卡全部条件并留下构件/安装/兼容/故障证据后才关闭T-15。
 4. 现在不需用户新增仓库/账号/模型ID/Key/预算；执行者创建临时库/文件/备份夹具，不改真实用户库。保留原Docker Desktop及`.drov`/私有env/SQLite/bytes/租约/云台账。T-16 smoke前再共同确认模型服务/固定ID/能力来源与费用上限，凭据仅在本地忽略配置/凭据管理安全提供。
@@ -390,3 +390,5 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | 2026-10-16 | T-15 首批实施 | 离线预览/Session数据库逻辑清理、墓碑/共享来源/费用保留；新增39、全库1184+59skip，最终9fd4170核心11+Docker4 jobs全部success；字节和容量仍保留，整卡进行中，下一批跨介质回收/abandonment/备份barrier，不进入T-16 |
 
 2026-10-15 准备轮历史补记：当时用户咨询可选T-10C材料，核对任务卡/release-policy与E2B官方quickstart/网络/价格资料；该准备轮仅文档变更，尚未安装SDK/读取凭据/调用云。其后用户明确授权本轮实施，现状以上方T-10C完整验收为准。
+
+| 2026-10-16 | T-15 第二批验收 | 有效阶段/过期未消费上传的显式回收、pending/done中断台账及普通打开阻断；新增42、全库1226+59skip，ffec4d1核心11+Docker4 jobs全部success；整卡进行中，下一项data_abandoned，再做备份barrier/迁移/导出 |
