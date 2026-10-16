@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "provider": "DeepSeek official",
+  "endpoint": "https://api.deepseek.com",
+  "model": "deepseek-flash",
+  "reported_version": "DeepSeek-V4.1-Flash (rolling alias; no immutable snapshot)",
+  "protocol": "drov.deepseek.responses.v1",
+  "streaming": true,
+  "reasoning_effort": "none",
+  "max_output_tokens": 2048,
+  "context_window": 1000000,
+  "model_retries": 0,
+  "read_tool_retries": 0,
+  "budget_cny": "13",
+  "usable_budget_cny": "11",
+  "settlement_reserve_cny": "2",
+  "peak_cny_per_million": {"input_miss": "2", "input_hit": "0.04", "output": "8"},
+  "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+  "price_checked": "2026-10-16",
+  "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+  "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+}

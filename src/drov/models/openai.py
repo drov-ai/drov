@@ -122,7 +122,9 @@ def _usage(value: object) -> Usage:
         raise ModelProtocolError("Invalid Responses usage") from None
 
 
-def _response(data: dict[str, Any], names: dict[str, str]) -> ModelResponse:
+def _response(
+    data: dict[str, Any], names: dict[str, str], *, plaintext_reasoning: bool = False
+) -> ModelResponse:
     status = data.get("status")
     usage = _usage(data.get("usage"))
     if status == "incomplete":
@@ -146,7 +148,18 @@ def _response(data: dict[str, Any], names: dict[str, str]) -> ModelResponse:
         kind = item.get("type")
         if kind == "reasoning":
             # A stored remote ID alone cannot continue a stateless reasoning turn.
-            if not _string(item.get("encrypted_content")):
+            if plaintext_reasoning:
+                content = item.get("content")
+                if type(content) is not list or not content:
+                    raise ModelProtocolError("Reasoning item lacks plaintext continuation data")
+                for part in content:
+                    part = _object(part)
+                    if part.get("type") != "reasoning_text":
+                        raise ModelProtocolError("Unsupported plaintext reasoning part")
+                    _string(part.get("text"))
+                if item.get("encrypted_content") is not None:
+                    raise ModelProtocolError("Unexpected encrypted reasoning")
+            elif not _string(item.get("encrypted_content")):
                 raise ModelProtocolError("Reasoning item lacks encrypted continuation data")
         elif kind == "function_call":
             if item.get("status") != "completed":
@@ -196,7 +209,13 @@ def _response(data: dict[str, Any], names: dict[str, str]) -> ModelResponse:
             result = result.model_copy(
                 update={
                     "provider_items": [
-                        {"type": _BUNDLE, "assistant": _assistant(result), "output": output}
+                        {
+                            "type": "drov.deepseek.responses.v1"
+                            if plaintext_reasoning
+                            else _BUNDLE,
+                            "assistant": _assistant(result),
+                            "output": output,
+                        }
                     ]
                 }
             )
@@ -212,6 +231,12 @@ class OpenAIResponses:
     model binding or call aclose explicitly. No arbitrary provider overrides,
     remote conversations, hosted tools, automatic truncation or SDK retries.
     """
+
+    _protocol = _BUNDLE
+    _events = _EVENTS
+
+    def _parse_response(self, data: dict[str, Any], names: dict[str, str]) -> ModelResponse:
+        return _response(data, names)
 
     def __init__(
         self,
@@ -242,7 +267,7 @@ class OpenAIResponses:
     @property
     def registration_config(self) -> dict[str, StrictJson]:
         return {
-            "protocol": _BUNDLE,
+            "protocol": self._protocol,
             "model": self._model,
             "max_output_tokens": self._max_output_tokens,
         }
@@ -270,7 +295,7 @@ class OpenAIResponses:
                 if (
                     bundle is None
                     or set(bundle) != {"type", "assistant", "output"}
-                    or bundle["type"] != _BUNDLE
+                    or bundle["type"] != self._protocol
                     or bundle["assistant"] != message.content
                     or type(bundle["output"]) is not list
                 ):
@@ -282,7 +307,7 @@ class OpenAIResponses:
                     for item in cast(list[Any], content.get("tool_calls", [])):
                         logical = _string(_object(item).get("name"))
                         prior_names[_name(logical)] = logical
-                prior = _response({"status": "completed", "output": output}, prior_names)
+                prior = self._parse_response({"status": "completed", "output": output}, prior_names)
                 if _assistant(prior) != message.content or prior.finish_reason == "refusal":
                     raise ModelProtocolError("Responses history protocol content mismatch")
                 inputs.extend(output)
@@ -295,7 +320,14 @@ class OpenAIResponses:
                     }
                 )
             else:
-                inputs.append({"role": message.role, "content": _string(message.content)})
+                inputs.append(
+                    {
+                        "role": message.role,
+                        "content": message.content
+                        if isinstance(message.content, str)
+                        else canonical_json(message.content),
+                    }
+                )
         if next(bundles, None) is not None:
             raise ModelProtocolError("Responses history has extra protocol bundles")
         return inputs
@@ -370,7 +402,9 @@ class OpenAIResponses:
                     last_sequence = -1
                     try:
                         async for event in result:
-                            data = event.model_dump(mode="json", exclude_unset=True)
+                            data = event.model_dump(
+                                mode="json", exclude_unset=True, warnings="none"
+                            )
                             kind = data.get("type")
                             sequence = data.get("sequence_number")
                             if type(sequence) is not int or sequence <= last_sequence:
@@ -384,7 +418,7 @@ class OpenAIResponses:
                                     raise ModelProtocolError("Responses terminal status mismatch")
                             elif kind in ("response.failed", "error"):
                                 raise ModelProviderError("Responses stream failed")
-                            elif kind not in _EVENTS:
+                            elif kind not in self._events:
                                 raise ModelProtocolError("Unsupported Responses stream event")
                             elif kind in (
                                 "response.output_item.added",
@@ -400,11 +434,13 @@ class OpenAIResponses:
                                 yield ModelDelta(text=_string(data.get("delta")))
                         if terminal is None:
                             raise ModelProtocolError("Responses stream ended before completion")
-                        response = _response(terminal, names)
+                        response = self._parse_response(terminal, names)
                     finally:
                         await result.close()
                 else:
-                    response = _response(result.model_dump(mode="json", exclude_unset=True), names)
+                    response = self._parse_response(
+                        result.model_dump(mode="json", exclude_unset=True, warnings="none"), names
+                    )
             except APIStatusError as exc:
                 if exc.status_code in (408, 409, 429) or exc.status_code >= 500:
                     raise TransientModelError(

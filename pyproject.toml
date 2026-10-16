@@ -56,7 +56,7 @@ packages = ["src/drov"]
 
 [tool.hatch.build.targets.sdist]
 only-include = [
-  "src", "tests", "scripts", "examples", "docs", "sandbox", "workbench", "pyproject.toml", "uv.lock",
+  "src", "tests", "scripts", "examples", "evals", "docs", "sandbox", "workbench", "pyproject.toml", "uv.lock",
   "README.md", "AGENTS.md", "LICENSE", "THIRD_PARTY.md", ".python-version",
 ]
 
@@ -70,7 +70,7 @@ select = ["E", "F", "I", "UP", "B", "ASYNC"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src", "tests", "scripts", "examples"]
+files = ["src", "tests", "scripts", "examples", "evals"]
 
 [[tool.mypy.overrides]]
 module = ["openai", "openai.*", "httpx2", "httpx2.*", "e2b", "e2b.*", "httpx", "httpx.*", "mcp", "mcp.*", "jsonschema", "jsonschema.*", "fastapi", "fastapi.*", "starlette", "starlette.*", "uvicorn", "uvicorn.*"]

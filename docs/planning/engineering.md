@@ -95,6 +95,8 @@ Memory 保存 key、content、version、时间和来源，写入使用 expected_
 
 OpenAI 适配器名为 `OpenAIResponses`，从 `drov.models.openai` 导入。必须显式传 model ID；不硬编码“最新模型”或替用户选择付费档位。ModelCapabilities 明确 text/tools/structured_output/streaming/context_window；未知窗口必须由应用填写输入上限。模型与价格在真实评测时固定，记录官方能力来源和实际测试结果。
 
+T-16增加DeepSeek专用Responses方言（[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)），仍使用现有openai/httpx2锁，无新extra。宿主显式借用客户端配置官方地址/安全凭据，适配器不读env或改变服务；默认reasoning_effort=none是公开可覆盖且参与指纹的工作默认值。评测源码/合成任务在[evals](../../evals/README.md)，先锁语料与规则；固定滚动alias不等于不可变快照，原始用量与保守费用另报，不能用SDK或离线结果证明线上质量。
+
 实际开发/协议锁为 openai 3.29.0、httpx2 2.13.1（最低声明版本与锁相同）；更高范围尚未逐版本验收。采用官方异步客户端，Drov 管理请求预算；关闭 SDK 内部自动重试，避免双层重试。使用 Responses 的 function calling 与 structured output；工具始终由 Drov 授权后在本地分发，不启用供应商托管工具。显式 `store=False`、禁用自动截断，不使用远程 conversation/previous_response_id 代替本地历史；保留需要往返的响应项。需要 encrypted reasoning 项的模型只能在往返测试通过后列入支持；不将该内容解密或展示为思维链。`store=False` 不等于供应商零保留承诺，后者取决于服务政策与账户。[E-11](evidence.md)
 
 通过 `parallel_tool_calls=False` 与 Drov 顺序计划共同限制派发；即使供应商返回多个调用，也不得在完整计划提交前执行。部分流、未知输出项、refusal、incomplete、429/5xx/超时均有适配测试。兼容某个 HTTP URL 不等于已经兼容所有 OpenAI-compatible 服务；额外供应商逐个通过契约测试再列支持。

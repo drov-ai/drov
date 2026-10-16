@@ -1,0 +1,27 @@
+# ADR-0033：DeepSeek Responses 方言与固定任务评测
+
+日期：2026-10-16。状态：已采纳并实施；具体真实模型/任务验收状态只见[progress](../planning/progress.md)。
+
+## 原因与选择
+
+T-16 用户授权使用本地安全配置的 DeepSeek Key，优先 `deepseek-flash`，兼容探针、7 项 smoke 与 81 项正式试验合计预算人民币13元。已有 OpenAIResponses 要求 encrypted reasoning，而 DeepSeek 的 stateless Responses 使用明文 reasoning content；替换地址会破坏历史校验。保持 OpenAI 原默认校验，增加 `drov.models.deepseek.DeepSeekResponses`：复用已验证的完整流提交、严格 schema、名称映射、错误/重试与借用关闭机制，单独固定私有 bundle `drov.deepseek.responses.v1`。
+
+构造要求显式借用 AsyncOpenAI、model/capabilities，可选 max_output_tokens=2048 与 reasoning_effort=none/low/high/max（默认none）；宿主配置地址和凭据，适配器不读取 env、不选付费服务。公开非秘密配置参与原 Agent 指纹。只接受 function/message/plaintext reasoning；明文只存私有 provider 项并按助手位置重放，不作为回答或流 delta 展示。缺失/不匹配/跨方言历史、未知托管工具、非法/未完整计划在派发前拒绝；原历史/上下文估算和授权规则不变。供应商忽略的 store/include/truncation/parallel_tool_calls 不发送，本地完整上下文选择及逐工具审批/顺序派发继续生效，不能推断零保留服务承诺。
+
+## 评测实施
+
+[manifest](../../evals/manifest.json)维护27项自有合成任务、输入/文件hash、控制步骤、预期状态/事实及预定最终schema适用性；[配置](../../evals/config.json)固定服务、滚动模型名称、参数、价格来源和总预算。执行器放在evals，独立于安装SDK；sdist包含可审查语料/执行器，wheel仅增加实际模型适配器。首次付费前提交语料/执行器，并保存源码/语料/锁/配置指纹。只有真实模式才可能报告正式模型门槛，离线替身、smoke与正式结果严格区分，不从字数或脚本答案推出模型质量。
+
+每个Memory阶段新进程/新会话使用真实SQLite；事项效果由独立非幂等loopback服务记录；代码任务使用真实Docker和被评测模型原代码，持久文件在关闭/新Runtime后实际下载核对。离线模式使用明确FixtureModel预定计划，所有模式共用Runtime与事实评分。最终schema分母为75（required检索超时、未知时取消两项各3次预先N/A），不按结果剔除失败。评分失败保留全部原样本；相同任务ID/重复结果不能凑完整81项。
+
+真实执行的单批离线账本先持久预留，后按完整input/output/cache用量和当日人民币高峰单价结算保守上界；可用11元、收尾预留2元。未结束、异常或缺少/不一致用量保留pending/unknown并停止新增付费请求，不把未知当0，不自动重置/退款。总上限是宿主保护与估算，不是供应商最终结算保证；不调用E2B、托管搜索或另开Pro混分。密钥只由宿主worker加载忽略且私有的env项，不入日志/配置指纹/Git。
+
+## 替代方案、代价与影响
+
+- 直接放宽OpenAI解析：会混淆不兼容历史，拒绝。
+- Chat接口：可另做适配，但此轮无需同时维护两套工具流协议。
+- 只跑脚本或少量模型示例：不能交付固定27/81任务质量证据，拒绝。
+
+共用内部解析通过显式方言分支和窄hook实现，原OpenAI默认仍要求加密项。无新依赖/数据库版本/DDL或持久Run语义变更；已有OpenAI bundle不迁移为DeepSeek。公开参数/私有方言、测试、API/运行/工程/能力/质量同轮同步。官方滚动来源见[evidence](../planning/evidence.md)；它们不是不可变模型快照或Drov兼容/质量已成功的证明，实际失败/费用与验收见[验证](../validation/t16-evaluation.md)。
+
+组合验证另复现了原Responses将非字符串user内容拒绝的缺口：自动Memory注入按原契约是`{type:drov.memory,record:...}`的user数据。现在在供应商文本输入边界使用canonical JSON，保留原role、marker、版本和内容；普通文本保持原样，绝不将Memory提升为system指令。原协议和归属语义不变，两种适配器都以真实客户端/SQLite关闭后重开验证。它是本轮实际修复，不能倒推T-11当时已验收了该组合。

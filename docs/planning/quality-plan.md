@@ -4,6 +4,8 @@
 
 本文件维护测试层次、夹具、判定和报告要求；需求定义仍在 [参考案例](reference-scenarios.md) 与 [行为契约](runtime-contract.md)。任务顺序在 [实施任务](implementation-plan.md)。通过模型任务不替代运行时正确性，通过离线替身也不证明模型会选择正确工具。
 
+T-16已将第5节构造范围落成[固定manifest](../../evals/manifest.json)和[评测执行器](../../evals/README.md)；27项/7smoke/81正式数量及原阈值保持。schema适用25项×3=75，S02-05(required检索在模型前超时)、S03-08(未知效果时取消后仅核查收尾)预先N/A。写入失败变体使用宿主明确拒绝、实际not_executed/零mutation与模型解释；磁盘/事务故障仍由T-08/T-10的L3证据支撑，不声称模型拒绝任务覆盖磁盘故障。模型协议方言与同一13元预算的fail-closed账本见[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)，实际通过/失败/未执行只在[验证记录](../validation/t16-evaluation.md)与progress。
+
 T-09 审批/输入子范围已增加两后端原计划/回执、20 次并发重复响应、当前权限/容量/到期/取消与输入修正测试，以及四进程批准/拒绝示例，证据见 [验证](../validation/t09-interactions.md)。这些覆盖 B-01/04 和 B-07 保存待处理请求的子范围；外部写入 S-03-A/B/C、S-03-D/B-05、通用恢复与 T-10 硬崩溃仍留缺项，不因只读计数成功关闭 T-09。
 
 T-09 外部路径补充独立进程非幂等 ItemService、写入后断连/非法结果/瞬态错误、核查与旧请求、取消/预算证据收尾、实际 Task/槽位/锁及各保存边界的恢复测试。完整 S-03-A/B/C/D/E 的普通/stream 离线例子见 [验证](../validation/t09-reconciliation-recovery.md)；其正常进程重开和提交边界注入不替代 T-10 的 SDK 硬终止、全部派发/回包/提交竞态与未知用量专项。

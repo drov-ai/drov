@@ -81,7 +81,7 @@ def main() -> None:
         )
         example = temporary / "openai_responses_offline.py"
         shutil.copyfile(ROOT / "examples/openai_responses_offline.py", example)
-        for arguments in ([], ["--stream"]):
+        for arguments in ([], ["--stream"], ["--deepseek"], ["--deepseek", "--stream"]):
             run([str(python), "-I", "-B", str(example), *arguments], temporary)
         print(
             json.dumps(

@@ -1,0 +1,219 @@
+"""Exercise the corpus through Runtime and challenge accounting/scoring with bad facts."""
+
+import argparse
+import asyncio
+import copy
+import json
+import os
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from drov.types import Usage
+from evals.budget import BudgetStop, Ledger
+from evals.common import manifest
+from evals.run import score, summarize, trial
+from tests.test_sandbox_docker import config as config
+
+TASKS = manifest()["tasks"]
+
+
+def options(tmp_path: Path, entry: str = "sdk") -> argparse.Namespace:
+    return argparse.Namespace(
+        directory=str(tmp_path),
+        mode="offline",
+        entry=entry,
+        docker_config="",
+        ledger="",
+        batch_hash="offline",
+        env_file="never-read",
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "task", [t for t in TASKS if not t["id"].endswith("09")], ids=lambda t: t["id"]
+)
+async def test_every_non_docker_task_uses_actual_runtime(
+    tmp_path: Path, task: dict[str, Any]
+) -> None:
+    result = await trial(options(tmp_path), task, 1)
+    assert result["score"]["passed"], result
+    if task["scenario"] == "S-03":
+        bad = copy.deepcopy(result["independent_service"])
+        bad["writes"] += 1
+        assert not score(task, result["phases"], bad)["passed"]
+    elif task["scenario"] == "S-01":
+        phases = copy.deepcopy(result["phases"])
+        phases[-1]["output"]["source_ids"] = ["not-retrieved"]
+        assert not score(task, phases, {})["passed"]
+    elif task["variant"] in ("save", "update"):
+        phases = copy.deepcopy(result["phases"])
+        phases[-1]["memory"]["version"] += 1
+        assert not score(task, phases, {})["passed"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("entry", ["stream", "http"])
+@pytest.mark.parametrize("identifier", ["S01-01", "S02-01", "S03-03", "S03-08"])
+async def test_entry_shapes_share_observations(tmp_path: Path, entry: str, identifier: str) -> None:
+    if entry == "http":
+        pytest.importorskip("fastapi")
+        pytest.importorskip("httpx")
+    task = next(t for t in TASKS if t["id"] == identifier)
+    result = await trial(options(tmp_path, entry), task, 1)
+    assert result["score"]["passed"], result
+
+
+def test_manifest_has_fixed_groups_schema_denominator_and_real_file_hash() -> None:
+    data = manifest()
+    assert len(data["smoke"]) == 7 and data["repeats"] == 3
+    assert sum(t["schema"] for t in TASKS) * 3 == 75
+    assert [t["id"] for t in TASKS if not t["schema"]] == ["S02-05", "S03-08"]
+
+
+def test_summary_cannot_count_duplicates_or_offline_as_live_release() -> None:
+    results = [
+        {
+            "task": t["id"],
+            "trial": t["id"] + "-" + str(i),
+            "scenario": t["scenario"],
+            "schema": t["schema"],
+            "mode": "offline",
+            "score": {"passed": True, "schema_valid": True, "safety": {}},
+        }
+        for t in TASKS
+        for i in range(1, 4)
+    ]
+    assert summarize(results, suite="formal")["complete"]
+    assert not summarize(results, suite="formal")["release_gate"]
+    results[-1] = results[0]
+    assert not summarize(results, suite="formal")["complete"]
+
+
+def test_ledger_reservation_persists_before_io_and_unknown_stops(tmp_path: Path) -> None:
+    ledger = Ledger(tmp_path / "ledger.json")
+    ledger.create(batch_hash="fixed")
+    identifier = ledger.reserve(
+        batch_hash="fixed", trial="t", request_hash="h", input_bytes=1000, max_output_tokens=100
+    )
+    assert json.loads(ledger.path.read_text())["attempts"][0]["status"] == "pending"
+    reopened = Ledger(ledger.path)
+    with pytest.raises(BudgetStop):
+        reopened.reserve(
+            batch_hash="fixed", trial="next", request_hash="h2", input_bytes=1, max_output_tokens=1
+        )
+    with pytest.raises(BudgetStop):
+        reopened.settle(identifier, Usage())
+    assert json.loads(ledger.path.read_text())["attempts"][0]["status"] == "unknown"
+
+
+@pytest.mark.parametrize(
+    "usage",
+    [
+        Usage(
+            input_tokens=100,
+            output_tokens=10,
+            total_tokens=110,
+            cached_input_tokens=101,
+            complete=True,
+        ),
+        Usage(
+            input_tokens=100,
+            output_tokens=10,
+            total_tokens=100,
+            cached_input_tokens=0,
+            complete=True,
+        ),
+        Usage(input_tokens=100, output_tokens=10, total_tokens=110, complete=False),
+    ],
+)
+def test_ledger_does_not_invent_missing_or_inconsistent_usage(tmp_path: Path, usage: Usage) -> None:
+    ledger = Ledger(tmp_path / "ledger.json")
+    ledger.create(batch_hash="fixed")
+    identifier = ledger.reserve(
+        batch_hash="fixed", trial="t", request_hash="h", input_bytes=1000, max_output_tokens=100
+    )
+    with pytest.raises(BudgetStop):
+        ledger.settle(identifier, usage)
+
+
+def test_ledger_price_ceiling_scope_and_no_reset(tmp_path: Path) -> None:
+    ledger = Ledger(tmp_path / "ledger.json")
+    ledger.create(batch_hash="fixed", ceiling="0.01", usable="0.005")
+    identifier = ledger.reserve(
+        batch_hash="fixed", trial="t", request_hash="h", input_bytes=1000, max_output_tokens=100
+    )
+    ledger.settle(
+        identifier,
+        Usage(
+            input_tokens=1000,
+            output_tokens=100,
+            total_tokens=1100,
+            cached_input_tokens=500,
+            complete=True,
+        ),
+    )
+    data = json.loads(ledger.path.read_text())
+    assert data["attempts"][0]["cost_upper_cny"] == "0.00182"
+    with pytest.raises(BudgetStop):
+        ledger.reserve(
+            batch_hash="changed", trial="t", request_hash="h", input_bytes=1, max_output_tokens=1
+        )
+    with pytest.raises(BudgetStop):
+        ledger.create(batch_hash="fixed")
+    with pytest.raises(BudgetStop):
+        ledger.reserve(
+            batch_hash="fixed",
+            trial="next",
+            request_hash="h2",
+            input_bytes=10000,
+            max_output_tokens=1000,
+        )
+    assert json.loads(ledger.path.read_text())["stopped"] == "budget_exhausted"
+
+
+def test_scoring_cannot_accept_words_instead_of_persistence() -> None:
+    task = next(t for t in TASKS if t["id"] == "S02-01")
+    phase = {
+        "phase": "read",
+        "state": "completed",
+        "model_calls": 1,
+        "schema_valid": True,
+        "operations": [],
+        "memory_changed": 0,
+        "memory": None,
+        "pid": 1,
+        "output": {"content": "简洁中文", "version": 1, "status": "present"},
+    }
+    assert not score(task, [phase], {})["passed"]
+
+
+@pytest.mark.docker
+@pytest.mark.asyncio
+@pytest.mark.parametrize("identifier", ["S01-09", "S02-09", "S03-09"])
+async def test_code_tasks_actual_docker(
+    tmp_path: Path, identifier: str, config: dict[str, str]
+) -> None:
+    analysis_path = Path(os.environ.get("DROV_ANALYSIS_IMAGE_RECORD", ".drov/analysis/image.json"))
+    assert await asyncio.to_thread(analysis_path.exists), "Fixed analysis image record required"
+    image = json.loads(await asyncio.to_thread(analysis_path.read_text))
+    configuration = tmp_path / "docker-eval.json"
+    configuration.write_text(
+        json.dumps(
+            {
+                "docker_cli": config["docker"],
+                "docker_host": config["host"],
+                "analysis_image": image["image_id"],
+            }
+        )
+    )
+    opts = options(tmp_path)
+    opts.docker_config = str(configuration)
+    task = next(t for t in TASKS if t["id"] == identifier)
+    result = await trial(opts, task, 1)
+    assert result["score"]["passed"], result
+    corrupted = copy.deepcopy(result["phases"])
+    corrupted[-1]["files"] = []
+    assert not score(task, corrupted, result["independent_service"])["passed"]

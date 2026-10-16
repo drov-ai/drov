@@ -94,7 +94,7 @@ jobs:
       - run: uv run --locked --all-extras python -I -B scripts/check_installed.py
       # Each native command is its own step so PowerShell cannot hide an earlier failure.
       - name: Offline official Responses client
-        run: uv run --locked --all-extras pytest tests/test_openai_responses.py
+        run: uv run --locked --all-extras pytest tests/test_openai_responses.py tests/test_deepseek_responses.py
       - name: Installed MCP extra and stdio examples
         run: uv run --locked --all-extras python scripts/check_installed_mcp.py --wheel dist/drov-0.1.0a0-py3-none-any.whl
       - name: Installed server extra and real loopback HTTP/SSE examples

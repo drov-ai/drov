@@ -103,3 +103,5 @@ T-15 第三批的离线data_abandoned、最小未知事实/不可恢复标记、
 T-15第四批成对SQLite/文件快照、新目录发布与持久恢复屏障见[ADR-0030](../decisions/0030-quarantined-consistent-backups.md)，实际检查/未验收范围见[备份验证](../validation/t15-backup.md)；任务状态仍只在progress。
 
 T-15收尾的实际早期v1兼容迁移/回执见[ADR-0031](../decisions/0031-compatible-v1-record-migration.md)，授权分页导出/副本脱敏见[ADR-0032](../decisions/0032-authorized-portable-exports.md)；统一实际证据见[收尾验证](../validation/t15-migration-export.md)，任务状态仍只在progress。
+
+T-16的DeepSeek独立Responses方言、固定任务与同批预算决定见[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)，实际失败/评测证据见[T-16验证](../validation/t16-evaluation.md)，任务状态只在progress。

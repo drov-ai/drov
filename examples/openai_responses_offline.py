@@ -15,6 +15,7 @@ import httpx2
 from openai import AsyncOpenAI
 
 from drov import Agent, ModelCapabilities, RunContext, Runtime, tool
+from drov.models.deepseek import DeepSeekResponses
 from drov.models.openai import OpenAIResponses
 
 
@@ -23,7 +24,7 @@ class Report:
     total: int
 
 
-async def run(*, stream: bool) -> None:
+async def run(*, stream: bool, deepseek: bool = False) -> None:
     requests: list[dict[str, Any]] = []
     handlers: set[asyncio.Task[None]] = set()
 
@@ -40,7 +41,11 @@ async def run(*, stream: bool) -> None:
             )
             body = json.loads(await reader.readexactly(length))
             requests.append(body)
-            assert body["store"] is False and body["text"]["format"]["strict"] is True
+            assert body["text"]["format"]["strict"] is True
+            if deepseek:
+                assert body["reasoning"] == {"effort": "none"} and "include" not in body
+            else:
+                assert body["store"] is False
             if len(requests) == 1:
                 output = [
                     {
@@ -66,6 +71,15 @@ async def run(*, stream: bool) -> None:
                         ],
                     }
                 ]
+            if deepseek:
+                output.insert(
+                    0,
+                    {
+                        "type": "reasoning",
+                        "id": f"rs_{len(requests)}",
+                        "content": [{"type": "reasoning_text", "text": "synthetic continuation"}],
+                    },
+                )
             result = {
                 "id": "resp_local",
                 "object": "response",
@@ -105,7 +119,8 @@ async def run(*, stream: bool) -> None:
                 base_url=f"http://127.0.0.1:{port}/v1",
                 http_client=http,
             ) as client:
-                adapter = OpenAIResponses(
+                adapter_type = DeepSeekResponses if deepseek else OpenAIResponses
+                adapter = adapter_type(
                     model="offline-fixture",
                     client=client,
                     capabilities=ModelCapabilities(
@@ -146,6 +161,7 @@ async def run(*, stream: bool) -> None:
                                 "total": 36,
                                 "local_http_requests": len(requests),
                                 "real_model": False,
+                                "dialect": "deepseek" if deepseek else "openai",
                             }
                         )
                     )
@@ -158,4 +174,6 @@ async def run(*, stream: bool) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stream", action="store_true")
-    asyncio.run(run(stream=parser.parse_args().stream))
+    parser.add_argument("--deepseek", action="store_true")
+    options = parser.parse_args()
+    asyncio.run(run(stream=options.stream, deepseek=options.deepseek))

@@ -72,3 +72,5 @@ HTTP服务安装`drov[server]`后运行`python examples/http_offline.py`或加`-
 `migration_offline.py`（支持`--stream`）：对新建合成库显式模拟早期兼容字段缺省，预览→完整备份→实际同义回填/幂等回执→原请求键仍返回同Run，model=1。真实历史writer夹具另由测试维护，不混称此例为旧SDK写出。
 
 `export_offline.py`（支持`--stream`）：默认元数据、显式正文/选定附件、应用JSON副本redactor，原输入保持；POSIX验证实际附件字节，Windows演示纯数据库分支，无模型/云付费调用。
+
+T-16为Responses离线例增加`--deepseek`（可与`--stream`组合），同一真实客户端/loopback工具闭环使用专用明文历史方言，仍无模型推理或外部凭据。独立openai-extra安装检查四种组合；真实固定任务入口见[evals说明](../evals/README.md)。

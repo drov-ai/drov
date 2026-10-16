@@ -1,10 +1,10 @@
 # 当前进度与下一轮
 
-更新：2026-10-16（Asia/Shanghai；T-15 整卡验收完成，下一项 T-16）。
+更新：2026-10-16（Asia/Shanghai；T-16 实施中，尚未整卡验收）。
 
 ## 当前状态
 
-- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-15数据维护与兼容整卡已验收并关闭；下一项T-16，尚未开始。** 最终源码检查点49ac27481f926f4fc8fa48c68f445a4d30d23415已推送，精确SHA核心11/Docker4 jobs全部success；本地全库、构件、独立安装及任务卡核对见[收尾记录](../validation/t15-migration-export.md)，前四批证据按该记录追溯。收尾补记仅修改Markdown，实际HEAD与同步状态以Git为准。
+- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-15整卡已验收；T-16正在实施固定任务集/离线执行器及DeepSeek协议适配，尚未整卡验收。** 最终源码检查点49ac27481f926f4fc8fa48c68f445a4d30d23415已推送，精确SHA核心11/Docker4 jobs全部success；本地全库、构件、独立安装及任务卡核对见[收尾记录](../validation/t15-migration-export.md)，前四批证据按该记录追溯。收尾补记仅修改Markdown，实际HEAD与同步状态以Git为准。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；实验性工作台已完整验收；T-15的SQLiteMaintenance/CLI、逻辑清理/墓碑、显式字节回收/中断台账、data_abandoned、一致备份/恢复屏障、实际历史v1字段迁移与授权导出均已验收。未验收：T-16至T-18；多 Agent/Skill/持久工作区等后续，无空壳。
@@ -17,7 +17,13 @@
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 当前交付：T-15 整卡完整验收
+## 当前交付：T-16 实施中
+
+按[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)已建立[27项manifest](../../evals/manifest.json)、[固定配置](../../evals/config.json)、真实Runtime/新进程Memory/独立事项服务/Docker事实评分执行器及DeepSeek专用Responses方言。冻结源码专项115项通过；SDK/stream/HTTP离线完整27项各通过，新增Memory真实客户端重开组合已修复并验证。全库/构件/平台验证与真实评测正在收尾。实际失败/证据见[本轮记录](../validation/t16-evaluation.md)。尚无真实模型结论，7项smoke/81正式/体验记录与最终回归未验收，不关闭整卡。
+
+本轮用户已明确授权DeepSeek官方服务、`.env.local`中已有Key、优先deepseek-flash、兼容/smoke/正式合计13元预算。仅由宿主调用进程安全加载Key，不输出/提交；采用11元可用+2元费用余量，未知用量停止。原E2B预算/账号/模板/台账保留，本轮不调用。
+
+## 历史已验收：T-15 整卡完整验收
 
 已接续实现实际早期v1兼容字段迁移、完整备份与原子回执；授权分页导出默认元数据，正文/逐文件read/view_content、应用副本redactor/hash/限额及撤权保护；补充恢复屏障对cancel/新放弃的事实保护。迁移/导出/维护综合189项、真实Docker三入口导出3项及两例SDK/stream通过。冻结源码本地完整收集1394项，3.14含真实Docker全库**1335通过/59skip（352.29s）**，3.11显式无Docker/E2B全库1231通过/163skip；两解释器构件/sdist重建、四套core-only与两套独立server安装、真实旧SDK/历史记录兼容、静态/类型/schema/OpenAPI均通过；90个SDK/资源载荷与冻结源码逐字一致。最终源码**49ac27481f926f4fc8fa48c68f445a4d30d23415**的[核心38868489017](https://github.com/drov-ai/drov/actions/runs/38868489017) **11 jobs**、[Docker38868489018](https://github.com/drov-ai/drov/actions/runs/38868489018) **4 jobs**全部completed/success，八套支持平台及3.15独立探测通过；Docker每套102专项通过，3.11实际Docker浏览器24项通过，本地同组24项通过。原任务卡全部条件已核对，**T-15整卡完整验收并关闭，无剩余任务卡缺项；T-16尚未开始**。见[ADR-0031](../decisions/0031-compatible-v1-record-migration.md)/[ADR-0032](../decisions/0032-authorized-portable-exports.md)/[收尾记录](../validation/t15-migration-export.md)。
 
@@ -338,18 +344,18 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 - 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
-## 下一项：T-16 场景与真实模型评测（尚未开始）
+## 当前任务：T-16 场景与真实模型评测（进行中）
 
 前置T-10B/T-11/T-12/T-14/T-15均已完整验收。按[原任务卡](implementation-plan.md)与[质量计划第5节](quality-plan.md#5-真实模型评测)接续，不重新开启一般规划，也不以脚本替身当真实模型质量：
 
 1. 先交付三场景共**27项固定任务manifest**，含合成输入/资料/工具结果、控制步骤、预期状态、事实断言、schema适用标记；三个代码任务保留实际CSV/PNG/显式跨会话文件与审批组合。第一次真实调用前提交并固定语料hash、配置及评分规则。
 2. 无Key/预算也先完成全部任务的离线全路径及报告结构，复用已有SDK/stream/HTTP/工作台契约，实际Docker只操作本批合成资源；保存/新进程读取、未知效果/重复审批/取消、安全拒绝与文件hash有事实断言。通过只证明运行结构，不关闭真实评测子范围。
-3. 真实调用前由用户明确服务、可访问的固定model ID及能力来源、宿主安全凭据配置和**同一批总预算**。执行者先核对当时官方价格、参数、用量和失败收尾余量；先跑**7项smoke**，再执行**81个正式试验**，共享总预算，smoke不混入正式分数。质量计划中的US$10仅建议，当前未获模型费用授权，不读取现有真实Key或调用付费模型/E2B。
+3. 真实调用前由用户明确服务、可访问的固定model ID及能力来源、宿主安全凭据配置和**同一批总预算**。执行者先核对当时官方价格、参数、用量和失败收尾余量；先跑**7项smoke**，再执行**81个正式试验**，共享总预算，smoke不混入正式分数。质量计划中的US$10仅建议，本轮模型费用已获13元总预算授权；仅安全加载DeepSeek所需项，E2B未授权不调用。
 4. 整卡完成标准：预注册manifest/离线全路径、真实smoke/完整正式报告和体验记录齐备，逐项按质量计划的安全、schema、总通过率/分场景/代码子组门槛验收；保留失败、未执行项、用量/费用和维护者验证限制。资源缺失时只验收离线子范围，列明恢复步骤，T-16继续进行中，不能宣称正式发布完成。
 
 现在无需新增仓库、账号或私有业务资料。真实调用前只需明确服务商、API模型名称、官方接口或自定义调用地址/说明、本地安全配置的Key与本轮总费用上限；此前“服务账号/项目”只指已有访问与计费归属，不要求额外注册、创建项目或交付登录信息。Key仅在本地Git忽略且仅当前用户可读的配置/环境或凭据管理中提供，不贴聊天或Git；具体配置变量随选定服务确认。保留Docker Desktop及原`.drov`/私有env/SQLite/bytes/租约/模板/云台账。若可邀请两位未参与实现的Python使用者，到体验验证前安排；没有则如实只报维护者验证。
 
-2026-10-16候选服务核查：用户提出DeepSeek V4 Flash/Pro并表示稍后准备Key与预算，本轮仅核对官方滚动文档和现有源码。官方现推荐Flash的API名称为`deepseek-flash`，对应V4.1-Flash；旧`deepseek-v4-flash`已转向该模型，Pro仍列`deepseek-v4-pro`。文档具备工具/流/结构化输出接入条件，但现有OpenAIResponses的加密续传与DeepSeek明文协议不同，尚未接入或实测，不能只换URL宣称兼容。建议先Flash做兼容探针及原7项smoke，再固定配置做正式评测；Pro如另做比较须分开记录，不替换失败样本或混分。实际来源、边界及本轮文档检查见[准备核查](../validation/2026-10-16-deepseek-readiness.md)。T-16实现仍未开始，未读取Key或调用模型，用户尚未授权费用。
+2026-10-16候选服务核查（历史，费用授权已由本轮替代）：用户提出DeepSeek V4 Flash/Pro并表示稍后准备Key与预算，本轮仅核对官方滚动文档和现有源码。官方现推荐Flash的API名称为`deepseek-flash`，对应V4.1-Flash；旧`deepseek-v4-flash`已转向该模型，Pro仍列`deepseek-v4-pro`。文档具备工具/流/结构化输出接入条件，但现有OpenAIResponses的加密续传与DeepSeek明文协议不同，尚未接入或实测，不能只换URL宣称兼容。建议先Flash做兼容探针及原7项smoke，再固定配置做正式评测；Pro如另做比较须分开记录，不替换失败样本或混分。实际来源、边界及本轮文档检查见[准备核查](../validation/2026-10-16-deepseek-readiness.md)。T-16实现仍未开始，未读取Key或调用模型，用户尚未授权费用。
 
 ## 用户准备事项
 
@@ -364,7 +370,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | T-14 本地工作台 | 整卡已验收；无需补充材料。启动与实验性限制见workbench/README；原品牌素材保留，公开包/站点前再核对来源/使用范围 |
 | T-15 维护/备份/兼容 | 整卡已验收，无需补充材料；保留原数据、Docker及私有环境，恢复副本屏障无通用解锁；真实用户库不作破坏性夹具 |
 | T-16 离线任务集/体验记录 | 当前下一项；不需新增仓库/账号/私有资料/Key/预算，执行者准备27项合成任务与离线全路径。有条件可在体验验证前邀请两位Python使用者，否则只报告维护者验证 |
-| 模型服务、模型API名称、调用方式、密钥和总预算 | 用户提出DeepSeek候选，Key/预算稍后准备。smoke/live前明确官方服务或其他调用地址、所用模型，并批准兼容探针/7项smoke/81正式试验共用的费用上限；不要求额外账号、项目或登录信息。执行者先估价；Key仅本地环境/Git忽略且仅当前用户可读的配置或凭据管理，不贴聊天/Git，未授权费用前不读取真实Key或付费调用 |
+| 模型服务、模型API名称、调用方式、密钥和总预算 | 本轮已授权DeepSeek官方、deepseek-flash、`.env.local`安全配置及合计13元；执行器按高峰人民币价、11元可用/2元余量控制；不需新账号/仓库/Key。未知用量或预算不足时停止并报告，不自动切Pro或动用E2B预算 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
 | Cloudflare drop.dev、账号范围、品牌来源与公开使用范围 | 官网/素材初次公开前核实；现有素材保留本地，当前不部署 |
 
