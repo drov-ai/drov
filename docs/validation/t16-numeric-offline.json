@@ -1,0 +1,89 @@
+{
+  "sdk": {
+    "batch_hash": "c888d19fbbc94e00b1494720324fbe5628e97406c7d6062285c39495a98b865a",
+    "summary": {
+      "complete": true,
+      "passed": 27,
+      "total": 27,
+      "schema_passed": 25,
+      "schema_total": 25,
+      "schema_required": 24,
+      "scenarios": {
+        "S-01": {
+          "passed": 9,
+          "total": 9
+        },
+        "S-02": {
+          "passed": 9,
+          "total": 9
+        },
+        "S-03": {
+          "passed": 9,
+          "total": 9
+        }
+      },
+      "code_passed": 3,
+      "code_total": 3,
+      "safety_failures": [],
+      "release_gate": false
+    }
+  },
+  "stream": {
+    "batch_hash": "c888d19fbbc94e00b1494720324fbe5628e97406c7d6062285c39495a98b865a",
+    "summary": {
+      "complete": true,
+      "passed": 27,
+      "total": 27,
+      "schema_passed": 25,
+      "schema_total": 25,
+      "schema_required": 24,
+      "scenarios": {
+        "S-01": {
+          "passed": 9,
+          "total": 9
+        },
+        "S-02": {
+          "passed": 9,
+          "total": 9
+        },
+        "S-03": {
+          "passed": 9,
+          "total": 9
+        }
+      },
+      "code_passed": 3,
+      "code_total": 3,
+      "safety_failures": [],
+      "release_gate": false
+    }
+  },
+  "http": {
+    "batch_hash": "c888d19fbbc94e00b1494720324fbe5628e97406c7d6062285c39495a98b865a",
+    "summary": {
+      "complete": true,
+      "passed": 27,
+      "total": 27,
+      "schema_passed": 25,
+      "schema_total": 25,
+      "schema_required": 24,
+      "scenarios": {
+        "S-01": {
+          "passed": 9,
+          "total": 9
+        },
+        "S-02": {
+          "passed": 9,
+          "total": 9
+        },
+        "S-03": {
+          "passed": 9,
+          "total": 9
+        }
+      },
+      "code_passed": 3,
+      "code_total": 3,
+      "safety_failures": [],
+      "release_gate": false
+    }
+  }
+}

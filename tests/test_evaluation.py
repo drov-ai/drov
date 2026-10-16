@@ -81,6 +81,60 @@ def test_manifest_has_fixed_groups_schema_denominator_and_real_file_hash() -> No
     assert [t["id"] for t in TASKS if not t["schema"]] == ["S02-05", "S03-08"]
 
 
+@pytest.mark.parametrize("identifier", ["S01-09", "S03-09"])
+@pytest.mark.parametrize(
+    ("number", "valid"),
+    [
+        ("60", True),
+        ("60.0", True),
+        ("6e1", True),
+        ("60.000000000000000001", False),
+        ("59.999999999999999999", False),
+        ("NaN", False),
+        ("sNaN", False),
+        ("Infinity", False),
+        ("wrong", False),
+        ("", False),
+    ],
+)
+def test_csv_oracle_compares_exact_finite_values(identifier: str, number: str, valid: bool) -> None:
+    task = next(t for t in TASKS if t["id"] == identifier)
+    names = task["expected"]["files"]
+    files = [
+        {
+            "name": name,
+            "sha256": "observed",
+            "ref": {"artifact_id": name, "sha256": "observed"},
+            "dimensions": [400, 300],
+            "text": f"count,sum,mean\n3.0,{number},2e1\n"
+            if name == "summary.csv"
+            else f"item_id,status,total\nitem-01,processing,{number}\n",
+        }
+        for name in names
+    ]
+    phase = {
+        "phase": "run",
+        "state": "completed",
+        "model_calls": 2,
+        "schema_valid": True,
+        "operations": [],
+        "files": files,
+        "post_close_verified": True,
+        "pauses": ["approval", "approval"],
+        "output": {
+            "count": 3,
+            "total": 60,
+            "mean": 20,
+            "artifact_ids": names,
+            "business_status": "denied",
+        },
+    }
+    result = score(task, [phase], {"writes": 0, "operations": {}})
+    assert result["passed"] is valid, result
+    assert result["checks"]["final_schema"]
+    assert "scoring_error" not in result
+
+
 def test_summary_cannot_count_duplicates_or_offline_as_live_release() -> None:
     results = [
         {

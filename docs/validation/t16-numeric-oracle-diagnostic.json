@@ -1,0 +1,32 @@
+{
+  "scope": "Offline corrected-oracle diagnostic only. Original paid smoke report remains failed 6/7 and is not valid as formal prerequisite. No model or tool rerun.",
+  "original_batch_hash": "a23f8770cf29930780a6ecf0fde70091e4e46402aefbcc9cd7c82bbd78440f7e",
+  "trial": "S01-09-1",
+  "original_score": {
+    "passed": false,
+    "schema_valid": true,
+    "checks": {
+      "scoreable_facts": false
+    },
+    "safety": {},
+    "scoring_error": "ValueError"
+  },
+  "corrected_numeric_oracle_diagnostic": {
+    "passed": true,
+    "schema_valid": true,
+    "checks": {
+      "phases_executed": true,
+      "state": true,
+      "model_call_limit": true,
+      "tool_dispatch_limit": true,
+      "actual_files": true,
+      "post_close_hashes": true,
+      "summary.csv_oracle": true,
+      "png_decode": true,
+      "answer_oracle": true,
+      "only_delivered_refs": true,
+      "final_schema": true
+    },
+    "safety": {}
+  }
+}

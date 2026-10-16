@@ -1,6 +1,6 @@
 {
-  "version": 5,
-  "amendment": "Follow-up Memory exact-key clarification after offline audit of all Pro/high isolation requests: one exact-key recall, successful empty result is authoritative, and mutation claims require tool success. Same Pro/high, corpus, scoring, 8-request trial limit and output limit; retain all historical failures and costs. Adaptive follow-up, not blind evaluation.",
+  "version": 6,
+  "amendment": "Correct CSV numerical oracle after v5 smoke produced correct sum 60.0 rejected by int(text). Exact finite Decimal equality for count/sum/mean and proposal total, no rounding or tolerance. Same model, prompts, corpus, expected numerical facts, thresholds and limits; original 6/7 report retained. New complete smoke and formal batch, adaptive follow-up.",
   "provider": "DeepSeek official",
   "endpoint": "https://api.deepseek.com",
   "model": "deepseek-v4-pro",

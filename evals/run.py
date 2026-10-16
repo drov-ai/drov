@@ -15,6 +15,7 @@ import sqlite3
 import subprocess
 import sys
 import time
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +44,15 @@ def fingerprint() -> str:
             str(path.relative_to(repository)).encode() + b"\0" + path.read_bytes() + b"\0"
         )
     return digest.hexdigest()
+
+
+def numeric_equal(value: str, expected: int) -> bool:
+    """CSV has textual cells; compare exact finite values, not a chosen notation."""
+    try:
+        number = Decimal(value)
+        return number.is_finite() and number == expected
+    except InvalidOperation:
+        return False
 
 
 def score(
@@ -108,14 +118,19 @@ def _score(
                 rows = list(csv.DictReader(io.StringIO(file["text"])))
                 checks[file["name"] + "_oracle"] = (
                     len(rows) == 1
-                    and int(rows[0].get("count", -1)) == 3
-                    and int(rows[0].get("sum", -1)) == 60
-                    and float(rows[0].get("mean", -1)) == 20
+                    and numeric_equal(rows[0].get("count", ""), 3)
+                    and numeric_equal(rows[0].get("sum", ""), 60)
+                    and numeric_equal(rows[0].get("mean", ""), 20)
                 )
             elif file["name"] == "proposal.csv":
-                checks["proposal_oracle"] = list(csv.DictReader(io.StringIO(file["text"]))) == [
-                    {"item_id": "item-01", "status": "processing", "total": "60"}
-                ]
+                rows = list(csv.DictReader(io.StringIO(file["text"])))
+                checks["proposal_oracle"] = (
+                    len(rows) == 1
+                    and set(rows[0]) == {"item_id", "status", "total"}
+                    and rows[0]["item_id"] == "item-01"
+                    and rows[0]["status"] == "processing"
+                    and numeric_equal(rows[0]["total"], 60)
+                )
             elif file["name"] == "chart.png":
                 checks["png_decode"] = file["dimensions"] == [400, 300]
         output = last["output"] or {}

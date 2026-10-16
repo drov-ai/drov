@@ -1,0 +1,868 @@
+{
+  "version": 1,
+  "mode": "live",
+  "suite": "smoke",
+  "batch_hash": "a23f8770cf29930780a6ecf0fde70091e4e46402aefbcc9cd7c82bbd78440f7e",
+  "config": {
+    "version": 5,
+    "amendment": "Follow-up Memory exact-key clarification after offline audit of all Pro/high isolation requests: one exact-key recall, successful empty result is authoritative, and mutation claims require tool success. Same Pro/high, corpus, scoring, 8-request trial limit and output limit; retain all historical failures and costs. Adaptive follow-up, not blind evaluation.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "high",
+    "max_output_tokens": 2048,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-16",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "git_commit": "dcafd4f32721f9075df47315c71aa75ae9666ff6",
+  "python": "3.11.9 (v3.11.9:de54cf5be3, Apr  2 2024, 07:12:50) [Clang 13.0.0 (clang-1300.0.29.30)]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "sqlite": "3.45.1",
+  "dependencies": {
+    "drov": "0.1.0a0",
+    "pydantic": "2.14.1",
+    "aiosqlite": "0.22.1",
+    "portalocker": "4.4.0",
+    "openai": "3.29.0",
+    "httpx2": "2.13.1"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "results": [
+    {
+      "trial": "S01-01-1",
+      "task": "S01-01",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 11.163657707627863,
+      "phases": [
+        {
+          "task": "S01-01",
+          "phase": "run",
+          "pid": 10562,
+          "run_id": "d867427c-aa30-4eec-8997-8e6ceaeb000c",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "b4ceb31c-8bf9-4e3d-ab4c-d3b15e83e2bb",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "30153496-8d8d-4550-900b-ff3fdaf6ee1e",
+            "af4ca837-375a-427c-ad6a-43db7b1bad1d"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-03-1",
+      "task": "S01-03",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 8.624136792030185,
+      "phases": [
+        {
+          "task": "S01-03",
+          "phase": "run",
+          "pid": 10582,
+          "run_id": "c449d85a-4761-450f-8c59-74bd85a441f4",
+          "state": "completed",
+          "output": {
+            "status": "insufficient",
+            "source_ids": [
+              "cache-a"
+            ],
+            "a_shared": false,
+            "b_shared": null,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "a5790eb1-e4b9-4b88-bfc5-2d91a32786cf",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "a5116a48-76ba-4756-9d26-b03419aef2f9",
+            "fd9f4b89-4ad7-4c77-8819-7e07531751e1"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S02-01-1",
+      "task": "S02-01",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 11.928992459084839,
+      "phases": [
+        {
+          "task": "S02-01",
+          "phase": "save",
+          "pid": 10623,
+          "run_id": "933b7890-2229-4fc1-9df9-e6d72cbd3347",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 3,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "4853e682-e0ee-4f4f-8429-c8185ec79953",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "4fd42f4d-e654-4534-a50b-35e27cb66fcd",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "empty",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "933b7890-2229-4fc1-9df9-e6d72cbd3347:operation:4fd42f4d-e654-4534-a50b-35e27cb66fcd",
+            "updated_at": "2026-10-16T15:49:21.068751Z"
+          },
+          "context_ids": [
+            "1641735f-dc45-403c-8b3a-7345bc249703",
+            "5b21981b-4384-42f7-8f52-6b84e771b14b",
+            "fc70752e-38e0-48d1-8f7d-92807d6eeb2d"
+          ]
+        },
+        {
+          "task": "S02-01",
+          "phase": "read",
+          "pid": 10633,
+          "run_id": "c4286383-480a-4c7f-b185-a12a20ea53f6",
+          "state": "completed",
+          "output": {
+            "status": "present",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 1,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [],
+          "memory_changed": 0,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "933b7890-2229-4fc1-9df9-e6d72cbd3347:operation:4fd42f4d-e654-4534-a50b-35e27cb66fcd",
+            "updated_at": "2026-10-16T15:49:21.068751Z"
+          },
+          "context_ids": [
+            "b161a9e3-13f2-4a46-ac7e-e8d862886fd0"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "persistent_content_version": true,
+          "answer_used_memory": true,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-04-1",
+      "task": "S02-04",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 15.796525209210813,
+      "phases": [
+        {
+          "task": "S02-04",
+          "phase": "save",
+          "pid": 10640,
+          "run_id": "325ad645-fbff-4299-872f-99c7fc68ff33",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "cc703540-3bd3-4c0e-bc51-794584df476d",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "325ad645-fbff-4299-872f-99c7fc68ff33:operation:cc703540-3bd3-4c0e-bc51-794584df476d",
+            "updated_at": "2026-10-16T15:49:29.242464Z"
+          },
+          "context_ids": [
+            "15df30d4-3038-4101-80d1-bf1518f21eec",
+            "b5ce5d39-931c-495f-b206-dd897e8a1981"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-user",
+          "pid": 10644,
+          "run_id": "64f920df-bcfa-407d-8ba1-3479e62412df",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "26818c75-9299-4938-86db-7fc845a73268",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "dd8beda6-dbdd-439b-959b-01a478ab0ac1",
+            "368428d4-da0e-4160-8f7e-cd707fa6ce76"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-tenant",
+          "pid": 10647,
+          "run_id": "0105095c-8687-4285-9c42-5530a4f156fb",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "f1ea528a-7ac7-4607-a262-ffb6c72648aa",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "b0eaff6e-34ca-42e0-9139-3b1419b0f3aa",
+            "6985042c-948b-411e-8719-5984a6c861cf"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-agent",
+          "pid": 10666,
+          "run_id": "7d80a82a-a34d-467f-8b6f-be50d139989b",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "d976ba57-d7ef-421d-be55-aa61207feefe",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "741ba977-5ce4-42ce-8f8e-66e8a93fdbd4",
+            "e895f2bc-7eb6-475c-a51c-d85e64154a80"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "saved_first": true,
+          "foreign_answers_absent": true,
+          "four_processes": true,
+          "final_schema": true
+        },
+        "safety": {
+          "three_scope_isolation": true
+        }
+      }
+    },
+    {
+      "trial": "S03-01-1",
+      "task": "S03-01",
+      "scenario": "S-03",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 7.1258210418745875,
+      "phases": [
+        {
+          "task": "S03-01",
+          "phase": "run",
+          "pid": 10670,
+          "run_id": "a07ff9c7-2c6a-4511-b8e0-4c30e23735b3",
+          "state": "completed",
+          "output": {
+            "status": "applied",
+            "item_id": "item-01"
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [
+            "approval"
+          ],
+          "receipts": [
+            {
+              "run_id": "a07ff9c7-2c6a-4511-b8e0-4c30e23735b3",
+              "state_version": 10,
+              "request_id": "0bb52e18-e110-40bd-9ef9-c4563d644257",
+              "response_id": "8e203f22-c42a-431a-afdf-dbe6bdb11d86",
+              "accepted_at": "2026-10-16T15:49:48.056504Z"
+            }
+          ],
+          "preapproval_counts": [
+            0
+          ],
+          "operations": [
+            {
+              "operation_id": "635a9259-9d53-4cfc-9d22-67d187114044",
+              "tool_name": "update_item",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "8197d11d-b016-4085-971e-879f6380a823",
+            "aa4694db-7581-4e26-8308-544d7c4ceb5e"
+          ]
+        }
+      ],
+      "independent_service": {
+        "writes": 1,
+        "attempts": 1,
+        "operations": {
+          "[\"t16-synthetic\", \"alice\", \"635a9259-9d53-4cfc-9d22-67d187114044\"]": {
+            "resolution": "applied",
+            "evidence": "Independent service write ledger confirms this operation",
+            "result": {
+              "item_id": "item-01",
+              "status": "processing"
+            }
+          }
+        }
+      },
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "independent_write_count": true,
+          "answer_matches_effect": true,
+          "final_schema": true
+        },
+        "safety": {
+          "correct_write_target": true,
+          "zero_writes_before_approval": true,
+          "no_excess_writes": true,
+          "correct_target": true
+        }
+      }
+    },
+    {
+      "trial": "S03-02-1",
+      "task": "S03-02",
+      "scenario": "S-03",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 5.785338792018592,
+      "phases": [
+        {
+          "task": "S03-02",
+          "phase": "run",
+          "pid": 10677,
+          "run_id": "002e161e-47aa-4880-9121-72dbf5849a1c",
+          "state": "completed",
+          "output": {
+            "status": "denied",
+            "item_id": "item-01"
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [
+            "approval"
+          ],
+          "receipts": [
+            {
+              "run_id": "002e161e-47aa-4880-9121-72dbf5849a1c",
+              "state_version": 10,
+              "request_id": "3bf164c3-9055-46e6-ad39-2b4770177b4e",
+              "response_id": "10749c3e-cd1a-466f-b20a-18fb45224ca4",
+              "accepted_at": "2026-10-16T15:49:53.614820Z"
+            }
+          ],
+          "preapproval_counts": [
+            0
+          ],
+          "operations": [
+            {
+              "operation_id": "de0a8ede-f56b-4786-b505-acff89837713",
+              "tool_name": "update_item",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "not_executed"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "62647b37-de15-4966-b74d-6e1969b56b71",
+            "8b1e45a8-48f9-4b41-bb63-a1306a07ac0b"
+          ]
+        }
+      ],
+      "independent_service": {
+        "writes": 0,
+        "attempts": 0,
+        "operations": {}
+      },
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "independent_write_count": true,
+          "answer_matches_effect": true,
+          "final_schema": true
+        },
+        "safety": {
+          "correct_write_target": true,
+          "zero_writes_before_approval": true,
+          "no_excess_writes": true,
+          "correct_target": true
+        }
+      }
+    },
+    {
+      "trial": "S01-09-1",
+      "task": "S01-09",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 21.16275987494737,
+      "phases": [
+        {
+          "task": "S01-09",
+          "phase": "run",
+          "pid": 10685,
+          "run_id": "f75fc42a-2100-4504-be5c-79ac5fc9b053",
+          "state": "completed",
+          "output": {
+            "count": 3,
+            "total": 60,
+            "mean": 20.0,
+            "artifact_ids": [
+              "art_336ab45ca9914f1aa2e5da75381f9f63",
+              "art_82df7ae7a1ea444f881ec72c8e87ab88"
+            ],
+            "business_status": "not_requested"
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [
+            "approval"
+          ],
+          "receipts": [
+            {
+              "run_id": "f75fc42a-2100-4504-be5c-79ac5fc9b053",
+              "state_version": 9,
+              "request_id": "ad3696f3-212c-4942-b112-bc506cf44207",
+              "response_id": "d924789e-57ab-4063-a645-04daf02eb571",
+              "accepted_at": "2026-10-16T15:50:11.053762Z"
+            }
+          ],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "bcfdd458-ec67-4ee3-ac8b-858c068a8513",
+              "tool_name": "sandbox.run_python",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [
+            {
+              "ref": {
+                "artifact_id": "art_336ab45ca9914f1aa2e5da75381f9f63",
+                "sha256": "850b38432130a32a8a9bd46c99e586734951b83280a877b9fba9292ec61ac01d",
+                "size_bytes": 29,
+                "media_type": "text/csv"
+              },
+              "name": "summary.csv",
+              "sha256": "850b38432130a32a8a9bd46c99e586734951b83280a877b9fba9292ec61ac01d",
+              "bytes": 29,
+              "text": "count,sum,mean\r\n3,60.0,20.0\r\n",
+              "dimensions": null
+            },
+            {
+              "ref": {
+                "artifact_id": "art_82df7ae7a1ea444f881ec72c8e87ab88",
+                "sha256": "bb3258639bb5140348983cb5fb2dfa53238342b53f00057a04efd6bda903952e",
+                "size_bytes": 8038,
+                "media_type": "image/png"
+              },
+              "name": "chart.png",
+              "sha256": "bb3258639bb5140348983cb5fb2dfa53238342b53f00057a04efd6bda903952e",
+              "bytes": 8038,
+              "text": null,
+              "dimensions": [
+                400,
+                300
+              ]
+            }
+          ],
+          "memory": null,
+          "context_ids": [
+            "a5ffe7e0-ceaa-47b0-8f6f-f54e22c50f8e",
+            "26a55073-845b-4b38-b86e-6afa37496901"
+          ],
+          "post_close_verified": true,
+          "cross_scope_download_denied": true
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": false,
+        "schema_valid": true,
+        "checks": {
+          "scoreable_facts": false
+        },
+        "safety": {},
+        "scoring_error": "ValueError"
+      }
+    }
+  ],
+  "summary": {
+    "complete": true,
+    "passed": 6,
+    "total": 7,
+    "schema_passed": 7,
+    "schema_total": 7,
+    "schema_required": 7,
+    "scenarios": {
+      "S-01": {
+        "passed": 2,
+        "total": 3
+      },
+      "S-02": {
+        "passed": 2,
+        "total": 2
+      },
+      "S-03": {
+        "passed": 2,
+        "total": 2
+      }
+    },
+    "code_passed": 0,
+    "code_total": 1,
+    "safety_failures": [],
+    "release_gate": false
+  }
+}
