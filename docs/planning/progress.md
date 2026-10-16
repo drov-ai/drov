@@ -21,6 +21,8 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 按[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)已建立[27项manifest](../../evals/manifest.json)、[固定配置](../../evals/config.json)、真实Runtime/新进程Memory/独立事项服务/Docker事实评分执行器及DeepSeek专用Responses方言。冻结源码专项115项通过；SDK/stream/HTTP离线完整27项各通过，新增Memory真实客户端重开组合已修复并验证。全库/构件/平台验证与真实评测正在收尾。实际失败/证据见[本轮记录](../validation/t16-evaluation.md)。真实v1 smoke首项因重复检索/全文标记错误失败，0/1通过，其余6/正式81未执行；两次调用高峰估计0.0033936元。v2已3/4通过后在S02-04出现无工具保存自述，余3 smoke/正式81未执行；Flash两轮17请求累计高峰估计0.020024元，全部settled。保留两轮失败，现按用户授权另登记Pro/low独立候选，提示/语料/评分不再改，费用/各模型价格累计在同一13元账本。7项完整smoke/81正式/体验记录与最终回归未验收，不关闭整卡。
 
+Pro首次smoke首项协议拒绝，0/1通过、余6/正式81未执行，原因分支当时未保存；用户控制台核对缓存0/输入644/输出127/总771后已结算。累计18请求峰值上界0.029249元，全settled；正在补安全错误诊断/有界终端费用收据，并在新源码登记后恢复同一Pro配置，模型/提示/评分不变。[原报告](../validation/t16-pro-smoke-v1.json)/[核对](../validation/t16-pro-reconciliation.json)保留，未将旧失败改写为通过。
+
 本轮用户已明确授权DeepSeek官方服务、`.env.local`中已有Key、优先deepseek-flash、兼容/smoke/正式合计13元预算。仅由宿主调用进程安全加载Key，不输出/提交；采用11元可用+2元费用余量，未知用量停止。原E2B预算/账号/模板/台账保留，本轮不调用。
 
 ## 历史已验收：T-15 整卡完整验收

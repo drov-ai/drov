@@ -12,9 +12,12 @@ from typing import Any
 
 from drov._json import canonical_json
 from drov.config import ModelCapabilities
+from drov.errors import ModelProtocolError
+from drov.models.openai import _usage
 from drov.models.protocol import ModelAdapter, ModelComplete, ModelEvent, ModelRequest
-from evals.budget import Ledger
+from evals.budget import BudgetStop, Ledger
 from evals.common import final, plan
+from evals.wire import WireReceipt
 
 CAPS = ModelCapabilities(
     text=True, tools=True, streaming=True, structured_output=True, context_window=1_000_000
@@ -41,10 +44,12 @@ class RecordedModel:
         ledger: Ledger | None = None,
         batch_hash: str = "",
         trial: str = "",
+        wire_receipt: WireReceipt | None = None,
     ) -> None:
         self.source, self.directory, self.ledger = source, directory, ledger
         self.batch_hash, self.trial = batch_hash, trial
         self.calls: list[ModelRequest] = []
+        self.wire_receipt = wire_receipt
 
     @property
     def capabilities(self) -> ModelCapabilities:
@@ -77,22 +82,52 @@ class RecordedModel:
             )
         started = time.monotonic()
         started_at = datetime.now(UTC).isoformat()
-        async for event in self.source.generate(request):
-            if isinstance(event, ModelComplete):
-                stem.with_suffix(".response.json").write_text(
-                    event.response.model_dump_json(indent=2), encoding="utf-8"
-                )
-                if self.ledger is not None and identifier is not None:
-                    self.ledger.settle(identifier, event.response.usage)
-                metadata = {
-                    "started_at": started_at,
-                    "elapsed_seconds": time.monotonic() - started,
-                    "provider": getattr(self.source, "_last_response_metadata", {}),
-                }
-                stem.with_suffix(".metadata.json").write_text(
-                    json.dumps(metadata, indent=2), encoding="utf-8"
-                )
-            yield event
+        if self.wire_receipt is not None:
+            self.wire_receipt.metadata.clear()
+        try:
+            async for event in self.source.generate(request):
+                if isinstance(event, ModelComplete):
+                    stem.with_suffix(".response.json").write_text(
+                        event.response.model_dump_json(indent=2), encoding="utf-8"
+                    )
+                    if self.ledger is not None and identifier is not None:
+                        self.ledger.settle(identifier, event.response.usage)
+                    metadata = {
+                        "started_at": started_at,
+                        "elapsed_seconds": time.monotonic() - started,
+                        "provider": getattr(self.source, "_last_response_metadata", {}),
+                    }
+                    stem.with_suffix(".metadata.json").write_text(
+                        json.dumps(metadata, indent=2), encoding="utf-8"
+                    )
+                yield event
+        except Exception as exc:
+            provider = getattr(self.source, "_last_response_metadata", {})
+            if not provider.get("usage") and self.wire_receipt is not None:
+                provider = self.wire_receipt.metadata
+            diagnostics = {
+                "started_at": started_at,
+                "error_type": type(exc).__name__,
+                "protocol_message": str(exc) if isinstance(exc, ModelProtocolError) else None,
+                "last_event": getattr(self.source, "_last_protocol_event", {}),
+                "provider": provider,
+                "usage_settled": False,
+            }
+            if (
+                isinstance(exc, ModelProtocolError)
+                and self.ledger is not None
+                and identifier is not None
+                and provider.get("usage") is not None
+            ):
+                try:
+                    self.ledger.settle(identifier, _usage(provider["usage"]))
+                    diagnostics["usage_settled"] = True
+                except (BudgetStop, ModelProtocolError):
+                    pass
+            stem.with_suffix(".error.json").write_text(
+                json.dumps(diagnostics, indent=2), encoding="utf-8"
+            )
+            raise
 
     async def aclose(self) -> None:
         await self.source.aclose()

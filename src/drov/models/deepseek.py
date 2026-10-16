@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncGenerator
 from typing import TYPE_CHECKING, Any, Literal
 
 from drov._json import StrictJson
 from drov.config import ModelCapabilities
 from drov.errors import ConfigurationError
 from drov.models.openai import _EVENTS, OpenAIResponses, _response
-from drov.models.protocol import ModelRequest, ModelResponse
+from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
 
 if TYPE_CHECKING:
     from openai import AsyncOpenAI
@@ -47,20 +48,39 @@ class DeepSeekResponses(OpenAIResponses):
         )
         self._reasoning_effort = reasoning_effort
         self._last_response_metadata: dict[str, Any] = {}
+        self._last_protocol_event: dict[str, Any] = {}
 
     @property
     def registration_config(self) -> dict[str, StrictJson]:
         return super().registration_config | {"reasoning_effort": self._reasoning_effort}
 
     def _parse_response(self, data: dict[str, Any], names: dict[str, str]) -> ModelResponse:
-        response = _response(data, names, plaintext_reasoning=True)
         if "usage" in data:
             self._last_response_metadata = {
                 "provider_model": data.get("model"),
                 "provider_response_id": data.get("id"),
                 "usage": data["usage"],
             }
-        return response
+        return _response(data, names, plaintext_reasoning=True)
+
+    def _observe_event(self, data: dict[str, Any]) -> None:
+        kind = data.get("type")
+        self._last_protocol_event = {
+            "type": kind
+            if isinstance(kind, str)
+            and len(kind) <= 100
+            and all(c.isascii() and (c.isalpha() or c in "_.") for c in kind)
+            else "invalid",
+            "sequence_number": data.get("sequence_number")
+            if type(data.get("sequence_number")) is int
+            else None,
+        }
+
+    async def generate(self, request: ModelRequest) -> AsyncGenerator[ModelEvent]:
+        self._last_response_metadata = {}
+        self._last_protocol_event = {}
+        async for event in super().generate(request):
+            yield event
 
     def _body(self, request: ModelRequest) -> dict[str, Any]:
         body = super()._body(request)

@@ -14,6 +14,9 @@ from drov.models.deepseek import DeepSeekResponses
 from drov.models.openai import OpenAIResponses, _name
 from drov.models.protocol import ModelMessage, ModelTool, collect_response
 from drov.runtime.registration import fingerprint
+from evals.budget import Ledger
+from evals.models import RecordedModel
+from evals.wire import WireReceipt
 from tests.test_openai_responses import (
     CAPS,
     CTX,
@@ -214,3 +217,97 @@ async def test_real_client_memory_save_and_reopened_injection(
         assert memory[0]["record"]["content"] == "synthetic preference"
         assert memory[0]["record"]["version"] == 1
         assert len(server.requests) == 3
+
+
+@pytest.mark.asyncio
+async def test_complete_usage_survives_invalid_plan_without_accepting_plan(tmp_path: Path) -> None:
+    bad = response([reasoning(), {"type": "web_search_call", "id": "unsupported"}])
+    async with fixture([Reply(completed(bad))]) as (_, client, _):
+        source = DeepSeekResponses(model="offline", capabilities=CAPS, client=client)
+        ledger = Ledger(tmp_path / "ledger.json")
+        ledger.create(batch_hash="fixed")
+        model = RecordedModel(
+            source, tmp_path / "calls", ledger=ledger, batch_hash="fixed", trial="fixture"
+        )
+        with pytest.raises(ModelProtocolError):
+            await collect_response(model.generate(request()))
+        attempts = json.loads(ledger.path.read_text())["attempts"]
+        assert attempts[0]["status"] == "settled" and attempts[0]["usage"]["total_tokens"] == 14
+        diagnostics = json.loads((tmp_path / "calls/model-01.error.json").read_text())
+        assert diagnostics["usage_settled"] is True
+        assert diagnostics["last_event"]["type"] == "response.completed"
+        assert "synthetic-private-continuation" not in json.dumps(diagnostics)
+        assert not (tmp_path / "calls/model-01.response.json").exists()
+
+
+@pytest.mark.asyncio
+async def test_truncated_next_request_never_reuses_previous_usage(tmp_path: Path) -> None:
+    async with fixture([Reply(completed()), Reply([])]) as (_, client, _):
+        source = DeepSeekResponses(model="offline", capabilities=CAPS, client=client)
+        ledger = Ledger(tmp_path / "ledger.json")
+        ledger.create(batch_hash="fixed")
+        model = RecordedModel(
+            source, tmp_path / "calls", ledger=ledger, batch_hash="fixed", trial="fixture"
+        )
+        await collect_response(model.generate(request()))
+        with pytest.raises(ModelProtocolError):
+            await collect_response(
+                model.generate(request().model_copy(update={"model_call_id": "second"}))
+            )
+        attempts = json.loads(ledger.path.read_text())["attempts"]
+        assert [a["status"] for a in attempts] == ["settled", "pending"]
+        diagnostics = json.loads((tmp_path / "calls/model-02.error.json").read_text())
+        assert diagnostics["provider"] == {} and diagnostics["usage_settled"] is False
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("valid_plan", [False, True])
+async def test_wire_receipt_preserves_billing_without_accepting_early_bad_event(
+    tmp_path: Path, valid_plan: bool
+) -> None:
+    body = completed(response([reasoning(), message()]))
+    if not valid_plan:
+        body.insert(0, event("response.unsupported", 1))
+    receipt = WireReceipt()
+    async with fixture([Reply(body)]) as (server, client, _):
+        client._client.event_hooks["response"].append(receipt.capture)
+        source = DeepSeekResponses(model="offline", capabilities=CAPS, client=client)
+        ledger = Ledger(tmp_path / "ledger.json")
+        ledger.create(batch_hash="fixed")
+        model = RecordedModel(
+            source,
+            tmp_path / "calls",
+            ledger=ledger,
+            batch_hash="fixed",
+            trial="fixture",
+            wire_receipt=receipt,
+        )
+        if valid_plan:
+            await collect_response(model.generate(request()))
+        else:
+            with pytest.raises(ModelProtocolError):
+                await collect_response(model.generate(request()))
+            diagnostic = (tmp_path / "calls/model-01.error.json").read_text()
+            assert "synthetic-private-continuation" not in diagnostic
+            assert json.loads(diagnostic)["usage_settled"] is True
+            assert not (tmp_path / "calls/model-01.response.json").exists()
+        attempts = json.loads(ledger.path.read_text())["attempts"]
+        assert attempts[0]["status"] == "settled" and attempts[0]["usage"]["total_tokens"] == 14
+        assert len(server.requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_wire_receipt_limit_and_missing_terminal_leave_usage_unknown(tmp_path: Path) -> None:
+    receipt = WireReceipt(limit=32)
+    async with fixture([Reply(completed())]) as (_, client, _):
+        client._client.event_hooks["response"].append(receipt.capture)
+        source = DeepSeekResponses(model="offline", capabilities=CAPS, client=client)
+        ledger = Ledger(tmp_path / "ledger.json")
+        ledger.create(batch_hash="fixed")
+        model = RecordedModel(
+            source, tmp_path / "calls", ledger=ledger, batch_hash="fixed", wire_receipt=receipt
+        )
+        with pytest.raises(ModelProtocolError):
+            await collect_response(model.generate(request()))
+        assert receipt.metadata == {}
+        assert json.loads(ledger.path.read_text())["attempts"][0]["status"] == "pending"

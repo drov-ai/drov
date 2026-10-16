@@ -238,6 +238,9 @@ class OpenAIResponses:
     def _parse_response(self, data: dict[str, Any], names: dict[str, str]) -> ModelResponse:
         return _response(data, names)
 
+    def _observe_event(self, data: dict[str, Any]) -> None:
+        """Private dialect diagnostics; observation never accepts a plan."""
+
     def __init__(
         self,
         *,
@@ -405,6 +408,7 @@ class OpenAIResponses:
                             data = event.model_dump(
                                 mode="json", exclude_unset=True, warnings="none"
                             )
+                            self._observe_event(data)
                             kind = data.get("type")
                             sequence = data.get("sequence_number")
                             if type(sequence) is not int or sequence <= last_sequence:

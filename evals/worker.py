@@ -54,6 +54,7 @@ from evals.common import (
     plan,
 )
 from evals.models import CAPS, FixtureModel, RecordedModel
+from evals.wire import WireReceipt
 from examples.item_service_fixture import ItemService
 
 INSTRUCTIONS = {
@@ -162,6 +163,7 @@ async def execute(options: argparse.Namespace) -> dict[str, Any]:
 
     async with AsyncExitStack() as stack:
         model_source: ModelAdapter
+        wire_receipt = None
         if options.mode == "live":
             import httpx2
             from openai import AsyncOpenAI
@@ -182,7 +184,12 @@ async def execute(options: argparse.Namespace) -> dict[str, Any]:
             ]
             if len(values) != 1 or not values[0]:
                 raise ValueError("Configure one DEEPSEEK_API_KEY in the ignored private env file")
-            http = await stack.enter_async_context(httpx2.AsyncClient(trust_env=False))
+            wire_receipt = WireReceipt()
+            http = await stack.enter_async_context(
+                httpx2.AsyncClient(
+                    trust_env=False, event_hooks={"response": [wire_receipt.capture]}
+                )
+            )
             client = AsyncOpenAI(
                 api_key=values[0],
                 base_url="https://api.deepseek.com",
@@ -207,6 +214,7 @@ async def execute(options: argparse.Namespace) -> dict[str, Any]:
             trial=options.trial_label or root.name,
             ledger=Ledger(Path(options.ledger)) if options.mode == "live" else None,
             batch_hash=options.batch_hash,
+            wire_receipt=wire_receipt,
         )
         tools: list[Any] = []
         output: Any = ResearchReport
