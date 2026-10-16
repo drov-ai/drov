@@ -60,6 +60,21 @@ class DeepSeekResponses(OpenAIResponses):
                 "provider_model": data.get("model"),
                 "provider_response_id": data.get("id"),
                 "usage": data["usage"],
+                "reasoning_shapes": [
+                    {
+                        "encrypted_type": type(item.get("encrypted_content")).__name__,
+                        "encrypted_length": len(item["encrypted_content"])
+                        if isinstance(item.get("encrypted_content"), str)
+                        else None,
+                        "plaintext_parts": len(item["content"])
+                        if isinstance(item.get("content"), list)
+                        else None,
+                    }
+                    for item in data.get("output", [])
+                    if isinstance(item, dict) and item.get("type") == "reasoning"
+                ]
+                if isinstance(data.get("output"), list)
+                else [],
             }
         return _response(data, names, plaintext_reasoning=True)
 

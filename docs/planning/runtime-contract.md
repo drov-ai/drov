@@ -80,7 +80,7 @@ HTTP SSE 使用 `run_id:seq` 作为持久化事件游标，可重送，由客户
 
 T-11 模型适配遵循 [ADR-0022](../decisions/0022-openai-responses-adapter.md)：供应商 SDK 重试关闭；仅 Runtime 按原保存输入执行有界模型重试，等待取本地 backoff 与有效 Retry-After 的较大者并受剩余时间限制。完整流正常结束且唯一终止响应验证后才提交计划；refusal/incomplete/畸形或中断流均不能派发工具。历史 provider bundle 按原助手响应位置重放，保留 reasoning/phase/调用顺序；缺失、不匹配或不兼容时在供应商调用前拒绝。供应商错误正文不写入 RunError，未知用量不填零。此规则不增加工具写入重试。
 
-T-16 的 DeepSeekResponses 按[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)使用独立明文 reasoning bundle，按同一历史分组、上下文估算与助手内容配对校验；不展示明文 reasoning delta，不接受OpenAI加密bundle替代，不因供应商允许并行提议而改变本地逐项授权/审批/顺序派发。预算账本属于评测宿主，先预留再请求；中断/未知用量阻止新增付费请求，不修改核心Run状态或将未知费用记0。
+T-16 的 DeepSeekResponses 按[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)使用独立明文 reasoning bundle，按同一历史分组、上下文估算与助手内容配对校验；明文content必须完整，允许空encrypted_content占位但拒绝非空加密值；不展示明文 reasoning delta，不接受OpenAI加密bundle替代，不因供应商允许并行提议而改变本地逐项授权/审批/顺序派发。预算账本属于评测宿主，先预留再请求；中断/未知用量阻止新增付费请求，不修改核心Run状态或将未知费用记0。
 
 T-05 已实现 @tool/PythonTool 和私有只读派发接点：同步工具先有界排队再派发，异步工具保留真实 Task；OperationJournal 同事务保存操作/Run 摘要、检查点、事件和 tool_dispatch_count 预算预留。每个重试只有显式 TransientToolError 才允许，超时/非法输出不重试。已有 operation_id 返回旧事实，不自动批准或重做；T-06 已接入完整计划提交与只读 Run 收尾；T-09 已接入审批/输入子范围；外部未知写入与显式恢复由 T-09 本轮交付，逐故障边界硬崩溃另在 T-10 验收。T-09 已接入外部 write/unknown 单次派发与核查；T-08 内置 Memory 使用第 7.3 节的专用事务路径。
 

@@ -311,3 +311,19 @@ async def test_wire_receipt_limit_and_missing_terminal_leave_usage_unknown(tmp_p
             await collect_response(model.generate(request()))
         assert receipt.metadata == {}
         assert json.loads(ledger.path.read_text())["attempts"][0]["status"] == "pending"
+
+
+@pytest.mark.asyncio
+async def test_plaintext_with_empty_encrypted_placeholder_round_trips() -> None:
+    item = reasoning() | {"encrypted_content": ""}
+    async with fixture([Reply(completed(response([item, message()])))]) as (_, client, _):
+        source = DeepSeekResponses(model="offline", capabilities=CAPS, client=client)
+        result = await collect_response(source.generate(request()))
+        assert result.message == "hello"
+        history = request(provider_items=result.provider_items).model_copy(
+            update={"messages": [ModelMessage(role="assistant", content="hello")]}
+        )
+        assert source._body(history)["input"][0] == item
+        assert source._last_response_metadata["reasoning_shapes"] == [
+            {"encrypted_type": "str", "encrypted_length": 0, "plaintext_parts": 1}
+        ]

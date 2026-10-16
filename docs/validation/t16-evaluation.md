@@ -46,3 +46,6 @@ CSV字节规则修复时一度误覆盖.gitattributes原四条Moby逐字保护�
 
 
 诊断/收据最终定向122项通过（22.05s，含实际Docker，`t16-diagnostics-target-accepted.log`），ruff/284文件格式与严格mypy192源通过。前一轮118通过/1失败/3skip仅为超限测试错断言异常类别；实际适配器按ValueError归类ModelProtocolError，修正断言，未改变生产异常规则。一次显式缩小mypy输入导致scripts中的本地_e2b_host未被纳入，改用项目配置mypy后全部通过；不将该输入错误记为源码兼容问题。
+
+
+[诊断源码登记](t16-preregistration-pro-diagnostic.json)后Pro首项仍失败，具体分支Unexpected encrypted reasoning，完整终端response.completed/seq74，无工具派发。此次用量自动完整结算：输入644（缓存640）、输出128/其中推理36、总772；上界0.003684元，累计19请求0.032933元。原报告另存[t16-pro-smoke-diagnostic.json](t16-pro-smoke-diagnostic.json)，不替换首次未知分支失败。官方[Responses指南](https://api-docs.deepseek.com/guides/responses_api/)当日复核仍列明文content、不支持加密延续；现在只允许空加密占位，真实非空值仍拒绝。新增字段安全形状元数据，下一固定源码检查点验证实际占位形状；保留明文/非空加密严格边界，不再次修改提示/任务/评分。
