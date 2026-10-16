@@ -1,0 +1,68 @@
+{
+  "scope": "Saved observations only; no provider, tool or sandbox execution. Timing includes host buffering; not time-to-first-token.",
+  "batch_hash": "6df093679e2c16ff16e5f62e484c2e8ac58d01e2dd64acc1e7b0e291971a6bbf",
+  "suite": "smoke",
+  "trial_latency": {
+    "count": 7,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 14.588461000006646,
+    "p95_seconds": 26.7566823749803,
+    "total_seconds": 96.44203845690936
+  },
+  "model_request_latency": {
+    "count": 22,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 2.160646582953632,
+    "p95_seconds": 13.004058917053044,
+    "total_seconds": 89.8377201249823
+  },
+  "paid_requests": 22,
+  "normalized_model_invocations": 22,
+  "observed_model_retries": 0,
+  "observed_external_tool_retries": 0,
+  "ordinary_tool_dispatched_events": 4,
+  "recorded_operations_including_builtin_memory_and_sandbox": 11,
+  "operation_statuses": {
+    "succeeded": 10,
+    "not_executed": 1
+  },
+  "usage": {
+    "input_tokens": 29131,
+    "output_tokens": 8069,
+    "total_tokens": 37200,
+    "cached_input_tokens": 22784
+  },
+  "cost_upper_cny": "0.2818212",
+  "all_history_accounting": {
+    "attempts": 607,
+    "status_counts": {
+      "settled": 607
+    },
+    "cost_upper_cny": "7.22202140",
+    "ceiling_cny": "13",
+    "usable_cny": "11",
+    "stopped": null
+  },
+  "not_provider_bill_or_balance": true,
+  "failed_trials": [],
+  "model_generated_code": [
+    {
+      "trial": "S01-09-1",
+      "phase": "run",
+      "response": "model-01.response.json",
+      "call_id": "call_00_zQ1UP9pWGA7KxsCf6Kql2855",
+      "code_sha256": "d6f57f79052a5bef40f85b6770e42e81ae3e56491b8f78ed968a9c52fc1e36c7",
+      "arguments": {
+        "code": "import csv, os, json\nimport matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\n\ninput_dir = '/work/inputs/art_17900343011146279482ed7176166dcf'\noutput_dir = '/work/outputs'\nos.makedirs(output_dir, exist_ok=True)\n\n# Read values from the granted numbers.csv\nvalues = []\nwith open(os.path.join(input_dir, 'numbers.csv'), newline='') as f:\n    reader = csv.DictReader(f)\n    for row in reader:\n        if 'value' in row and row['value'] not in (None, ''):\n            values.append(float(row['value']))\n\ncount = len(values)\ntotal = sum(values)\nmean = (total / count) if count else 0.0\n\n# Deliver summary.csv with header count,sum,mean\nsummary_path = os.path.join(output_dir, 'summary.csv')\nwith open(summary_path, 'w', newline='') as f:\n    w = csv.writer(f)\n    w.writerow(['count', 'sum', 'mean'])\n    w.writerow([count, total, mean])\n\n# Deliver chart.png: 400x300 static PNG, actual value bar chart\nfig = plt.figure(figsize=(4, 3), dpi=100)\nplt.bar(range(1, count + 1), values, color='steelblue')\nplt.xlabel('row')\nplt.ylabel('value')\nplt.title('Actual values')\nplt.tight_layout()\nfig.savefig(os.path.join(output_dir, 'chart.png'))\nplt.close(fig)\n\n# Emit computed stats as JSON for accurate reporting\nprint(json.dumps({\n    'count': int(count),\n    'total': int(total),\n    'mean': mean,\n}, allow_nan=False))\n",
+        "inputs": [
+          "art_17900343011146279482ed7176166dcf"
+        ],
+        "outputs": [
+          "summary.csv",
+          "chart.png"
+        ]
+      }
+    }
+  ],
+  "raw_report_sha256": "d471c772cfce504a8cc78b03abfba7f4cebbd480af8efcb1248f110e92c28bb3"
+}

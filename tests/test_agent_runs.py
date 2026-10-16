@@ -554,7 +554,7 @@ async def test_cancelled_actual_thread_retains_slot_and_sqlite_lock(
     @tool(name="search", effect="read")
     def search() -> str:
         loop.call_soon_threadsafe(entered.set)
-        release.wait(3)
+        release.wait(30)
         return "late-result"
 
     model = ScriptedModel([plan("search")])
@@ -566,7 +566,8 @@ async def test_cancelled_actual_thread_retains_slot_and_sqlite_lock(
     await runtime.open()
     try:
         ref = await runtime.start(agent, "one", session_id="one", context=ALICE)
-        await asyncio.wait_for(entered.wait(), 1)
+        # Setup scheduling is independent of the 20ms shutdown grace under test.
+        await asyncio.wait_for(entered.wait(), 10)
         if delayed_notification:
             work = runtime._runs.works[ref.run_id]
             original = work._call_done

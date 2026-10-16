@@ -83,3 +83,27 @@ v12按[ADR-0037](../decisions/0037-evaluation-memory-terminal-conditions.md)补�
 6142ff1的Docker38936492101四jobs成功；核心38936492018的Windows3.14在既有test_actual_process_kill_at_abandonment_commit[before]中，已wait终止的合成子进程后立即重开StorageInUse，原错误日志保留.drov/t16-bounded-core-failure.log。九jobs成功、Windows3.11被后续源码并发规则取消；整轮conclusion=cancelled，不能算成功。仅测试增加Windows子进程已回收后的5s有界锁释放观察；原进程存活时立即StorageInUse断言、实际事务前/后状态/未知事实断言不变，未改SDK锁规则。POSIX不重试；真实Windows最终结果待新源码CI。
 
 v12三入口离线各27/27、schema25/25、代码3/3、零安全失败，见[摘要](t16-terminal-offline.json)。两解释器含Docker/abandonment定向各128项：首次127 passed/1 failed（3.11 31.28s、3.14 33.23s），新增二次提交反例误把update的seed准备阶段当作写阶段而KeyError；改选第一个非seed阶段，原日志保留。只复验S02-02，两解释器均1 passed，其他127项未变；并非128项在同次全部通过的记录。静态/格式291文件、mypy192源、schema/OpenAPI、98 Markdown/912本地链接/16说明片段AST/保护与凭据模式检查通过。Windows有界观察分支的真实验证仍以最终源码CI为准，本地POSIX两个真实kill边界均已通过。
+
+## v12真实smoke完整7/7；正式81执行中
+
+源码6ba039f4ec295a7b77552a1cec224d45564df2a4 / [登记](t16-preregistration-terminal.json)6629c91先提交推送；指纹6df093679e2c16ff16e5f62e484c2e8ac58d01e2dd64acc1e7b0e291971a6bbf。新[smoke原报告](t16-terminal-smoke.json)/[计量与原代码](t16-terminal-smoke-metrics.json)完整7/7、schema7/7、代码1/1、零安全失败，Memory保存一次/版本1及四进程隔离符合原预期。此smoke22次全部settled/峰值上界0.2818212元；含历史607次/7.22202140元，无pending/unknown/stopped。当前同指纹新目录.drov/t16-terminal-formal完整81执行，结果后补。
+
+v12受影响sdist已实际重建，逐字核对12个评测/测试源文件（含Windows测试修正），排除.env.local/.drov/Git/品牌；SHA256=d38e3e42e8e8ca0afb10872e818bcc25d062555e3b1088df8526d056be16ab37（构建时文档快照）。源码6ba039f最终核心38939561420/Docker38939561405已触发，实际平台结论以完成后记录为准。
+
+## v12完整正式81质量门槛全部通过
+
+[原正式报告](t16-terminal-formal.json)/[计量与全部模型原代码](t16-terminal-formal-metrics.json)为78/81，三场景26/27、25/27、27/27，schema73/75，代码9/9，零安全失败，release_gate=true。没有剔除或补抽：一项S01-08-2重复检索；两项S02-08-2/3普通聊天返回自然语言而非MemoryReport，被SDK以invalid_output拒绝，未写Memory，新读进程正确absent。三个失败全部保留，未调整阈值。
+
+[完整复核](t16-terminal-review.json)覆盖三失败/每场景三正式成功、九个代码任务；实际12个代码阶段/15个CSV或PNG全部重新核对本地下载字节/hash/Ref/大小，销毁后重开与跨scope授权拒绝通过。三张真实PNG已逐图查看，均400×300、12/18/30三柱。所有12次保存/更新/删除成功自述均有单次实际mutation/正确持久内容及版本证据；没有无依据成功。三个隔离组实际完成，没有触发本配置的局部trial_stops；该边界仍以低层与driver合成回归证明，不能冒充live故障。
+
+正式207付费请求，输入258673/输出71336/cache211072 tokens、费用峰值上界2.4178026元，模型/外部工具自动重试均0。任务耗时nearest-rank p50=8.983s/p95=26.671s（81项/910.184s），模型请求p50=2.533s/p95=12.331s；含宿主缓冲与阶段/工具，不是首字延迟、不同候选的因果对比或竞品成绩。
+
+[最终会计](t16-terminal-accounting.json)814次全settled、峰值上界9.63982400元；本轮新增631次/7.83982260元，起点183次逐字段保持。独立按每attempt原费率重新计算全部费用（最早17次缺rates按历史Flash默认，绝不套当前Pro价）；原13/11上限保持，可用估算余1.360176元、另预留2元，无pending/unknown/global_stop/trial_stops，不是供应商实扣/余额。已停止新增模型请求，无需充值。只读Docker标记清点0执行容器；未动用户原数据/字节/租约/品牌、E2B账本，无其他付费服务/发布/部署。
+
+## 最终Windows启动屏障修正（不改变模型冻结指纹）
+
+6ba039f核心38939561420最终10/11 jobs成功，Windows3.14唯一失败为既有test_cancelled_actual_thread_retains_slot_and_sqlite_lock[True]在等待线程进入的1秒启动屏障超时；未进入取消/锁保留断言，非刚修复的abandonment用例。原日志.drov/t16-terminal-core-failure.log保留；同源码Docker38939561405四jobs全success。
+
+仅测试把启动等待改10秒、夹具线程保护上限改30秒，finally仍显式释放；被测20毫秒shutdown_grace、延迟通知1.1秒、ShutdownIncomplete、槽位与SQLite锁、取消持久化及迟到结果不采用的断言不变。SDK/评测/模型/语料/配置指纹6df093...逐字相同，已完成L4报告保持原commit，不重新付费或改原报告。此测试修订的本地与最终平台结果在完成后补记。
+
+测试启动屏障修订本地：Python3.11 agent_runs组50 passed/1 Python3.12+ API skip（2.83s），3.14为51 passed（2.83s）；两种实际线程/延迟通知/持锁/取消迟到结果均通过。静态/格式291文件与mypy192源通过。待该测试修订精确commit最终CI完成前，T-16只记真实质量子范围通过，不提前关闭。

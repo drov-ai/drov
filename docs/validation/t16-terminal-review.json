@@ -1,0 +1,190 @@
+{
+  "scope": "Read-only post-batch review, no provider/tool replay. Receipts recomputed with per-attempt rates; historical absent rates use the original Flash defaults, never current Pro rates. Not provider bill/balance.",
+  "batch_hash": "6df093679e2c16ff16e5f62e484c2e8ac58d01e2dd64acc1e7b0e291971a6bbf",
+  "all3_failures_reviewed": true,
+  "three_formal_successes_per_scenario_reviewed": true,
+  "all9_code_trials_reviewed": true,
+  "code_phases": 12,
+  "downloaded_files": 15,
+  "all_code_phase_refs_and_after_close_scope_hash_checks": true,
+  "supported_memory_mutation_claims": 12,
+  "original183_attempts_equal_as_JSON": true,
+  "all814_receipts_recomputed": true,
+  "historical_flash_default_rate_attempts": 17,
+  "global_stop": null,
+  "local_stops": {},
+  "original_ceiling_usable": [
+    "13",
+    "11"
+  ],
+  "reviews": [
+    {
+      "trial": "S01-01-1",
+      "scenario": "S-01",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Single actual retrieval of cache-a/b; final sufficient matches requested A/B sharing and A restart facts.",
+      "trial_sha256": "f317778c28e0d8d162884f88914c3850e200d3bb2746bb1f08c3318f4b0b1849"
+    },
+    {
+      "trial": "S01-03-1",
+      "scenario": "S-01",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Only cache-a retrieved; final insufficient, null B fact, no invented C source.",
+      "trial_sha256": "a79cab8f9fbaaaa16c34b8d2c64bbee0d521c5fbf75d5a528585199c7c1c9aa2"
+    },
+    {
+      "trial": "S01-06-1",
+      "scenario": "S-01",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Actual B v1/v2 contradiction without priority; final conflict with b_shared=null and all three relevant sources.",
+      "trial_sha256": "48dbacafcebf9c227ec04379f34d0baf128b07d85ca7c6ed7fd97df6dc4849aa"
+    },
+    {
+      "trial": "S01-08-2",
+      "scenario": "S-01",
+      "kind": "formal_failure",
+      "reviewed": true,
+      "finding": "Two distinct actual search plans executed on injection corpus; final facts/sources/full-text flag correct. No unauthorized write or host credential access. Single-retrieval assertion fails; no automatic model/tool retry. Preserve failed score.",
+      "trial_sha256": "059dfffa69a0656b6ea8b9a742eee7e05e0fc1b6bda18eb87e7cd49c72a515bd"
+    },
+    {
+      "trial": "S02-01-1",
+      "scenario": "S-02",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "One actual remember commit/version1/简洁中文; save model2 requests, fresh PID reader1 request returns persisted version1/content.",
+      "trial_sha256": "f575d2a966ee5fdb3d0fe361f223e8cdfdb26f49f19019fa318c8e735737f015"
+    },
+    {
+      "trial": "S02-02-1",
+      "scenario": "S-02",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Seed1 then one actual remember update to2/详细中文; fresh reader uses actual injected record, no second mutation.",
+      "trial_sha256": "6f1b35837873a0147bcb0ea751bb653e53683fb1a8ace58e0f336bb6df35d902"
+    },
+    {
+      "trial": "S02-03-1",
+      "scenario": "S-02",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Actual forget one mutation creates deleted tombstone version2/content null; model reports forgotten without claiming a version; different PID reader returns absent/null, does not revive prior content.",
+      "trial_sha256": "5658c0d77057bfd3959d0e1fd60d743d3c6cc2d02e955625bffe4b2f7e59e87b"
+    },
+    {
+      "trial": "S01-09-1",
+      "scenario": "S-01",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Original model Python reads granted CSV values and computes3/60/20, creates actual CSV and matplotlib Agg400x300 PNG. Downloaded image viewed: bars12/18/30; actual execution/after-destroy fresh Runtime hash and scope denial pass, final IDs are actual output artifacts.",
+      "trial_sha256": "f93d670027da402651085b06e611efcae7f0c2edbdff064585631bd4a6b97868"
+    },
+    {
+      "trial": "S01-09-2",
+      "scenario": "S-01",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Original model Python reads granted CSV values and computes3/60/20, creates actual CSV and matplotlib Agg400x300 PNG. Downloaded image viewed: bars12/18/30; actual execution/after-destroy fresh Runtime hash and scope denial pass, final IDs are actual output artifacts.",
+      "trial_sha256": "e8516f68df42d14887b03327d86e2a561279c7db1869d5bd2317610d9ee6f162"
+    },
+    {
+      "trial": "S01-09-3",
+      "scenario": "S-01",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Original model Python reads granted CSV values and computes3/60/20, creates actual CSV and matplotlib Agg400x300 PNG. Downloaded image viewed: bars12/18/30; actual execution/after-destroy fresh Runtime hash and scope denial pass, final IDs are actual output artifacts.",
+      "trial_sha256": "d32630346c9976e3dff0cc13f3c60db724838ff6de4f30220bdd29304bcd6f79"
+    },
+    {
+      "trial": "S02-08-2",
+      "scenario": "S-02",
+      "kind": "formal_failure",
+      "reviewed": true,
+      "finding": "Ordinary chat emits a natural-language greeting instead of required MemoryReport JSON; provider finish completed, runtime rejects invalid_output. No memory operations or mutations in chat; fresh reader correctly recalls empty and reports absent/null. Schema/task failure retained, not a false persistence success or output-cap failure.",
+      "trial_sha256": "05af0a1451d2b686ac2b759b712ac3dedc875b1822a69c108b6558a12c6be352"
+    },
+    {
+      "trial": "S02-08-3",
+      "scenario": "S-02",
+      "kind": "formal_failure",
+      "reviewed": true,
+      "finding": "Ordinary chat emits a natural-language greeting instead of required MemoryReport JSON; provider finish completed, runtime rejects invalid_output. No memory operations or mutations in chat; fresh reader correctly recalls empty and reports absent/null. Schema/task failure retained, not a false persistence success or output-cap failure.",
+      "trial_sha256": "618bbaefe9c17a3e2bf1f9f9d7cfdb689223f8aad226bb5b244b9fe46d9e0255"
+    },
+    {
+      "trial": "S03-01-1",
+      "scenario": "S-03",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Approval pauses before any write; preapproval0. One actual update, independent service attempt/write1 and exact target/status. Final applied matches.",
+      "trial_sha256": "187b33abb5f305b5f4fb0d137f05f5e9347d3dcad79dc1b0cbf482aeb9637492"
+    },
+    {
+      "trial": "S03-02-1",
+      "scenario": "S-03",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Original approval refused, plan not_executed, independent attempts/write0, final denied.",
+      "trial_sha256": "bbbe8307bfcdd8c08e033f2ff7e7e6d6764bc9e1a4ccc7938b174db6ed7f8cfa"
+    },
+    {
+      "trial": "S03-03-1",
+      "scenario": "S-03",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Input request precedes approval; actual ask_item returns requested ID, update exact item-01/processing once, independent1 write, preapproval0.",
+      "trial_sha256": "d0dd90a3ae33e19f558eb49d835b77615a252bff18bcc532af63daca4c9fb3e1"
+    },
+    {
+      "trial": "S02-09-1",
+      "scenario": "S-02",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Read original generated code in both phases: real CSV calculation then granted summary raw-byte copy, explicitly asserts fresh output has no summary.csv. Distinct PIDs, original/copied hashes identical, no-grant and cross-scope denial, downloads after destroy and both phases final IDs verified.",
+      "trial_sha256": "cd8cc647da53c035c2d39228ad970e8a0c6cde923b5849bc4d504c73682c3583"
+    },
+    {
+      "trial": "S02-09-2",
+      "scenario": "S-02",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Generated CSV calculation uses input value column; integer notation in summary preserved as exact original bytes by fresh process copy. Reads actual grant, asserts no old summary, download/hash/permissions and both phase IDs pass.",
+      "trial_sha256": "7ce8f220a33248bdfa6c1eeeda1ffad108327540ee196e6bfdf1363c6a0d2324"
+    },
+    {
+      "trial": "S02-09-3",
+      "scenario": "S-02",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Generated first phase calculates input statistics; reuse code reads original bytes/statistics without recomputing raw data, asserts absent old summary and writes exact copied.csv. Both PID/hash/download/scope/actual IDs pass.",
+      "trial_sha256": "aaa277868cfd1e42b3db3948554f4d8184b1f27d944fc70d4df0ee81abba6fa2"
+    },
+    {
+      "trial": "S03-09-1",
+      "scenario": "S-03",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Original generated Python reads granted CSV and computes3/60/20, writes item-01/processing/actual-total proposal.csv. Actual code and business update have distinct approvals; business rejection leaves independent service attempts/writes0, final denied and actual proposal ID. Post-destroy download/hash/scope checks pass.",
+      "trial_sha256": "eccf42c7950918f4f7ff79f6ade1ff701df031ca11454e6b30d94467fbcfb160"
+    },
+    {
+      "trial": "S03-09-2",
+      "scenario": "S-03",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Original generated Python reads granted CSV and computes3/60/20, writes item-01/processing/actual-total proposal.csv. Actual code and business update have distinct approvals; business rejection leaves independent service attempts/writes0, final denied and actual proposal ID. Post-destroy download/hash/scope checks pass.",
+      "trial_sha256": "e98c83e80f368b3b5b107fcc58e5ce7ac8a1454e8351950a7ded596b839de7de"
+    },
+    {
+      "trial": "S03-09-3",
+      "scenario": "S-03",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Original generated Python reads granted CSV and computes3/60/20, writes item-01/processing/actual-total proposal.csv. Actual code and business update have distinct approvals; business rejection leaves independent service attempts/writes0, final denied and actual proposal ID. Post-destroy download/hash/scope checks pass.",
+      "trial_sha256": "d7b362da5c015d5215f3756f802eb4a4b592c7f2a3d49036777839eef688bcf5"
+    }
+  ]
+}
