@@ -93,3 +93,6 @@ H-01 至 H-04 的定义在 [产品定义](product.md)。所有假设当前均为
 | E-36 | [工具调用](https://api-docs.deepseek.com/guides/tool_calls/)、[JSON输出](https://api-docs.deepseek.com/guides/json_mode/)；当日滚动协议 | Chat接口另列strict工具Beta及JSON模式；接口能力需按具体协议区分 | JSON合法不等于最终schema有效；工具strict不等于所有协议/schema受支持，不放宽Drov类型、权限、预算或恢复契约来换取通过 |
 
 2026-10-16 T-16实施前复查：上述DeepSeek官方滚动Responses/Thinking文档仍声明明文reasoning、完整本地历史、function与text.format；不把宣称当实测。官方[人民币价格页](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/)列Flash高峰百万token缓存命中0.04元/未命中2元/输出8元，空闲减半；评测账本统一采用高峰上界和完整实际用量，不借汇率折算或假定当前一定空闲。实际适配与模型结果见[T-16记录](../validation/t16-evaluation.md)。
+
+
+2026-10-16 Pro实际协议差异：官方滚动Responses文档列encrypted_content不支持，但授权探针在完整明文reasoning外实际返回38字符字符串。仅保存字段形状/用量，不将推理正文写入公开诊断；按ADR-0033以明文续接并移除额外字段。该实测仅证明此次返回，不推断所有模型/未来版本形状相同。

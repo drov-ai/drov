@@ -89,6 +89,7 @@ async def test_incomplete_or_unsupported_plans_never_complete(bad: str) -> None:
     output = [item, message()]
     if bad == "encrypted":
         item["encrypted_content"] = "unsupported"
+        item["content"] = []
     elif bad == "empty":
         item["content"] = []
     elif bad == "summary":
@@ -323,7 +324,25 @@ async def test_plaintext_with_empty_encrypted_placeholder_round_trips() -> None:
         history = request(provider_items=result.provider_items).model_copy(
             update={"messages": [ModelMessage(role="assistant", content="hello")]}
         )
-        assert source._body(history)["input"][0] == item
+        assert source._body(history)["input"][0] == reasoning()
         assert source._last_response_metadata["reasoning_shapes"] == [
             {"encrypted_type": "str", "encrypted_length": 0, "plaintext_parts": 1}
         ]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("opaque", ["opaque-provider-token", 7])
+async def test_plaintext_is_authoritative_and_opaque_metadata_is_not_replayed(opaque: Any) -> None:
+    item = reasoning() | {"encrypted_content": opaque}
+    async with fixture([Reply(completed(response([item, message()])))]) as (_, client, _):
+        source = DeepSeekResponses(model="offline", capabilities=CAPS, client=client)
+        if not isinstance(opaque, str):
+            with pytest.raises(ModelProtocolError):
+                await collect_response(source.generate(request()))
+            return
+        result = await collect_response(source.generate(request()))
+        history = request(provider_items=result.provider_items).model_copy(
+            update={"messages": [ModelMessage(role="assistant", content="hello")]}
+        )
+        assert source._body(history)["input"][0] == reasoning()
+        assert result.message == "hello" and source._body(history)["input"][1] == message()

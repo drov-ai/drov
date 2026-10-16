@@ -157,8 +157,10 @@ def _response(
                     if part.get("type") != "reasoning_text":
                         raise ModelProtocolError("Unsupported plaintext reasoning part")
                     _string(part.get("text"))
-                if item.get("encrypted_content") not in (None, ""):
-                    raise ModelProtocolError("Unexpected encrypted reasoning")
+                if item.get("encrypted_content") is not None and not isinstance(
+                    item["encrypted_content"], str
+                ):
+                    raise ModelProtocolError("Invalid optional reasoning metadata")
             elif not _string(item.get("encrypted_content")):
                 raise ModelProtocolError("Reasoning item lacks encrypted continuation data")
         elif kind == "function_call":

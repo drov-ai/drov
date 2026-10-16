@@ -97,6 +97,17 @@ class DeepSeekResponses(OpenAIResponses):
         async for event in super().generate(request):
             yield event
 
+    def _input(self, request: ModelRequest) -> list[dict[str, Any]]:
+        inputs = super()._input(request)
+        # Real Pro emits an opaque encrypted field alongside complete plaintext.
+        # Only plaintext is supported for stateless DeepSeek continuation.
+        return [
+            {k: v for k, v in item.items() if k != "encrypted_content"}
+            if item.get("type") == "reasoning"
+            else item
+            for item in inputs
+        ]
+
     def _body(self, request: ModelRequest) -> dict[str, Any]:
         body = super()._body(request)
         for ignored in ("include", "truncation", "parallel_tool_calls", "store"):

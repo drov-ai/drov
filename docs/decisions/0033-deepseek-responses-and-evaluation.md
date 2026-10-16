@@ -35,3 +35,6 @@ Pro首次协议拒绝暴露出评测错误诊断丢失用量的问题；原调�
 
 
 诊断检查点识别到Pro完整终端被Unexpected encrypted reasoning拒绝，原0/1失败与用量保留。明确空encrypted_content字符串仅是空占位，和缺字段/null同义；必须仍有完整明文content，非空加密值、空/未知明文part继续拒绝。原OpenAI仍必须非空encrypted_content，跨方言不转换。新增真实客户端包含空占位的往返与原非空拒绝回归；安全诊断仅记录字段类型/长度/part数。下一真实检查点用于核对实际字段形状，不从上一错误消息猜测长度；提示/评分/语料不变。
+
+
+后续[固定检查点](../validation/t16-preregistration-pro-compatible.json)实测仍拒绝，安全形状记录证明encrypted_content为38字符字符串，且content有1个明文part。官方滚动说明不足以覆盖这项返回差异。最终选择完整明文作为唯一续接依据：可保留额外字符串/null字段在私有原始bundle，但发回DeepSeek前移除encrypted_content；它不参与助手内容、不作为回答、不赋予跨方言兼容。仅加密/无完整明文、非法字段类型继续拒绝。替代方案是对实际Pro始终拒绝或丢明文依赖额外字段，均不符合本轮明确服务的有效续接；代价是需跟踪供应商输出差异。原OpenAI加密续接要求不变。此段取代前一空占位限定，前一真实失败保留，不改任务/提示/评分。
