@@ -26,3 +26,9 @@
 - Ruff、258文件格式、严格mypy174文件、生成schema/OpenAPI与空白检查通过。原core/Artifact/Sandbox/Upload/retention/reclamation/abandonment DDL、版本、stage/header/容量16项AST保持（`t15-backup-original-definitions.json`）；uv.lock/P4/品牌未改，84份Markdown/735相对链接/16段Python AST与跟踪变更凭据模式通过（`t15-backup-doc-check.json`）。静态检查不等于任意安全或物理断电保证。
 
 最终源码/平台CI完成后另补，不把后续迁移/导出工作套用本批结果；构件包含冻结时的文档，后续验收Markdown补记不宣称已在旧sdist内。下一项、用户资源及会话建议只维护在[progress](../planning/progress.md)。
+
+## Windows3.14原生失败与修正检查点
+
+992037dd43d1ffd556868d111db7f9c9ade15bd1的核心CI38860944818在Windows3.14 HTTP专项实际为61通过/14skip/1失败：备份_inventory比较路径lstat与句柄fstat的完整token，误报同一文件变化；原生完整job日志`.drov/t15-backup-windows314-failure.log`，初次workflow未结束时gh --log-failed尚不可用的记录另保留。没有将其他平台或旧构件结果当作此项通过。
+
+2026-10-16查阅CPython一手[问题157671](https://github.com/python/cpython/issues/157671)：报告Windows3.14的stat/fstat对ctime取值含义可能不同，与本次失败边界相符；它是诊断依据，原生修复结果另验。修正跨API只比较inode/device/size/mtime；分别记录并比较路径前后和句柄前后的完整token，两个ctime检查均保留，且再次核对私有文件/硬链接。新增2个不同时间来源与真正读取中变更的故障回归，含原HTTP共41项通过（5.36s，`.drov/t15-backup-windows-local.log`）。类型检查修正合成stat结果的可选Windows属性读取方式，mypy174文件通过；SDK源码未因该测试类型修正改变，最终构件与全库/原生CI另记。

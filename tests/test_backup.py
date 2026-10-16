@@ -631,3 +631,36 @@ async def test_pending_reclamation_must_finish_before_snapshot(
         manifest = await maintenance.backup(tmp_path / "complete")
         assert manifest.artifact_store_id is not None
     assert await SQLiteMaintenance.inspect_backup(tmp_path / "complete") == manifest
+
+
+@pytest.mark.parametrize("changed", [False, True])
+def test_stat_and_fstat_clock_domains_kept_separate_but_changes_still_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, changed: bool
+) -> None:
+    from drov.storage._backup import _transfer
+
+    source = tmp_path / "state.sqlite"
+    source.write_bytes(b"synthetic bytes")
+    source.chmod(0o600)
+    original = os.fstat
+    calls = 0
+
+    def shifted(fd: int) -> os.stat_result:
+        nonlocal calls
+        calls += 1
+        actual = original(fd)
+        fields = {
+            name: getattr(actual, name) for name in ("st_atime_ns", "st_mtime_ns", "st_ctime_ns")
+        }
+        fields["st_ctime_ns"] += calls if changed else 1
+        if hasattr(actual, "st_file_attributes"):
+            fields["st_file_attributes"] = getattr(actual, "st_file_attributes", 0)
+        return os.stat_result(tuple(actual), fields)
+
+    monkeypatch.setattr(os, "fstat", shifted)
+    if changed:
+        with pytest.raises(PersistenceUnavailable):
+            _transfer(source, None, "state.sqlite")
+    else:
+        result = _transfer(source, None, "state.sqlite")
+        assert result.sha256 == hashlib.sha256(b"synthetic bytes").hexdigest()

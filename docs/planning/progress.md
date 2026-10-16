@@ -19,7 +19,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 ## 当前交付：T-15 第四批成对一致备份与持久屏障
 
-在第三批精确源码a4c8c7a95eea1dfe846f3f297b97aec3b9435005推送后，接续同一T-15独立实施真实SQLite backup、成对文件复制/ready校验、不可覆盖新bundle、inspect/restore与副本发布前存储整体屏障。最终本地3.14含真实Docker全库1290通过/59skip、3.11相关187专项、双解释器构件/四套core-only与两套独立server安装通过，旧SDK接受原库/拒绝新副本且库字节不变；平台CI待推送后绑定SHA，未验收前不关闭本批或T-15。见[ADR-0030](../decisions/0030-quarantined-consistent-backups.md)/[记录](../validation/t15-backup.md)。实际记录迁移和授权导出仍缺；屏障没有通用自动/force解除。
+在第三批精确源码a4c8c7a95eea1dfe846f3f297b97aec3b9435005推送后，接续同一T-15独立实施真实SQLite backup、成对文件复制/ready校验、不可覆盖新bundle、inspect/restore与副本发布前存储整体屏障。最终本地3.14含真实Docker全库1290通过/59skip、3.11相关187专项、双解释器构件/四套core-only与两套独立server安装通过，旧SDK接受原库/拒绝新副本且库字节不变；992037d平台CI发现Windows3.14跨stat/fstat的ctime语义差异，修复保留各自前后变化检查，新增2故障回归、相关41项通过；最终全库/构件/原生CI在修复检查点另验，未验收前不关闭本批或T-15。见[ADR-0030](../decisions/0030-quarantined-consistent-backups.md)/[记录](../validation/t15-backup.md)。实际记录迁移和授权导出仍缺；屏障没有通用自动/force解除。
 
 ## 已验收：第三批显式放弃遗留运行
 

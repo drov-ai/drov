@@ -157,7 +157,12 @@ def _transfer(
         dir_fd=directory_fd,
     )
     with os.fdopen(fd, "rb") as incoming:
-        if _identity(os.fstat(incoming.fileno())) != _identity(before):
+        opened = os.fstat(incoming.fileno())
+        _private(opened)
+        # Windows stat and fstat can assign different meanings to ctime. Bind
+        # the same inode/size/mtime across APIs, then compare each API's complete
+        # snapshot to itself at the end; do not discard either change-time check.
+        if _identity(opened)[:-1] != _identity(before)[:-1]:
             raise PersistenceUnavailable("Backup source changed while opening")
         digest, length = hashlib.sha256(), 0
         target = None
@@ -173,10 +178,13 @@ def _transfer(
             if target is not None:
                 target.flush()
                 os.fsync(target.fileno())
+            after_fd, after_path = os.fstat(incoming.fileno()), info()
+            _private(after_fd)
+            _private(after_path)
             if (
                 length != before.st_size
-                or _identity(os.fstat(incoming.fileno())) != _identity(before)
-                or _identity(info()) != _identity(before)
+                or _identity(after_fd) != _identity(opened)
+                or _identity(after_path) != _identity(before)
             ):
                 raise PersistenceUnavailable("Backup source changed during transfer")
         finally:

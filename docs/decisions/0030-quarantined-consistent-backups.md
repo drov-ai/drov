@@ -24,3 +24,5 @@ SQLite事务、字节回收台账和data_abandoned都不能证明旧备份之后
 ## 验证
 
 合成库/真实SQLite backup、空库/备份后缺失Run和键、原审批已执行后旧副本、未知写入/verifier零调用、租约/费用/墓碑/跨Session共享来源、实际CSV/PNG销毁后授权/hash读取、版本/库存/配对/字节损坏、拒绝覆盖/原锁、取消实际worker和复制/发布硬终止边界。脚本模型不是实际模型质量，合成E2B租约不是云资源验证。通过/失败/未跑仅见[记录](../validation/t15-backup.md)。
+
+2026-10-16原生兼容修正：路径stat与句柄fstat跨API只绑定相同inode/device/size/mtime，随后各自前后比较包括ctime的完整token；不混用Windows3.14两种ctime含义（[CPython157671](https://github.com/python/cpython/issues/157671)，查阅2026-10-16）。两种读取中变化仍拒绝，具体原生失败/复验见本批验证；接口、屏障和原DDL不改。
