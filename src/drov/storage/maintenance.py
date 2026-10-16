@@ -532,6 +532,11 @@ def main() -> int:
     args = parser.parse_args()
     if args.action == "delete-session" and args.fingerprint is None:
         parser.error("delete-session requires --fingerprint from a preview")
+    if args.fingerprint is not None and (
+        len(args.fingerprint) != 64
+        or any(character not in "0123456789abcdef" for character in args.fingerprint)
+    ):
+        parser.error("--fingerprint must be a lowercase SHA-256 digest")
 
     async def run() -> None:
         scope = SessionScope(tenant_id=args.tenant, user_id=args.user, session_id=args.session)

@@ -526,6 +526,12 @@ async def test_gone_still_requires_current_read_permission(tmp_path: Path) -> No
         result = await rt.run(a, "first", session_id="session", context=ALICE)
     async with SQLiteMaintenance(tmp_path / "state.db") as maintenance:
         await maintenance.delete_session(await maintenance.preview_session(SCOPE))
+    async with Runtime(agents=[], storage=SQLiteStorage(tmp_path / "state.db")) as reader:
+        with pytest.raises(CursorExpired):
+            await reader.inspect(result.run_id, context=ALICE, after=f"{result.run_id}:1")
+        with pytest.raises(CursorExpired):
+            async with reader.events(result.run_id, context=ALICE, after=f"{result.run_id}:1"):
+                pass
     async with Runtime(
         agents=[a], storage=SQLiteStorage(tmp_path / "state.db"), authorizer=DenyReads()
     ) as rt:
@@ -581,6 +587,16 @@ async def test_actual_cli_preview_and_fingerprint_delete(tmp_path: Path) -> None
         subprocess.run, args, capture_output=True, text=True, timeout=10
     )
     assert missing.returncode == 2 and contents(path)
+    for invalid in ["é" * 64, "0" * 63, "X" * 64, "0" * 64]:
+        refused = await asyncio.to_thread(
+            subprocess.run,
+            [*args, "--fingerprint", invalid],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        assert refused.returncode == 2 and contents(path)
+        assert "Traceback" not in refused.stderr
     applied = await asyncio.to_thread(
         subprocess.run,
         [*args, "--fingerprint", plan["fingerprint"]],
