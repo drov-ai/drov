@@ -195,3 +195,5 @@ T-12 MCPFixture 已落地为 [官方SDK服务](../../examples/mcp_stdio_fixture.
 安装检查须从wheel/sdist重建比较所有静态字节，core-only无Web导入仍通过；独立server安装后以真实HTTP读取页面/每个资源/CSP并验证数据仍需认证。前端CI固定锁重新生成schema和资源、比较跟踪文件并运行浏览器；Docker CI独立执行真实代码/文件用例。实际结果/失败修正在 [验证](../validation/t14-workbench.md)，不由本节推断全部通过，不把脚本模型、维护者截图或Chromium移动视口当真实模型质量/外部用户体验/所有浏览器设备支持。
 
 T-15 首批检查SQLite/字节排他锁、预览不修改原格式/不含正文、过期/篡改计划、原键/无键/换键的墓碑保护、当前read与跨scope的410/404、显式Memory scope、未知操作/租约、共享来源证明及累计云费用保留；实际SQL失败/提交丢应答/取消和进程硬终止分别验证回滚或已提交墓碑。三条原实际Docker CSV/PNG用例增加共享后来源清理/最后引用Gone断言。core-only安装执行新增维护示例，server矩阵显式跑HTTP维护边界。实际计数/环境及未跑范围见 [验证](../validation/t15-maintenance.md)；阶段和剩余要求只见progress。物理回收/中断台账、备份barrier/迁移/正文导出和data_abandoned仍须独立验收，不能拿上述检查替代。
+
+T-15 第二批的[回收专项](../../tests/test_reclamation.py)用真实SQLite/私有字节检查预览只读、完整计划冲突、精确owner/Agent、共享整批、未结束/未知操作/沙箱租约、过期receiving/staged和已消费/未过期上传；确认回收前容量拒绝、完成后准入。分别注入意图/完成提交失败及丢应答、unlink/rmdir/fsync失败；在意图前后、数据/清单删除后、目录移除后及完成提交前后实际杀进程并重开恢复。取消测试必须等真实线程退出才放锁；替换目录/文件、软硬链接、额外项和非私有权限不得误删哨兵。原Docker三入口再跑共享CSV/PNG授权/hash、回收和Gone，不增加模型/代码次数；core-only安装的normal/stream维护示例在POSIX实际回收，在Windows按既定字节范围跳过。具体通过/失败/平台限制见[第二批记录](../validation/t15-reclamation.md)；这些检查仍不替代abandonment、备份barrier、迁移或授权导出。

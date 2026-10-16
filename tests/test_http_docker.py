@@ -192,6 +192,13 @@ async def test_actual_file_execution_entry_equivalence_and_post_close_download(
         plan = await maintenance.preview_session(SessionScope(**ALICE.model_dump(), session_id="s"))
         assert plan.retained_artifacts == 2 and plan.cleared_artifacts == 1
         await maintenance.delete_session(plan)
+        from drov.storage.records import MemoryScope
+
+        owner = MemoryScope(**ALICE.model_dump(), agent_name="assistant")
+        garbage = await maintenance.preview_reclamation(owner)
+        # The old input can be removed, while the batch with shared CSV/PNG stays.
+        assert garbage.stages >= 1 and garbage.protected
+        await maintenance.reclaim(garbage)
     async with Runtime(
         agents=[],
         storage=SQLiteStorage(tmp_path / "state.db"),
@@ -210,6 +217,11 @@ async def test_actual_file_execution_entry_equivalence_and_post_close_download(
         )
         assert plan.cleared_artifacts == 2 and plan.bytes_reclaimed == 0
         await maintenance.delete_session(plan)
+        garbage = await maintenance.preview_reclamation(owner)
+        assert garbage.stages >= 1 and not garbage.protected
+        removed = await maintenance.reclaim(garbage)
+        assert removed.bytes_reclaimed == sum(len(data) for data in downloaded)
+        assert (await maintenance.preview_reclamation(owner)).stages == 0
     async with Runtime(
         agents=[],
         storage=SQLiteStorage(tmp_path / "state.db"),

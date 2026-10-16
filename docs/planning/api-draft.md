@@ -507,3 +507,13 @@ SessionDeletionPlan 包含 scope/include_memory、全库及阶段清单的 HMAC 
 delete_session/delete-session 这一批只删除数据库正文/引用并保留最小事实；阶段字节、stage.json 和容量仍保留，不是完整个人数据擦除或容量回收。已清理 Session ID 不复用，原 request_key、换键、无键均 ContentGone；需要新会话 ID。Run/Artifact 在原 owner 当前 read 通过后返回 ContentGone/HTTP410，其他身份猜测及撤权仍404。保留共享引用与来源证明不授予额外权限；跨tenant/user/Agent的普通文本提及不参与另一作用域的清理判定。后续完整维护边界见 [维护策略](release-policy.md)，实际任务状态见 [progress](progress.md)。
 
 无需账号/Key的实际合成例见 [maintenance_offline.py](../../examples/maintenance_offline.py)；CLI与当前限制见 [工程方案](engineering.md#离线维护入口t-15-首批)。
+
+## 显式字节回收（T-15 第二批）
+
+同一 `SQLiteMaintenance` 提供 `preview_reclamation(MemoryScope, expired_uploads=False) -> ReclamationPlan`、`reclaim(plan) -> ReclamationResult`、`resume_reclamation() -> ReclamationResult`。构造和权限边界沿前节，无 HTTP 管理路由。逻辑删除仍不自动删字节；回收精确指定 tenant/user/Agent，任一引用保护整个 stage。
+
+ReclamationPlan 包含 scope、expired_uploads、as_of、fingerprint、stages、bytes_eligible、capacity_eligible、uploads 和按原因的 protected 数量。预览不修改原库/文件，不返回正文、文件名、路径或阶段ID。reclaim 使用原完整计划，数据库/引用/清单/候选文件身份变化或计划篡改返回 Conflict。只有显式 expired_uploads=True 才选择 as_of 时已过期且未消费的上传；已消费输入不按 TTL 删除。
+
+ReclamationResult 包含 completed_stages、bytes_reclaimed、capacity_released；字节数是本次确认完成阶段的原库存数据长度，容量另含原预留及清单额度。中断前已删字节可计入恢复完成的阶段，不能将多次结果当成独立磁盘/费用计量；每阶段持久 done 才是累计依据。重复完成后 resume 返回零。
+
+pending 意图使普通 SQLiteStorage/Runtime 打开返回 PersistenceUnavailable；离线入口可用 resume_reclamation 完成同一次删除，其他维护动作先返回 Conflict。引用/租约或文件身份与原台账不符时保留 pending 并拒绝，不强制跳过。此阻断用于本次删除，不能代替旧备份恢复的 recovery barrier。有效清单以外的旧孤儿/未知项继续拒绝，不能据猜测删除。POSIX、安全擦除/备份限制和具体恢复命令见 [工程方案](engineering.md#显式字节回收与中断恢复) / [ADR-0028](../decisions/0028-resumable-byte-reclamation.md)。

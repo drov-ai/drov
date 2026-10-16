@@ -287,4 +287,18 @@ python -m drov.storage.maintenance delete-session --database /private/drov/state
 
 无 Artifact 的库省略 --artifacts。命令是用法说明，本轮不对真实库执行。删除必须指定完全相同的原预览摘要；变更即重新预览，有 blockers 始终拒绝，错误只输出code并非成功退出。--include-memory 显式涵盖该用户/Agent整个scope，默认不删Memory。宿主文件访问是管理员能力，不把此接口挂给未信任请求；当前没有新增普通用户权限或审批流程。
 
-预览扫描全库及阶段清单，产生HMAC，暂不宣称大库性能。retention_schema=1仅实际删除时同事务启用，独立DDL见 [参考](../reference/storage-retention-schema-v1.sql)。所有原SQLite/Artifact/Sandbox/Upload格式保持；最小墓碑/来源证明与保留费用金额的语义由运行契约/维护策略维护。bytes_reclaimed=0，真实字节/stage.json和容量保留，unreferenced_stages仅报告潜在无引用阶段；没有自动TTL回收。后续跨介质回收、备份/恢复/barrier、迁移与正文导出仍按T-15任务卡实施，不提供可误用的空入口。
+预览扫描全库及阶段清单，产生HMAC，暂不宣称大库性能。retention_schema=1仅实际删除时同事务启用，独立DDL见 [参考](../reference/storage-retention-schema-v1.sql)。所有原SQLite/Artifact/Sandbox/Upload格式保持；最小墓碑/来源证明与保留费用金额的语义由运行契约/维护策略维护。delete_session 的 bytes_reclaimed=0，真实字节/stage.json和容量保留，unreferenced_stages仅报告潜在无引用阶段；没有自动TTL回收。字节回收必须另行执行下节动作；备份/恢复/barrier、迁移与正文导出仍按T-15任务卡实施。
+
+## 显式字节回收与中断恢复
+
+按 [ADR-0028](../decisions/0028-resumable-byte-reclamation.md) 使用同一离线排他锁，原 LocalArtifacts POSIX 0700/0600、目录 FD/无链接边界保持；原字节布局和配额常量不变。首次实际回收启用独立 [reclamation_schema=1](../reference/storage-reclamation-schema-v1.sql)，预览不启用。整阶段引用保护，数据字节/清单删除及目录同步后才提交 done；pending 阻断普通 SQLiteStorage.open/Runtime，必须离线恢复。
+
+```sh
+python -m drov.storage.maintenance preview-reclamation --database /private/drov/state.db --artifacts /private/drov/files --tenant tenant --user alice --agent assistant > /private/drov/reclamation-plan.json
+python -m drov.storage.maintenance reclaim --database /private/drov/state.db --artifacts /private/drov/files --plan-file /private/drov/reclamation-plan.json
+python -m drov.storage.maintenance resume-reclamation --database /private/drov/state.db --artifacts /private/drov/files
+```
+
+这是现有库用法，不对用户真实库自动执行。预览文件最多64KiB，只含归属/统计/摘要；保持在宿主私有目录。需回收过期未消费上传时在 preview-reclamation 显式加 --expired-uploads；reclaim 必须原完整预览，旧计划冲突后重新预览，不能改摘要或数量。pending 时不产生新计划，先运行 resume-reclamation；完成/重复恢复返回统计零或本次完成阶段统计，不重新执行模型/代码。
+
+恢复拒绝原库存之外的文件、链接/硬链接、替换目录、改动文件及新增数据库引用，保留台账供人工检查。无有效 stage.json 且没有原 pending 台账的目录仍 fail closed，本批不猜测其 owner 或强删。不能手工删 pending 表绕过阻断；库、原字节目录与台账共同保留。bytes_reclaimed 表示逻辑数据长度，不包含磁盘块、SQLite空闲页、外部备份或物理安全擦除；累计云费用不退款。

@@ -3,15 +3,17 @@
 import argparse
 import asyncio
 import json
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from drov import Agent, RunContext, Runtime, SQLiteStorage
+from drov.artifacts import ArtifactInput, LocalArtifacts
 from drov.errors import ContentGone, IncompatibleStorage
 from drov.models import ScriptedModel
 from drov.models.protocol import ModelResponse
 from drov.storage.maintenance import SQLiteMaintenance
-from drov.storage.records import SessionScope
+from drov.storage.records import MemoryScope, SessionScope
 
 
 async def check(directory: Path, *, stream: bool) -> None:
@@ -19,26 +21,54 @@ async def check(directory: Path, *, stream: bool) -> None:
     context = RunContext(tenant_id="fixture", user_id="alice")
     model = ScriptedModel([ModelResponse(message="synthetic answer", finish_reason="completed")])
     agent: Agent[str] = Agent(name="assistant", revision="1", model=model)
-    async with Runtime(agents=[agent], storage=SQLiteStorage(database)) as runtime:
+
+    def store() -> LocalArtifacts | None:
+        return LocalArtifacts(directory=directory / "files") if os.name == "posix" else None
+
+    inputs = [ArtifactInput(name="synthetic.csv", data=b"value\n7\n")] if os.name == "posix" else []
+    async with Runtime(
+        agents=[agent], storage=SQLiteStorage(database), artifacts=store()
+    ) as runtime:
         if stream:
             async with runtime.stream(
-                agent, "synthetic input", session_id="old", context=context, request_key="once"
+                agent,
+                "synthetic input",
+                session_id="old",
+                context=context,
+                request_key="once",
+                artifacts=inputs,
             ) as subscription:
                 async for _ in subscription:
                     pass
                 outcome = await subscription.result()
         else:
             outcome = await runtime.run(
-                agent, "synthetic input", session_id="old", context=context, request_key="once"
+                agent,
+                "synthetic input",
+                session_id="old",
+                context=context,
+                request_key="once",
+                artifacts=inputs,
             )
         assert outcome.status == "completed"
-    async with SQLiteMaintenance(database) as maintenance:
+    reclaimed = 0
+    async with SQLiteMaintenance(database, artifacts=store()) as maintenance:
         plan = await maintenance.preview_session(
             SessionScope(**context.model_dump(), session_id="old")
         )
         assert not plan.blockers
         await maintenance.delete_session(plan)
-    async with Runtime(agents=[agent], storage=SQLiteStorage(database)) as runtime:
+        if os.name == "posix":
+            preview = await maintenance.preview_reclamation(
+                MemoryScope(**context.model_dump(), agent_name="assistant")
+            )
+            assert preview.stages == 1
+            reclaimed = (await maintenance.reclaim(preview)).bytes_reclaimed
+            assert reclaimed == len(inputs[0].data)
+            assert (await maintenance.resume_reclamation()).completed_stages == 0
+    async with Runtime(
+        agents=[agent], storage=SQLiteStorage(database), artifacts=store()
+    ) as runtime:
         try:
             await runtime.start(
                 agent, "synthetic input", session_id="old", context=context, request_key="once"
@@ -65,7 +95,7 @@ async def check(directory: Path, *, stream: bool) -> None:
                 "stream": stream,
                 "database_rows_deleted": plan.counts,
                 "old_request": "content_gone",
-                "bytes_reclaimed": plan.bytes_reclaimed,
+                "bytes_reclaimed": reclaimed,
             }
         )
     )

@@ -2511,6 +2511,126 @@
       "title": "PermissionPolicy",
       "type": "object"
     },
+    "ReclamationPlan": {
+      "$defs": {
+        "MemoryScope": {
+          "additionalProperties": false,
+          "properties": {
+            "agent_name": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Agent Name",
+              "type": "string"
+            },
+            "tenant_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Tenant Id",
+              "type": "string"
+            },
+            "user_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tenant_id",
+            "user_id",
+            "agent_name"
+          ],
+          "title": "MemoryScope",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Host-admin preview; no content, logical names or filesystem paths.",
+      "properties": {
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "bytes_eligible": {
+          "minimum": 0,
+          "title": "Bytes Eligible",
+          "type": "integer"
+        },
+        "capacity_eligible": {
+          "minimum": 0,
+          "title": "Capacity Eligible",
+          "type": "integer"
+        },
+        "expired_uploads": {
+          "default": false,
+          "title": "Expired Uploads",
+          "type": "boolean"
+        },
+        "fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Fingerprint",
+          "type": "string"
+        },
+        "protected": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Protected",
+          "type": "object"
+        },
+        "scope": {
+          "$ref": "#/$defs/MemoryScope"
+        },
+        "stages": {
+          "minimum": 0,
+          "title": "Stages",
+          "type": "integer"
+        },
+        "uploads": {
+          "minimum": 0,
+          "title": "Uploads",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scope",
+        "as_of",
+        "fingerprint",
+        "stages",
+        "bytes_eligible",
+        "capacity_eligible",
+        "uploads",
+        "protected"
+      ],
+      "title": "ReclamationPlan",
+      "type": "object"
+    },
+    "ReclamationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes_reclaimed": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Bytes Reclaimed",
+          "type": "integer"
+        },
+        "capacity_released": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Capacity Released",
+          "type": "integer"
+        },
+        "completed_stages": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Completed Stages",
+          "type": "integer"
+        }
+      },
+      "title": "ReclamationResult",
+      "type": "object"
+    },
     "Resource": {
       "$defs": {
         "RunContext": {

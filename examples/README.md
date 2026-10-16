@@ -63,4 +63,4 @@ HTTP服务安装`drov[server]`后运行`python examples/http_offline.py`或加`-
 
 ## 离线维护合成例
 
-运行 `python examples/maintenance_offline.py` 或加 `--stream`。示例只在自动创建的临时合成库执行：实际SDK完成一个Run、停止Runtime、离线预览/逻辑清理、重开后旧Session/请求键返回ContentGone，模型夹具调用计数仍1。无需账号、Key、Docker或预算；core-only wheel/sdist安装检查包含两种入口。它没有操作真实用户库、释放字节或实现完整备份恢复；管理入口及限制见 [API](../docs/planning/api-draft.md#离线-session-逻辑清理t-15-首批)，整卡状态见progress。
+运行 `python examples/maintenance_offline.py` 或加 `--stream`。示例只在自动创建的临时合成库执行：实际SDK完成一个Run、停止Runtime、离线预览/逻辑清理、重开后旧Session/请求键返回ContentGone，模型夹具调用计数仍1。POSIX还实际接收合成CSV，在逻辑删除后另行预览/回收并确认字节计数及重复恢复为零；Windows沿既定字节范围仅运行数据库子范围。无需账号、Key、Docker或预算；core-only wheel/sdist安装检查包含两种入口。它没有操作真实用户库或实现完整备份恢复；管理入口及限制见 [API](../docs/planning/api-draft.md#离线-session-逻辑清理t-15-首批)，整卡状态见progress。

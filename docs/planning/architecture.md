@@ -68,6 +68,7 @@ flowchart TD
 | ContextManifest | model_call_id、输入组成、来源、用量估算、选入/处理结果 | 每次新模型输入一个固定清单，与输入/事件/检查点同事务；供应商用量从响应关联，权限投影由 Runtime 负责 |
 | MemoryRecord | tenant_id、user_id、agent_name、key、version、来源与内容 | 首期默认用户在该 Agent 下的记忆；不自动共享到其他 Agent |
 | DataTombstone / RestoreBarrier | 已清理记录的去重/不可恢复标记；恢复旧备份的核查标记 | 显式离线维护所有；保留最小事实，不把清理或回滚备份当作重新执行授权 |
+| ReclamationEntry | 有效阶段的待删库存、文件身份/容量与 pending/done 进展 | SQLiteMaintenance 持同一 SQLite/字节锁；LocalArtifacts 只按已提交库存删除，pending 阻断普通存储打开，不复用为备份恢复屏障 |
 
 RunContext 中的凭据、连接和服务对象不序列化。存储只保留可验证的身份标识和非秘密配置引用，恢复时从应用重新解析依赖和当前权限。
 

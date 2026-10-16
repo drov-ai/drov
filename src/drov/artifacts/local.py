@@ -91,6 +91,7 @@ class LocalArtifacts:
         self._header: _Header | None = None
         self._storage: SQLiteStorage | None = None
         self._loop: asyncio.AbstractEventLoop | None = None
+        self._reclaiming: frozenset[str] = frozenset()
 
     @property
     def is_open(self) -> bool:
@@ -117,6 +118,12 @@ class LocalArtifacts:
         self._loop = loop
 
     async def open(self, *, storage: SQLiteStorage) -> None:
+        await self._open_bound(storage, maintenance=False)
+
+    async def _open_for_maintenance(self, *, storage: SQLiteStorage) -> None:
+        await self._open_bound(storage, maintenance=True)
+
+    async def _open_bound(self, storage: SQLiteStorage, *, maintenance: bool) -> None:
         self._check_loop()
         async with self._gate:
             if self._fd is not None or self.is_open:
@@ -124,10 +131,23 @@ class LocalArtifacts:
             if not isinstance(storage, SQLiteStorage) or not storage.is_open:
                 raise ConfigurationError("Artifact bytes require an open SQLiteStorage")
             storage._require_open()
+            from drov.storage._reclamation import entries
+            from drov.storage.sqlite import SQLiteDriver
+
+            pending = [
+                item
+                for item in await entries(SQLiteDriver(storage._sql))
+                if item.state == "pending"
+            ]
+            if pending and not maintenance:
+                raise PersistenceUnavailable("Byte reclamation requires offline resumption")
+            self._reclaiming = frozenset(item.stage_id for item in pending)
             binding = hmac.new(storage._secret, b"drov.artifacts.pair.v1", "sha256").hexdigest()
             try:
                 await _io(lambda: self._open(binding))
                 assert self._header is not None
+                if any(item.store_id != self._header.store_id for item in pending):
+                    raise PersistenceUnavailable("Reclamation ledger belongs to another store")
                 await storage._bind_artifacts(self._header.store_id)
                 self._storage = storage
             except BaseException:
@@ -309,6 +329,8 @@ class LocalArtifacts:
                 continue
             if not re.fullmatch(ID_PATTERN, name):
                 raise PersistenceUnavailable("Unexpected artifact store entry")
+            if name in self._reclaiming:
+                continue
             stages.append(self._load(name))
         return stages
 
@@ -504,6 +526,7 @@ class LocalArtifacts:
         self._storage = None
         self._identity = self._lock_identity = None
         self._header = None
+        self._reclaiming = frozenset()
 
     async def aclose(self) -> None:
         self._check_loop()

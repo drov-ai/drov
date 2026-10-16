@@ -95,3 +95,5 @@ T-13 服务的身份/所有权、同一Runtime路由/SSE、私有上传接收与
 T-14 的同源登录壳/内存凭据、最小Agent目录、原事件/交互与安全PNG/附件取舍见 [ADR-0026](../decisions/0026-local-workbench.md)，实际浏览器、Docker与wheel资产证据见 [验证](../validation/t14-workbench.md)。任务状态仍只在progress。
 
 T-15 首批的可信本地离线预览/Session数据库逻辑清理、去重墓碑、共享来源证明与累计云费用保留见 [ADR-0027](../decisions/0027-offline-session-retention.md)，实际检查及未交付边界见 [验证](../validation/t15-maintenance.md)。不从本批SQL事务推断物理回收或一致备份已完成；任务状态/下一步仍只在progress。
+
+T-15 第二批的显式整阶段字节回收、pending/done中断台账、普通打开阻断和过期未消费上传边界见[ADR-0028](../decisions/0028-resumable-byte-reclamation.md)，实际检查见[回收验证](../validation/t15-reclamation.md)。它不替代data_abandoned、完整备份/恢复/barrier、迁移或授权导出验收。

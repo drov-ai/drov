@@ -315,6 +315,18 @@ class SQLiteStorage(Storage):
                         expected_names.add("retention_tombstones")
                         await self._validate_retention_schema()
                         self._retention_enabled = True
+                    if "reclamation_schema" in values:
+                        if values["reclamation_schema"] != "1" or "artifact_schema" not in values:
+                            raise IncompatibleStorage("Reclamation extension is unsupported")
+                        expected_names.add("artifact_reclamation")
+                        await self._validate_reclamation_schema()
+                        pending, _ = await self._sql(
+                            "SELECT 1 FROM artifact_reclamation WHERE state='pending' LIMIT 1"
+                        )
+                        if initialize and pending:
+                            raise PersistenceUnavailable(
+                                "Byte reclamation is incomplete; resume offline maintenance"
+                            )
                     if names != expected_names:
                         raise IncompatibleStorage("Database tables do not match its schema version")
                     if values.get("format") != "drov.sqlite" or values.get("record_schema") != str(
@@ -400,6 +412,14 @@ class SQLiteStorage(Storage):
         rows, _ = await self._sql("SELECT sql FROM sqlite_master WHERE name='retention_tombstones'")
         if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(RETENTION_DDL[0].split()):
             raise IncompatibleStorage("Retention extension table is invalid")
+
+    async def _validate_reclamation_schema(self) -> None:
+        from drov.storage._reclamation import RECLAMATION_DDL, entries
+
+        rows, _ = await self._sql("SELECT sql FROM sqlite_master WHERE name='artifact_reclamation'")
+        if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(RECLAMATION_DDL[0].split()):
+            raise IncompatibleStorage("Reclamation extension table is invalid")
+        await entries(SQLiteDriver(self._sql))
 
     async def _bind_artifacts(self, store_id: str) -> None:
         """Pair one private byte directory with this database; no record/DDL migration."""
