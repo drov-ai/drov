@@ -70,6 +70,7 @@ class SandboxController:
                     raise ShutdownIncomplete("Unconfirmed sandbox leases retain storage ownership")
 
     async def verify(self, record: RunRecord, operation_id: str) -> ReconciliationDecision:
+        await self.runtime.storage.check_execution_allowed()
         owner = MemoryScope(
             tenant_id=record.scope.tenant_id,
             user_id=record.scope.user_id,
@@ -105,6 +106,7 @@ class SandboxController:
     ) -> ToolExecution:
         if work.task is not asyncio.current_task():
             raise ConfigurationError("Sandbox dispatch belongs to the kernel task")
+        await self.runtime.storage.check_execution_allowed()
         work.checkpoint()
         storage = self.runtime.storage
         scope = RunContext(tenant_id=record.scope.tenant_id, user_id=record.scope.user_id)
@@ -561,6 +563,7 @@ class SandboxController:
         )
 
     async def recover(self, record: RunRecord) -> bool:
+        await self.runtime.storage.check_execution_allowed()
         """Query/clean/publish the original execution, never create/start replacement code."""
         storage = self.runtime.storage
         owner = MemoryScope(

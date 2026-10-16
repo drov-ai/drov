@@ -104,6 +104,10 @@ class Storage(ABC):
         async with self.transaction() as transaction:
             return await transaction.start(request, max_unfinished=max_unfinished)
 
+    async def check_execution_allowed(self) -> None:
+        async with self.transaction() as transaction:
+            await transaction._driver.check_execution_allowed()
+
     async def get_run(self, scope: RunContext, run_id: str) -> RunRecord:
         async with self.transaction() as transaction:
             return await transaction.get_run(scope, run_id)

@@ -503,6 +503,7 @@ class ReconciliationController:
         runs = self.runs
         record = await runs.visible(run_id, context, True)
         await runs.authorize(context, runs.resource(record), ("respond", "verify"))
+        await runs.storage.check_execution_allowed()
         owner = runs.resource(record).owner
         key: tuple[str, str]
 

@@ -199,6 +199,24 @@ async def test_actual_file_execution_entry_equivalence_and_post_close_download(
         # The old input can be removed, while the batch with shared CSV/PNG stays.
         assert garbage.stages >= 1 and garbage.protected
         await maintenance.reclaim(garbage)
+        await maintenance.backup(tmp_path / "backup")
+    restored = await SQLiteMaintenance.restore(tmp_path / "backup", tmp_path / "restored")
+    assert restored.artifacts is not None
+    async with Runtime(
+        agents=[],
+        storage=SQLiteStorage(restored.database),
+        artifacts=LocalArtifacts(directory=restored.artifacts, limits=restored.artifact_limits),
+    ) as reader:
+        from drov.errors import RecoveryBlocked
+
+        with pytest.raises(RecoveryBlocked):
+            await reader.storage.check_execution_allowed()
+        async with client(DrovApp(runtime=reader, auth=Auth())) as connection:
+            for ref, expected in zip(refs, downloaded, strict=True):
+                response = await connection.get(f"/v1/artifacts/{ref.artifact_id}/content")
+                assert response.status_code == 200 and response.content == expected
+                assert hashlib.sha256(response.content).hexdigest() == ref.sha256
+        assert len(model.calls) == 2
     async with Runtime(
         agents=[],
         storage=SQLiteStorage(tmp_path / "state.db"),

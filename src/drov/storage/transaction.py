@@ -361,6 +361,7 @@ class Transaction:
     async def lookup_start(self, request: StartRequest) -> RunRef | None:
         """Check dedup before Runtime reserves a slot, within the same transaction."""
         self._check()
+        await self._driver.check_execution_allowed()
         request = StartRequest.model_validate(request)
         await self._driver.check_retained(
             Query(

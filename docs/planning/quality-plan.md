@@ -199,3 +199,6 @@ T-15 首批检查SQLite/字节排他锁、预览不修改原格式/不含正文�
 T-15 第二批的[回收专项](../../tests/test_reclamation.py)用真实SQLite/私有字节检查预览只读、完整计划冲突、精确owner/Agent、共享整批、未结束/未知操作/沙箱租约、过期receiving/staged和已消费/未过期上传；确认回收前容量拒绝、完成后准入。分别注入意图/完成提交失败及丢应答、unlink/rmdir/fsync失败；在意图前后、数据/清单删除后、目录移除后及完成提交前后实际杀进程并重开恢复。取消测试必须等真实线程退出才放锁；替换目录/文件、软硬链接、额外项和非私有权限不得误删哨兵。原Docker三入口再跑共享CSV/PNG授权/hash、回收和Gone，不增加模型/代码次数；core-only安装的normal/stream维护示例在POSIX实际回收，在Windows按既定字节范围跳过。具体通过/失败/平台限制见[第二批记录](../validation/t15-reclamation.md)；这些检查仍不替代abandonment、备份barrier、迁移或授权导出。
 
 T-15 第三批的[放弃专项](../../tests/test_abandonment.py)检查accepted/running/suspended、原锁、只读/不泄露正文预览、原因边界/完整计划冲突、原未知操作不改/prepared未执行、当前交互关闭、相同计划只返回原回执、正文清理后最小事实/墓碑仍存，以及普通终态未知/未确认租约不能绕过；费用和租约逐字保持。SQL失败/丢应答/取消/提交前后真实硬终止分别验证回滚或同一事实。实际SDK/stream/HTTP审批暂停后，原批准/恢复不可派发，工具调用仍0、模型夹具计数仍1；HTTP不新增管理路由、当前read撤权仍404、普通消息不泄露管理原因。放弃后未知阶段仍保护，只有显式正文清理后才进入回收。core-only安装包含新的两入口合成例；结果与未跑范围见[第三批记录](../validation/t15-abandonment.md)。
+
+
+T-15备份专项（ADR-0030）验证实际SQLite backup API/原库不变、完整SQL+header/stage/ready字节hash、空库/旧审批/备份后缺失Run和键、未知写/verifier/租约/费用不重派发、跨Session来源墓碑、实际Docker CSV/PNG恢复后授权读取；版本/库存/配对/ready损坏拒绝，目标/原锁拒绝覆盖，实际线程取消与复制/发布进程硬终止。Windows纯数据库与POSIX配对文件分别验证，skip不代表文件支持；检查/安装/平台/未跑范围见[本批记录](../validation/t15-backup.md)，不从此推断实际迁移、用户导出或断电验证。

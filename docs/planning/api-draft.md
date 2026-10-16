@@ -527,3 +527,6 @@ pending 意图使普通 SQLiteStorage/Runtime 打开返回 PersistenceUnavailabl
 AbandonmentFact是不可变管理回执，包含opaque Run/Session、Agent、终态/不可恢复标记、最终版本/原状态、原因、未知operation/tool/revision/effect/status、放弃时保留租约数量和时间；无输入/参数/代码/文件名或明文owner/request_key。普通SDK/HTTP失败消息不含管理原因，原因仅在这个管理员查询中返回。提交不确定后须先重开原存储，同一完整计划重试返回同一回执，不再增事件/版本；换计划冲突。已清理正文后仍可查事实，同scope旧Session/请求墓碑仍Gone。
 
 只有事实与当前failed/data_abandoned/版本/归属及未知操作逐项匹配，Session逻辑清理才允许去掉对应未知正文；无事实或不匹配仍拒绝。未确认销毁租约始终阻止清理，放弃不删租约、不调用后端、不退预算，也不自动回收字节。资源清理仍需原资源/后端的独立确认；保留租约数量只是放弃当时的快照。恢复旧备份的屏障仍是独立能力。可运行的无Key/预算SDK/stream例见[abandonment_offline.py](../../examples/abandonment_offline.py)，取舍见[ADR-0029](../decisions/0029-offline-run-abandonment.md)。
+
+
+T-15一致备份管理员接口（ADR-0030）：`await maintenance.backup(new_directory)`，`await SQLiteMaintenance.inspect_backup(bundle)`，`await SQLiteMaintenance.restore(bundle, new_directory)`，`await maintenance.get_recovery_barrier()`。完整清单/新目标路径只属于可信本地管理员；备份为原始数据，不是普通用户导出。目标不可覆盖；返回RestoreResult中的数据库与可选原配对文件路径/限制。副本发布前持久屏障阻止所有接收与respond/resume/recover/verify及新内核派发，HTTP返回409/recovery_barrier；旧同键也拒绝。查看仍按原权限。无通用自动/force解锁入口，独立业务核实/事实补齐前保持阻断，具体文件/耐久性边界见[ADR-0030](../decisions/0030-quarantined-consistent-backups.md)。

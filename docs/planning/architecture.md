@@ -149,3 +149,6 @@ T-12 MCP适配实际结构：`integrations._mcp_tool` 是无可选依赖的定�
 T-13 的 `server` 模块仅持有传输连接/身份与拥有或借用的Runtime；`runtime.sessions`负责授权分页，`artifacts.uploads`维护独立SQLite暂存元数据并由RunController原接收事务消费，字节继续归LocalArtifacts。服务不访问模型循环或另设工具权限。UploadReceipt不是ArtifactRef，未消费上传不属于可读产物。所有权/兼容与取舍见 [ADR-0025](../decisions/0025-http-identity-and-uploads.md)。
 
 T-15 首批由 `storage.maintenance` 持有可信本地管理生命周期，复用原SQLite/LocalArtifacts锁；不装配Agent/模型/沙箱、不提供HTTP管理路由。`storage._retention`维护独立墓碑DDL、带密钥归属/来源证明和保留费用索引；Transaction/ArtifactTransaction只增加查询保护，Runtime继续负责当前授权投影。共享文件可保留最小来源，字节仍由LocalArtifacts持有/计容量；离线逻辑清理不承担后续物理回收、完整备份或资源核销。决定和兼容面见 [ADR-0027](../decisions/0027-offline-session-retention.md)，阶段只见progress。
+
+
+T-15的`storage._backup/_barrier`（ADR-0030）归属可信离线管理：SQLite backup与原文件配对、完整bundle/新目录原子发布、副本内存储整体屏障。原库/后端执行状态不随备份改变；Storage接收、Runtime控制及内核派发检查同一持久事实，观察保留权限。它不是用户导出模块或模型/沙箱后端，不能自动核实/销毁外部资源或解除屏障。

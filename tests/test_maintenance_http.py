@@ -160,3 +160,48 @@ async def test_abandonment_is_not_an_http_action_and_terminal_run_cannot_dispatc
         policy.denied.add("read")
         assert (await connection.get(f"/v1/runs/{run_id}")).status_code == 404
     assert calls == [] and len(model.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_restored_http_old_and_absent_keys_blocked_but_views_remain_authorized(
+    tmp_path: Path,
+) -> None:
+    model = ScriptedModel([final("saved answer")])
+    a = definition(model)
+    path = tmp_path / "state.db"
+    async with client(
+        DrovApp(agents={"assistant": a}, storage=SQLiteStorage(path), auth=Auth())
+    ) as connection:
+        accepted = await connection.post("/v1/runs", json=body(request_key="once"))
+        run_id = accepted.json()["run_id"]
+        assert "run.completed" in (await connection.get(f"/v1/runs/{run_id}/events")).text
+    async with SQLiteMaintenance(path) as maintenance:
+        await maintenance.backup(tmp_path / "backup")
+    restored = await SQLiteMaintenance.restore(tmp_path / "backup", tmp_path / "restored")
+    policy = Policy()
+    async with client(
+        DrovApp(
+            agents={"assistant": a},
+            storage=SQLiteStorage(restored.database),
+            auth=Auth(),
+            authorizer=policy,
+        )
+    ) as connection:
+        view = await connection.get(f"/v1/runs/{run_id}")
+        assert view.status_code == 200 and "saved answer" not in view.text
+        content = await connection.get(f"/v1/runs/{run_id}?include_content=true")
+        assert content.status_code == 200 and "saved answer" in content.text
+        for changes in (
+            {"request_key": "once"},
+            {"request_key": "absent", "session": "post-backup"},
+        ):
+            blocked = await connection.post("/v1/runs", json=body(**changes))
+            assert (
+                blocked.status_code == 409 and blocked.json()["error"]["code"] == "recovery_barrier"
+            )
+        assert (await connection.post(f"/v1/runs/{run_id}/recover", json={})).json()["error"][
+            "code"
+        ] == "recovery_barrier"
+        policy.denied.add("read")
+        assert (await connection.get(f"/v1/runs/{run_id}")).status_code == 404
+    assert len(model.calls) == 1

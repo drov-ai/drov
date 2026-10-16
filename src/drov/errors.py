@@ -43,6 +43,10 @@ class Conflict(DrovError):
     code = "conflict"
 
 
+class RecoveryBlocked(Conflict):
+    code = "recovery_barrier"
+
+
 class InteractionExpired(Conflict):
     code = "interaction_expired"
 

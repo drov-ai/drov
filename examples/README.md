@@ -66,3 +66,5 @@ HTTP服务安装`drov[server]`后运行`python examples/http_offline.py`或加`-
 运行 `python examples/maintenance_offline.py` 或加 `--stream`。示例只在自动创建的临时合成库执行：实际SDK完成一个Run、停止Runtime、离线预览/逻辑清理、重开后旧Session/请求键返回ContentGone，模型夹具调用计数仍1。POSIX还实际接收合成CSV，在逻辑删除后另行预览/回收并确认字节计数及重复恢复为零；Windows沿既定字节范围仅运行数据库子范围。无需账号、Key、Docker或预算；core-only wheel/sdist安装检查包含两种入口。它没有操作真实用户库或实现完整备份恢复；管理入口及限制见 [API](../docs/planning/api-draft.md#离线-session-逻辑清理t-15-首批)，整卡状态见progress。
 
 `python examples/abandonment_offline.py` 或加 `--stream`：合成模型提出一个必须审批的工具，实际SDK/stream暂停；关闭Runtime后显式离线放弃，再重开确认原批准/恢复不能执行，模型夹具计数仍1、实际工具调用0，正文清理后最小管理事实仍可查。仅操作临时样本，无外部账号/Key/费用，已纳入core-only构件安装验证；它不证明外部操作未执行或沙箱已销毁。
+
+`backup_offline.py`（支持`--stream`）：合成运行后实际SQLite backup，POSIX另配对CSV，inspect/restore到新目录、授权字节读取、屏障阻断备份后缺失的新Run/键，模型仍只调用一次。Windows只演示纯数据库分支；不解除屏障、不调用真实模型或云。

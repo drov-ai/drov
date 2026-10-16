@@ -314,3 +314,8 @@ python -m drov.storage.maintenance get-abandonment --database /private/drov/stat
 ```
 
 首次实际放弃启用[abandonment_schema=1](../reference/storage-abandonment-schema-v1.sql)，原格式不改，新SDK仍读旧库、旧SDK拒绝新扩展。数据库失败/取消/提交丢回执遵循原保护，若存储poison须关闭重开再用原完整计划获取原回执；不能手工去标记或修改计划强行重试。最小事实和当前Run/未知操作匹配后才允许正文逻辑清理，未确认租约仍阻止；字节回收仍另行预览，不把放弃当销毁/核实/退款或旧备份屏障。
+
+
+### T-15成对备份与屏障实现（ADR-0030）
+
+SQLiteMaintenance的backup/inspect_backup/restore使用原排他锁、SQLite connection.backup API及私有原目录FD复制；新bundle根锁、partial→data原子发布、固定相对库存/大小/SHA-256、完整schema/记录/ready校验。目标必须为新目录，pending回收先resume；原库不升级。副本内独立recovery_schema=1/recovery_barrier，原所有DDL/版本保持，旧SDK拒绝新副本。恢复到新bundle并返回真实数据库/文件路径；屏障在发布前已持久化，拦截存储接收及Runtime控制/内核派发，查看与维护可用。CLI同名backup/inspect-backup/restore/get-recovery-barrier；无HTTP管理入口或通用force解除。取消等实际worker收尾后才释放锁，partial不自动删或视为完整备份。Windows纯DB支持文件flush/SQLite FULL/目录rename，POSIX另同步各级目录；原配对文件仍POSIX，未宣称物理断电验证。详见[决定](../decisions/0030-quarantined-consistent-backups.md)/[验证](../validation/t15-backup.md)。

@@ -131,3 +131,6 @@ T-15 首批落地补充（[ADR-0027](../decisions/0027-offline-session-retention
 T-15 第二批补充（[ADR-0028](../decisions/0028-resumable-byte-reclamation.md)）：另行预览/显式回收有效阶段与过期未消费上传；逻辑删除本身仍为零字节回收。持久 pending/done 台账提供已知库存的可恢复删除，完成前阻断普通存储打开，不能删除仍有共享引用/未知执行/租约/已消费上传的字节。仅新回收启用 reclamation_schema=1，旧SDK拒绝；原所有DDL/版本及字节格式保持。数据长度/容量释放不等于磁盘安全擦除、SQLite页压缩、备份副本删除或云费用退款。无有效原清单/可信归属且没有 pending 台账的旧孤儿仍拒绝，不提供猜测式强删。abandonment、完整备份/恢复/barrier、实际迁移和授权导出依旧独立验收，状态只见progress。
 
 T-15 第三批补充（[ADR-0029](../decisions/0029-offline-run-abandonment.md)）：独立abandonment_schema=1与最小不可恢复事实，支持持排他锁的显式data_abandoned；非终态结束不改未知效果/资源销毁事实，原因长期保留且不回显到普通终态消息。prepared未执行、未知原样保留、关闭当前交互及幂等回执同事务提交。仅匹配该事实的未知正文可随Session逻辑清理，未知operation/tool/reason/不可恢复标记仍存；未确认租约与预算不因此释放。原所有DDL/版本保持，旧SDK拒绝此新扩展；完整备份/恢复/barrier、实际迁移和授权导出仍另行验收。
+
+
+T-15成对备份/恢复的实际增量见[ADR-0030](../decisions/0030-quarantined-consistent-backups.md)：原SQL/字节停机锁下通过SQLite backup API、原字节复制和ready/hash核对形成完整bundle；新目录发布前先持久化recovery_schema=1屏障，原库不升级。即使直接打开备份SQL，或恢复空库/缺少备份之后Run/键，也不能新接收/控制/派发。restore只到新目录，原配对/所有版本/清单校验，不覆盖拼接。备份含原始敏感数据且不是用户导出；校验和不是对本地管理员的签名认证。无自动或force解除屏障的方法，独立业务核实/必要事实补齐之前继续阻断；本批未提供应用专用重建/解锁工具。取消/硬终止边界、Windows/POSIX耐久性和实际通过范围见[验证](../validation/t15-backup.md)，不推断已完成旧记录迁移/授权导出。

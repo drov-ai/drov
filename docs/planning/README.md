@@ -99,3 +99,5 @@ T-15 首批的可信本地离线预览/Session数据库逻辑清理、去重墓�
 T-15 第二批的显式整阶段字节回收、pending/done中断台账、普通打开阻断和过期未消费上传边界见[ADR-0028](../decisions/0028-resumable-byte-reclamation.md)，实际检查见[回收验证](../validation/t15-reclamation.md)。它不替代data_abandoned、完整备份/恢复/barrier、迁移或授权导出验收。
 
 T-15 第三批的离线data_abandoned、最小未知事实/不可恢复标记、原租约/费用保留和正文清理边界见[ADR-0029](../decisions/0029-offline-run-abandonment.md)，实际检查见[放弃验证](../validation/t15-abandonment.md)；不将放弃当作核实、销毁或旧备份屏障。
+
+T-15第四批成对SQLite/文件快照、新目录发布与持久恢复屏障见[ADR-0030](../decisions/0030-quarantined-consistent-backups.md)，实际检查/未验收范围见[备份验证](../validation/t15-backup.md)；任务状态仍只在progress。

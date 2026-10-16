@@ -18,6 +18,7 @@ from drov.errors import (
     PermissionDenied,
     PersistenceUnavailable,
     RecordNotFound,
+    RecoveryBlocked,
 )
 from drov.storage.records import EventDraft, RunItem, RunRecord
 from drov.storage.transaction import Transaction
@@ -55,6 +56,10 @@ class InteractionController:
             await self.expire_in(tx, current)
 
     async def expire_in(self, tx: Transaction, record: RunRecord) -> bool:
+        try:
+            await tx._driver.check_execution_allowed()
+        except RecoveryBlocked:
+            return False
         request = record.state.pending
         if request is None or request.kind == "reconciliation" or tx._now() < request.expires_at:
             return False
@@ -169,6 +174,7 @@ class InteractionController:
         async with runs.storage.transaction() as tx:
             record = await self.runs.locate_in(tx, context, run_id)
         await runs.authorize(context, runs.resource(record), ("respond",))
+        await runs.storage.check_execution_allowed()
         response = TypeAdapter(InteractionResponse).validate_python(response)
         response = TypeAdapter(InteractionResponse).validate_json(response.model_dump_json())
         if isinstance(response, ReconciliationDecision):

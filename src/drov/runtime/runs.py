@@ -242,6 +242,7 @@ class RunController:
         _upload_ids: tuple[str, ...] = (),
     ) -> RunRef:
         self.runtime._require_open()
+        await self.storage.check_execution_allowed()
         self.executable(agent)
         if self.runtime._sandboxes is not None:
             controller = self.runtime._sandboxes
@@ -924,6 +925,7 @@ class RunController:
         record: RunRecord,
     ) -> ModelResponse:
         async def collect() -> ModelResponse:
+            await self.storage.check_execution_allowed()
             await self.runtime._files.validate(record, check_bytes=True)
             response = None
             async for event in agent.model.generate(

@@ -76,6 +76,7 @@ class ToolDispatcher:
     ) -> ToolExecution:
         if work.task is not asyncio.current_task():
             raise ConfigurationError("Tool dispatch belongs to the kernel execution task")
+        await self.storage.check_execution_allowed()
         scope = RunContext(tenant_id=record.scope.tenant_id, user_id=record.scope.user_id)
         key = (scope.tenant_id, scope.user_id, record.state.run_id, operation_id)
         if key in self._inflight:

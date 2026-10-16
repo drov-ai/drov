@@ -621,6 +621,166 @@
       "title": "ArtifactResource",
       "type": "object"
     },
+    "BackupManifest": {
+      "$defs": {
+        "ArtifactLimits": {
+          "additionalProperties": false,
+          "properties": {
+            "max_artifact_bytes": {
+              "default": 8388608,
+              "maximum": 1073741824,
+              "minimum": 1,
+              "title": "Max Artifact Bytes",
+              "type": "integer"
+            },
+            "max_export_bytes": {
+              "default": 16777216,
+              "maximum": 1073741824,
+              "minimum": 1,
+              "title": "Max Export Bytes",
+              "type": "integer"
+            },
+            "max_input_bytes": {
+              "default": 8388608,
+              "maximum": 1073741824,
+              "minimum": 1,
+              "title": "Max Input Bytes",
+              "type": "integer"
+            },
+            "max_input_files": {
+              "default": 8,
+              "maximum": 256,
+              "minimum": 1,
+              "title": "Max Input Files",
+              "type": "integer"
+            },
+            "max_output_files": {
+              "default": 8,
+              "maximum": 256,
+              "minimum": 1,
+              "title": "Max Output Files",
+              "type": "integer"
+            },
+            "max_owner_bytes": {
+              "default": 67108864,
+              "maximum": 68719476736,
+              "minimum": 1,
+              "title": "Max Owner Bytes",
+              "type": "integer"
+            },
+            "max_store_bytes": {
+              "default": 1073741824,
+              "maximum": 1099511627776,
+              "minimum": 1,
+              "title": "Max Store Bytes",
+              "type": "integer"
+            }
+          },
+          "title": "ArtifactLimits",
+          "type": "object"
+        },
+        "BackupFile": {
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "pattern": "^(state\\.sqlite|artifacts/store\\.json|artifacts/[0-9a-f]{32}/(stage\\.json|art_[0-9a-f]{32}))$",
+              "title": "Path",
+              "type": "string"
+            },
+            "sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            },
+            "size_bytes": {
+              "minimum": 0,
+              "title": "Size Bytes",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "path",
+            "size_bytes",
+            "sha256"
+          ],
+          "title": "BackupFile",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "artifact_limits": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactLimits"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "artifact_store_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Store Id"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/BackupFile"
+          },
+          "maxItems": 100000,
+          "minItems": 1,
+          "title": "Files",
+          "type": "array"
+        },
+        "format": {
+          "const": "drov.backup",
+          "default": "drov.backup",
+          "title": "Format",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "snapshot_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "versions": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Versions",
+          "type": "object"
+        }
+      },
+      "required": [
+        "snapshot_id",
+        "created_at",
+        "versions",
+        "files"
+      ],
+      "title": "BackupManifest",
+      "type": "object"
+    },
     "CancelReceipt": {
       "additionalProperties": false,
       "properties": {
@@ -2869,6 +3029,68 @@
       "title": "ReclamationResult",
       "type": "object"
     },
+    "RecoveryBarrier": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "backup",
+            "restore"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "previous_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Previous Sha256"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "snapshot_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "source_manifest_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Manifest Sha256"
+        }
+      },
+      "required": [
+        "snapshot_id",
+        "origin",
+        "created_at"
+      ],
+      "title": "RecoveryBarrier",
+      "type": "object"
+    },
     "Resource": {
       "$defs": {
         "RunContext": {
@@ -2970,6 +3192,168 @@
         "accepted_at"
       ],
       "title": "ResponseReceipt",
+      "type": "object"
+    },
+    "RestoreResult": {
+      "$defs": {
+        "ArtifactLimits": {
+          "additionalProperties": false,
+          "properties": {
+            "max_artifact_bytes": {
+              "default": 8388608,
+              "maximum": 1073741824,
+              "minimum": 1,
+              "title": "Max Artifact Bytes",
+              "type": "integer"
+            },
+            "max_export_bytes": {
+              "default": 16777216,
+              "maximum": 1073741824,
+              "minimum": 1,
+              "title": "Max Export Bytes",
+              "type": "integer"
+            },
+            "max_input_bytes": {
+              "default": 8388608,
+              "maximum": 1073741824,
+              "minimum": 1,
+              "title": "Max Input Bytes",
+              "type": "integer"
+            },
+            "max_input_files": {
+              "default": 8,
+              "maximum": 256,
+              "minimum": 1,
+              "title": "Max Input Files",
+              "type": "integer"
+            },
+            "max_output_files": {
+              "default": 8,
+              "maximum": 256,
+              "minimum": 1,
+              "title": "Max Output Files",
+              "type": "integer"
+            },
+            "max_owner_bytes": {
+              "default": 67108864,
+              "maximum": 68719476736,
+              "minimum": 1,
+              "title": "Max Owner Bytes",
+              "type": "integer"
+            },
+            "max_store_bytes": {
+              "default": 1073741824,
+              "maximum": 1099511627776,
+              "minimum": 1,
+              "title": "Max Store Bytes",
+              "type": "integer"
+            }
+          },
+          "title": "ArtifactLimits",
+          "type": "object"
+        },
+        "RecoveryBarrier": {
+          "additionalProperties": false,
+          "properties": {
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            },
+            "origin": {
+              "enum": [
+                "backup",
+                "restore"
+              ],
+              "title": "Origin",
+              "type": "string"
+            },
+            "previous_sha256": {
+              "anyOf": [
+                {
+                  "pattern": "^[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Previous Sha256"
+            },
+            "schema_version": {
+              "const": 1,
+              "default": 1,
+              "title": "Schema Version",
+              "type": "integer"
+            },
+            "snapshot_id": {
+              "pattern": "^[0-9a-f]{32}$",
+              "title": "Snapshot Id",
+              "type": "string"
+            },
+            "source_manifest_sha256": {
+              "anyOf": [
+                {
+                  "pattern": "^[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Source Manifest Sha256"
+            }
+          },
+          "required": [
+            "snapshot_id",
+            "origin",
+            "created_at"
+          ],
+          "title": "RecoveryBarrier",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Host-only locations; never expose this administrator result via HTTP.",
+      "properties": {
+        "artifact_limits": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactLimits"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "artifacts": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifacts"
+        },
+        "barrier": {
+          "$ref": "#/$defs/RecoveryBarrier"
+        },
+        "database": {
+          "title": "Database",
+          "type": "string"
+        }
+      },
+      "required": [
+        "database",
+        "barrier"
+      ],
+      "title": "RestoreResult",
       "type": "object"
     },
     "RunContext": {

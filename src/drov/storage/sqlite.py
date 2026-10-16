@@ -84,6 +84,11 @@ class SQLiteDriver:
         self.execute = execute
         self.retention_secret = retention_secret
 
+    async def check_execution_allowed(self) -> None:
+        from drov.storage._barrier import check
+
+        await check(self)
+
     async def check_retained(self, query: Query) -> None:
         if self.retention_secret is None or query.tenant_id is None or query.user_id is None:
             return
@@ -332,6 +337,11 @@ class SQLiteStorage(Storage):
                             raise IncompatibleStorage("Abandonment extension is unsupported")
                         expected_names.add("abandonment_facts")
                         await self._validate_abandonment_schema()
+                    if "recovery_schema" in values:
+                        if values["recovery_schema"] != "1":
+                            raise IncompatibleStorage("Recovery extension is unsupported")
+                        expected_names.add("recovery_barrier")
+                        await self._validate_recovery_schema()
                     if names != expected_names:
                         raise IncompatibleStorage("Database tables do not match its schema version")
                     if values.get("format") != "drov.sqlite" or values.get("record_schema") != str(
@@ -425,6 +435,14 @@ class SQLiteStorage(Storage):
         if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(RECLAMATION_DDL[0].split()):
             raise IncompatibleStorage("Reclamation extension table is invalid")
         await entries(SQLiteDriver(self._sql))
+
+    async def _validate_recovery_schema(self) -> None:
+        from drov.storage._barrier import BARRIER_DDL, get
+
+        rows, _ = await self._sql("SELECT sql FROM sqlite_master WHERE name='recovery_barrier'")
+        if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(BARRIER_DDL[0].split()):
+            raise IncompatibleStorage("Recovery extension table is invalid")
+        await get(SQLiteDriver(self._sql))
 
     async def _validate_abandonment_schema(self) -> None:
         from drov.storage._abandonment import ABANDONMENT_DDL, AbandonmentFact

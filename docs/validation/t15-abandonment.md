@@ -16,7 +16,7 @@
 
 ## 最终检查点
 
-源码已冻结完成本地验证，跨平台CI待本次提交推送后绑定精确SHA，当前不提前关闭本子范围或T-15。
+代码/测试检查点 **a4c8c7a95eea1dfe846f3f297b97aec3b9435005** 已推送；本地和该精确SHA平台检查通过，本子范围已验收，T-15整卡仍进行中。
 
 - 本机Darwin ARM64、Python3.11.9/3.14.3、uv0.13.0。最终3.14含真实Docker全库 **1254通过/59skip（328.21s，1313项）**，`.drov/t15-abandonment-full314.log`；DROV_E2B_TEST_CONFIG显式为空，59项是真实E2B未授权，不是云验证成功。最终新增28项（27放弃/1HTTP），原两解释器134专项为显式终态字段/例子增加前的检查点，不冒充最终3.11全库。
 - 两解释器wheel/sdist重建、四套core-only安装、POSIX八个例子的normal/stream通过（`.drov/t15-abandonment-package{311,314}.log`）。新增放弃例实际暂停审批→关闭Runtime→离线放弃→拒绝原批准/恢复→清理正文→原事实仍在，model=1/tool=0。两套独立server安装后三场景loopback HTTP/SSE与五个工作台资产通过（`installed{311,314}.log`）。
@@ -24,4 +24,6 @@
 - 实际隔离载入历史ffec4d1开发wheel，84个载荷逐字等于该历史源码，wheel SHA256 **9b3c1ac986e275e922ad81b7974c1eba02b2a21db32cf54596887e87a2073bfa**；能读原库，拒绝新增abandonment扩展库，两库字节均未变（`.drov/t15-abandonment-compat.log`）。这不是公开版本迁移证明。
 - Ruff、251文件格式、严格mypy169文件、生成schema/OpenAPI、空白检查通过；原core/Artifact/Sandbox/Upload/retention/reclamation DDL、版本、stage/header及容量定义15项AST比较保持（`t15-abandonment-original-definitions.json`）。82份Markdown/714相对链接/16段Python AST、品牌拷贝与受保护原文件、跟踪变更凭据模式检查通过（`t15-abandonment-doc-check.json`）；静态检查不等于任意数据安全保证。
 
-跨平台与最终源码SHA在CI完成后补记。接续任务、资源与会话建议只维护在[progress](../planning/progress.md)。
+最终[核心38858719899](https://github.com/drov-ai/drov/actions/runs/38858719899)全部11个job、[Docker38858719894](https://github.com/drov-ai/drov/actions/runs/38858719894)全部4个job completed/success，两套元数据headSha均为 **a4c8c7a95eea1dfe846f3f297b97aec3b9435005**，完整证据`.drov/t15-abandonment-{core,docker}-ci.{json,log}`。Linux/macOS3.11核心932通过/160skip，Linux3.12–3.14/macOS3.14为934通过/158skip；Windows3.11为778通过/314skip，3.14为780通过/312skip。POSIX文件分支在Windows适用跳过，不能称Windows文件已支持；八套server/MCP/安装/extras步骤均success，HTTP专项POSIX75通过、Windows61通过/14skip。Docker各102通过/3适用skip，3.11另有24个实际Docker浏览器通过；不把核心skip计为专项通过。Python3.15仍advisory，未扩大正式支持矩阵。
+
+**第三批显式放弃与最小未知事实已验收；T-15整卡仍未关闭。** 验收后同轮接续一致备份/屏障，另见[第四批记录](t15-backup.md)；该增量不冒用a4c8c7a的CI/构件结果。原数据、环境、租约/云台账和品牌保留，本批没有付费模型/云调用。接续任务、资源与会话建议只维护在[progress](../planning/progress.md)。

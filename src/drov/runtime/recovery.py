@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING, Any, cast
 
 from drov._json import StrictJson, canonical_json
-from drov.errors import Conflict, PersistenceUnavailable
+from drov.errors import Conflict, PersistenceUnavailable, RecoveryBlocked
 from drov.models.protocol import ModelRequest, ModelResponse
 from drov.runtime.reconciliation import ambiguous, operation_in, put_operation
 from drov.storage.records import EventDraft, RunRecord
@@ -48,6 +48,10 @@ class RecoveryController:
         )
 
     async def scan(self) -> None:
+        try:
+            await self.runs.storage.check_execution_allowed()
+        except RecoveryBlocked:
+            return  # Observing an immutable backup must not normalize its cursors.
         before = None
         while True:
             async with self.runs.storage.transaction() as tx:
@@ -147,6 +151,7 @@ class RecoveryController:
         runs = self.runs
         record = await runs.visible(run_id, context, wait)
         await runs.authorize(context, runs.resource(record), ("recover",))
+        await runs.storage.check_execution_allowed()
         owner = runs.resource(record).owner
 
         async def apply() -> None:

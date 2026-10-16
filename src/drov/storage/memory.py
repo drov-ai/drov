@@ -14,6 +14,9 @@ class MemoryDriver:
     def __init__(self, rows: dict[Key, Row]) -> None:
         self.rows = rows
 
+    async def check_execution_allowed(self) -> None:
+        pass  # In-memory data is never restored from a filesystem snapshot.
+
     async def check_retained(self, query: Query) -> None:
         pass  # Offline maintenance is an explicit SQLite capability.
 

@@ -1,7 +1,7 @@
-"""Explicit offline administration: logical deletion and resumable byte reclamation.
+"""Explicit offline retention, reclamation, abandonment and quarantined backups.
 
-Byte reclamation is a separate, previewed action. Neither action is a backup,
-safe restore of an older database, or physical disk erasure guarantee.
+Backup bundles are administrator copies, separate from authorized user exports.
+Restored stores remain blocked pending independent business reconciliation.
 """
 
 import asyncio
@@ -43,6 +43,8 @@ from drov.storage._abandonment import (
 from drov.storage._abandonment import (
     select as select_abandonment,
 )
+from drov.storage._backup import BackupManifest, RestoreResult
+from drov.storage._barrier import RecoveryBarrier
 from drov.storage._driver import Key, Row
 from drov.storage._reclamation import (
     RECLAMATION_DDL,
@@ -74,6 +76,9 @@ __all__ = [
     "ReclamationResult",
     "AbandonmentPlan",
     "AbandonmentFact",
+    "BackupManifest",
+    "RestoreResult",
+    "RecoveryBarrier",
 ]
 
 
@@ -641,6 +646,53 @@ class SQLiteMaintenance:
                     raise RecordNotFound("Abandonment is unavailable")
                 return fact
 
+    async def backup(self, destination: str | Path) -> BackupManifest:
+        """Snapshot the locked pair into a new private, quarantined bundle."""
+        from drov.storage._backup import backup
+
+        async with self._gate:
+            self._require_open()
+            settled = await _settle(backup(self, Path(destination)))
+            if settled.error is not None:
+                raise settled.error
+            if settled.cancelled:
+                raise asyncio.CancelledError
+            assert settled.value is not None
+            return settled.value
+
+    @staticmethod
+    async def inspect_backup(source: str | Path) -> BackupManifest:
+        from drov.storage._backup import inspect
+
+        settled = await _settle(inspect(Path(source)))
+        if settled.error is not None:
+            raise settled.error
+        if settled.cancelled:
+            raise asyncio.CancelledError
+        assert settled.value is not None
+        return settled.value
+
+    @staticmethod
+    async def restore(source: str | Path, destination: str | Path) -> RestoreResult:
+        """Restore into a new directory; never replace a live database or store."""
+        from drov.storage._backup import restore
+
+        settled = await _settle(restore(Path(source), Path(destination)))
+        if settled.error is not None:
+            raise settled.error
+        if settled.cancelled:
+            raise asyncio.CancelledError
+        assert settled.value is not None
+        return settled.value
+
+    async def get_recovery_barrier(self) -> RecoveryBarrier | None:
+        from drov.storage._barrier import get
+
+        async with self._gate:
+            self._require_open()
+            async with self._storage.transaction() as tx:
+                return await get(self._driver(tx))
+
     async def _select_reclamation(
         self, tx: Transaction, scope: MemoryScope, expire: bool, as_of: UtcTime
     ) -> tuple[ReclamationPlan, list[ReclamationEntry], list[UploadRecord]]:
@@ -973,9 +1025,15 @@ def main() -> int:
             "preview-abandonment",
             "abandon-run",
             "get-abandonment",
+            "backup",
+            "restore",
+            "inspect-backup",
+            "get-recovery-barrier",
         ),
     )
-    parser.add_argument("--database", required=True, type=Path)
+    parser.add_argument("--database", type=Path)
+    parser.add_argument("--source", type=Path, help="Complete backup bundle for restore")
+    parser.add_argument("--destination", type=Path, help="New private bundle directory")
     parser.add_argument("--artifacts", type=Path)
     parser.add_argument("--tenant")
     parser.add_argument("--user")
@@ -992,6 +1050,12 @@ def main() -> int:
     parser.add_argument("--include-memory", action="store_true")
     parser.add_argument("--fingerprint", help="Exact fingerprint from the current preview")
     args = parser.parse_args()
+    if args.action not in ("restore", "inspect-backup") and args.database is None:
+        parser.error("this action requires --database")
+    if args.action in ("backup", "restore") and args.destination is None:
+        parser.error("backup and restore require a new --destination")
+    if args.action in ("restore", "inspect-backup") and args.source is None:
+        parser.error("restore and inspect-backup require --source")
     if args.action in (
         "preview-session",
         "delete-session",
@@ -1021,8 +1085,25 @@ def main() -> int:
         parser.error("--fingerprint must be a lowercase SHA-256 digest")
 
     async def run() -> None:
+        if args.action == "inspect-backup":
+            print((await SQLiteMaintenance.inspect_backup(args.source)).model_dump_json(indent=2))
+            return
+        if args.action == "restore":
+            print(
+                (await SQLiteMaintenance.restore(args.source, args.destination)).model_dump_json(
+                    indent=2
+                )
+            )
+            return
         files = LocalArtifacts(directory=args.artifacts) if args.artifacts is not None else None
         async with SQLiteMaintenance(args.database, artifacts=files) as maintenance:
+            if args.action == "backup":
+                print((await maintenance.backup(args.destination)).model_dump_json(indent=2))
+                return
+            if args.action == "get-recovery-barrier":
+                barrier = await maintenance.get_recovery_barrier()
+                print(barrier.model_dump_json(indent=2) if barrier else "null")
+                return
             if args.action == "preview-abandonment":
                 abandoned = await maintenance.preview_abandonment(
                     RunContext(tenant_id=args.tenant, user_id=args.user),
