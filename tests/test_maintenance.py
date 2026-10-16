@@ -541,6 +541,54 @@ async def test_missing_pairing_metadata_is_not_repaired_by_maintenance(tmp_path:
     assert path.read_bytes() == before
 
 
+@pytest.mark.asyncio
+@POSIX
+@pytest.mark.parametrize("foreign", ["user", "tenant", "agent"])
+async def test_untrusted_cross_scope_mentions_cannot_retain_ready_metadata(
+    tmp_path: Path, foreign: str
+) -> None:
+    a: Agent[str] = Agent(name="assistant", revision="1", model=ScriptedModel([final("done")] * 2))
+    b: Agent[str] = Agent(name="another", revision="1", model=ScriptedModel([final("done")]))
+    actor = RunContext(
+        tenant_id="other" if foreign == "tenant" else "tenant",
+        user_id="bob" if foreign == "user" else "alice",
+    )
+    async with Runtime(
+        agents=[a, b],
+        storage=SQLiteStorage(tmp_path / "state.db"),
+        artifacts=LocalArtifacts(directory=tmp_path / "files"),
+    ) as rt:
+        result = await rt.run(
+            a,
+            "source",
+            session_id="session",
+            context=ALICE,
+            artifacts=[ArtifactInput(name="secret.csv", data=b"private bytes")],
+        )
+        ref = (await rt.storage.get_run(ALICE, result.run_id)).artifact_inputs[0]
+        mention = await rt.run(
+            b if foreign == "agent" else a,
+            "Untrusted text mentions " + ref.artifact_id,
+            session_id="mention",
+            context=actor,
+        )
+        assert mention.status == "completed"
+        assert (await rt.storage.get_run(actor, mention.run_id)).artifact_inputs == []
+    async with SQLiteMaintenance(
+        tmp_path / "state.db", artifacts=LocalArtifacts(directory=tmp_path / "files")
+    ) as maintenance:
+        plan = await maintenance.preview_session(SCOPE)
+        assert plan.cleared_artifacts == 1 and plan.retained_artifacts == 0
+        await maintenance.delete_session(plan)
+    async with Runtime(
+        agents=[],
+        storage=SQLiteStorage(tmp_path / "state.db"),
+        artifacts=LocalArtifacts(directory=tmp_path / "files"),
+    ) as rt:
+        with pytest.raises(ContentGone):
+            await rt.read_artifact(ref, context=ALICE)
+
+
 class DenyReads(OwnerAuthorizer):
     async def authorize(self, actor: RunContext, action: Action, resource: Resource) -> bool:
         return False if action == "read" else await super().authorize(actor, action, resource)

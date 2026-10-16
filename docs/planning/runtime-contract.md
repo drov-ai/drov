@@ -370,3 +370,5 @@ T-14 的登录壳、固定静态资产与认证目录边界见 [ADR-0026](../dec
 T-15 首批的实际清理接点见 [ADR-0027](../decisions/0027-offline-session-retention.md)。离线预览不修改数据/扩展，数据库逻辑清理在排他锁和单一事务内复核完整快照；未结束/unknown/dispatched 操作与未确认销毁租约不因 Run 终态而失去保护。显式清理 Memory scope 还保护其他相关未结束/未知 Run。原 Session 墓碑在接收和文件暂存前检查，换键或无键不能复活；新 ID 才可创建新会话。原 owner 当前 read 通过后投影 ContentGone/410，其他身份或撤权仍404。
 
 共享 Artifact 保留最小来源证明，即使原 Run 正文已清理，已有授权引用仍可验证/读取；证明不授予额外权限。最后引用逻辑清理返回 ContentGone，阶段字节及其容量在本批全部保留。已销毁 E2B 租约的费用预留同事务转存，不因清理重新释放云准入额度。此接点尚不实现本节约定的 abandonment、完整字节回收、备份/barrier、迁移或导出，不能据 SQL 删除成功推断其通过；状态与下一步只见 progress。
+
+维护引用判定仍受归属隔离：同一tenant/user/Agent内保守保留正文中的引用；跨作用域只承认实际grant/类型化执行或上传引用。其他用户、租户或Agent仅在文本中提到原Artifact ID，不能使源文件在最后合法引用清理后仍保持ready。

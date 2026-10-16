@@ -67,6 +67,20 @@ class _Selection:
     uploads: list[UploadRecord]
 
 
+def _mentions(item: Row, record: ArtifactRecord, owner_runs: set[str]) -> bool:
+    if (item.key.tenant_id, item.key.user_id) != (record.owner.tenant_id, record.owner.user_id):
+        return False
+    if item.key.kind == "memory":
+        scoped = item.key.namespace == record.owner.agent_name
+    elif item.key.kind == "run":
+        scoped = item.key.key in owner_runs
+    else:
+        scoped = item.key.kind not in ("session", "start_key") and (
+            item.key.namespace in owner_runs
+        )
+    return scoped and record.ref.artifact_id in item.payload
+
+
 class SQLiteMaintenance:
     """Trusted local administrator capability, guarded by the Runtime's locks.
 
@@ -317,12 +331,27 @@ class SQLiteMaintenance:
             source_survives = any(
                 item.key.kind == "run" and item.key.key == record.run_id for item in remaining
             )
+            owner_runs = {
+                item.key.key
+                for item in remaining
+                if item.key.kind == "run"
+                and (item.key.tenant_id, item.key.user_id)
+                == (record.owner.tenant_id, record.owner.user_id)
+                and _decode(RunRecord, item).agent_name == record.owner.agent_name
+            }
+
             keep = (
                 source_survives
                 or record.ref.artifact_id in remaining_grants
-                or any(record.ref.artifact_id in item.payload for item in remaining)
-                or any(record.ref.artifact_id in item.model_dump_json() for item in other_leases)
-                or any(record.ref.artifact_id in item.model_dump_json() for item in other_uploads)
+                or any(_mentions(item, record, owner_runs) for item in remaining)
+                or any(grant.ref == record.ref for lease in other_leases for grant in lease.inputs)
+                or any(
+                    upload.ref == record.ref
+                    and upload.stage_id == record.stage_id
+                    and (upload.owner.tenant_id, upload.owner.user_id, upload.target.agent_name)
+                    == (record.owner.tenant_id, record.owner.user_id, record.owner.agent_name)
+                    for upload in other_uploads
+                )
                 or (record.owner.tenant_id, record.owner.user_id)
                 != (scope.tenant_id, scope.user_id)
             )

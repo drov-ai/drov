@@ -504,6 +504,6 @@ async def clear_existing_session(database, scope: SessionScope, *, files=None):
 
 SessionDeletionPlan 包含 scope/include_memory、全库及阶段清单的 HMAC fingerprint、各类记录数量、blockers、保留/清理的 Artifact 数量、无引用阶段数量和 bytes_reclaimed=0；没有用户输入、文件名、参数或正文。删除在同一事务重算并完整比较 plan，过期/篡改返回 Conflict。默认保留 Memory；显式 include_memory=True 删除该用户/Agent 的整个 Memory scope，不仅是当前会话贡献，其他相关未结束/未知 Run 仍阻止此动作。
 
-delete_session/delete-session 这一批只删除数据库正文/引用并保留最小事实；阶段字节、stage.json 和容量仍保留，不是完整个人数据擦除或容量回收。已清理 Session ID 不复用，原 request_key、换键、无键均 ContentGone；需要新会话 ID。Run/Artifact 在原 owner 当前 read 通过后返回 ContentGone/HTTP410，其他身份猜测及撤权仍404。保留共享引用与来源证明不授予额外权限。后续完整维护边界见 [维护策略](release-policy.md)，实际任务状态见 [progress](progress.md)。
+delete_session/delete-session 这一批只删除数据库正文/引用并保留最小事实；阶段字节、stage.json 和容量仍保留，不是完整个人数据擦除或容量回收。已清理 Session ID 不复用，原 request_key、换键、无键均 ContentGone；需要新会话 ID。Run/Artifact 在原 owner 当前 read 通过后返回 ContentGone/HTTP410，其他身份猜测及撤权仍404。保留共享引用与来源证明不授予额外权限；跨tenant/user/Agent的普通文本提及不参与另一作用域的清理判定。后续完整维护边界见 [维护策略](release-policy.md)，实际任务状态见 [progress](progress.md)。
 
 无需账号/Key的实际合成例见 [maintenance_offline.py](../../examples/maintenance_offline.py)；CLI与当前限制见 [工程方案](engineering.md#离线维护入口t-15-首批)。
