@@ -1,0 +1,45 @@
+{
+  "version": 4,
+  "registered_date": "2026-10-16",
+  "source_commit": "4bb9bdf44da4a9dd55c2c917a7a434cd8e9edbc0",
+  "batch_hash": "b908809e5c062e88d4cd1ec645efc64f1a5a562a8feb82e99e94b1b65df9f75d",
+  "manifest_sha256": "b1f62768489fc0f175e24cf16267a0de0752b7f700b5075c8f0e9f0910cd5677",
+  "config": {
+    "version": 3,
+    "amendment": "Independent user-authorized Pro configuration after aborted Flash smoke; prompts/corpus/scoring unchanged; retain both Flash failures and costs.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "low",
+    "max_output_tokens": 2048,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-16",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "planned_trials": {
+    "smoke": 7,
+    "formal": 81
+  },
+  "formal_schema_denominator": 75,
+  "authorization_total_cny": "13",
+  "paid_calls_before_registration": 18,
+  "previous_registration": "4a96bd1254d214eb51394d34f556f1690631c1848492e983092c187fe98587ef",
+  "retained_cost_upper_cny": "0.02924900",
+  "selection": "Same Pro/low prompts/corpus/scoring; safe protocol and independent bounded billing receipt diagnostics; prior failures retained; not a streaming first-token latency measurement"
+}
