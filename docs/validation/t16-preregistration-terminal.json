@@ -1,0 +1,47 @@
+{
+  "version": 15,
+  "registered_at": "2026-10-17T01:25:24.749249+08:00",
+  "source_commit": "6ba039f4ec295a7b77552a1cec224d45564df2a4",
+  "batch_hash": "6df093679e2c16ff16e5f62e484c2e8ac58d01e2dd64acc1e7b0e291971a6bbf",
+  "config": {
+    "version": 12,
+    "amendment": "After v11 smoke2/3, add explicit Memory terminal conditions: read task ends after one successful recall including empty; write task ends immediately after successful remember/forget, no verification recall or second identical mutation; automatic injected record is the just-committed result. Preserve actual version2 duplicate-save failure, all585 settled requests/costs. Same Pro/high/8192, corpus/oracle/expected/thresholds,8/16 limits and scoped trial-stop behavior. New complete7+81; adaptive not blind.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "high",
+    "max_output_tokens": 8192,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-17",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "manifest_sha256": "1aa0d80c62285c7510b7d740f9ea62849aeb2acd654e4313fee4bd8978e981fb",
+  "planned_trials": {
+    "smoke": 7,
+    "formal": 81
+  },
+  "formal_schema_denominator": 75,
+  "authorization_total_cny": "13",
+  "paid_calls_before_registration": 585,
+  "previous_registration": "f87a14beac59598163912e577e8841bc46460a3cc6591068db711a163d0a1112",
+  "retained_cost_upper_cny": "6.94020020",
+  "reviewed_stop": null,
+  "selection": "After v11 smoke2/3, add explicit Memory terminal conditions: read task ends after one successful recall including empty; write task ends immediately after successful remember/forget, no verification recall or second identical mutation; automatic injected record is the just-committed result. Preserve actual version2 duplicate-save failure, all585 settled requests/costs. Same Pro/high/8192, corpus/oracle/expected/thresholds,8/16 limits and scoped trial-stop behavior. New complete7+81; adaptive not blind.",
+  "review_evidence": "v11 smoke2/3: after successful version1 remember, model recalls and submits a distinct second write to version2; actual events and fresh reader agree, original single-mutation/version1 assertions correctly fail. Explicit post-success terminal rules address missing end condition without changing Memory semantics or expected version. Preserve all585 costs/old failure. Same Pro/high/8192, scoped trial cap and thresholds; offline3 entries27/27, both Python groups cover128 with one corrected fixture recheck. Windows post-kill test only gets bounded cleanup observation; SDK unchanged."
+}
