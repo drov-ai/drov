@@ -1,0 +1,102 @@
+{
+  "checked_at": "2026-10-16T15:42:58.534201+00:00",
+  "scope": "latest evaluation-control source, explicit offline FixtureModel with actual Docker; no model requests",
+  "reports": {
+    "sdk": {
+      "git_commit": "d07446d612066e1af744c2b864ff7615584b22b9",
+      "batch_hash": "9351569b32dd3220e10df7b78af02dc98919aac18abed0b0ab869235deaa3e6d",
+      "raw_local_report": ".drov/t16-postreview-sdk/report.json",
+      "raw_report_sha256": "af6f433be4403458b4154eb3050848e2e0c66365bc814fee8ffd04156a01f40a",
+      "summary": {
+        "complete": true,
+        "passed": 27,
+        "total": 27,
+        "schema_passed": 25,
+        "schema_total": 25,
+        "schema_required": 24,
+        "scenarios": {
+          "S-01": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-02": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-03": {
+            "passed": 9,
+            "total": 9
+          }
+        },
+        "code_passed": 3,
+        "code_total": 3,
+        "safety_failures": [],
+        "release_gate": false
+      }
+    },
+    "stream": {
+      "git_commit": "d07446d612066e1af744c2b864ff7615584b22b9",
+      "batch_hash": "9351569b32dd3220e10df7b78af02dc98919aac18abed0b0ab869235deaa3e6d",
+      "raw_local_report": ".drov/t16-postreview-stream/report.json",
+      "raw_report_sha256": "e6f10811be24f75e119624bc3478932a9c8426f992a9f1f6c5783cad6ebc2528",
+      "summary": {
+        "complete": true,
+        "passed": 27,
+        "total": 27,
+        "schema_passed": 25,
+        "schema_total": 25,
+        "schema_required": 24,
+        "scenarios": {
+          "S-01": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-02": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-03": {
+            "passed": 9,
+            "total": 9
+          }
+        },
+        "code_passed": 3,
+        "code_total": 3,
+        "safety_failures": [],
+        "release_gate": false
+      }
+    },
+    "http": {
+      "git_commit": "d07446d612066e1af744c2b864ff7615584b22b9",
+      "batch_hash": "9351569b32dd3220e10df7b78af02dc98919aac18abed0b0ab869235deaa3e6d",
+      "raw_local_report": ".drov/t16-postreview-http/report.json",
+      "raw_report_sha256": "f4e893e4b6360a677078ab765eccb2d971aaa6b8747cdc0ff2e24f46b6c72907",
+      "summary": {
+        "complete": true,
+        "passed": 27,
+        "total": 27,
+        "schema_passed": 25,
+        "schema_total": 25,
+        "schema_required": 24,
+        "scenarios": {
+          "S-01": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-02": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-03": {
+            "passed": 9,
+            "total": 9
+          }
+        },
+        "code_passed": 3,
+        "code_total": 3,
+        "safety_failures": [],
+        "release_gate": false
+      }
+    }
+  }
+}

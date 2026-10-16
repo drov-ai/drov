@@ -87,3 +87,8 @@ SDK源码1297c4808b6e0910b4a5ea89ff8c57e3b263b5fa的核心38922182329最终**11/
 
 
 评测控制修复的强化负向小组在3.11/3.14各4项通过（`t16-stop-review-negative{311,314}.log`），包括已settled但预算停止仍拒绝、未知/未结费用拒绝、原trial第9次仍拒绝。ruff/285格式与mypy192源通过。只重建受影响sdist并逐字检查新evals/budget.py/run.py/config.json，排除私有目录/凭据，SHA256=fcd3a353fbf8c3f905552d267a104e32b49feff74bf124ed0e51c2269f06ac72（构建时文档快照）；SDK wheel载荷未改，未重复不相关安装矩阵。下一轮优先S02-04隔离读取/多余recall和跨阶段请求限额，保持原8次上限。
+
+
+评测控制最终源码**d07446d612066e1af744c2b864ff7615584b22b9**已推送；该源码新增[核心38926025096](https://github.com/drov-ai/drov/actions/runs/38926025096)/[Docker38926025085](https://github.com/drov-ai/drov/actions/runs/38926025085)验证仍在排队/运行，**尚未取得最新评测控制代码全平台结论**，不能沿用1297c48的全绿作为最新HEAD全绿。当前三入口再次完整离线复跑，分别27/27、schema25/25、代码3/3、零安全失败，见[最终离线摘要](t16-postreview-offline.json)，本地完整原报告`.drov/t16-postreview-{sdk,stream,http}/report.json`。均release_gate=false，没有新增付费请求。源文档/案例链接最终检查仍为92份Markdown、831本地文件链接、16Python片段AST，无真实凭据模式或保护文件改动；后续补记只改记录，不重跑未变化的SDK。
+
+最终恢复优先级：先核对d07446d的最新远程CI，再离线复核Pro/high的S02-04自动Memory空结果/重复recall与各阶段必要请求；不能放宽预定8次上限或用缺回答当成功。核实接口缺陷后才修正；新候选必须新登记、显式复核trial_model_limit并保留原44请求/费用/上限，之后完整7 smoke再81正式。当前只有实现与离线/失败诊断子范围完成，真实质量与整卡验收仍未完成。建议New Chat继续同一Local checkout，无需新仓库/账号/Key或充值；保留Docker/私有env/原台账。可在独立体验阶段安排两位Python使用者，不分享Key。
