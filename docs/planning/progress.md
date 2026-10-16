@@ -1,6 +1,6 @@
 # 当前进度与下一轮
 
-更新：2026-10-16（Asia/Shanghai；T-16 实施中，尚未整卡验收）。
+更新：2026-10-16（Asia/Shanghai；T-16 接续 Memory 精确键读取澄清评测，尚未整卡验收）。
 
 ## 当前状态
 
@@ -346,15 +346,13 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 - 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
-## 当前任务：T-16 场景与真实模型评测（子范围已完成，整卡进行中）
+## 当前任务：T-16 场景与真实模型评测（接续实施中）
 
-前置T-10B/T-11/T-12/T-14/T-15已完整验收；27项manifest、冻结登记、SDK/stream/HTTP离线全路径、实际Docker、预算/记录/严格评分及适配修复均有证据。Pro/low首项循环质量失败；最后Pro/high前三项通过，第4项保存成功但隔离读取达到累计请求限额、无完整最终回答；不是缺Key或预算阻塞，不能直接开正式81或跳过到下一卡。
+前置 T-10B/T-11/T-12/T-14/T-15 已完整验收。当前从 main/94830fe 干净 checkout 接续，未进入 T-17。旧 Pro/high S02-04 的 8 次真实请求和末次本地拒绝已离线逐项审计，成功精确键空结果完整，未发现适配器丢输入证据；改子串重查多消耗请求。见[接续验证](../validation/t16-followup.md)与[审计](../validation/t16-memory-isolation-audit.json)。
 
-下一轮先核对d07446d的[核心CI](https://github.com/drov-ai/drov/actions/runs/38926025096)与[Docker CI](https://github.com/drov-ai/drov/actions/runs/38926025085)；随后具体任务：**先复核Pro/high的S02-04隔离读取为何多次请求Memory/模型，导致跨阶段请求上限耗尽**。S01-01已在high候选通过，low的[离线请求审计](../validation/t16-pro-wire-audit.json)仍保留；当前优先审查high的other-user/other-tenant/other-agent保存输入、自动Memory空结果与recall调用事实，不放宽原8次上限。只有发现可复现接口缺陷才改适配器并补回归/契约；无缺陷时为明确的独立候选参数配置事前登记，保持任务/语料/评分与所有旧失败。禁止直接覆盖旧smoke、重建账本退款或把重复请求当成功重试。完整7项smoke同指纹全部通过后再运行81正式；本轮没有给出任何配置必成功的承诺。
+新配置 v5 只澄清 Memory 精确键一次读取、成功空结果的语义与修改成功需工具证据；Pro/high/2048、语料/评分/8请求上限不变，属于见过失败后的自适应接续。三入口离线各 27/27、代码各 3/3、schema 各 25/25，零安全失败。提交/新指纹登记后才显式 reviewed_trial_limit 恢复原账本；新目录完整 7 smoke 通过才能跑同指纹 81 正式。不覆盖旧失败，不放宽门槛、不重建账本。调用前原账本仍 44 settled / 0.24583100 元上界、13/11 元上限、trial_model_limit。
 
-恢复：保留`.drov/t16-model-ledger.json`（当前44请求已结算、原13/11元上限）、全部`.drov/t16-*smoke*`和freeze；最后已执行freeze为`.drov/t16-freeze-pro-high.json`，batch_hash=f4ecc6c05662f4608afb7e019460f43e6269d684d23434cfcec76192fc24e3b8，当前源码后续仅评测控制修复，需重新登记而不能复用旧freeze。旧smoke3/4不能作formal输入。改源码/参数时先提交新checkpoint并另存登记，核对旧费用全部settled、离线复核trial_model_limit后显式Ledger.amend(..., reviewed_trial_limit=True)保留累计费用/原限额/审计；不得删stopped或重建账本；新输出目录重新完整smoke，不自动从失败后挑项续跑。原Runtime/SQLite/bytes/租约和用户数据不能作为清理夹具。评测控制最终d07446d的三入口再次各27/27，见[最终离线摘要](../validation/t16-postreview-offline.json)；它不新增模型质量证据。
-
-整卡完成标准仍按[任务卡](implementation-plan.md)/[质量计划](quality-plan.md#5-真实模型评测)：7 smoke与完整81正式、总体至少69/81、每场景至少22/27、代码至少8/9、schema至少72/75、零安全违规；完整费用/耗时/失败复核及每场景至少3成功抽查、使用体验记录。全部满足才关闭T-16。独立开发者缺席可如实只报维护者验证，不能宣称体验优势。
+整卡完成标准按[任务卡](implementation-plan.md)/[质量计划](quality-plan.md#5-真实模型评测)：完整 7 smoke 与 81 正式、总体至少 69/81、每场景至少 22/27、代码至少 8/9、schema至少 72/75、零安全违规；完整费用/耗时/失败复核及每场景至少 3 成功抽查、使用体验记录。结果待本轮完成后补记；独立开发者缺席如实只报维护者验证。
 
 ## 用户准备事项
 

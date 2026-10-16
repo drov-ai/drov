@@ -1,6 +1,6 @@
 {
-  "version": 4,
-  "amendment": "Final independent Pro/high candidate: official daily-agent effort recommendation after Pro/low repeated retrieval; prompts, corpus, scoring and output limit unchanged; retain every previous failure and cost",
+  "version": 5,
+  "amendment": "Follow-up Memory exact-key clarification after offline audit of all Pro/high isolation requests: one exact-key recall, successful empty result is authoritative, and mutation claims require tool success. Same Pro/high, corpus, scoring, 8-request trial limit and output limit; retain all historical failures and costs. Adaptive follow-up, not blind evaluation.",
   "provider": "DeepSeek official",
   "endpoint": "https://api.deepseek.com",
   "model": "deepseek-v4-pro",

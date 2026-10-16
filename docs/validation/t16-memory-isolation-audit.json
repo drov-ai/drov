@@ -1,0 +1,193 @@
+{
+  "scope": "Offline inspection of saved normalized model inputs and outputs only; no provider call or tool execution. Final other-agent model-02 request was locally rejected before provider I/O.",
+  "source_batch_hash": "f4ecc6c05662f4608afb7e019460f43e6269d684d23434cfcec76192fc24e3b8",
+  "phases": [
+    {
+      "phase": "save",
+      "calls": [
+        {
+          "request": "model-01.request.json",
+          "tool_results": [],
+          "requested_tools": [
+            {
+              "name": "memory.remember",
+              "arguments": {
+                "content": "简洁中文",
+                "expected_version": 0,
+                "key": "reply-style"
+              }
+            }
+          ],
+          "complete_response": true,
+          "private_memory_in_foreign_input": false
+        },
+        {
+          "request": "model-02.request.json",
+          "tool_results": [
+            {
+              "status": "succeeded",
+              "has_result": true,
+              "result": {
+                "key": "reply-style",
+                "version": 1
+              },
+              "error_code": null
+            }
+          ],
+          "requested_tools": [],
+          "complete_response": true,
+          "private_memory_in_foreign_input": false
+        }
+      ]
+    },
+    {
+      "phase": "other-user",
+      "calls": [
+        {
+          "request": "model-01.request.json",
+          "tool_results": [],
+          "requested_tools": [
+            {
+              "name": "memory.recall",
+              "arguments": {
+                "key": "reply-style",
+                "query": null,
+                "limit": 5
+              }
+            },
+            {
+              "name": "memory.recall",
+              "arguments": {
+                "key": null,
+                "query": "reply-style",
+                "limit": 10
+              }
+            }
+          ],
+          "complete_response": true,
+          "private_memory_in_foreign_input": false
+        },
+        {
+          "request": "model-02.request.json",
+          "tool_results": [
+            {
+              "status": "succeeded",
+              "has_result": true,
+              "result": [],
+              "error_code": null
+            },
+            {
+              "status": "succeeded",
+              "has_result": true,
+              "result": [],
+              "error_code": null
+            }
+          ],
+          "requested_tools": [],
+          "complete_response": true,
+          "private_memory_in_foreign_input": false
+        }
+      ]
+    },
+    {
+      "phase": "other-tenant",
+      "calls": [
+        {
+          "request": "model-01.request.json",
+          "tool_results": [],
+          "requested_tools": [
+            {
+              "name": "memory.recall",
+              "arguments": {
+                "key": "reply-style",
+                "limit": 5,
+                "query": null
+              }
+            }
+          ],
+          "complete_response": true,
+          "private_memory_in_foreign_input": false
+        },
+        {
+          "request": "model-02.request.json",
+          "tool_results": [
+            {
+              "status": "succeeded",
+              "has_result": true,
+              "result": [],
+              "error_code": null
+            }
+          ],
+          "requested_tools": [
+            {
+              "name": "memory.recall",
+              "arguments": {
+                "key": null,
+                "limit": 5,
+                "query": "reply-style"
+              }
+            }
+          ],
+          "complete_response": true,
+          "private_memory_in_foreign_input": false
+        },
+        {
+          "request": "model-03.request.json",
+          "tool_results": [
+            {
+              "status": "succeeded",
+              "has_result": true,
+              "result": [],
+              "error_code": null
+            },
+            {
+              "status": "succeeded",
+              "has_result": true,
+              "result": [],
+              "error_code": null
+            }
+          ],
+          "requested_tools": [],
+          "complete_response": true,
+          "private_memory_in_foreign_input": false
+        }
+      ]
+    },
+    {
+      "phase": "other-agent",
+      "calls": [
+        {
+          "request": "model-01.request.json",
+          "tool_results": [],
+          "requested_tools": [
+            {
+              "name": "memory.recall",
+              "arguments": {
+                "key": "reply-style",
+                "query": null,
+                "limit": 5
+              }
+            }
+          ],
+          "complete_response": true,
+          "private_memory_in_foreign_input": false
+        },
+        {
+          "request": "model-02.request.json",
+          "tool_results": [
+            {
+              "status": "succeeded",
+              "has_result": true,
+              "result": [],
+              "error_code": null
+            }
+          ],
+          "requested_tools": null,
+          "complete_response": false,
+          "private_memory_in_foreign_input": false
+        }
+      ]
+    }
+  ],
+  "conclusion": "Exact-key successful empty results are intact. Other-tenant repeated recall with substring, consuming an additional request; other-agent final answer not attempted after aggregate 8-call limit. No local serialization defect found. Empty automatic retrieval has no memory record message by current contract; absence alone is not proof of a missed exact-key record."
+}
