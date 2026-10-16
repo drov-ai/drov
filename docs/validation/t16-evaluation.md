@@ -70,3 +70,8 @@ CSV字节规则修复时一度误覆盖.gitattributes原四条Moby逐字保护�
 最终冻结源码本地Python3.14完整全库**1401通过/59skip（386.83s，共1460项）**，含明确配置的本地Docker，59为本轮未授权E2B，见`t16-plaintext-full314.log`。先前另一次1398/59全库执行期间文件仍在修正，不作为最终冻结源码验收，最终以本次为准。285文件ruff格式/静态、mypy192源、schema/OpenAPI与锁检查通过；91个Git跟踪SDK/资源载荷与最终wheel逐字一致，未将本机.DS_Store当作应打包源码。92份Markdown/829本地文件链接/16Python说明片段AST通过（`t16-final-doc-check.json`），可识别凭据模式0；AST检查不等同SDK运行。只读清点本地dev.drov.execution容器0，原非Drov数据库容器保留。
 
 最终精确源码1297c4808b6e0910b4a5ea89ff8c57e3b263b5fa的[Docker38922182332](https://github.com/drov-ai/drov/actions/runs/38922182332)全部4 jobs completed/success；[核心38922182329](https://github.com/drov-ai/drov/actions/runs/38922182329)quality/python-next/workbench已success，八套package尚在运行，最终结果待补，不把已通过部分当完整平台验收。
+
+
+## 最后一项独立候选：Pro/high
+
+Pro/low的完整协议往返与离线输入审计完成后，尚有10.88元可用估算余量；官方[Pro GA说明](https://api-docs.deepseek.com/news/news260813/)将high用于日常Agent工作流。因此本轮增加最后一个独立Pro/high候选，只有reasoning_effort由low改high；提示/语料/评分/2048输出上限与价格不变。这是看见旧结果后的参数选择，不能作为盲测或替换旧样本。全部旧失败/费用保留；先提交配置/新指纹再调用，仍要完整7 smoke后81正式。该候选失败后本轮不再改参数/提示抽样。SDK/执行器源码与1297c48相同，配置JSON/登记改变，不重复声称原CI对应新参数质量。

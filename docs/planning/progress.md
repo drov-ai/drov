@@ -21,7 +21,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 按[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)实现[27项manifest](../../evals/manifest.json)、[固定配置](../../evals/config.json)、真实Runtime/新进程Memory/独立事项服务/Docker事实评分执行器、持久总费用账本及DeepSeek专用Responses方言。两种Responses的Memory重开客户端组合缺口已复现并修复；Pro实际返回完整明文加额外opaque字符串，续接使用完整明文并移除额外字段，原OpenAI加密规则不变。最终三入口离线均27/27、schema25/25、代码3/3、零安全失败；它们是脚本替身结构验证，不是模型质量。
 
-真实失败按登记独立保留：Flash v1为0/1，v2一次提示澄清后3/4（S02-04无工具却自述保存）；Pro前三个检查点首项协议拒绝，最终明文兼容配置仍在S01-01连续8次检索后limit_exceeded、0/1。没有完整7项smoke，**81正式试验未启动，真实代码/正式质量门槛/每场景3成功抽查均未验收**，不进入T-17或关闭整卡。本轮不再修改提示/评分抽样；离线重建8次保存输入未发现工具事实/原指令/call_id配对丢失，供应商内部原因未知。全部原报告、费用核对及恢复步骤见[本轮验证](../validation/t16-evaluation.md)，使用记录为[仅维护者侧验证](../validation/t16-experience.md)。
+真实失败按登记独立保留：Flash v1为0/1，v2一次提示澄清后3/4（S02-04无工具却自述保存）；Pro前三个检查点首项协议拒绝，最终明文兼容配置仍在S01-01连续8次检索后limit_exceeded、0/1。没有完整7项smoke，**81正式试验未启动，真实代码/正式质量门槛/每场景3成功抽查均未验收**，不进入T-17或关闭整卡。本轮不再修改提示/评分；最后另登记Pro/high候选（官方日常Agent工作流建议），仅effort变更，保持旧失败和总费用；离线重建8次保存输入未发现工具事实/原指令/call_id配对丢失，供应商内部原因未知。全部原报告、费用核对及恢复步骤见[本轮验证](../validation/t16-evaluation.md)，使用记录为[仅维护者侧验证](../validation/t16-experience.md)。
 
 本轮用户已授权DeepSeek官方、`.env.local`已有DEEPSEEK_API_KEY、deepseek-flash或deepseek-v4-pro、合计13元。宿主worker仅加载所需Key，不输出/提交；11元可用+2元余量。首次Pro缺失usage由用户控制台644输入/0缓存/127输出/771总数核对后才结算；后续安全诊断与有界收据自动保留用量，坏计划仍失败。累计**28请求全部settled、峰值估算上界0.11976080元**，无pending/unknown，无需充值；不是供应商实扣/余额。原E2B预算/账号/模板/台账保留，本轮未调用。
 
