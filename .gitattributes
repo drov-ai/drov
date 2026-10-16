@@ -1,2 +1,8 @@
+# Preserve the exact copied upstream bytes used by security-profile checks.
+sandbox/docker/seccomp-v27.0.3.json -text
+src/drov/sandbox/seccomp-v27.0.3.json -text
+sandbox/docker/LICENSE.moby -text
+src/drov/sandbox/LICENSE.moby -text
+
 # Evaluation data hashes refer to the exact committed bytes on every checkout.
 evals/data/numbers.csv -text
