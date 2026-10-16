@@ -1,0 +1,47 @@
+{
+  "version": 10,
+  "registered_at": "2026-10-17T00:13:55.659701+08:00",
+  "source_commit": "987fe4700eaf92db4e70eecd78332831faf53782",
+  "batch_hash": "ff90c04695522c11f7c770b71f3dc89c51280e7c560f8c2e86577677cf524dd9",
+  "manifest_sha256": "b1f62768489fc0f175e24cf16267a0de0752b7f700b5075c8f0e9f0910cd5677",
+  "config": {
+    "version": 7,
+    "amendment": "Evidence-based follow-up to incomplete v6 formal 34/37: use optimistic CAS version 0 for explicitly requested new memory before any version lookup, query after actual conflict; raise reasoning-inclusive output allowance from 2048 to 4096 after two exhausted-output failures. Provider/model/high, corpus, numerical oracle, thresholds and 8-request/16-tool trial limits unchanged. Preserve all old samples and costs; new complete smoke and formal, adaptive not blind.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "high",
+    "max_output_tokens": 4096,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-16",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "planned_trials": {
+    "smoke": 7,
+    "formal": 81
+  },
+  "formal_schema_denominator": 75,
+  "authorization_total_cny": "13",
+  "paid_calls_before_registration": 181,
+  "previous_registration": "c888d19fbbc94e00b1494720324fbe5628e97406c7d6062285c39495a98b865a",
+  "retained_cost_upper_cny": "1.75739360",
+  "reviewed_stop": "trial_model_limit",
+  "selection": "Evidence-based follow-up to incomplete v6 formal 34/37: use optimistic CAS version 0 for explicitly requested new memory before any version lookup, query after actual conflict; raise reasoning-inclusive output allowance from 2048 to 4096 after two exhausted-output failures. Provider/model/high, corpus, numerical oracle, thresholds and 8-request/16-tool trial limits unchanged. Preserve all old samples and costs; new complete smoke and formal, adaptive not blind.",
+  "review_evidence": "All v6 failures reviewed: exactly 2048 output in two incomplete responses; save had exact-key prelookup then CAS, consuming 3 requests and exhausting cumulative 8 before final foreign answer. Original 34/37 and 44 unexecuted retained. Use optimistic CAS for new writes and 4096 with matching monetary/context reserves; unchanged thresholds and corpus."
+}
