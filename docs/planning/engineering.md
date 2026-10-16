@@ -1,6 +1,6 @@
 # 首版工程方案
 
-状态：工程选择与默认值由本页维护；当前任务状态统一见 [progress](progress.md)，T-10 完整证据见 [专项验证](../validation/t10-faults-cancellation.md)。文件/代码沙箱闭环已按 ADR-0020 实现；T-10B 受测专项证据见 [验证](../validation/t10b-sandbox-faults.md)；E2B、真实模型质量和服务仍未验收；Responses 离线适配见 ADR-0022。更新：2026-10-15。
+状态：工程选择与默认值由本页维护；当前任务状态统一见 [progress](progress.md)，T-10 完整证据见 [专项验证](../validation/t10-faults-cancellation.md)。文件/代码沙箱闭环已按 ADR-0020 实现；T-10B 受测专项证据见 [验证](../validation/t10b-sandbox-faults.md)；E2B 与 HTTP/工作台的实现分别见 ADR-0023/0025/0026；DeepSeek真实任务评测见[T-16记录](../validation/t16-evidence-scope.md)，OpenAI供应商仅离线适配见ADR-0022。实际验收状态统一以progress为准。更新：2026-10-17。
 
 本文件维护技术栈、目录、支持矩阵和默认配置。能力范围以 [能力表](capability-matrix.md) 为准，公共字段在 [API 草案](api-draft.md)，执行语义在 [行为契约](runtime-contract.md)。决定及替代方案见 [ADR-0004](../decisions/0004-first-release-engineering.md)。
 

@@ -35,8 +35,10 @@ CSV数值评分使用精确有限Decimal等值，合法整数/小数/科学记�
 协议诊断与费用独立：评测宿主有界缓冲同一SSE应答（2MiB），只保留终端数字usage/id/model，原字节仍由官方SDK严格校验。提前协议拒绝也可以结算完整收据，始终不接受该计划；没有完整收据仍停止。该模式的耗时包括缓冲，不可用来宣称首字/实时流延迟。原始推理不会进入error诊断或提交的汇总。
 
 
-跨阶段累计达到单任务8次请求上限会持久记录trial_model_limit，和预算不足/缺用量不同。默认amend仍拒绝所有stopped。只有离线复核完成、全部旧费用已settled、明确新指纹与原因，宿主才能显式使用Ledger.amend(..., reviewed_trial_limit=True)登记新批次并在审计中保留reviewed_stop；原attempt/单任务计数/费用/13与11元上限不变，不允许继续原试验。budget_exhausted、其他停止原因或任一pending/unknown不能通过该参数恢复。实际停止状态只见progress，执行器不会自动恢复。
+旧版跨阶段累计达到单任务8次请求上限会在批次stopped记录trial_model_limit，和预算不足/缺用量不同。默认amend仍拒绝所有stopped。只有离线复核完成、全部旧费用已settled、明确新指纹与原因，宿主才能显式使用Ledger.amend(..., reviewed_trial_limit=True)登记新批次并在审计中保留reviewed_stop；原attempt/单任务计数/费用/13与11元上限不变，不允许继续原试验。budget_exhausted、其他停止原因或任一pending/unknown不能通过该参数恢复。实际停止状态只见progress，执行器不会自动恢复。
 
 研究任务充分性按题目要求的事实判定，状态定义见质量计划。manifest v2 澄清 S01-01 只问 A 的应用进程重启保留，与 ResearchReport 一致；资料、预期答案和评分不变。v7 的原 0/1 失败保留，新批次单独登记并完整执行，见 [ADR-0034](../docs/decisions/0034-evaluation-evidence-scope.md)。
 
 文件复用 oracle 按原阶段 summary.csv 与新阶段 copied.csv 的唯一目标/hash 比较，额外交付文件不计入这对目标；缺失/重名/错阶段/字节变化仍拒绝。缺最终回答保持失败并保留安全诊断。v9完整81原报告不重算，v10修订及8192输出候选见[ADR-0035](../docs/decisions/0035-evaluation-artifact-oracle.md)。
+
+[ADR-0036](../docs/decisions/0036-evaluation-trial-limit-scope.md)取代新试验的全批停止行为：trial_stops持久拒绝原试验，报告completion=incomplete/trial_stop且任务/schema失败；其他独立试验仅在全部费用settled、无全局停止且原总预留允许时继续。旧全局stopped仍须显式reviewed_trial_limit新登记，不自动解除；原计数/费用/13与11上限保持，不补答/重放/剔除失败。

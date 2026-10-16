@@ -317,6 +317,9 @@ def summarize(results: list[dict[str, Any]], *, suite: str) -> dict[str, Any]:
 async def trial(options: argparse.Namespace, task: dict[str, Any], repeat: int) -> dict[str, Any]:
     root = Path(options.directory) / f"{task['id']}-{repeat}"
     root.mkdir(parents=True, exist_ok=False)
+    trial_label = (
+        f"{options.batch_hash[:12]}:{getattr(options, 'suite', 'offline')}:{task['id']}:{repeat}"
+    )
     phases = ["run"]
     if task["scenario"] == "S-02" and not task["id"].endswith("09"):
         phases = [
@@ -375,8 +378,7 @@ async def trial(options: argparse.Namespace, task: dict[str, Any], repeat: int) 
                 "--env-file",
                 options.env_file,
                 "--trial-label",
-                f"{options.batch_hash[:12]}:{getattr(options, 'suite', 'offline')}:"
-                f"{task['id']}:{repeat}",
+                trial_label,
             ]
             process = await asyncio.create_subprocess_exec(
                 *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -404,6 +406,13 @@ async def trial(options: argparse.Namespace, task: dict[str, Any], repeat: int) 
         "independent_service": stats,
         "score": score(task, reports, stats),
     }
+    if options.mode == "live":
+        ledger = json.loads(
+            await asyncio.to_thread(Path(options.ledger).read_text, encoding="utf-8")
+        )
+        if reason := ledger.get("trial_stops", {}).get(trial_label):
+            result["trial_stop"] = reason
+            result["completion"] = "incomplete"
     (root / "trial.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )

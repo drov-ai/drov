@@ -1,10 +1,10 @@
 # 当前进度与下一轮
 
-更新：2026-10-17（Asia/Shanghai；T-16 v9完整真实smoke7/7，正式73/81但代码5/9未过，v10离线验证中，尚未整卡验收）。
+更新：2026-10-17（Asia/Shanghai；T-16 v9正式73/81但代码5/9未过；v10正式36/39后单试验限额停止；v11纠正停止范围，离线验证中，尚未整卡验收）。
 
 ## 当前状态
 
-- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-16继续进行：v9完整真实smoke7/7，正式73/81但代码5/9未过，v10离线验证中，尚不能关闭或进入T-17。** 本轮按ADR-0034修清研究任务证据范围，保留v8完整6/7类型失败，v9仅明确已有最终JSON严格整数要求；三入口离线各27/27、两解释器含Docker定向各97通过。真实正式与费用/CI最终结果见[本轮验证](../validation/t16-evidence-scope.md)，以实际Git/报告为准。
+- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-16继续进行：v9正式73/81但代码5/9未过；v10正式36/39后单试验限额停止；v11纠正停止范围，离线验证中，尚不能关闭或进入T-17。** 本轮按ADR-0034修清研究任务证据范围，保留v8完整6/7类型失败，v9仅明确已有最终JSON严格整数要求；三入口离线各27/27、两解释器含Docker定向各97通过。真实正式与费用/CI最终结果见[本轮验证](../validation/t16-evidence-scope.md)，以实际Git/报告为准。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；实验性工作台已完整验收；T-15的SQLiteMaintenance/CLI、逻辑清理/墓碑、显式字节回收/中断台账、data_abandoned、一致备份/恢复屏障、实际历史v1字段迁移与授权导出均已验收。未验收：T-16至T-18；多 Agent/Skill/持久工作区等后续，无空壳。
@@ -350,13 +350,15 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 - 随后补记 CI 的文档提交不改变已验证代码；工作区检查点和交接完整，无 T-05 验收缺项。
 - 历史：[T-03 CI 38345105142](https://github.com/drov-ai/drov/actions/runs/38345105142) 对 751ff55 成功；平台/跳过项见 [T-03 验证](../validation/t03-storage.md)。
 
-## 当前任务：T-16 场景与真实模型评测（子范围完成，整卡继续）
+## 当前任务：T-16 场景与真实模型评测（v11离线验证中）
 
-下一项先离线核实S01-01的“资料充分”定义：题目泛称A/B重启保留，语料明确A进程重启丢失与B独立服务，却不明确B自身重启持久性；schema只含a_survives_restart。比较manifest、ResearchReport与评分规则，区分模型失误和确切任务语义缺项。不能仅因失败把sufficient改insufficient，不能修改旧语料/报告或直接同配置换目录抽样。若查明缺项，同轮修复任务说明/对应契约/反例与ADR，并在新付费前提交新指纹；否则保留质量失败，再明确下一候选依据。保持8请求上限，不将三个参考场景变成产品边界。
+本轮 v8 澄清 S01-01 研究证据范围后完整smoke6/7，保留最终JSON类型失败；v9明确既有严格整数类型，完整smoke7/7、正式81全部执行73通过，但代码5/9未达8/9，不能关闭。八失败/每场景至少3成功已复核，见[本轮记录](../validation/t16-evidence-scope.md)与[复核](../validation/t16-typed-review.json)。
 
-恢复步骤：核对main最新Git与987fe47的[核心](https://github.com/drov-ai/drov/actions/runs/38930298760)/[Docker](https://github.com/drov-ai/drov/actions/runs/38930298815)最终结果；保留所有.drov/t16-*原目录、数据库、原账本183次/1.80000140元与全部登记。最新已执行freeze为`.drov/t16-freeze-cas.json`（ff90c046...），原smoke0/1不可用作formal。当前ledger无stopped，新的确切修订用Ledger.amend固定新指纹/非空原因/原费用和13/11上限；不重建/退款、不重跑旧trial。新目录重新完整7 smoke全部通过，才同指纹正式81。
+当前候选v10：目标文件oracle按原阶段唯一summary与新阶段唯一copy/hash比较、缺Memory回答保持失败并保留安全诊断、代码产物按题目选择；输出8192且上下文/费用预留一致。语料/预期/全部门槛和8请求/16工具不变，见ADR-0035。三入口离线各27/27、两解释器含Docker定向各99通过。源码6142ff11e754f8348dfd00cc78a693a9fbf0af20 / 登记d91e68b已推送；[登记](../validation/t16-preregistration-bounded.json)固定cabb75ad5d4a1caf1bd30218854b7e4758684d0c16e0fcaa7dd244cdd2f85f2f。
 
-整卡完成标准仍按[任务卡](implementation-plan.md)/[质量计划](quality-plan.md#5-真实模型评测)：完整7+81、至少69/81、每场景22/27、代码8/9、schema72/75、零安全违规，完整费用/耗时/失败复核与每场景至少3正式成功抽查。当前仅S01/S02各抽查3个正式成功；S03无正式样本，不用smoke补足。使用记录仍仅维护者验证，不声称易用性或竞品优势。当前未达到整卡标准。
+恢复先核实当前Git/工作进程、`.drov/t16-bounded-smoke/report.json`及原`.drov/t16-model-ledger.json`，本地freeze为`.drov/t16-freeze-bounded.json`。v10起点442次全settled/峰值上界5.57661560元，原13/11元上限与2元预留保持。实时in-flight pending不是可退款或可重建台账；进程中断而费用未知时必须停止并核实，不自动重跑/续原trial。v10完整smoke7/7，正式36/39后因S02-04-3单任务8请求停止，全局stopped仍保留；累计575次全部settled/6.71037980元。v11按ADR-0036仅纠正新试验超限的停止范围，原试验继续失败/不可续，其他独立试验仍受原总预算/未知费用保护。新源码提交/登记后显式reviewed_trial_limit沿原账本、新目录完整7+81，不能沿用旧smoke或续原39项。保留全部旧目录、SQLite/bytes/租约/云台账、原报告与历史指纹。
+
+完成标准：完整7+81、总69/81、每场景22/27、代码8/9、schema72/75、零安全违规、完整费用/耗时/全部失败及每场景至少3正式成功复核。当前未达整卡标准，不进入T-17；体验仍仅维护者验证。
 
 ## 用户准备事项
 

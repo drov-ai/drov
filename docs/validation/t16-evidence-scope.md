@@ -53,3 +53,19 @@ v9源码提交前定向测试：Python3.11为97 passed（29.24s），Python3.14�
 按[ADR-0035](../decisions/0035-evaluation-artifact-oracle.md)修复原任务的两处评分诊断缺陷；新增额外文件可接受、目标缺失/重名/错阶段/变字节反例和Memory缺回答的完整score入口检查。代码说明按本题选择图/建议表；max_output_tokens8192绑定原上下文/费用预留，实际官方客户端loopback扩展8096输出用量结算/错配零HTTP零预留。SDK/公开类型/语料/全部expected/阈值和8请求/16工具保持，旧报告不变。此为已见失败后的联合修订，不声称盲测或单变量提升。先离线检查/源码提交和新登记，再沿原442次账本完整7+81，结果后补。
 
 v10调用前：三入口完整离线各27/27、schema25/25、代码3/3、零安全失败，见[摘要](t16-bounded-offline.json)。Python3.11定向99 passed（29.02s），3.14为99 passed（30.74s），均含实际Docker。静态/格式289文件、mypy192源、schema/OpenAPI、96 Markdown/880本地链接/16片段AST/凭据与保护文件检查通过。[只读纠错诊断](t16-artifact-oracle-diagnostic.json)确认两次相同字节不再因额外产物误拒绝，缺失聊天仍失败且保留零写入安全事实；原报告hash未变，不将诊断重算为旧批次成绩。
+
+## v10 完整真实smoke7/7；正式81执行中
+
+源码6142ff11e754f8348dfd00cc78a693a9fbf0af20、登记d91e68b/[登记文件](t16-preregistration-bounded.json)先提交推送。指纹cabb75ad5d4a1caf1bd30218854b7e4758684d0c16e0fcaa7dd244cdd2f85f2f，[smoke原报告](t16-bounded-smoke.json)/[计量与模型原代码](t16-bounded-smoke-metrics.json)完整7/7、schema7/7、代码1/1、零安全失败。本smoke23请求全部settled/峰值上界0.1704192元；含历史465次/5.74703480元，无stopped/pending/unknown。新目录.drov/t16-bounded-formal同指纹完整81执行，结果后补。
+
+v9源码7cd58dd的核心38933475121十一jobs及Docker38933475056四jobs最终全部success；本轮最终6142ff1的核心38936492018/Docker38936492101执行中，不以旧成绩代替。v10受影响sdist已重建并逐字核对11个评测/测试源文件，排除私有目录/env/品牌；SHA256=cafadd06c0a57d2153e8a108597086becf526a999f9c5d150e465269a27dd7f6（构建时文档快照）。
+
+## v10 正式36/39后局部限额引发全批停止
+
+[原报告](t16-bounded-formal.json)/[计量与全部原代码](t16-bounded-formal-metrics.json)保留36/39、S01为25/27、S02为11/12、schema38/39、代码3/3，正式预定81/75/9分母不变，42未执行不能算通过。三次CSV/PNG均由模型编写并实际运行，下载三图已查看：400×300、12/18/30三柱，实际CSV统计正确，销毁后新Runtime下载/hash/跨归属拒绝通过。[复核](t16-bounded-review.json)覆盖三失败、S01三成功及三代码；本配置S03尚无正式样本，不用旧批次补齐。
+
+S02-04-3实际save2、other-user2、other-tenant2、other-agent两次相同精确键空读取，8次付费后第9次只在本地拒绝，末阶段无最终回答，原试验失败。输入/空数组/call_id配对完整，无私有内容泄漏；不是CAS保存前预查问题，不能把成功隔离事实当成完成回答。本正式110请求全部settled、峰值上界0.963345元；含历史575次/6.71037980元，无pending/unknown，stopped=trial_model_limit。
+
+按[ADR-0036](../decisions/0036-evaluation-trial-limit-scope.md)纠正局部限额与全批费用保护的范围：新trial_stops不可续原试验，但允许已结算/预算充足时继续其他独立样本；旧全局stopped仍须明确reviewed_trial_limit新登记。v11只改此执行器行为，Pro/high/8192/提示/语料/oracle/预期/8请求及阈值不变。旧39项与未执行42项不续跑或替换，新源码/登记后完整7+81。并补跨打开/跨登记限额、其他试验准入、pending阻断与完整81迭代的合成driver回归，合成质量标offline。
+
+v11最终三入口完整离线各27/27、schema25/25、代码3/3、零安全失败，见[摘要](t16-scoped-offline.json)。Python3.11含Docker定向101 passed（29.26s），3.14为101 passed（31.17s）。新增两个限额/driver回归的功能检查通过；首轮mypy指出合成driver visited缺list[str]注解，已补齐，静态最终结果后补。未改SDK/SQL/锁/品牌；旧全局stopped尚未解除，真实新批次需先提交与登记。

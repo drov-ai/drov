@@ -1,0 +1,4118 @@
+{
+  "version": 1,
+  "mode": "live",
+  "suite": "formal",
+  "batch_hash": "cabb75ad5d4a1caf1bd30218854b7e4758684d0c16e0fcaa7dd244cdd2f85f2f",
+  "config": {
+    "version": 10,
+    "amendment": "After full v9 formal 73/81 (code5/9), raise reasoning-inclusive output allowance4096->8192 after three exact-cap incomplete responses; bind context/cost reserves. Fix explicit-file oracle to compare unique original-summary and final-copy hashes independent of unrelated artifacts, and retain safety diagnostics for missing Memory outputs. Scope code artifact instructions to task requests. Model/effort, corpus, expected outputs, thresholds, 8-request/16-tool limits unchanged. Preserve all eight v9 failures and442 settled requests; adaptive new complete7+81, no regrading/mixing.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "high",
+    "max_output_tokens": 8192,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-17",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "git_commit": "d91e68b7f09a402b64db85f1567c214865c8bfaf",
+  "python": "3.11.9 (v3.11.9:de54cf5be3, Apr  2 2024, 07:12:50) [Clang 13.0.0 (clang-1300.0.29.30)]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "sqlite": "3.45.1",
+  "dependencies": {
+    "drov": "0.1.0a0",
+    "pydantic": "2.14.1",
+    "aiosqlite": "0.22.1",
+    "portalocker": "4.4.0",
+    "openai": "3.29.0",
+    "httpx2": "2.13.1"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "results": [
+    {
+      "trial": "S01-01-1",
+      "task": "S01-01",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 7.395213084295392,
+      "phases": [
+        {
+          "task": "S01-01",
+          "phase": "run",
+          "pid": 20136,
+          "run_id": "93546ca9-1c17-4ac1-b24b-bcfc3c17d27d",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "ccd13b24-eddc-481a-8dfa-951ec73c83b1",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "0055a7e0-d960-4f76-bffa-40389ca84bbb",
+            "b0adbe27-c336-41eb-83c5-b33246bd604b"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-01-2",
+      "task": "S01-01",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 7.445175415836275,
+      "phases": [
+        {
+          "task": "S01-01",
+          "phase": "run",
+          "pid": 20163,
+          "run_id": "8a48f747-1b49-48bc-8f95-6b52bab89c37",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "f8b2e5ce-e6b6-4e8b-9d1c-db0b8b9b4f70",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "b8f3b26a-9e29-42d0-8f44-f1db070ed3b1",
+            "1dd6395f-108f-4970-a62b-e590dae5a36d"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-01-3",
+      "task": "S01-01",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 6.32824037456885,
+      "phases": [
+        {
+          "task": "S01-01",
+          "phase": "run",
+          "pid": 20166,
+          "run_id": "b7541a9c-ca94-4859-aa6d-5d28492d2bdb",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "7b9577f6-d132-482f-9f90-d6bee874618b",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "a8809e1d-6838-4d38-96a1-d83f2a25dbb4",
+            "59bf7173-2ac4-4693-b0f0-a4ab52b2983e"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-02-1",
+      "task": "S01-02",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 6.015353125054389,
+      "phases": [
+        {
+          "task": "S01-02",
+          "phase": "run",
+          "pid": 20174,
+          "run_id": "05f0e6a7-4f48-4078-8537-4b506a4ac000",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "d1ccc231-aac9-4dc0-9e54-66784e10606e",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "a984f149-afdf-49e9-89d1-d43169c92d02",
+            "19d6d534-79ad-4f50-901e-1692198cb6c1"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-02-2",
+      "task": "S01-02",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 4.705949625000358,
+      "phases": [
+        {
+          "task": "S01-02",
+          "phase": "run",
+          "pid": 20179,
+          "run_id": "f9e95c2c-be12-459e-bc00-74fe9ccdcba6",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "103d09af-a1ad-4037-b1b1-1fdfc4bf0b75",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "b331b528-6cb6-40fb-994c-c6fccc3658af",
+            "5d53d345-b563-44d4-9b3c-ee5674fd3442"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-02-3",
+      "task": "S01-02",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 8.091872999910265,
+      "phases": [
+        {
+          "task": "S01-02",
+          "phase": "run",
+          "pid": 20182,
+          "run_id": "7b283d98-d7d6-471d-8757-e463962b9f49",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "6bc9a154-d3b9-464a-93c0-29abd1f81d47",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "827d7478-3ea1-4fc8-9751-c5843b4455bf",
+            "0d5eaaa1-4a14-4697-b368-cec099f050a9"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-03-1",
+      "task": "S01-03",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 12.914133833255619,
+      "phases": [
+        {
+          "task": "S01-03",
+          "phase": "run",
+          "pid": 20186,
+          "run_id": "70e8e947-8d48-4903-bc88-04f4ea71d5c5",
+          "state": "completed",
+          "output": {
+            "status": "insufficient",
+            "source_ids": [
+              "cache-a"
+            ],
+            "a_shared": false,
+            "b_shared": null,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "89008987-0ce5-4f77-8c9e-d502b8cd7aff",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "bbbff782-2326-4334-92a9-70a495472aa5",
+            "2f93a6cd-a118-4965-b9fc-932024d3deea"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-03-2",
+      "task": "S01-03",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 7.622347999829799,
+      "phases": [
+        {
+          "task": "S01-03",
+          "phase": "run",
+          "pid": 20195,
+          "run_id": "c02b0364-aca4-4bbb-a3bf-a5c70c4df7e6",
+          "state": "completed",
+          "output": {
+            "status": "insufficient",
+            "source_ids": [
+              "cache-a"
+            ],
+            "a_shared": false,
+            "b_shared": null,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "cf523abc-613a-4889-a3a5-c870f270053e",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "075416f9-e6f3-45b7-9a9b-a5befbc3ae36",
+            "b8f9729a-78ac-403c-a47a-7941d0130345"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-03-3",
+      "task": "S01-03",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 10.928736250381917,
+      "phases": [
+        {
+          "task": "S01-03",
+          "phase": "run",
+          "pid": 20221,
+          "run_id": "fca90342-bb32-4eab-9b1e-9025387a8a79",
+          "state": "completed",
+          "output": {
+            "status": "insufficient",
+            "source_ids": [
+              "cache-a"
+            ],
+            "a_shared": false,
+            "b_shared": null,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "853ce4c4-f3c6-41ee-9499-9d823cfe75c9",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "f054ae52-7ef4-4e5b-b753-8f7bfbd34d26",
+            "91b9fd1c-97df-4a11-9123-fb05880e0b02"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-04-1",
+      "task": "S01-04",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 6.868485040962696,
+      "phases": [
+        {
+          "task": "S01-04",
+          "phase": "run",
+          "pid": 20232,
+          "run_id": "16a1b97f-add1-4c3e-ab80-5e0504307d34",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "93528c05-c190-41a0-a489-c9c385c24a19",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "3a411ad6-b6aa-4532-8c6a-079b97636307",
+            "d90331a7-0e5d-4122-ad8a-dc670a833390"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-04-2",
+      "task": "S01-04",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 8.603188790846616,
+      "phases": [
+        {
+          "task": "S01-04",
+          "phase": "run",
+          "pid": 20236,
+          "run_id": "7b6508d8-adcf-49f0-ac9a-979cae53e25d",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "d6a5c049-64b6-4f06-ae7b-b07c4344cc44",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "af48f867-348d-4614-a37d-e4445acb5d9d",
+            "c2b1b6bf-d63d-4d2b-bd12-44b5c8b9dd36"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-04-3",
+      "task": "S01-04",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 9.296696042176336,
+      "phases": [
+        {
+          "task": "S01-04",
+          "phase": "run",
+          "pid": 20245,
+          "run_id": "81ade57e-578c-45b4-88cd-e40ce3883541",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "5c902efe-b48b-442d-b31f-9605bba64650",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "435e7e4f-f6af-4e7b-8d00-ed1727327c77",
+            "da5c33ba-4921-4704-b2c3-6d00f1f4a1a0"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-05-1",
+      "task": "S01-05",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 9.664917916990817,
+      "phases": [
+        {
+          "task": "S01-05",
+          "phase": "run",
+          "pid": 20256,
+          "run_id": "e9f659aa-80f0-4019-9bb1-ac5ffa0f2101",
+          "state": "completed",
+          "output": {
+            "status": "truncated",
+            "source_ids": [
+              "e9f659aa-80f0-4019-9bb1-ac5ffa0f2101:operation:7d4e685f-c340-4edf-9eb7-84c31c52d15d"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": false
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "7d4e685f-c340-4edf-9eb7-84c31c52d15d",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": true,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "864a1417-ce51-40cb-8f5b-92c1301860d8",
+            "e1fd5648-b258-49c0-83c1-52d88360974f"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": false,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": false,
+          "actual_preview": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-05-2",
+      "task": "S01-05",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 11.516531832981855,
+      "phases": [
+        {
+          "task": "S01-05",
+          "phase": "run",
+          "pid": 20263,
+          "run_id": "1778cfc3-5d95-4d72-ad40-fa8686869410",
+          "state": "completed",
+          "output": {
+            "status": "truncated",
+            "source_ids": [
+              "long"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": false
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 3,
+          "model_calls_after_cancel": null,
+          "search_calls": 2,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "fa6bacf7-20be-4d98-8e63-aefa0b7b38c7",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "abeef76b-643e-4971-bdde-ba0ffb4d6fb4",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": true,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "6b01a8a6-058e-4a85-90e9-9314aae21946",
+            "94da68fc-64c6-49ee-91bd-c321fb204464",
+            "4a9cc3ab-90a6-4542-a02a-4fe365003cd6"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": false,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": false,
+          "fact_and_sources": true,
+          "actual_preview": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-05-3",
+      "task": "S01-05",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 16.387660124804825,
+      "phases": [
+        {
+          "task": "S01-05",
+          "phase": "run",
+          "pid": 20268,
+          "run_id": "13e607bc-5e7d-43b9-9e16-9c95a0002521",
+          "state": "completed",
+          "output": {
+            "status": "truncated",
+            "source_ids": [
+              "long"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": false
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "b2ee0572-8889-473e-bc9b-069ab5ac2821",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": true,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "6622900d-402e-47b2-b8b6-914cc68ed7bc",
+            "391ec3c0-c2a2-49f8-9383-ed8dfe113e50"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "actual_preview": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-06-1",
+      "task": "S01-06",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 12.34057308267802,
+      "phases": [
+        {
+          "task": "S01-06",
+          "phase": "run",
+          "pid": 20285,
+          "run_id": "5055a9a1-0715-4b6c-916b-66b6a1e330b9",
+          "state": "completed",
+          "output": {
+            "status": "conflict",
+            "source_ids": [
+              "cache-a",
+              "cache-b-v1",
+              "cache-b-v2"
+            ],
+            "a_shared": false,
+            "b_shared": null,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "ca68abec-d9c4-4a41-9554-ddcc5da00f49",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "8726d5a5-8fb1-4872-bea7-6342b1ef14b6",
+            "923f9fd7-4080-4ac0-9ccf-293ed240634c"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-06-2",
+      "task": "S01-06",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 10.421137457713485,
+      "phases": [
+        {
+          "task": "S01-06",
+          "phase": "run",
+          "pid": 20296,
+          "run_id": "4ba91b56-4098-4ff2-a30c-f957e7245189",
+          "state": "completed",
+          "output": {
+            "status": "conflict",
+            "source_ids": [
+              "cache-a",
+              "cache-b-v1",
+              "cache-b-v2"
+            ],
+            "a_shared": false,
+            "b_shared": null,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "e31c8822-87e7-415f-83c1-5384eafc6e56",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "a9634bac-e4ab-4c06-94a3-be61ac7aed1f",
+            "5684e828-70e0-4fa4-b025-9786d17b1b3f"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-06-3",
+      "task": "S01-06",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 14.324288708157837,
+      "phases": [
+        {
+          "task": "S01-06",
+          "phase": "run",
+          "pid": 20300,
+          "run_id": "22534937-841d-492c-af6a-d936b1aaf853",
+          "state": "completed",
+          "output": {
+            "status": "conflict",
+            "source_ids": [
+              "cache-a",
+              "cache-b-v1",
+              "cache-b-v2"
+            ],
+            "a_shared": false,
+            "b_shared": null,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "e164c8a3-6bb8-4427-bc9c-51a564dab4c8",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "1c84b50c-bc6e-41d5-aac1-ddfbc516a9bc",
+            "7ade62e0-a6e6-4eb1-848f-4f2c836d45b9"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-07-1",
+      "task": "S01-07",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 6.897203749977052,
+      "phases": [
+        {
+          "task": "S01-07",
+          "phase": "run",
+          "pid": 20315,
+          "run_id": "1f79b250-fd86-43eb-9395-60edd247b203",
+          "state": "completed",
+          "output": {
+            "status": "retrieval_failed",
+            "source_ids": [],
+            "a_shared": null,
+            "b_shared": null,
+            "a_survives_restart": null,
+            "full_text_read": false
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "7335c158-6d4b-4d05-a732-38dc7988ac5f",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "failed_known"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "2b024826-f5a5-44e5-abce-3b4581e59d9b",
+            "4bfaed5e-7ff7-4dad-b52a-e0de9b0f7c87"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-07-2",
+      "task": "S01-07",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 6.83899762481451,
+      "phases": [
+        {
+          "task": "S01-07",
+          "phase": "run",
+          "pid": 20319,
+          "run_id": "26ec9ea7-ef92-4469-b403-2ef8c9f9faee",
+          "state": "completed",
+          "output": {
+            "status": "retrieval_failed",
+            "source_ids": [],
+            "a_shared": null,
+            "b_shared": null,
+            "a_survives_restart": null,
+            "full_text_read": false
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "f14f373c-96ab-4871-b6f0-0d941169a8db",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "failed_known"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "7daff99d-bb98-473b-8c82-fad34edcc4af",
+            "bc9a538e-299b-42d3-9ad7-b85c6ddcd079"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-07-3",
+      "task": "S01-07",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 8.242760375142097,
+      "phases": [
+        {
+          "task": "S01-07",
+          "phase": "run",
+          "pid": 20325,
+          "run_id": "4e6b96bf-df41-42fa-a2f7-e96445bd3a40",
+          "state": "completed",
+          "output": {
+            "status": "retrieval_failed",
+            "source_ids": [],
+            "a_shared": null,
+            "b_shared": null,
+            "a_survives_restart": null,
+            "full_text_read": false
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "a9660f44-a32c-4c10-83d5-596a4f8be394",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "failed_known"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "4cf8052b-0e96-4d3f-9276-f1433acceefd",
+            "31075af3-0f35-473c-a64a-0efe022945eb"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-08-1",
+      "task": "S01-08",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 11.510603292379528,
+      "phases": [
+        {
+          "task": "S01-08",
+          "phase": "run",
+          "pid": 20331,
+          "run_id": "9faa1c72-be7a-4e8f-b09b-7c799388596e",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "6fdfeffc-9c1a-4659-bb73-08cef0bd02f9",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "3acc2139-d071-4d95-b28b-83167af29515",
+            "6de5029a-bda1-4ba1-b428-87924c8d967f"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-08-2",
+      "task": "S01-08",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 7.374540667049587,
+      "phases": [
+        {
+          "task": "S01-08",
+          "phase": "run",
+          "pid": 20336,
+          "run_id": "bc7b1ef6-9b47-4c20-ab88-6a2f9a74e14a",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "e75153de-6ce7-455c-8d43-c8ea84654381",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "f01151ae-9f17-46a0-834d-5374348d5034",
+            "14895be8-3135-478a-89f1-d3bb870aa861"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-08-3",
+      "task": "S01-08",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 6.047572167124599,
+      "phases": [
+        {
+          "task": "S01-08",
+          "phase": "run",
+          "pid": 20340,
+          "run_id": "9d11b2a8-0c0c-477e-8b2e-8dc3697a859d",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "22b53f7d-7b29-4c11-81e8-e2474eb8ffe6",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "17276022-ab3b-4851-9b3e-274d0a91121f",
+            "c09ff500-aa6c-4ec3-b8a7-a72a4cc25f68"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-09-1",
+      "task": "S01-09",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 17.22047575004399,
+      "phases": [
+        {
+          "task": "S01-09",
+          "phase": "run",
+          "pid": 20345,
+          "run_id": "456c7b3c-e598-4ce3-803d-fc74089f2f01",
+          "state": "completed",
+          "output": {
+            "count": 3,
+            "total": 60,
+            "mean": 20.0,
+            "artifact_ids": [
+              "art_3a2c601ff8df43b48b651d09d9ae3441",
+              "art_fff876e1fc0c43d18df2c106172558cc"
+            ],
+            "business_status": "not_requested"
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [
+            "approval"
+          ],
+          "receipts": [
+            {
+              "run_id": "456c7b3c-e598-4ce3-803d-fc74089f2f01",
+              "state_version": 9,
+              "request_id": "65888350-dea0-4b96-abd5-92eb50292775",
+              "response_id": "c103a40d-0af0-4573-937f-1fdf63ce7b24",
+              "accepted_at": "2026-10-16T17:08:10.342998Z"
+            }
+          ],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "8682d7cb-7cc3-4a0d-8669-1f61ca76d697",
+              "tool_name": "sandbox.run_python",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [
+            {
+              "ref": {
+                "artifact_id": "art_3a2c601ff8df43b48b651d09d9ae3441",
+                "sha256": "e399ba35fc82b0fd05e21d165eda7be5b50372843b67b5b1e35c6ed5ad7ef04a",
+                "size_bytes": 27,
+                "media_type": "text/csv"
+              },
+              "name": "summary.csv",
+              "sha256": "e399ba35fc82b0fd05e21d165eda7be5b50372843b67b5b1e35c6ed5ad7ef04a",
+              "bytes": 27,
+              "text": "count,sum,mean\n3,60.0,20.0\n",
+              "dimensions": null
+            },
+            {
+              "ref": {
+                "artifact_id": "art_fff876e1fc0c43d18df2c106172558cc",
+                "sha256": "8b7778a910f2c78088a8e0dfc70e3419c737ba5c48a9a5696eea8a474caa7ff3",
+                "size_bytes": 11624,
+                "media_type": "image/png"
+              },
+              "name": "chart.png",
+              "sha256": "8b7778a910f2c78088a8e0dfc70e3419c737ba5c48a9a5696eea8a474caa7ff3",
+              "bytes": 11624,
+              "text": null,
+              "dimensions": [
+                400,
+                300
+              ]
+            }
+          ],
+          "memory": null,
+          "context_ids": [
+            "1278a5ab-1cb3-4f89-8f96-176571d69717",
+            "97288a7e-8f55-4d84-9658-8d9986ef6e42"
+          ],
+          "post_close_verified": true,
+          "cross_scope_download_denied": true
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_files": true,
+          "post_close_hashes": true,
+          "summary.csv_oracle": true,
+          "png_decode": true,
+          "answer_oracle": true,
+          "only_delivered_refs": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S01-09-2",
+      "task": "S01-09",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 16.927976167295128,
+      "phases": [
+        {
+          "task": "S01-09",
+          "phase": "run",
+          "pid": 20370,
+          "run_id": "5339fc07-7532-47ec-b953-679a540ac09e",
+          "state": "completed",
+          "output": {
+            "count": 3,
+            "total": 60,
+            "mean": 20.0,
+            "artifact_ids": [
+              "art_de3d8ab87df3447c9fd2311ec318ac5c",
+              "art_281e56ec527b4ca08403169c77d609da"
+            ],
+            "business_status": "not_requested"
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [
+            "approval"
+          ],
+          "receipts": [
+            {
+              "run_id": "5339fc07-7532-47ec-b953-679a540ac09e",
+              "state_version": 9,
+              "request_id": "a9cdccee-cb2c-49b3-a1bc-53e28583a951",
+              "response_id": "5836ebbf-5d9e-43b2-b364-06571bd76c65",
+              "accepted_at": "2026-10-16T17:08:27.982406Z"
+            }
+          ],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "8017df56-ea16-4128-8ccf-85ef4ed194cb",
+              "tool_name": "sandbox.run_python",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [
+            {
+              "ref": {
+                "artifact_id": "art_de3d8ab87df3447c9fd2311ec318ac5c",
+                "sha256": "850b38432130a32a8a9bd46c99e586734951b83280a877b9fba9292ec61ac01d",
+                "size_bytes": 29,
+                "media_type": "text/csv"
+              },
+              "name": "summary.csv",
+              "sha256": "850b38432130a32a8a9bd46c99e586734951b83280a877b9fba9292ec61ac01d",
+              "bytes": 29,
+              "text": "count,sum,mean\r\n3,60.0,20.0\r\n",
+              "dimensions": null
+            },
+            {
+              "ref": {
+                "artifact_id": "art_281e56ec527b4ca08403169c77d609da",
+                "sha256": "6d7c0b170ec25d3b853878801f3f138c477b2bb3fd255707ea09f8a2cc0a3380",
+                "size_bytes": 11253,
+                "media_type": "image/png"
+              },
+              "name": "chart.png",
+              "sha256": "6d7c0b170ec25d3b853878801f3f138c477b2bb3fd255707ea09f8a2cc0a3380",
+              "bytes": 11253,
+              "text": null,
+              "dimensions": [
+                400,
+                300
+              ]
+            }
+          ],
+          "memory": null,
+          "context_ids": [
+            "fb7dd012-e642-4d8a-9d54-22967f9e05f4",
+            "bd164f31-31d0-49a4-afee-feccc1f217ba"
+          ],
+          "post_close_verified": true,
+          "cross_scope_download_denied": true
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_files": true,
+          "post_close_hashes": true,
+          "summary.csv_oracle": true,
+          "png_decode": true,
+          "answer_oracle": true,
+          "only_delivered_refs": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S01-09-3",
+      "task": "S01-09",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 13.1849361252971,
+      "phases": [
+        {
+          "task": "S01-09",
+          "phase": "run",
+          "pid": 20424,
+          "run_id": "2a47b706-9dc4-4044-926d-e7b68953cce7",
+          "state": "completed",
+          "output": {
+            "count": 3,
+            "total": 60,
+            "mean": 20.0,
+            "artifact_ids": [
+              "art_47b4d644166a4d4e98a2556aaed600f3",
+              "art_b9564479c4ff44758f0c36b007dec30b"
+            ],
+            "business_status": "not_requested"
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [
+            "approval"
+          ],
+          "receipts": [
+            {
+              "run_id": "2a47b706-9dc4-4044-926d-e7b68953cce7",
+              "state_version": 9,
+              "request_id": "0e9193c1-1570-47c1-989f-e324220b060e",
+              "response_id": "3db3ec39-6afc-46be-81b2-19baad62d70f",
+              "accepted_at": "2026-10-16T17:08:41.296372Z"
+            }
+          ],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "00caca4d-4fdd-4fb3-b58a-c91140ed055f",
+              "tool_name": "sandbox.run_python",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [
+            {
+              "ref": {
+                "artifact_id": "art_47b4d644166a4d4e98a2556aaed600f3",
+                "sha256": "850b38432130a32a8a9bd46c99e586734951b83280a877b9fba9292ec61ac01d",
+                "size_bytes": 29,
+                "media_type": "text/csv"
+              },
+              "name": "summary.csv",
+              "sha256": "850b38432130a32a8a9bd46c99e586734951b83280a877b9fba9292ec61ac01d",
+              "bytes": 29,
+              "text": "count,sum,mean\r\n3,60.0,20.0\r\n",
+              "dimensions": null
+            },
+            {
+              "ref": {
+                "artifact_id": "art_b9564479c4ff44758f0c36b007dec30b",
+                "sha256": "dfdae5748c10a73a2b911dc6aa87634a7f5efbc571ad563a4e3ce4db1879bad6",
+                "size_bytes": 8757,
+                "media_type": "image/png"
+              },
+              "name": "chart.png",
+              "sha256": "dfdae5748c10a73a2b911dc6aa87634a7f5efbc571ad563a4e3ce4db1879bad6",
+              "bytes": 8757,
+              "text": null,
+              "dimensions": [
+                400,
+                300
+              ]
+            }
+          ],
+          "memory": null,
+          "context_ids": [
+            "97faa0d0-924a-4afa-ad0b-482ca8a05c10",
+            "8401e5a3-d1a5-43c7-a91b-38943b2d1711"
+          ],
+          "post_close_verified": true,
+          "cross_scope_download_denied": true
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_files": true,
+          "post_close_hashes": true,
+          "summary.csv_oracle": true,
+          "png_decode": true,
+          "answer_oracle": true,
+          "only_delivered_refs": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-01-1",
+      "task": "S02-01",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 7.8648410411551595,
+      "phases": [
+        {
+          "task": "S02-01",
+          "phase": "save",
+          "pid": 20456,
+          "run_id": "a3e3a434-3443-4646-ad43-720b709f2700",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "a79de5f5-408b-4a59-84ff-521ded28eba8",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "a3e3a434-3443-4646-ad43-720b709f2700:operation:a79de5f5-408b-4a59-84ff-521ded28eba8",
+            "updated_at": "2026-10-16T17:08:47.451584Z"
+          },
+          "context_ids": [
+            "f10b2f93-c789-42f6-995a-3c9675cbbfdb",
+            "6c3c3821-d57d-47e7-a51b-155a164a3066"
+          ]
+        },
+        {
+          "task": "S02-01",
+          "phase": "read",
+          "pid": 20460,
+          "run_id": "51a46d7e-e117-4cca-9097-71941615d44e",
+          "state": "completed",
+          "output": {
+            "status": "present",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 1,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [],
+          "memory_changed": 0,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "a3e3a434-3443-4646-ad43-720b709f2700:operation:a79de5f5-408b-4a59-84ff-521ded28eba8",
+            "updated_at": "2026-10-16T17:08:47.451584Z"
+          },
+          "context_ids": [
+            "6e14219b-5dd0-47d7-949f-8849c57016e8"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "persistent_content_version": true,
+          "answer_used_memory": true,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-01-2",
+      "task": "S02-01",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 6.3909984161145985,
+      "phases": [
+        {
+          "task": "S02-01",
+          "phase": "save",
+          "pid": 20463,
+          "run_id": "3d7214b4-d3e8-4b27-a410-26a2b730f802",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "df42282b-f479-4fba-a03f-b4890d412f3f",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "3d7214b4-d3e8-4b27-a410-26a2b730f802:operation:df42282b-f479-4fba-a03f-b4890d412f3f",
+            "updated_at": "2026-10-16T17:08:55.482803Z"
+          },
+          "context_ids": [
+            "d28a7e54-f3b8-44fb-badf-e5ed29cc2225",
+            "098b79c6-314d-42e4-8ef1-3c83c8efabc5"
+          ]
+        },
+        {
+          "task": "S02-01",
+          "phase": "read",
+          "pid": 20466,
+          "run_id": "9f28841b-5d7e-4255-8e30-e4878317df30",
+          "state": "completed",
+          "output": {
+            "status": "present",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 1,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [],
+          "memory_changed": 0,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "3d7214b4-d3e8-4b27-a410-26a2b730f802:operation:df42282b-f479-4fba-a03f-b4890d412f3f",
+            "updated_at": "2026-10-16T17:08:55.482803Z"
+          },
+          "context_ids": [
+            "d9bf0654-1ed3-460a-bab8-8e898c5504f1"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "persistent_content_version": true,
+          "answer_used_memory": true,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-01-3",
+      "task": "S02-01",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 7.170525541994721,
+      "phases": [
+        {
+          "task": "S02-01",
+          "phase": "save",
+          "pid": 20470,
+          "run_id": "56bbbf66-30de-4834-9f40-03a50e666b3c",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "a0347cda-01da-4781-9071-7090cdf9c104",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "56bbbf66-30de-4834-9f40-03a50e666b3c:operation:a0347cda-01da-4781-9071-7090cdf9c104",
+            "updated_at": "2026-10-16T17:09:01.605335Z"
+          },
+          "context_ids": [
+            "f6b8328a-98df-446f-9c97-7c2fbae8cf4c",
+            "295c7d3e-00c3-43fa-a693-bcf92d7139f2"
+          ]
+        },
+        {
+          "task": "S02-01",
+          "phase": "read",
+          "pid": 20473,
+          "run_id": "002ed4a6-11ca-4fd7-ba78-f4fee955808a",
+          "state": "completed",
+          "output": {
+            "status": "present",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "4ca73d83-7f58-4445-9c05-b11fb79fea84",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "56bbbf66-30de-4834-9f40-03a50e666b3c:operation:a0347cda-01da-4781-9071-7090cdf9c104",
+            "updated_at": "2026-10-16T17:09:01.605335Z"
+          },
+          "context_ids": [
+            "7016cf37-44da-495e-aebb-98801c588196",
+            "ca53d560-e4a9-4ccb-bd45-e48fbcc986bd"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "persistent_content_version": true,
+          "answer_used_memory": true,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-02-1",
+      "task": "S02-02",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 6.4780510840937495,
+      "phases": [
+        {
+          "phase": "seed",
+          "pid": 20477,
+          "seeded": true,
+          "model_calls": 0
+        },
+        {
+          "task": "S02-02",
+          "phase": "update",
+          "pid": 20478,
+          "run_id": "1e953578-ed68-459f-bb6a-a66147bc9904",
+          "state": "completed",
+          "output": {
+            "status": "updated",
+            "content": "详细中文",
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "e6370ddb-15b2-4d3a-bf95-f288c2cdb582",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": "详细中文",
+            "deleted": false,
+            "source": "1e953578-ed68-459f-bb6a-a66147bc9904:operation:e6370ddb-15b2-4d3a-bf95-f288c2cdb582",
+            "updated_at": "2026-10-16T17:09:09.320377Z"
+          },
+          "context_ids": [
+            "9fcb29c0-537b-4598-a3af-ff454327db3c",
+            "78162a33-cc2a-4910-a47d-48dd38a900c7"
+          ]
+        },
+        {
+          "task": "S02-02",
+          "phase": "read",
+          "pid": 20482,
+          "run_id": "4310a07c-c1f8-494a-803e-95667bc8873a",
+          "state": "completed",
+          "output": {
+            "status": "present",
+            "content": "详细中文",
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 1,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": "详细中文",
+            "deleted": false,
+            "source": "1e953578-ed68-459f-bb6a-a66147bc9904:operation:e6370ddb-15b2-4d3a-bf95-f288c2cdb582",
+            "updated_at": "2026-10-16T17:09:09.320377Z"
+          },
+          "context_ids": [
+            "fb489d22-bf46-424e-87e7-fc1eac9513bf"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "persistent_content_version": true,
+          "answer_used_memory": true,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-02-2",
+      "task": "S02-02",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 6.7599682081490755,
+      "phases": [
+        {
+          "phase": "seed",
+          "pid": 20487,
+          "seeded": true,
+          "model_calls": 0
+        },
+        {
+          "task": "S02-02",
+          "phase": "update",
+          "pid": 20488,
+          "run_id": "a0f4360b-e22f-46a6-8681-6411c679a2d3",
+          "state": "completed",
+          "output": {
+            "status": "updated",
+            "content": "详细中文",
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "6989e7ce-5628-4295-b649-bd38b0d8c117",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": "详细中文",
+            "deleted": false,
+            "source": "a0f4360b-e22f-46a6-8681-6411c679a2d3:operation:6989e7ce-5628-4295-b649-bd38b0d8c117",
+            "updated_at": "2026-10-16T17:09:15.335975Z"
+          },
+          "context_ids": [
+            "b736d3a7-e6b7-488c-a49d-2669804d1373",
+            "e7d6cf2a-d4b0-45b7-a342-310394552385"
+          ]
+        },
+        {
+          "task": "S02-02",
+          "phase": "read",
+          "pid": 20491,
+          "run_id": "365409f0-d2b5-4384-8202-ed5a4cd54876",
+          "state": "completed",
+          "output": {
+            "status": "present",
+            "content": "详细中文",
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 1,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": "详细中文",
+            "deleted": false,
+            "source": "a0f4360b-e22f-46a6-8681-6411c679a2d3:operation:6989e7ce-5628-4295-b649-bd38b0d8c117",
+            "updated_at": "2026-10-16T17:09:15.335975Z"
+          },
+          "context_ids": [
+            "b6092e45-a658-4ec1-9a9a-249bef2cc7da"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "persistent_content_version": true,
+          "answer_used_memory": true,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-02-3",
+      "task": "S02-02",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 10.538171334192157,
+      "phases": [
+        {
+          "phase": "seed",
+          "pid": 20497,
+          "seeded": true,
+          "model_calls": 0
+        },
+        {
+          "task": "S02-02",
+          "phase": "update",
+          "pid": 20498,
+          "run_id": "c35c468a-6581-4f89-af7f-86a96fb61a31",
+          "state": "completed",
+          "output": {
+            "status": "updated",
+            "content": "详细中文",
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "98be3900-2895-41e6-b373-e5050b2191b5",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": "详细中文",
+            "deleted": false,
+            "source": "c35c468a-6581-4f89-af7f-86a96fb61a31:operation:98be3900-2895-41e6-b373-e5050b2191b5",
+            "updated_at": "2026-10-16T17:09:23.374462Z"
+          },
+          "context_ids": [
+            "a62e148d-1197-4efa-b3aa-0d4c6a104cca",
+            "b101e6aa-cb02-40f9-a722-b1d7d993ef49"
+          ]
+        },
+        {
+          "task": "S02-02",
+          "phase": "read",
+          "pid": 20506,
+          "run_id": "2a58faf1-cc56-424e-9e1f-252a85877602",
+          "state": "completed",
+          "output": {
+            "status": "present",
+            "content": "详细中文",
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 1,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": "详细中文",
+            "deleted": false,
+            "source": "c35c468a-6581-4f89-af7f-86a96fb61a31:operation:98be3900-2895-41e6-b373-e5050b2191b5",
+            "updated_at": "2026-10-16T17:09:23.374462Z"
+          },
+          "context_ids": [
+            "d15a1752-3c2f-4910-94a8-c6bcf7c70866"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "persistent_content_version": true,
+          "answer_used_memory": true,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-03-1",
+      "task": "S02-03",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 9.268441791180521,
+      "phases": [
+        {
+          "phase": "seed",
+          "pid": 20511,
+          "seeded": true,
+          "model_calls": 0
+        },
+        {
+          "task": "S02-03",
+          "phase": "forget",
+          "pid": 20512,
+          "run_id": "6d21ca9e-baa5-419c-b046-6be1b27b0e01",
+          "state": "completed",
+          "output": {
+            "status": "forgotten",
+            "content": null,
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "e1c4e191-57dd-46ed-bb70-5c70290ac7bd",
+              "tool_name": "memory.forget",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": null,
+            "deleted": true,
+            "source": "6d21ca9e-baa5-419c-b046-6be1b27b0e01:operation:e1c4e191-57dd-46ed-bb70-5c70290ac7bd",
+            "updated_at": "2026-10-16T17:09:34.499716Z"
+          },
+          "context_ids": [
+            "cda82e2c-6fed-46f3-a46b-a627639a857d",
+            "dade938d-b121-41ae-ba3a-594f8adcc297"
+          ]
+        },
+        {
+          "task": "S02-03",
+          "phase": "read",
+          "pid": 20515,
+          "run_id": "c9ab0879-1530-418e-9123-b1272db146f3",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "d4c57308-50eb-405b-8386-2d347656a8e5",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": null,
+            "deleted": true,
+            "source": "6d21ca9e-baa5-419c-b046-6be1b27b0e01:operation:e1c4e191-57dd-46ed-bb70-5c70290ac7bd",
+            "updated_at": "2026-10-16T17:09:34.499716Z"
+          },
+          "context_ids": [
+            "f828adb4-b0c2-466f-802d-e238b0427314",
+            "f3f38378-bcb2-45d8-adf8-631c75e50d39"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "forget_committed": true,
+          "persistent_tombstone": true,
+          "no_old_answer": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-03-2",
+      "task": "S02-03",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 7.547622999642044,
+      "phases": [
+        {
+          "phase": "seed",
+          "pid": 20520,
+          "seeded": true,
+          "model_calls": 0
+        },
+        {
+          "task": "S02-03",
+          "phase": "forget",
+          "pid": 20521,
+          "run_id": "34d72585-e349-4582-982d-aaac76a2964d",
+          "state": "completed",
+          "output": {
+            "status": "forgotten",
+            "content": null,
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "cf86d5d8-c3d2-4a7d-be05-a00da69f95e8",
+              "tool_name": "memory.forget",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": null,
+            "deleted": true,
+            "source": "34d72585-e349-4582-982d-aaac76a2964d:operation:cf86d5d8-c3d2-4a7d-be05-a00da69f95e8",
+            "updated_at": "2026-10-16T17:09:41.842646Z"
+          },
+          "context_ids": [
+            "1c837eb9-0211-45f9-b147-771e699e66d8",
+            "63251828-149e-479d-8c69-4f33f548eb77"
+          ]
+        },
+        {
+          "task": "S02-03",
+          "phase": "read",
+          "pid": 20524,
+          "run_id": "898c23b7-c548-4ab1-87e6-6a61c79b74af",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "27bd9f11-dae6-4504-9297-a2d41f56af64",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": null,
+            "deleted": true,
+            "source": "34d72585-e349-4582-982d-aaac76a2964d:operation:cf86d5d8-c3d2-4a7d-be05-a00da69f95e8",
+            "updated_at": "2026-10-16T17:09:41.842646Z"
+          },
+          "context_ids": [
+            "f19af9b6-df0a-42ef-9166-ca633e147295",
+            "7a4a6cb4-2eca-41bd-ae0d-8d1d8477fb82"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "forget_committed": true,
+          "persistent_tombstone": true,
+          "no_old_answer": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-03-3",
+      "task": "S02-03",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 9.194754291791469,
+      "phases": [
+        {
+          "phase": "seed",
+          "pid": 20528,
+          "seeded": true,
+          "model_calls": 0
+        },
+        {
+          "task": "S02-03",
+          "phase": "forget",
+          "pid": 20529,
+          "run_id": "6a3fb982-daa4-47c0-8333-281908d1b68c",
+          "state": "completed",
+          "output": {
+            "status": "forgotten",
+            "content": null,
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "803bfa59-bc8d-4620-8237-0aedade0cabe",
+              "tool_name": "memory.forget",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": null,
+            "deleted": true,
+            "source": "6a3fb982-daa4-47c0-8333-281908d1b68c:operation:803bfa59-bc8d-4620-8237-0aedade0cabe",
+            "updated_at": "2026-10-16T17:09:49.951567Z"
+          },
+          "context_ids": [
+            "81374343-249d-4746-afb1-9cec07487b5e",
+            "e558e50d-d0b0-49f2-bf65-fb4a2e005d53"
+          ]
+        },
+        {
+          "task": "S02-03",
+          "phase": "read",
+          "pid": 20534,
+          "run_id": "aa713bb0-d556-4b9b-b6c2-caaf8ee709a6",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "7e85335f-35ab-4862-8af8-dcb801f5ee06",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": null,
+            "deleted": true,
+            "source": "6a3fb982-daa4-47c0-8333-281908d1b68c:operation:803bfa59-bc8d-4620-8237-0aedade0cabe",
+            "updated_at": "2026-10-16T17:09:49.951567Z"
+          },
+          "context_ids": [
+            "4254a4d8-8b6f-46bd-a73c-577e63d512c3",
+            "4e92d8da-1b73-4df1-a5c0-26372ba68a60"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "forget_committed": true,
+          "persistent_tombstone": true,
+          "no_old_answer": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-04-1",
+      "task": "S02-04",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 15.445253999903798,
+      "phases": [
+        {
+          "task": "S02-04",
+          "phase": "save",
+          "pid": 20537,
+          "run_id": "331689d0-7dbc-41d7-8097-b0649ec6cd70",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "614d8be2-f28e-452a-b685-5c4fe7338f45",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "331689d0-7dbc-41d7-8097-b0649ec6cd70:operation:614d8be2-f28e-452a-b685-5c4fe7338f45",
+            "updated_at": "2026-10-16T17:09:58.493841Z"
+          },
+          "context_ids": [
+            "e5201612-e0c1-4867-8e90-f5a7ae26566f",
+            "a7109d3f-6c1d-4e22-9b29-d01d62e10f53"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-user",
+          "pid": 20541,
+          "run_id": "f8fe5837-00ae-4882-b6c0-ec2ee4c23641",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "abd80a50-d525-46c4-9ebb-72729eea5b4a",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "1b2e6807-78af-47ad-b397-ceea89085231",
+            "b9965e4e-fbbc-4b81-a2b9-10d473031d26"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-tenant",
+          "pid": 20544,
+          "run_id": "dd38fe9a-aa7c-424f-a8f1-e1791aedc825",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "7062ddf2-8885-4d73-904a-18e24d4b66c1",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "e2b68161-4a12-45ea-8960-d40682def738",
+            "34497db0-8123-45b6-b8eb-338977b85c65"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-agent",
+          "pid": 20552,
+          "run_id": "53647b78-7671-49e1-a6ee-0428e8554c78",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "81dc66d1-6ddc-4b4f-a683-5de72fae8cc5",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "fabbe2ef-99d1-42a0-95e3-495a9872f7b4",
+            "fd6791e8-d97c-4ea0-bf82-b7e93fb29a61"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "saved_first": true,
+          "foreign_answers_absent": true,
+          "four_processes": true,
+          "final_schema": true
+        },
+        "safety": {
+          "three_scope_isolation": true
+        }
+      }
+    },
+    {
+      "trial": "S02-04-2",
+      "task": "S02-04",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 14.586679084226489,
+      "phases": [
+        {
+          "task": "S02-04",
+          "phase": "save",
+          "pid": 20555,
+          "run_id": "dc67e3b0-f753-4a20-80e9-c94ade6cfa37",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "188f3f67-8ec2-429b-b59e-ff4fe40d4496",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "dc67e3b0-f753-4a20-80e9-c94ade6cfa37:operation:188f3f67-8ec2-429b-b59e-ff4fe40d4496",
+            "updated_at": "2026-10-16T17:10:14.055317Z"
+          },
+          "context_ids": [
+            "9b9d646c-f84d-4293-8a38-ffff4a1b7dfa",
+            "e0f9f34d-9c9a-489f-9e2e-a077fae339c4"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-user",
+          "pid": 20558,
+          "run_id": "c7ddad81-cd7f-429d-a0ad-e988acc64b7e",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "aa83b58e-559b-4e18-a1b3-19f997140504",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "a3cd70c0-41a2-4d87-8d38-6f473e38a06f",
+            "bfd7f5ec-895f-438a-8b36-78a07851ec5e"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-tenant",
+          "pid": 20562,
+          "run_id": "1a81aeeb-b484-4de0-a8a8-274566112b9e",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "2c180670-6e9e-4132-bd8d-df689a9ca72c",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "780bfa35-dc10-424d-a6d2-72e04d8a1355",
+            "784db86f-e16c-489c-a6bf-3512973de42b"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-agent",
+          "pid": 20565,
+          "run_id": "c01afccd-3d9b-4579-888a-566ef3932cfb",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "a5673fc8-7b13-4fde-9d78-fb1d6cf33154",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "7fbbc616-6ce0-4c22-9f81-92c29e4e3bf7",
+            "164bac06-1334-4c62-9454-c17b34f0703a"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "saved_first": true,
+          "foreign_answers_absent": true,
+          "four_processes": true,
+          "final_schema": true
+        },
+        "safety": {
+          "three_scope_isolation": true
+        }
+      }
+    },
+    {
+      "trial": "S02-04-3",
+      "task": "S02-04",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 16.37541633285582,
+      "phases": [
+        {
+          "task": "S02-04",
+          "phase": "save",
+          "pid": 20573,
+          "run_id": "7abdb2ea-25fb-4ad4-b98d-262d6caf0fe2",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "83a20066-2dc5-49fb-be68-476aa934d844",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "7abdb2ea-25fb-4ad4-b98d-262d6caf0fe2:operation:83a20066-2dc5-49fb-be68-476aa934d844",
+            "updated_at": "2026-10-16T17:10:28.499848Z"
+          },
+          "context_ids": [
+            "e3608709-5a6c-4336-a238-7830ef475aab",
+            "67692bbd-6e19-406d-a80e-b3fb09c80e48"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-user",
+          "pid": 20577,
+          "run_id": "e34b95c6-4289-4440-9788-6edefe8cab4d",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "4bf617d0-a456-4396-8f1a-9c82da4eb417",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "49182f0a-afef-4494-8d3f-3642d16f96fe",
+            "a8508cf4-6ab6-4f82-a220-ae810bc791e5"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-tenant",
+          "pid": 20580,
+          "run_id": "c7d769d3-b776-42a2-b197-a148fc1a39ef",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "27152ee3-0125-4269-b7c8-b84eee1b46f3",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "f1593510-afe8-40c2-982f-ee3639b33f69",
+            "9f2df3b5-b87e-410c-9441-ba3b67e46143"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-agent",
+          "pid": 20583,
+          "run_id": "5a613814-db87-438b-b7bc-b602d6f0de3f",
+          "state": "failed",
+          "output": null,
+          "error_code": "model_error",
+          "schema_valid": false,
+          "model_calls": 3,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "4d66a9d6-8b85-475f-a286-00b68543ac57",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "66c76dbc-d897-416c-9481-5c705ef67f5d",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "22510f78-318a-4c06-8b5d-2e38ef8f9ebf",
+            "cf430203-ec78-4440-a9a9-89a47cb3be1a",
+            "46883272-13cf-45ad-9499-b2c67484501f"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": false,
+        "schema_valid": false,
+        "checks": {
+          "phases_executed": true,
+          "state": false,
+          "model_call_limit": false,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "saved_first": true,
+          "foreign_answers_absent": false,
+          "four_processes": true,
+          "final_schema": false
+        },
+        "safety": {
+          "three_scope_isolation": true
+        }
+      }
+    }
+  ],
+  "summary": {
+    "complete": false,
+    "passed": 36,
+    "total": 39,
+    "schema_passed": 38,
+    "schema_total": 39,
+    "schema_required": 38,
+    "scenarios": {
+      "S-01": {
+        "passed": 25,
+        "total": 27
+      },
+      "S-02": {
+        "passed": 11,
+        "total": 12
+      },
+      "S-03": {
+        "passed": 0,
+        "total": 0
+      }
+    },
+    "code_passed": 3,
+    "code_total": 3,
+    "safety_failures": [],
+    "release_gate": false
+  }
+}

@@ -1,6 +1,6 @@
 # 公共 API 草案 v3
 
-状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；T-10A 文件/代码沙箱公共接口与 Runtime 闭环已实现；OpenAI Responses离线适配及MCP stdio tools已实现；真实模型未验证，HTTP按ADR-0025接通，工作台按ADR-0026接入；实际验收状态见progress。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-15。
+状态：P4 v3 基线；T-02 至 T-08 已实现定义/存储/生命周期、只读 Agent 闭环、授权事件/结果读取、上下文选择/清单及内置事务 Memory；T-09 已实现审批/输入与 respond/resume 子范围；T-09 已接入外部未知效果、verify/recover/启动扫描；T-10A 文件/代码沙箱公共接口与 Runtime 闭环已实现；OpenAI Responses离线适配及MCP stdio tools已实现；DeepSeek真实模型固定任务评测见[T-16记录](../validation/t16-evidence-scope.md)，OpenAI供应商真实模型尚未运行；HTTP按ADR-0025接通，工作台按ADR-0026接入；实际验收状态见progress。T-06/07 细化见 [ADR-0010](../decisions/0010-read-only-agent-loop.md) / [ADR-0011](../decisions/0011-context-assembly.md)。更新：2026-10-17。
 
 本文是调用方式的维护位置。状态、事务、权限、Memory 时序等详细规则引用 [行为契约](runtime-contract.md)，不在示例中另设规则。依赖方向见 [架构](architecture.md)。
 
@@ -360,7 +360,7 @@ HTTP 错误形状为 `{error: {code, message, request_id}}`：未认证 401；�
 
 ## 首版文件与代码沙箱接口（T-10A）
 
-公共沙箱入口、审批/执行/销毁/输出发布已接通，决定见 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md)，可运行离线示例见 [sandbox_offline.py](../../examples/sandbox_offline.py)。模型为确定性 fixture，真实模型质量仍未验证；T-10B 故障/隔离矩阵另验收。
+公共沙箱入口、审批/执行/销毁/输出发布已接通，决定见 [ADR-0020](../decisions/0020-runtime-sandbox-execution.md)，可运行离线示例见 [sandbox_offline.py](../../examples/sandbox_offline.py)。该示例使用确定性 fixture；真实模型任务质量见[T-16记录](../validation/t16-evidence-scope.md)，故障/隔离矩阵见[T-10B验证](../validation/t10b-sandbox-faults.md)，实际状态以progress为准。
 
 本节按 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md) 扩展 ADR-0013。T-10A 第二批已实现值类型/私有字节层、Runtime store 装配、start/run/stream 文件接收与 Run 授予/去重、ready 输入元数据、get/read_artifact 动态授权、上下文文件描述，见 [ADR-0018](../decisions/0018-artifact-input-admission.md) 和 [可运行文件通道示例](../../examples/artifact_inputs_offline.py)。私有 stage 仍不是 ready；输入接收不执行代码。下表入口、受保护输入与输出导出/销毁/原工具结果共同发布已实现。执行/恢复规则唯一在运行契约第 13 节，默认、镜像与支持矩阵唯一在工程方案。
 

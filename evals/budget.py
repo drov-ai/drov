@@ -149,8 +149,10 @@ class Ledger:
                 raise BudgetStop("Batch has stopped; reconcile before any new paid request")
             if any(a["status"] != "settled" for a in data["attempts"]):
                 raise BudgetStop("Unknown or unfinished paid attempt requires reconciliation")
+            if trial in data.get("trial_stops", {}):
+                raise BudgetStop("Trial exceeded eight logical model requests")
             if sum(a["trial"] == trial for a in data["attempts"]) >= 8:
-                data["stopped"] = "trial_model_limit"
+                data.setdefault("trial_stops", {})[trial] = "trial_model_limit"
                 self._write(data)
                 raise BudgetStop("Trial exceeded eight logical model requests")
             spent = sum((Decimal(a["cost_upper_cny"]) for a in data["attempts"]), Decimal(0))

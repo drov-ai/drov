@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import copy
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -13,8 +14,8 @@ import pytest
 from drov.tools.schema import compile_type
 from drov.types import Usage
 from evals.budget import BudgetStop, Ledger
-from evals.common import CodeReport, manifest
-from evals.run import score, summarize, trial
+from evals.common import ROOT, CodeReport, manifest
+from evals.run import fingerprint, run, score, summarize, trial
 from tests.test_sandbox_docker import config as config
 
 TASKS = manifest()["tasks"]
@@ -359,6 +360,153 @@ def test_model_change_retains_old_prices_and_reserves_pro_peak_cost(tmp_path: Pa
     assert attempts[1]["reserved_cny"] == "0.0117"
 
 
+def test_exhausted_trial_stays_stopped_but_other_trials_keep_original_budget(
+    tmp_path: Path,
+) -> None:
+    ledger = Ledger(tmp_path / "ledger.json")
+    ledger.create(batch_hash="fixed")
+    usage = Usage(
+        input_tokens=1, output_tokens=1, total_tokens=2, cached_input_tokens=0, complete=True
+    )
+    for _ in range(8):
+        identifier = ledger.reserve(
+            batch_hash="fixed",
+            trial="first",
+            request_hash="h",
+            input_bytes=10,
+            max_output_tokens=10,
+        )
+        ledger.settle(identifier, usage)
+    for _ in range(2):
+        with pytest.raises(BudgetStop, match="eight"):
+            Ledger(ledger.path).reserve(
+                batch_hash="fixed",
+                trial="first",
+                request_hash="ninth",
+                input_bytes=10,
+                max_output_tokens=10,
+            )
+    before = json.loads(ledger.path.read_text())
+    assert "stopped" not in before and len(before["attempts"]) == 8
+    assert before["trial_stops"] == {"first": "trial_model_limit"}
+    other = ledger.reserve(
+        batch_hash="fixed", trial="second", request_hash="new", input_bytes=10, max_output_tokens=10
+    )
+    with pytest.raises(BudgetStop, match="unfinished"):
+        ledger.reserve(
+            batch_hash="fixed",
+            trial="third",
+            request_hash="blocked",
+            input_bytes=10,
+            max_output_tokens=10,
+        )
+    ledger.settle(other, usage)
+    ledger.amend(previous_hash="fixed", batch_hash="new", reason="independent registration")
+    after = json.loads(ledger.path.read_text())
+    assert after["attempts"][:8] == before["attempts"] and len(after["attempts"]) == 9
+    assert after["trial_stops"] == before["trial_stops"]
+    assert after["ceiling"] == "13" and after["usable"] == "11"
+    with pytest.raises(BudgetStop, match="eight"):
+        ledger.reserve(
+            batch_hash="new",
+            trial="first",
+            request_hash="still-blocked",
+            input_bytes=10,
+            max_output_tokens=10,
+        )
+
+
+@pytest.mark.asyncio
+async def test_formal_driver_keeps_failed_trial_and_runs_other_independent_trials(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    pytest.importorskip("openai")
+    pytest.importorskip("httpx2")
+    opts = options(tmp_path / "report")
+    opts.mode, opts.suite, opts.task, opts.init_ledger = "live", "formal", "", False
+    opts.ledger = str(tmp_path / "ledger.json")
+    opts.docker_config = str(tmp_path / "docker.json")
+    await asyncio.to_thread(Path(opts.docker_config).write_text, "{}")
+    batch = fingerprint()
+    opts.freeze, opts.smoke_report = str(tmp_path / "freeze.json"), str(tmp_path / "smoke.json")
+    configuration = json.loads(await asyncio.to_thread((ROOT / "config.json").read_text))
+    docker_hash = hashlib.sha256(
+        await asyncio.to_thread(Path(opts.docker_config).read_bytes)
+    ).hexdigest()
+    await asyncio.to_thread(
+        Path(opts.freeze).write_text,
+        json.dumps(
+            {
+                "batch_hash": batch,
+                "config": configuration,
+                "docker_config_hash": docker_hash,
+            }
+        ),
+    )
+    await asyncio.to_thread(
+        Path(opts.smoke_report).write_text,
+        json.dumps({"batch_hash": batch, "summary": {"passed": 7}}),
+    )
+    ledger = Ledger(Path(opts.ledger))
+    ledger.create(batch_hash=batch)
+    visited: list[str] = []
+
+    async def synthetic_worker(
+        settings: argparse.Namespace, task: dict[str, Any], repeat: int
+    ) -> dict[str, Any]:
+        # Exercise driver + durable accounting only; never start a paid worker.
+        label = f"{batch[:12]}:formal:{task['id']}:{repeat}"
+        first = not visited
+        visited.append(label)
+        for _ in range(8 if first else 1):
+            identifier = ledger.reserve(
+                batch_hash=batch,
+                trial=label,
+                request_hash="synthetic",
+                input_bytes=10,
+                max_output_tokens=10,
+            )
+            ledger.settle(
+                identifier,
+                Usage(
+                    input_tokens=1,
+                    output_tokens=1,
+                    total_tokens=2,
+                    cached_input_tokens=0,
+                    complete=True,
+                ),
+            )
+        if first:
+            with pytest.raises(BudgetStop):
+                ledger.reserve(
+                    batch_hash=batch,
+                    trial=label,
+                    request_hash="ninth",
+                    input_bytes=10,
+                    max_output_tokens=10,
+                )
+        return {
+            "trial": f"{task['id']}-{repeat}",
+            "task": task["id"],
+            "scenario": task["scenario"],
+            "schema": task["schema"],
+            "mode": "offline",
+            "score": {"passed": not first, "schema_valid": not first, "safety": {}},
+        }
+
+    monkeypatch.setattr("evals.run.trial", synthetic_worker)
+    await run(opts)
+    report = json.loads((Path(opts.directory) / "report.json").read_text())
+    assert len(visited) == len(set(visited)) == 81
+    assert report["summary"]["complete"] and report["summary"]["passed"] == 80
+    assert not report["results"][0]["score"]["passed"]
+    assert not report["summary"]["release_gate"]  # Synthetic work never becomes live quality.
+    accounting = json.loads(ledger.path.read_text())
+    assert len(accounting["attempts"]) == 88 and "stopped" not in accounting
+    assert all(a["status"] == "settled" for a in accounting["attempts"])
+    assert accounting["trial_stops"] == {visited[0]: "trial_model_limit"}
+
+
 def test_reviewed_trial_stop_requires_new_registration_and_preserves_costs(tmp_path: Path) -> None:
     ledger = Ledger(tmp_path / "ledger.json")
     ledger.create(batch_hash="first")
@@ -388,6 +536,11 @@ def test_reviewed_trial_stop_requires_new_registration_and_preserves_costs(tmp_p
             input_bytes=10,
             max_output_tokens=10,
         )
+    # Historical ledgers stopped the entire batch on a per-trial limit.
+    legacy = json.loads(ledger.path.read_text())
+    legacy.pop("trial_stops")
+    legacy["stopped"] = "trial_model_limit"
+    ledger._write(legacy)
     before = json.loads(ledger.path.read_text())
     with pytest.raises(BudgetStop):
         ledger.amend(previous_hash="first", batch_hash="new", reason="review")

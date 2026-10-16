@@ -1,5 +1,7 @@
 # T-16：固定任务、模型适配与评测记录
 
+本文件保留2026-10-16首批历史原始结论；后续修订、完整批次和最新验证见[2026-10-17接续记录](t16-evidence-scope.md)，当前任务状态只以[progress](../planning/progress.md)为准。
+
 日期：2026-10-16（Asia/Shanghai）。Local `/Users/yanlong/projects/drov`，起点main/46b17d3，工作区干净且与origin/main同步。先读取AGENTS/progress/规划导航/handoff和T-15收尾证据；实查49ac274精确源码的核心38868489017全部11 jobs、Docker38868489018全部4 jobs completed/success（`.drov/t16-predecessor-{core,docker}.json`），未发现前项缺口，接续T-16。
 
 本轮用户授权DeepSeek官方服务、本地`.env.local`、优先deepseek-flash，全部模型费用合计13元；原E2B台账不动，不调用云沙箱或公开发布/部署。只操作新建合成数据库/文件/事项服务和原Docker镜像；原用户数据/品牌/私有环境保留。方案见[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)，任务状态只维护在[progress](../planning/progress.md)。

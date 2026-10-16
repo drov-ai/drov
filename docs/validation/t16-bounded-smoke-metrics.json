@@ -1,0 +1,68 @@
+{
+  "scope": "Saved observations only; no provider, tool or sandbox execution. Timing includes host buffering; not time-to-first-token.",
+  "batch_hash": "cabb75ad5d4a1caf1bd30218854b7e4758684d0c16e0fcaa7dd244cdd2f85f2f",
+  "suite": "smoke",
+  "trial_latency": {
+    "count": 7,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 10.514638083055615,
+    "p95_seconds": 14.199730082880706,
+    "total_seconds": 67.36565870977938
+  },
+  "model_request_latency": {
+    "count": 23,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 2.311662250198424,
+    "p95_seconds": 5.952694833278656,
+    "total_seconds": 60.69373808661476
+  },
+  "paid_requests": 23,
+  "normalized_model_invocations": 23,
+  "observed_model_retries": 0,
+  "observed_external_tool_retries": 0,
+  "ordinary_tool_dispatched_events": 4,
+  "recorded_operations_including_builtin_memory_and_sandbox": 12,
+  "operation_statuses": {
+    "succeeded": 10,
+    "not_executed": 2
+  },
+  "usage": {
+    "input_tokens": 26414,
+    "output_tokens": 4230,
+    "total_tokens": 30644,
+    "cached_input_tokens": 20864
+  },
+  "cost_upper_cny": "0.1704192",
+  "all_history_accounting": {
+    "attempts": 465,
+    "status_counts": {
+      "settled": 465
+    },
+    "cost_upper_cny": "5.74703480",
+    "ceiling_cny": "13",
+    "usable_cny": "11",
+    "stopped": null
+  },
+  "not_provider_bill_or_balance": true,
+  "failed_trials": [],
+  "model_generated_code": [
+    {
+      "trial": "S01-09-1",
+      "phase": "run",
+      "response": "model-01.response.json",
+      "call_id": "call_00_mimrn0i8PvRK0uLPgMUS8852",
+      "code_sha256": "60f227efdeabd9f6b7a5663b6b0ba6bcca0002caf71b10fd203cc188e5167410",
+      "arguments": {
+        "code": "import csv, os, statistics\nimport matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\n\ninput_path = '/work/inputs/art_ad30ef00c5dc4c6a97a86373f5d8e538/numbers.csv'\nwith open(input_path, newline='') as f:\n    reader = csv.DictReader(f)\n    values = []\n    for row in reader:\n        values.append(float(row['value']))\n\ncount = len(values)\ntotal = sum(values)\nmean = statistics.mean(values) if values else float('nan')\n\nos.makedirs('/work/outputs', exist_ok=True)\nwith open('/work/outputs/summary.csv', 'w', newline='') as f:\n    writer = csv.writer(f)\n    writer.writerow(['count','sum','mean'])\n    writer.writerow([count, total, mean])\n\n# print content and stats for debugging\nwith open(input_path, newline='') as f:\n    print('CSV content:', repr(f.read()))\nprint('count:', count)\nprint('sum:', total)\nprint('mean:', mean)\n\nplt.figure(figsize=(400/100, 300/100), dpi=100)\nplt.bar(range(len(values)), values)\nplt.title('value')\nplt.xlabel('row')\nplt.ylabel('value')\nplt.tight_layout()\nplt.savefig('/work/outputs/chart.png')\nplt.close()\nprint('outputs:', os.listdir('/work/outputs'))\n",
+        "inputs": [
+          "art_ad30ef00c5dc4c6a97a86373f5d8e538"
+        ],
+        "outputs": [
+          "summary.csv",
+          "chart.png"
+        ]
+      }
+    }
+  ],
+  "raw_report_sha256": "e6d6456f15026771bb3e7a9f3742c7e2919fdf2408d974c9a298eaa9a1ad6c01"
+}

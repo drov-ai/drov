@@ -1,6 +1,6 @@
 # 已实现的定义与数据契约
 
-T-02 至 T-08 提供类型/schema、协议、事务存储、Runtime 生命周期、工具权限、只读 Agent 循环、正文投影、上下文选择/清单及事务 Memory；T-09 审批/输入子范围已实现；T-09 外部未知效果/显式恢复已实现；OpenAI Responses 已有官方客户端的离线 HTTP/SSE 适配，真实模型 smoke/质量尚未验证。公共入口语义见 [API](../planning/api-draft.md)，T-06 细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
+T-02 至 T-08 提供类型/schema、协议、事务存储、Runtime 生命周期、工具权限、只读 Agent 循环、正文投影、上下文选择/清单及事务 Memory；T-09 审批/输入子范围已实现；T-09 外部未知效果/显式恢复已实现；OpenAI Responses 已有官方客户端的离线 HTTP/SSE 适配，该供应商的真实模型 smoke/质量尚未运行。DeepSeek独立方言和真实固定任务评测见[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)/[T-16记录](../validation/t16-evidence-scope.md)，具体状态以[progress](../planning/progress.md)为准。公共入口语义见 [API](../planning/api-draft.md)，T-06 细节见 [ADR-0010](../decisions/0010-read-only-agent-loop.md)。
 
 ## 模块入口
 

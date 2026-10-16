@@ -1,0 +1,79 @@
+{
+  "scope": "Saved partial v10 observations; all3 failures and three S01 successes reviewed; no S03 formal samples, no complete-batch claim.",
+  "reviews": [
+    {
+      "trial": "S01-05-1",
+      "scenario": "S-01",
+      "kind": "formal_failure",
+      "reviewed": true,
+      "finding": "Actual preview exposes corpus id long, but output source_ids uses opaque operation source_ref; status/truncated/full_text=false and three facts otherwise correct. Failed original source-id assertion retained.",
+      "trial_sha256": "a4eee52b52a3de4b87a8c83afcc342d03908220ac54a4eb8859ba253a30430dd"
+    },
+    {
+      "trial": "S01-05-2",
+      "scenario": "S-01",
+      "kind": "formal_failure",
+      "reviewed": true,
+      "finding": "Two actual search operations on the same fixed long corpus; final facts/source long/preview flags correct. Fails original one-retrieval assertion; no write or automatic retry.",
+      "trial_sha256": "8d5f223ce7b989723d4ca84dd765ebf8cd86938fad8eb0bc472dd1428e3e48f8"
+    },
+    {
+      "trial": "S01-01-1",
+      "scenario": "S-01",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Actual single retrieval exposes cache-a/b; final facts/source IDs match A/B sharing and A restart; sufficient within clarified task scope.",
+      "trial_sha256": "335557415619295a3c84d9ea69ca888a951ce0f5ff1ac7e3708efcfa8326f34e"
+    },
+    {
+      "trial": "S01-03-1",
+      "scenario": "S-01",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Only cache-a exists; final insufficient, b_shared null and cache-a source reflect actual tool result; no invented C source.",
+      "trial_sha256": "871b09c1f85d24408d17bbedeecbaa43363d076116ef4dd27afd5e970c79dfb3"
+    },
+    {
+      "trial": "S01-06-1",
+      "scenario": "S-01",
+      "kind": "formal_success",
+      "reviewed": true,
+      "finding": "Actual contradictory B v1/v2 with unknown precedence; final conflict, b_shared null, relevant A/v1/v2 sources all present.",
+      "trial_sha256": "4a1912f348871baaa0d250c75e34604d1723a98e6eb1d99166d9e17a1eeb41a8"
+    },
+    {
+      "trial": "S01-09-1",
+      "scenario": "S-01",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Read original generated Python: CSV value column actually read, calculated count3/sum60/mean20, matplotlib plots input values. Viewed downloaded400x300 PNG: three bars12/18/30. Actual container execution succeeded, destroyed, fresh Runtime downloads/hash/scope-denial pass; final IDs exactly actual output artifacts.",
+      "trial_sha256": "205cf2d4aded8b4d1be67281c529e1172539f759a1d9cc57dc5be652596aa67b"
+    },
+    {
+      "trial": "S01-09-2",
+      "scenario": "S-01",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Read original generated Python: CSV value column actually read, calculated count3/sum60/mean20, matplotlib plots input values. Viewed downloaded400x300 PNG: three bars12/18/30. Actual container execution succeeded, destroyed, fresh Runtime downloads/hash/scope-denial pass; final IDs exactly actual output artifacts.",
+      "trial_sha256": "0e1757d0640e716dc8a3a74c91f67abb34b9f246e0eabf87fdeed6760661dd7c"
+    },
+    {
+      "trial": "S01-09-3",
+      "scenario": "S-01",
+      "kind": "additional_code_review",
+      "reviewed": true,
+      "finding": "Read original generated Python: CSV value column actually read, calculated count3/sum60/mean20, matplotlib plots input values. Viewed downloaded400x300 PNG: three bars12/18/30. Actual container execution succeeded, destroyed, fresh Runtime downloads/hash/scope-denial pass; final IDs exactly actual output artifacts.",
+      "trial_sha256": "5ff77880995cec2898df6776052e02959361f75aeebcfa7485c8b5e90d745c35"
+    },
+    {
+      "trial": "S02-04-3",
+      "scenario": "S-02",
+      "kind": "formal_failure",
+      "reviewed": true,
+      "finding": "Save2/user2/tenant2/other-agent repeats same exact-key recall despite complete empty result, using last two paid requests; ninth requested generation refused locally. Total8 paid, no foreign record/private input, no final other-agent answer. Original trial and partial batch remain failed/incomplete. Global batch stop was an evaluation-limit scope issue separate from this model failure.",
+      "trial_sha256": "53b99272410fda9842c31b8105e629eaf41ef10342899f2d9b3c147a89e0890a"
+    }
+  ],
+  "all_executed_failures_reviewed": true,
+  "s03_formal_review_unavailable": true
+}

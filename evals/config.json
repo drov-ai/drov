@@ -1,6 +1,6 @@
 {
-  "version": 10,
-  "amendment": "After full v9 formal 73/81 (code5/9), raise reasoning-inclusive output allowance4096->8192 after three exact-cap incomplete responses; bind context/cost reserves. Fix explicit-file oracle to compare unique original-summary and final-copy hashes independent of unrelated artifacts, and retain safety diagnostics for missing Memory outputs. Scope code artifact instructions to task requests. Model/effort, corpus, expected outputs, thresholds, 8-request/16-tool limits unchanged. Preserve all eight v9 failures and442 settled requests; adaptive new complete7+81, no regrading/mixing.",
+  "version": 11,
+  "amendment": "Correct evaluation limit scope after v10 partial36/39: persist the exhausted trial at eight paid requests without halting independent remaining trials when all costs settled and total budget allows. Exhausted trial remains incomplete/failed and cannot resume; unknown/pending/monetary stops remain global, legacy global stop needs explicit review/amend. Same Pro/high/8192, prompts/corpus/oracle/expected/thresholds and 8/16 limits. Preserve v10 failures,42 unexecuted and575 settled requests/costs; new complete7+81, no regrading/mixing.",
   "provider": "DeepSeek official",
   "endpoint": "https://api.deepseek.com",
   "model": "deepseek-v4-pro",
