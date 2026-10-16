@@ -23,3 +23,13 @@ S01-01 泛问 A/B 重启，语料和 schema 只说明 A 重启，确有任务范
 Python 3.11.9/3.14.3 定向组最初均为 89 passed / 3 failed（17.91s/20.95s）：宿主漏传 DROV_ANALYSIS_IMAGE_RECORD，三个代码用例在模型/容器前因找不到分析镜像记录拒绝。原日志 .drov/t16-scope-tests.log / tests314.log 保留。补齐原 .drov/t10a-analysis-image/image.json 后仅重跑失败子组，两解释器各 3 passed（5.68s/5.77s），没有把原失败覆盖成通过；共覆盖每套 92 个定向用例。另三入口完整离线均独立实际运行代码。
 
 ruff 静态与格式（288 文件）、mypy（192 源）、schema/OpenAPI 检查通过；95 Markdown/864 本地链接/16 Python 说明片段 AST、保护文件与可识别凭据模式检查通过。起初 shell 的默认 uv 为 0.11.30，按项目 0.13.0 要求在任何执行前拒绝；改用本 checkout 既有 .drov/t16-tools/bin/uv 0.13.0，锁定 dry-run 确认依赖无升级。未修改 SDK、锁、SQL 或品牌。
+
+## v8 完整 smoke 6/7，类型失败保留
+
+源码 3be67ce / 登记 e67af51 先提交/推送，[事前登记](t16-preregistration-scope.json)固定 a4200c397960959a8ef2b769f181595f08c0383c13a2e89b54c62c5e294b931b。完整 7 项完成，6 通过，schema6/7、零已观察安全失败；见[原报告](t16-scope-smoke.json)/[计量与模型原代码](t16-scope-smoke-metrics.json)。S01-01 研究状态与四进程 Memory 隔离均通过。代码实际输出 count,sum,mean / 3,60.0,20.0 及 400×300 PNG，原容器销毁后新 Runtime 下载/hash/跨归属拒绝均通过；最终 JSON total=60.0 被原严格 int 解码拒绝 invalid_output，schema失败，按 smoke 规则停止。没有进入正式，也没有重算报告。
+
+本批21真实请求全部 settled，峰值上界0.3090654元；历史累计204次/2.10906680元，无pending/unknown/stopped，无需充值。v9仅明确已有最终JSON的严格整数词法，CSV等值规则不变，先提交/登记新指纹再完整7+81。前轮987fe47的核心九jobs成功、Windows两个长时间未完成，新main显式工作流开始后由原有并发规则取消，原状态保留，不写成成功。当前e67af51核心38932431423/Docker38932438853运行中。
+
+v8的[逐项复核](t16-scope-review.json)保留最终原JSON/正确CSV与图片观察、四进程8请求隔离、批准1/拒绝0写入。v9补充5个最终JSON严格整数正反例（60接受，60.0/6e1/字符串/布尔拒绝），不改变原SDK类型规则。最终三入口离线再次各27/27、schema25/25、代码3/3、零安全失败，见[摘要](t16-typed-offline.json)；两解释器定向结果和新登记如下续记。
+
+v9源码提交前定向测试：Python3.11为97 passed（29.24s），Python3.14为97 passed（31.07s），均显式提供原Docker及分析镜像记录。静态/格式、mypy192源、95份Markdown/870本地链接/16片段AST通过。新源码只改开发评测提示与相应反例/文档，不改SDK/锁/SQL/品牌。

@@ -89,6 +89,8 @@ CODE_INSTRUCTIONS = (
     "建议表proposal.csv表头item_id,status,total，数据item-01,processing,实际总和。"
     "只在实际产物complete后引用真实artifact_id，不能引用输入充当输出。"
     "业务更新与代码计算各自经宿主审批；被拒绝不再尝试。最后按schema报告实际统计、产物ID；"
+    "最终JSON的count和total字段是严格整数，请用整数文本，不带小数点或指数；mean是数值。"
+    "CSV的数值表示不受此JSON字段类型要求限制。"
     "没有业务操作时business_status=not_requested，被拒绝为denied。"
 )
 

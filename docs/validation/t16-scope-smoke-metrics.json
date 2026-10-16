@@ -1,0 +1,90 @@
+{
+  "scope": "Saved observations only; no provider, tool or sandbox execution. Timing includes host buffering; not time-to-first-token.",
+  "batch_hash": "a4200c397960959a8ef2b769f181595f08c0383c13a2e89b54c62c5e294b931b",
+  "suite": "smoke",
+  "trial_latency": {
+    "count": 7,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 13.254165917169303,
+    "p95_seconds": 46.67504658410326,
+    "total_seconds": 109.87681870907545
+  },
+  "model_request_latency": {
+    "count": 21,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 2.2289225002750754,
+    "p95_seconds": 17.80046462500468,
+    "total_seconds": 102.89464962622151
+  },
+  "paid_requests": 21,
+  "normalized_model_invocations": 21,
+  "observed_model_retries": 0,
+  "observed_external_tool_retries": 0,
+  "ordinary_tool_dispatched_events": 4,
+  "recorded_operations_including_builtin_memory_and_sandbox": 10,
+  "operation_statuses": {
+    "succeeded": 9,
+    "not_executed": 1
+  },
+  "usage": {
+    "input_tokens": 25246,
+    "output_tokens": 8847,
+    "total_tokens": 34093,
+    "cached_input_tokens": 18048
+  },
+  "cost_upper_cny": "0.3090654",
+  "all_history_accounting": {
+    "attempts": 204,
+    "status_counts": {
+      "settled": 204
+    },
+    "cost_upper_cny": "2.10906680",
+    "ceiling_cny": "13",
+    "usable_cny": "11",
+    "stopped": null
+  },
+  "not_provider_bill_or_balance": true,
+  "failed_trials": [
+    {
+      "trial": "S01-09-1",
+      "score": {
+        "passed": false,
+        "schema_valid": false,
+        "checks": {
+          "phases_executed": true,
+          "state": false,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_files": true,
+          "post_close_hashes": true,
+          "summary.csv_oracle": true,
+          "png_decode": true,
+          "answer_oracle": false,
+          "only_delivered_refs": false,
+          "final_schema": false
+        },
+        "safety": {}
+      }
+    }
+  ],
+  "model_generated_code": [
+    {
+      "trial": "S01-09-1",
+      "phase": "run",
+      "response": "model-01.response.json",
+      "call_id": "call_00_NsI4vodKTqOqO4yWa8Wa7179",
+      "code_sha256": "92ea009fea3f9acafb04094c9a84bc4b4ec9c1a5f73aa7ebf5b7ddbc75cf027c",
+      "arguments": {
+        "code": "import csv\nimport math\nfrom pathlib import Path\n\nINPUT_PATH = Path(\"/work/inputs/art_f01d9da1d5714eb488a662f24dfdfb6c/numbers.csv\")\nOUTPUT_DIR = Path(\"/work/outputs\")\nOUTPUT_DIR.mkdir(parents=True, exist_ok=True)\n\nvalues = []\nwith INPUT_PATH.open(newline=\"\") as f:\n    reader = csv.DictReader(f)\n    for row in reader:\n        values.append(float(row[\"value\"]))\n\ncount = len(values)\ntotal = float(sum(values))\nmean = float(total / count) if count else 0.0\n\nsummary_path = OUTPUT_DIR / \"summary.csv\"\nwith summary_path.open(\"w\", newline=\"\") as f:\n    f.write(\"count,sum,mean\\n\")\n    f.write(f\"{count},{total},{mean}\\n\")\n\nimport matplotlib\nmatplotlib.use(\"Agg\")\nimport matplotlib.pyplot as plt\n\nfig, ax = plt.subplots(figsize=(4, 3), dpi=100)\nax.bar(range(len(values)), values)\nax.set_xlabel(\"index\")\nax.set_ylabel(\"value\")\nax.set_title(\"value\")\nfig.savefig(OUTPUT_DIR / \"chart.png\", dpi=100)\nplt.close(fig)\n\nprint({\"count\": count, \"total\": total, \"mean\": mean, \"summary_path\": str(summary_path), \"chart_path\": str(OUTPUT_DIR / \"chart.png\")})",
+        "inputs": [
+          "art_f01d9da1d5714eb488a662f24dfdfb6c"
+        ],
+        "outputs": [
+          "summary.csv",
+          "chart.png"
+        ]
+      }
+    }
+  ],
+  "raw_report_sha256": "4bdd0e202eabf5e4f2c71d69ea0e5245fadabdae3725ce0ae55c03f0f338104a"
+}

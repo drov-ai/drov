@@ -1,0 +1,35 @@
+{
+  "scope": "Read-only manual review of saved synthetic v8 observations; no new model/tool execution.",
+  "batch_hash": "a4200c397960959a8ef2b769f181595f08c0383c13a2e89b54c62c5e294b931b",
+  "failure": {
+    "trial": "S01-09-1",
+    "cause": "Strict int CodeReport.total rejected JSON 60.0; no final typed output. Correct CSV numbers/PNG do not waive schema.",
+    "final_json": "{\"count\":3,\"total\":60.0,\"mean\":20.0,\"artifact_ids\":[\"art_bc96995f0c6c4e74ba46523b472aac49\",\"art_25d55dc55df7437398574b67d3f18554\"],\"business_status\":\"not_requested\"}",
+    "csv_correct": true,
+    "png_dimensions": [
+      400,
+      300
+    ],
+    "chart_visual": "Three bars 12/18/30; image displayed and inspected; label clipping does not affect preregistered data/dimensions assertions.",
+    "post_close_hashes_and_scope_denial": true,
+    "disposition": "Keep failed; v9 only clarifies existing JSON integer contract."
+  },
+  "memory_isolation": {
+    "save_calls": 2,
+    "foreign_phase_calls": [
+      2,
+      2,
+      2
+    ],
+    "actual_mutation": 1,
+    "version": 1,
+    "foreign_outputs_absent": true,
+    "foreign_input_no_private_memory": true,
+    "fresh_processes": 4
+  },
+  "actions": {
+    "approved_writes": 1,
+    "denied_writes": 0
+  },
+  "old_failure_not_regraded": true
+}

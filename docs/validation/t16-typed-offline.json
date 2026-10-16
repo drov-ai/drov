@@ -1,0 +1,95 @@
+{
+  "scope": "Final v9 offline scripted runtime/Docker only, not live model quality.",
+  "entries": {
+    "sdk": {
+      "batch_hash": "97dca1e8467ec44cf62299ab1045f23de0a0a0ea39d910d76a369fe516c8cbcd",
+      "summary": {
+        "complete": true,
+        "passed": 27,
+        "total": 27,
+        "schema_passed": 25,
+        "schema_total": 25,
+        "schema_required": 24,
+        "scenarios": {
+          "S-01": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-02": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-03": {
+            "passed": 9,
+            "total": 9
+          }
+        },
+        "code_passed": 3,
+        "code_total": 3,
+        "safety_failures": [],
+        "release_gate": false
+      },
+      "raw_report_sha256": "86fa0210f1445d89d17cea8be180c6fa81b5e1f53a5852349509b72aeb643ee7"
+    },
+    "stream": {
+      "batch_hash": "97dca1e8467ec44cf62299ab1045f23de0a0a0ea39d910d76a369fe516c8cbcd",
+      "summary": {
+        "complete": true,
+        "passed": 27,
+        "total": 27,
+        "schema_passed": 25,
+        "schema_total": 25,
+        "schema_required": 24,
+        "scenarios": {
+          "S-01": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-02": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-03": {
+            "passed": 9,
+            "total": 9
+          }
+        },
+        "code_passed": 3,
+        "code_total": 3,
+        "safety_failures": [],
+        "release_gate": false
+      },
+      "raw_report_sha256": "57ad48d237bad1969757fb5c76429749faf2857ef32f568bcaaf007560ef633f"
+    },
+    "http": {
+      "batch_hash": "97dca1e8467ec44cf62299ab1045f23de0a0a0ea39d910d76a369fe516c8cbcd",
+      "summary": {
+        "complete": true,
+        "passed": 27,
+        "total": 27,
+        "schema_passed": 25,
+        "schema_total": 25,
+        "schema_required": 24,
+        "scenarios": {
+          "S-01": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-02": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-03": {
+            "passed": 9,
+            "total": 9
+          }
+        },
+        "code_passed": 3,
+        "code_total": 3,
+        "safety_failures": [],
+        "release_gate": false
+      },
+      "raw_report_sha256": "8de8a656420a2f451375885a910b1d5731847278196d78aae4f2dbe0089dc282"
+    }
+  }
+}

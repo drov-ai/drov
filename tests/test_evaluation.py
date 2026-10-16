@@ -10,9 +10,10 @@ from typing import Any
 
 import pytest
 
+from drov.tools.schema import compile_type
 from drov.types import Usage
 from evals.budget import BudgetStop, Ledger
-from evals.common import manifest
+from evals.common import CodeReport, manifest
 from evals.run import score, summarize, trial
 from tests.test_sandbox_docker import config as config
 
@@ -144,6 +145,26 @@ def test_csv_oracle_compares_exact_finite_values(identifier: str, number: str, v
     assert result["passed"] is valid, result
     assert result["checks"]["final_schema"]
     assert "scoring_error" not in result
+
+
+@pytest.mark.parametrize(
+    ("number", "valid"),
+    [("60", True), ("60.0", False), ("6e1", False), ('"60"', False), ("true", False)],
+)
+def test_final_code_report_preserves_strict_integer_type(number: str, valid: bool) -> None:
+    # CSV notation is scored numerically, but the existing SDK's declared Python
+    # int output contract remains strict. Reproduce the actual v8 final failure.
+    codec = compile_type(CodeReport)
+    response = (
+        '{"count":3,"total":'
+        + number
+        + ',"mean":20.0,"artifact_ids":["delivered"],"business_status":"not_requested"}'
+    )
+    if valid:
+        assert codec.parse(response).total == 60
+    else:
+        with pytest.raises(ValueError):
+            codec.parse(response)
 
 
 def test_summary_cannot_count_duplicates_or_offline_as_live_release() -> None:

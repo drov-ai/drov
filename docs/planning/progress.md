@@ -19,7 +19,7 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 ## 当前交付：T-16 实施中
 
-2026-10-17 新接续轮进行中：已离线确认 S01-01 题目与 ResearchReport 的证据范围缺项，按 [ADR-0034](../decisions/0034-evaluation-evidence-scope.md) 澄清 A/B 共享及仅 A 应用进程重启，原资料/预期/门槛不改。候选 v8 沿用 Pro/high/4096，先离线验证、提交新指纹，再完整 7+81；旧失败和累计 183 次/1.80000140 元保留。新结果见[本轮记录](../validation/t16-evidence-scope.md)。
+2026-10-17 新接续轮进行中：已离线确认 S01-01 题目与 ResearchReport 的证据范围缺项，按 [ADR-0034](../decisions/0034-evaluation-evidence-scope.md) 澄清 A/B 共享及仅 A 应用进程重启，原资料/预期/门槛不改。v8 完整 smoke 6/7，代码产物正确但最终 total=60.0 违反原严格 int；v9 仅明确已有最终JSON类型要求，先离线验证、提交新指纹，再完整 7+81。累计204次/2.10906680元全部settled，旧失败保留。新结果见[本轮记录](../validation/t16-evidence-scope.md)。
 
 既有27项manifest/真实Runtime/独立进程Memory/事项服务/Docker执行器、DeepSeek专用Responses方言与预算账本保留，本轮未改SDK源码/依赖锁/SQL/品牌。v5仅澄清Memory精确键读取，实际完整smoke6/7，正确CSV 60.0被int(text)误拒绝；v6以Decimal精确有限等值修复，不改正确数值或门槛，完整真实smoke7/7，随后正式预定81实际37、34通过：两项输出2048后incomplete，一项保存前查版本使隔离累计超过8请求。原报告/所有失败与未执行44项保留，不重算或混分。
 
