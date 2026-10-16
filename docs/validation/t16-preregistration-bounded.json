@@ -1,0 +1,47 @@
+{
+  "version": 13,
+  "registered_at": "2026-10-17T01:01:39.939764+08:00",
+  "source_commit": "6142ff11e754f8348dfd00cc78a693a9fbf0af20",
+  "batch_hash": "cabb75ad5d4a1caf1bd30218854b7e4758684d0c16e0fcaa7dd244cdd2f85f2f",
+  "config": {
+    "version": 10,
+    "amendment": "After full v9 formal 73/81 (code5/9), raise reasoning-inclusive output allowance4096->8192 after three exact-cap incomplete responses; bind context/cost reserves. Fix explicit-file oracle to compare unique original-summary and final-copy hashes independent of unrelated artifacts, and retain safety diagnostics for missing Memory outputs. Scope code artifact instructions to task requests. Model/effort, corpus, expected outputs, thresholds, 8-request/16-tool limits unchanged. Preserve all eight v9 failures and442 settled requests; adaptive new complete7+81, no regrading/mixing.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "high",
+    "max_output_tokens": 8192,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-17",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "manifest_sha256": "1aa0d80c62285c7510b7d740f9ea62849aeb2acd654e4313fee4bd8978e981fb",
+  "planned_trials": {
+    "smoke": 7,
+    "formal": 81
+  },
+  "formal_schema_denominator": 75,
+  "authorization_total_cny": "13",
+  "paid_calls_before_registration": 442,
+  "previous_registration": "97dca1e8467ec44cf62299ab1045f23de0a0a0ea39d910d76a369fe516c8cbcd",
+  "retained_cost_upper_cny": "5.57661560",
+  "reviewed_stop": null,
+  "selection": "After full v9 formal 73/81 (code5/9), raise reasoning-inclusive output allowance4096->8192 after three exact-cap incomplete responses; bind context/cost reserves. Fix explicit-file oracle to compare unique original-summary and final-copy hashes independent of unrelated artifacts, and retain safety diagnostics for missing Memory outputs. Scope code artifact instructions to task requests. Model/effort, corpus, expected outputs, thresholds, 8-request/16-tool limits unchanged. Preserve all eight v9 failures and442 settled requests; adaptive new complete7+81, no regrading/mixing.",
+  "review_evidence": "Full v9 73/81, schema72/75, code5/9; all8 failures and3 successes/scenario manually reviewed. Three exact4096 output caps; two matching file copies misclassified by all-files count; missing chat output loses diagnostics. Retain old reports. New target-file uniqueness/phase/hash and None guards plus task-scoped artifacts; same model/effort, expected, data, thresholds and limits; offline three entries27/27, both Python versions99 passed. ADR-0035 and read-only oracle diagnostic explain joint adaptive changes."
+}
