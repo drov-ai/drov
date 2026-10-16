@@ -1,0 +1,45 @@
+{
+  "version": 7,
+  "registered_date": "2026-10-16",
+  "source_commit": "9072e1553d6383ae679f7782b18ef76db9361e6a",
+  "batch_hash": "f4ecc6c05662f4608afb7e019460f43e6269d684d23434cfcec76192fc24e3b8",
+  "manifest_sha256": "b1f62768489fc0f175e24cf16267a0de0752b7f700b5075c8f0e9f0910cd5677",
+  "config": {
+    "version": 4,
+    "amendment": "Final independent Pro/high candidate: official daily-agent effort recommendation after Pro/low repeated retrieval; prompts, corpus, scoring and output limit unchanged; retain every previous failure and cost",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "high",
+    "max_output_tokens": 2048,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-16",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "planned_trials": {
+    "smoke": 7,
+    "formal": 81
+  },
+  "formal_schema_denominator": 75,
+  "authorization_total_cny": "13",
+  "paid_calls_before_registration": 28,
+  "previous_registration": "390570e7d3b4778eeea913364c22f39425bc97d520142f950fedff30ec5e3fdc",
+  "retained_cost_upper_cny": "0.11976080",
+  "selection": "Final independent Pro/high candidate per official daily-Agent effort guidance; only effort low->high, preserve prompts/corpus/scoring/2048 limit and all previous failures/costs; not blind parameter selection"
+}
