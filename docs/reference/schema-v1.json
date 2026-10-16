@@ -1244,6 +1244,79 @@
       "title": "E2BLimits",
       "type": "object"
     },
+    "ExportedArtifact": {
+      "$defs": {
+        "ArtifactRef": {
+          "additionalProperties": false,
+          "properties": {
+            "artifact_id": {
+              "pattern": "^art_[0-9a-f]{32}$",
+              "title": "Artifact Id",
+              "type": "string"
+            },
+            "media_type": {
+              "maxLength": 128,
+              "title": "Media Type",
+              "type": "string"
+            },
+            "sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            },
+            "size_bytes": {
+              "minimum": 0,
+              "title": "Size Bytes",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "sha256",
+            "size_bytes",
+            "media_type"
+          ],
+          "title": "ArtifactRef",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Selected copy; source hash remains distinct from a redacted copy's hash.",
+      "properties": {
+        "data_base64": {
+          "maxLength": 100663296,
+          "title": "Data Base64",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 67108864,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "source": {
+          "$ref": "#/$defs/ArtifactRef"
+        }
+      },
+      "required": [
+        "source",
+        "name",
+        "sha256",
+        "size_bytes",
+        "data_base64"
+      ],
+      "title": "ExportedArtifact",
+      "type": "object"
+    },
     "HTTPResponse": {
       "$defs": {
         "ApprovalDecision": {
@@ -2268,6 +2341,144 @@
         }
       },
       "title": "Memory",
+      "type": "object"
+    },
+    "MigrationPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "changes": {
+          "additionalProperties": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "propertyNames": {
+            "enum": [
+              "run",
+              "operation"
+            ]
+          },
+          "title": "Changes",
+          "type": "object"
+        },
+        "fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Fingerprint",
+          "type": "string"
+        },
+        "profile": {
+          "const": "v1-compatible-defaults",
+          "default": "v1-compatible-defaults",
+          "title": "Profile",
+          "type": "string"
+        },
+        "record_schema": {
+          "const": 1,
+          "default": 1,
+          "title": "Record Schema",
+          "type": "integer"
+        },
+        "source_schema": {
+          "const": 1,
+          "default": 1,
+          "title": "Source Schema",
+          "type": "integer"
+        },
+        "target_schema": {
+          "const": 1,
+          "default": 1,
+          "title": "Target Schema",
+          "type": "integer"
+        },
+        "unfinished_runs": {
+          "minimum": 0,
+          "title": "Unfinished Runs",
+          "type": "integer"
+        },
+        "unknown_operations": {
+          "minimum": 0,
+          "title": "Unknown Operations",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fingerprint",
+        "changes",
+        "unfinished_runs",
+        "unknown_operations"
+      ],
+      "title": "MigrationPlan",
+      "type": "object"
+    },
+    "MigrationReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "backup_snapshot_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Backup Snapshot Id",
+          "type": "string"
+        },
+        "changes": {
+          "additionalProperties": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "propertyNames": {
+            "enum": [
+              "run",
+              "operation"
+            ]
+          },
+          "title": "Changes",
+          "type": "object"
+        },
+        "migrated_at": {
+          "format": "date-time",
+          "title": "Migrated At",
+          "type": "string"
+        },
+        "plan_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Plan Digest",
+          "type": "string"
+        },
+        "profile": {
+          "const": "v1-compatible-defaults",
+          "default": "v1-compatible-defaults",
+          "title": "Profile",
+          "type": "string"
+        },
+        "record_schema": {
+          "const": 1,
+          "default": 1,
+          "title": "Record Schema",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "source_schema": {
+          "const": 1,
+          "default": 1,
+          "title": "Source Schema",
+          "type": "integer"
+        },
+        "target_schema": {
+          "const": 1,
+          "default": 1,
+          "title": "Target Schema",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "plan_digest",
+        "backup_snapshot_id",
+        "changes",
+        "migrated_at"
+      ],
+      "title": "MigrationReceipt",
       "type": "object"
     },
     "ModelCapabilities": {
@@ -3377,6 +3588,1306 @@
         "user_id"
       ],
       "title": "RunContext",
+      "type": "object"
+    },
+    "RunExport": {
+      "$defs": {
+        "ApprovalRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "arguments_summary": {
+              "$ref": "#/$defs/JsonValue"
+            },
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            },
+            "expires_at": {
+              "format": "date-time",
+              "title": "Expires At",
+              "type": "string"
+            },
+            "kind": {
+              "const": "approval",
+              "default": "approval",
+              "title": "Kind",
+              "type": "string"
+            },
+            "operation_id": {
+              "minLength": 1,
+              "title": "Operation Id",
+              "type": "string"
+            },
+            "prompt": {
+              "title": "Prompt",
+              "type": "string"
+            },
+            "request_id": {
+              "minLength": 1,
+              "title": "Request Id",
+              "type": "string"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "schema_version": {
+              "const": 1,
+              "default": 1,
+              "title": "Schema Version",
+              "type": "integer"
+            },
+            "tool_name": {
+              "minLength": 1,
+              "title": "Tool Name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "request_id",
+            "run_id",
+            "operation_id",
+            "created_at",
+            "expires_at",
+            "prompt",
+            "tool_name",
+            "arguments_summary"
+          ],
+          "title": "ApprovalRequest",
+          "type": "object"
+        },
+        "ArtifactRef": {
+          "additionalProperties": false,
+          "properties": {
+            "artifact_id": {
+              "pattern": "^art_[0-9a-f]{32}$",
+              "title": "Artifact Id",
+              "type": "string"
+            },
+            "media_type": {
+              "maxLength": 128,
+              "title": "Media Type",
+              "type": "string"
+            },
+            "sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            },
+            "size_bytes": {
+              "minimum": 0,
+              "title": "Size Bytes",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "artifact_id",
+            "sha256",
+            "size_bytes",
+            "media_type"
+          ],
+          "title": "ArtifactRef",
+          "type": "object"
+        },
+        "Cancelled": {
+          "additionalProperties": false,
+          "properties": {
+            "operations": {
+              "items": {
+                "$ref": "#/$defs/OperationSummary"
+              },
+              "title": "Operations",
+              "type": "array"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "state_version": {
+              "exclusiveMinimum": 0,
+              "title": "State Version",
+              "type": "integer"
+            },
+            "status": {
+              "const": "cancelled",
+              "default": "cancelled",
+              "title": "Status",
+              "type": "string"
+            },
+            "usage": {
+              "$ref": "#/$defs/Usage"
+            }
+          },
+          "required": [
+            "run_id",
+            "state_version"
+          ],
+          "title": "Cancelled",
+          "type": "object"
+        },
+        "Completed_Annotated_JsonValue__BeforeValidator__": {
+          "additionalProperties": false,
+          "properties": {
+            "output": {
+              "$ref": "#/$defs/JsonValue"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "state_version": {
+              "exclusiveMinimum": 0,
+              "title": "State Version",
+              "type": "integer"
+            },
+            "status": {
+              "const": "completed",
+              "default": "completed",
+              "title": "Status",
+              "type": "string"
+            },
+            "usage": {
+              "$ref": "#/$defs/Usage"
+            }
+          },
+          "required": [
+            "run_id",
+            "state_version",
+            "output"
+          ],
+          "title": "Completed[Annotated[JsonValue, BeforeValidator]]",
+          "type": "object"
+        },
+        "ContextManifest": {
+          "additionalProperties": false,
+          "properties": {
+            "agent_name": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Agent Name",
+              "type": "string"
+            },
+            "budget": {
+              "minimum": 0,
+              "title": "Budget",
+              "type": "integer"
+            },
+            "content_visible": {
+              "default": false,
+              "title": "Content Visible",
+              "type": "boolean"
+            },
+            "estimated_tokens": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Estimated Tokens",
+              "type": "integer"
+            },
+            "estimator": {
+              "minLength": 1,
+              "title": "Estimator",
+              "type": "string"
+            },
+            "input_hash": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Input Hash",
+              "type": "string"
+            },
+            "input_ref": {
+              "minLength": 1,
+              "title": "Input Ref",
+              "type": "string"
+            },
+            "model_call_id": {
+              "minLength": 1,
+              "title": "Model Call Id",
+              "type": "string"
+            },
+            "reported_usage": {
+              "$ref": "#/$defs/Usage"
+            },
+            "retrieval_status": {
+              "enum": [
+                "disabled",
+                "included",
+                "empty",
+                "timeout",
+                "failed",
+                "excluded"
+              ],
+              "title": "Retrieval Status",
+              "type": "string"
+            },
+            "revision": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Revision",
+              "type": "string"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "schema_version": {
+              "default": 1,
+              "enum": [
+                1,
+                2
+              ],
+              "title": "Schema Version",
+              "type": "integer"
+            },
+            "sources": {
+              "items": {
+                "$ref": "#/$defs/ContextSource"
+              },
+              "title": "Sources",
+              "type": "array"
+            }
+          },
+          "required": [
+            "model_call_id",
+            "run_id",
+            "agent_name",
+            "revision",
+            "input_ref",
+            "input_hash",
+            "budget",
+            "estimator",
+            "sources",
+            "retrieval_status"
+          ],
+          "title": "ContextManifest",
+          "type": "object"
+        },
+        "ContextSource": {
+          "additionalProperties": false,
+          "properties": {
+            "content": {
+              "$ref": "#/$defs/JsonValue",
+              "default": null
+            },
+            "estimated_tokens": {
+              "minimum": 0,
+              "title": "Estimated Tokens",
+              "type": "integer"
+            },
+            "id": {
+              "minLength": 1,
+              "title": "Id",
+              "type": "string"
+            },
+            "included": {
+              "title": "Included",
+              "type": "boolean"
+            },
+            "kind": {
+              "enum": [
+                "instructions",
+                "input",
+                "history",
+                "memory",
+                "tool",
+                "schema",
+                "provider",
+                "artifact"
+              ],
+              "title": "Kind",
+              "type": "string"
+            },
+            "reason": {
+              "minLength": 1,
+              "title": "Reason",
+              "type": "string"
+            },
+            "transform": {
+              "default": "none",
+              "enum": [
+                "none",
+                "preview",
+                "excluded"
+              ],
+              "title": "Transform",
+              "type": "string"
+            },
+            "version": {
+              "minLength": 1,
+              "title": "Version",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "kind",
+            "included",
+            "reason",
+            "estimated_tokens"
+          ],
+          "title": "ContextSource",
+          "type": "object"
+        },
+        "DurableEvent": {
+          "additionalProperties": false,
+          "properties": {
+            "content_visible": {
+              "default": false,
+              "title": "Content Visible",
+              "type": "boolean"
+            },
+            "data": {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "title": "Data",
+              "type": "object"
+            },
+            "durable": {
+              "const": true,
+              "default": true,
+              "title": "Durable",
+              "type": "boolean"
+            },
+            "occurred_at": {
+              "format": "date-time",
+              "title": "Occurred At",
+              "type": "string"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "schema_version": {
+              "const": 1,
+              "default": 1,
+              "title": "Schema Version",
+              "type": "integer"
+            },
+            "seq": {
+              "exclusiveMinimum": 0,
+              "title": "Seq",
+              "type": "integer"
+            },
+            "state_version": {
+              "exclusiveMinimum": 0,
+              "title": "State Version",
+              "type": "integer"
+            },
+            "type": {
+              "enum": [
+                "run.accepted",
+                "run.running",
+                "run.suspended",
+                "run.completed",
+                "run.failed",
+                "run.cancelled",
+                "run.cancel_requested",
+                "model.attempt_started",
+                "model.attempt_completed",
+                "model.attempt_failed",
+                "tool.prepared",
+                "tool.dispatched",
+                "tool.succeeded",
+                "tool.failed_known",
+                "tool.denied",
+                "tool.unknown",
+                "tool.not_executed",
+                "interaction.requested",
+                "interaction.responded",
+                "interaction.expired",
+                "context.prepared",
+                "memory.changed",
+                "recovery.required",
+                "verification.started",
+                "verification.completed"
+              ],
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id",
+            "state_version",
+            "seq",
+            "type",
+            "occurred_at",
+            "data"
+          ],
+          "title": "DurableEvent",
+          "type": "object"
+        },
+        "ExportedArtifact": {
+          "additionalProperties": false,
+          "description": "Selected copy; source hash remains distinct from a redacted copy's hash.",
+          "properties": {
+            "data_base64": {
+              "maxLength": 100663296,
+              "title": "Data Base64",
+              "type": "string"
+            },
+            "name": {
+              "title": "Name",
+              "type": "string"
+            },
+            "sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "title": "Sha256",
+              "type": "string"
+            },
+            "size_bytes": {
+              "maximum": 67108864,
+              "minimum": 0,
+              "title": "Size Bytes",
+              "type": "integer"
+            },
+            "source": {
+              "$ref": "#/$defs/ArtifactRef"
+            }
+          },
+          "required": [
+            "source",
+            "name",
+            "sha256",
+            "size_bytes",
+            "data_base64"
+          ],
+          "title": "ExportedArtifact",
+          "type": "object"
+        },
+        "Failed": {
+          "additionalProperties": false,
+          "properties": {
+            "error": {
+              "$ref": "#/$defs/RunError"
+            },
+            "operations": {
+              "items": {
+                "$ref": "#/$defs/OperationSummary"
+              },
+              "title": "Operations",
+              "type": "array"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "state_version": {
+              "exclusiveMinimum": 0,
+              "title": "State Version",
+              "type": "integer"
+            },
+            "status": {
+              "const": "failed",
+              "default": "failed",
+              "title": "Status",
+              "type": "string"
+            },
+            "usage": {
+              "$ref": "#/$defs/Usage"
+            }
+          },
+          "required": [
+            "run_id",
+            "state_version",
+            "error"
+          ],
+          "title": "Failed",
+          "type": "object"
+        },
+        "InputRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            },
+            "expires_at": {
+              "format": "date-time",
+              "title": "Expires At",
+              "type": "string"
+            },
+            "input_schema": {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "title": "Input Schema",
+              "type": "object"
+            },
+            "kind": {
+              "const": "input",
+              "default": "input",
+              "title": "Kind",
+              "type": "string"
+            },
+            "operation_id": {
+              "minLength": 1,
+              "title": "Operation Id",
+              "type": "string"
+            },
+            "prompt": {
+              "title": "Prompt",
+              "type": "string"
+            },
+            "request_id": {
+              "minLength": 1,
+              "title": "Request Id",
+              "type": "string"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "schema_version": {
+              "const": 1,
+              "default": 1,
+              "title": "Schema Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "request_id",
+            "run_id",
+            "operation_id",
+            "created_at",
+            "expires_at",
+            "prompt",
+            "input_schema"
+          ],
+          "title": "InputRequest",
+          "type": "object"
+        },
+        "InteractionSummary": {
+          "additionalProperties": false,
+          "properties": {
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            },
+            "expires_at": {
+              "format": "date-time",
+              "title": "Expires At",
+              "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "approval",
+                "input",
+                "reconciliation"
+              ],
+              "title": "Kind",
+              "type": "string"
+            },
+            "operation_id": {
+              "minLength": 1,
+              "title": "Operation Id",
+              "type": "string"
+            },
+            "request_id": {
+              "minLength": 1,
+              "title": "Request Id",
+              "type": "string"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "schema_version": {
+              "const": 1,
+              "default": 1,
+              "title": "Schema Version",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "request_id",
+            "kind",
+            "run_id",
+            "operation_id",
+            "created_at",
+            "expires_at"
+          ],
+          "title": "InteractionSummary",
+          "type": "object"
+        },
+        "JsonValue": {},
+        "OperationSummary": {
+          "additionalProperties": false,
+          "properties": {
+            "effect": {
+              "enum": [
+                "read",
+                "write",
+                "unknown"
+              ],
+              "title": "Effect",
+              "type": "string"
+            },
+            "operation_id": {
+              "minLength": 1,
+              "title": "Operation Id",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "prepared",
+                "dispatched",
+                "succeeded",
+                "failed_known",
+                "unknown",
+                "not_executed"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "tool_name": {
+              "minLength": 1,
+              "title": "Tool Name",
+              "type": "string"
+            },
+            "tool_revision": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Tool Revision",
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id",
+            "tool_name",
+            "tool_revision",
+            "effect",
+            "status"
+          ],
+          "title": "OperationSummary",
+          "type": "object"
+        },
+        "ReconciliationRequest": {
+          "additionalProperties": false,
+          "properties": {
+            "arguments_summary": {
+              "$ref": "#/$defs/JsonValue"
+            },
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            },
+            "expires_at": {
+              "format": "date-time",
+              "title": "Expires At",
+              "type": "string"
+            },
+            "explanation": {
+              "minLength": 1,
+              "title": "Explanation",
+              "type": "string"
+            },
+            "kind": {
+              "const": "reconciliation",
+              "default": "reconciliation",
+              "title": "Kind",
+              "type": "string"
+            },
+            "operation_id": {
+              "minLength": 1,
+              "title": "Operation Id",
+              "type": "string"
+            },
+            "prompt": {
+              "title": "Prompt",
+              "type": "string"
+            },
+            "request_id": {
+              "minLength": 1,
+              "title": "Request Id",
+              "type": "string"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "schema_version": {
+              "const": 1,
+              "default": 1,
+              "title": "Schema Version",
+              "type": "integer"
+            },
+            "tool_name": {
+              "minLength": 1,
+              "title": "Tool Name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "request_id",
+            "run_id",
+            "operation_id",
+            "created_at",
+            "expires_at",
+            "prompt",
+            "explanation",
+            "tool_name",
+            "arguments_summary"
+          ],
+          "title": "ReconciliationRequest",
+          "type": "object"
+        },
+        "RunError": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "minLength": 1,
+              "title": "Code",
+              "type": "string"
+            },
+            "message": {
+              "title": "Message",
+              "type": "string"
+            },
+            "operation_id": {
+              "anyOf": [
+                {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Operation Id"
+            },
+            "retryable": {
+              "default": false,
+              "title": "Retryable",
+              "type": "boolean"
+            },
+            "stage": {
+              "minLength": 1,
+              "title": "Stage",
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message",
+            "stage"
+          ],
+          "title": "RunError",
+          "type": "object"
+        },
+        "RunInspection": {
+          "additionalProperties": false,
+          "properties": {
+            "context_manifests": {
+              "items": {
+                "$ref": "#/$defs/ContextManifest"
+              },
+              "title": "Context Manifests",
+              "type": "array"
+            },
+            "events": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/DurableEvent"
+                  },
+                  {
+                    "$ref": "#/$defs/UnknownDurableEvent"
+                  }
+                ]
+              },
+              "title": "Events",
+              "type": "array"
+            },
+            "has_more": {
+              "default": false,
+              "title": "Has More",
+              "type": "boolean"
+            },
+            "next_cursor": {
+              "anyOf": [
+                {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Next Cursor"
+            },
+            "snapshot": {
+              "$ref": "#/$defs/RunSnapshot"
+            }
+          },
+          "required": [
+            "snapshot",
+            "events"
+          ],
+          "title": "RunInspection",
+          "type": "object"
+        },
+        "RunOutcome_Annotated_JsonValue__BeforeValidator__": {
+          "discriminator": {
+            "mapping": {
+              "cancelled": "#/$defs/Cancelled",
+              "completed": "#/$defs/Completed_Annotated_JsonValue__BeforeValidator__",
+              "failed": "#/$defs/Failed",
+              "suspended": "#/$defs/Suspended"
+            },
+            "propertyName": "status"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Completed_Annotated_JsonValue__BeforeValidator__"
+            },
+            {
+              "$ref": "#/$defs/Suspended"
+            },
+            {
+              "$ref": "#/$defs/Failed"
+            },
+            {
+              "$ref": "#/$defs/Cancelled"
+            }
+          ]
+        },
+        "RunSnapshot": {
+          "additionalProperties": false,
+          "properties": {
+            "agent_name": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Agent Name",
+              "type": "string"
+            },
+            "cancel_requested": {
+              "default": false,
+              "title": "Cancel Requested",
+              "type": "boolean"
+            },
+            "content_visible": {
+              "default": false,
+              "title": "Content Visible",
+              "type": "boolean"
+            },
+            "created_at": {
+              "format": "date-time",
+              "title": "Created At",
+              "type": "string"
+            },
+            "operations": {
+              "items": {
+                "$ref": "#/$defs/OperationSummary"
+              },
+              "title": "Operations",
+              "type": "array"
+            },
+            "outcome": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/RunOutcome_Annotated_JsonValue__BeforeValidator__"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "pending": {
+              "anyOf": [
+                {
+                  "discriminator": {
+                    "mapping": {
+                      "approval": "#/$defs/ApprovalRequest",
+                      "input": "#/$defs/InputRequest",
+                      "reconciliation": "#/$defs/ReconciliationRequest"
+                    },
+                    "propertyName": "kind"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ApprovalRequest"
+                    },
+                    {
+                      "$ref": "#/$defs/InputRequest"
+                    },
+                    {
+                      "$ref": "#/$defs/ReconciliationRequest"
+                    }
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/InteractionSummary"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Pending"
+            },
+            "reason": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "approval",
+                    "input",
+                    "reconciliation",
+                    "recovery"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Reason"
+            },
+            "recoverable": {
+              "default": false,
+              "title": "Recoverable",
+              "type": "boolean"
+            },
+            "revision": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Revision",
+              "type": "string"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "session_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Session Id",
+              "type": "string"
+            },
+            "state_version": {
+              "exclusiveMinimum": 0,
+              "title": "State Version",
+              "type": "integer"
+            },
+            "status": {
+              "enum": [
+                "accepted",
+                "running",
+                "suspended",
+                "completed",
+                "failed",
+                "cancelled"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "updated_at": {
+              "format": "date-time",
+              "title": "Updated At",
+              "type": "string"
+            },
+            "usage": {
+              "$ref": "#/$defs/Usage"
+            }
+          },
+          "required": [
+            "run_id",
+            "state_version",
+            "status",
+            "agent_name",
+            "revision",
+            "session_id",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "RunSnapshot",
+          "type": "object"
+        },
+        "Suspended": {
+          "additionalProperties": false,
+          "properties": {
+            "pending": {
+              "anyOf": [
+                {
+                  "discriminator": {
+                    "mapping": {
+                      "approval": "#/$defs/ApprovalRequest",
+                      "input": "#/$defs/InputRequest",
+                      "reconciliation": "#/$defs/ReconciliationRequest"
+                    },
+                    "propertyName": "kind"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/ApprovalRequest"
+                    },
+                    {
+                      "$ref": "#/$defs/InputRequest"
+                    },
+                    {
+                      "$ref": "#/$defs/ReconciliationRequest"
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pending"
+            },
+            "reason": {
+              "enum": [
+                "approval",
+                "input",
+                "reconciliation",
+                "recovery"
+              ],
+              "title": "Reason",
+              "type": "string"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "state_version": {
+              "exclusiveMinimum": 0,
+              "title": "State Version",
+              "type": "integer"
+            },
+            "status": {
+              "const": "suspended",
+              "default": "suspended",
+              "title": "Status",
+              "type": "string"
+            },
+            "usage": {
+              "$ref": "#/$defs/Usage"
+            }
+          },
+          "required": [
+            "run_id",
+            "state_version",
+            "reason",
+            "pending"
+          ],
+          "title": "Suspended",
+          "type": "object"
+        },
+        "UnknownDurableEvent": {
+          "additionalProperties": false,
+          "description": "Read-only retention of a future event; never dispatch it as a command.",
+          "properties": {
+            "content_visible": {
+              "default": false,
+              "title": "Content Visible",
+              "type": "boolean"
+            },
+            "data": {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "title": "Data",
+              "type": "object"
+            },
+            "durable": {
+              "const": true,
+              "default": true,
+              "title": "Durable",
+              "type": "boolean"
+            },
+            "occurred_at": {
+              "format": "date-time",
+              "title": "Occurred At",
+              "type": "string"
+            },
+            "run_id": {
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            },
+            "schema_version": {
+              "const": 1,
+              "default": 1,
+              "title": "Schema Version",
+              "type": "integer"
+            },
+            "seq": {
+              "exclusiveMinimum": 0,
+              "title": "Seq",
+              "type": "integer"
+            },
+            "state_version": {
+              "exclusiveMinimum": 0,
+              "title": "State Version",
+              "type": "integer"
+            },
+            "type": {
+              "minLength": 1,
+              "title": "Type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "run_id",
+            "state_version",
+            "seq",
+            "type",
+            "occurred_at",
+            "data"
+          ],
+          "title": "UnknownDurableEvent",
+          "type": "object"
+        },
+        "Usage": {
+          "additionalProperties": false,
+          "properties": {
+            "cached_input_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Cached Input Tokens"
+            },
+            "complete": {
+              "default": false,
+              "title": "Complete",
+              "type": "boolean"
+            },
+            "cost_amount": {
+              "anyOf": [
+                {
+                  "pattern": "^(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Cost Amount"
+            },
+            "currency": {
+              "anyOf": [
+                {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Currency"
+            },
+            "input_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Input Tokens"
+            },
+            "output_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Output Tokens"
+            },
+            "total_tokens": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Total Tokens"
+            }
+          },
+          "title": "Usage",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "content_visible": {
+          "default": false,
+          "title": "Content Visible",
+          "type": "boolean"
+        },
+        "context_manifests": {
+          "items": {
+            "$ref": "#/$defs/ContextManifest"
+          },
+          "title": "Context Manifests",
+          "type": "array"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/ExportedArtifact"
+          },
+          "maxItems": 16,
+          "title": "Files",
+          "type": "array"
+        },
+        "page": {
+          "$ref": "#/$defs/RunInspection"
+        },
+        "redacted": {
+          "default": false,
+          "title": "Redacted",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "page"
+      ],
+      "title": "RunExport",
       "type": "object"
     },
     "RunInspection": {

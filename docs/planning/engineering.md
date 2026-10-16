@@ -319,3 +319,10 @@ python -m drov.storage.maintenance get-abandonment --database /private/drov/stat
 ### T-15成对备份与屏障实现（ADR-0030）
 
 SQLiteMaintenance的backup/inspect_backup/restore使用原排他锁、SQLite connection.backup API及私有原目录FD复制；新bundle根锁、partial→data原子发布、固定相对库存/大小/SHA-256、完整schema/记录/ready校验。目标必须为新目录，pending回收先resume；原库不升级。副本内独立recovery_schema=1/recovery_barrier，原所有DDL/版本保持，旧SDK拒绝新副本。恢复到新bundle并返回真实数据库/文件路径；屏障在发布前已持久化，拦截存储接收及Runtime控制/内核派发，查看与维护可用。CLI同名backup/inspect-backup/restore/get-recovery-barrier；无HTTP管理入口或通用force解除。取消等实际worker收尾后才释放锁，partial不自动删或视为完整备份。Windows纯DB支持文件flush/SQLite FULL/目录rename，POSIX另同步各级目录；原配对文件仍POSIX，未宣称物理断电验证。详见[决定](../decisions/0030-quarantined-consistent-backups.md)/[验证](../validation/t15-backup.md)。
+
+
+### T-15迁移和导出实现
+
+storage._migration仅支持v1-compatible-defaults：真实早期v1 Run/ToolOperation字段回填，原DDL/user_version/record_schema保持1，独立migration_schema=1/migration_receipts。原锁/完整HMAC计划→完整隔离备份→同事务实际payload更新/不可变回执/完整性；不升级普通open，不创建无变更空表。CLI preview-migration/migrate复用原管理员入口，来源与代价见[ADR-0031](../decisions/0031-compatible-v1-record-migration.md)。
+
+runtime.exports/drov.exports提供Runtime.export_run、RunExport/ExportedArtifact与纯同步ExportRedactor。数据来自已有授权观察和逐文件读取，原RunInspection仍摘要，正文上下文独立；分页/大小/16附件限制、复制后再校验权限/来源/hash。框架执行控制字段与已知标识文本做便携投影，截断JSON预览只保留来源标记；业务directory字段保留，应用自行处理业务秘密和附件脱敏。完整算法/范围见[ADR-0032](../decisions/0032-authorized-portable-exports.md)，实际检查见[记录](../validation/t15-migration-export.md)。无新依赖、锁/原字节格式或普通HTTP管理接口。

@@ -530,3 +530,12 @@ AbandonmentFact是不可变管理回执，包含opaque Run/Session、Agent、终
 
 
 T-15一致备份管理员接口（ADR-0030）：`await maintenance.backup(new_directory)`，`await SQLiteMaintenance.inspect_backup(bundle)`，`await SQLiteMaintenance.restore(bundle, new_directory)`，`await maintenance.get_recovery_barrier()`。完整清单/新目标路径只属于可信本地管理员；备份为原始数据，不是普通用户导出。目标不可覆盖；返回RestoreResult中的数据库与可选原配对文件路径/限制。副本发布前持久屏障阻止所有接收与respond/resume/recover/verify及新内核派发，HTTP返回409/recovery_barrier；旧同键也拒绝。查看仍按原权限。无通用自动/force解锁入口，独立业务核实/事实补齐前保持阻断，具体文件/耐久性边界见[ADR-0030](../decisions/0030-quarantined-consistent-backups.md)。
+
+
+### 显式兼容迁移与授权导出（T-15收尾）
+
+`await maintenance.preview_migration()`返回具名v1-compatible-defaults计划；`await maintenance.migrate(plan, backup_directory=new_directory)`先备份，再原子回填早期v1兼容字段并保存MigrationReceipt。完整计划幂等，未知版本/profile拒绝，原状态/事件/去重和租约费用不变；无实际变化拒绝写表。不是任意未来schema转换器，见[ADR-0031](../decisions/0031-compatible-v1-record-migration.md)。
+
+`await runtime.export_run(run_id, context=actor, include_content=False, artifact_ids=(), after=None, limit=100, max_bytes=16*1024**2, redactor=None)`返回RunExport。默认元数据；正文另需read/view_content，完整上下文在独立context_manifests，原事件页继续只有摘要。每个附件显式ID、属于该Run且逐项授权/hash校验，最多16个；文件含原ArtifactRef及独立副本size/hash/Base64。原分页/游标规则、最多500事件且受Runtime上限，容量默认16MiB/显式最高64MiB。ExportRedactor处理JSON副本，可脱敏正文或附件（重算副本hash），不改身份/权限/页游标或引入未选择来源；转换后重查权限。没有自动外传/保存或HTTP导出路由，详见[ADR-0032](../decisions/0032-authorized-portable-exports.md)/[合成例](../../examples/export_offline.py)。
+
+恢复屏障也拒绝cancel和新的data_abandoned：旧prepared不能证明备份之后未派发。已有不可变放弃回执仍可查，纯观察/同义迁移/备份保留；无通用自动/force解除。

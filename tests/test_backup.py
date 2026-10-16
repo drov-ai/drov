@@ -219,6 +219,8 @@ async def test_saved_approval_and_absent_post_backup_run_cannot_resume(tmp_path:
                 )
         with pytest.raises(RecoveryBlocked):
             await runtime.recover(paused.run_id, context=ACTOR)
+        with pytest.raises(RecoveryBlocked):
+            await runtime.cancel(paused.run_id, context=ACTOR)
         for key in ("once", "missing-key", None):
             with pytest.raises(RecoveryBlocked):
                 await runtime.start(
@@ -233,6 +235,15 @@ async def test_saved_approval_and_absent_post_backup_run_cannot_resume(tmp_path:
                 request_key="post-backup-key",
             )
     assert len(service.calls) == 1 and len(model.calls) == 2
+    async with SQLiteMaintenance(result.database) as maintenance:
+        with pytest.raises(RecoveryBlocked):
+            await maintenance.abandon_run(
+                await maintenance.preview_abandonment(
+                    ACTOR, paused.run_id, reason="cannot infer dispatch from old history"
+                )
+            )
+        current = await maintenance._storage.get_run(ACTOR, paused.run_id)
+        assert current.state.status == "suspended" and current.state.pending is not None
 
 
 @pytest.mark.asyncio

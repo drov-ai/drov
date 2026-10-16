@@ -25,7 +25,8 @@ from drov.artifacts.records import ArtifactRecord
 from drov.artifacts.transaction import ArtifactTransaction
 from drov.artifacts.types import ArtifactLimits, Sha256
 from drov.artifacts.uploads import UploadRecord
-from drov.errors import ConfigurationError, PersistenceUnavailable
+from drov.errors import ConfigurationError, IncompatibleStorage, PersistenceUnavailable
+from drov.models.protocol import ModelRequest, ModelResponse
 from drov.sandbox._leases import LeaseTransaction, SandboxLease
 from drov.storage._barrier import RecoveryBarrier, get, install
 from drov.storage._driver import Key, Row
@@ -43,7 +44,7 @@ from drov.storage.records import (
 from drov.storage.sqlite import DDL, SQLiteStorage, _settle
 from drov.storage.transaction import _decode
 from drov.tools.operations import ToolOperation
-from drov.types import UtcTime, WireModel
+from drov.types import ContextManifest, UtcTime, WireModel
 
 if TYPE_CHECKING:
     from drov.storage.maintenance import SQLiteMaintenance
@@ -353,6 +354,21 @@ async def validate(maintenance: "SQLiteMaintenance") -> dict[str, str]:
                     operation.status,
                 ) != (value.run_id, value.item_id, value.version, value.state):
                     raise PersistenceUnavailable("Backup operation index differs")
+            elif isinstance(value, RunItem):
+                # These are framework-owned envelopes, not arbitrary tool-result
+                # dictionaries. Do not mutate/certify a future saved protocol.
+                version = value.data.get("schema_version")
+                if type(version) is not int or version != 1:
+                    raise IncompatibleStorage("Saved protocol envelope is unsupported")
+                try:
+                    if value.kind == "context":
+                        ContextManifest.from_json(canonical_json(value.data["manifest"]))
+                    elif value.kind == "model_input":
+                        ModelRequest.from_json(canonical_json(value.data["request"]))
+                    elif value.kind == "model_response":
+                        ModelResponse.from_json(canonical_json(value.data["response"]))
+                except (ValueError, KeyError, TypeError) as exc:
+                    raise IncompatibleStorage("Saved protocol payload is unsupported") from exc
         store = maintenance._artifacts
         for raw in snapshot.get("artifact_records", []):
             record = ArtifactRecord.from_json(raw[5])
@@ -417,6 +433,7 @@ async def validate(maintenance: "SQLiteMaintenance") -> dict[str, str]:
                     "reclamation_schema",
                     "abandonment_schema",
                     "recovery_schema",
+                    "migration_schema",
                 }
             },
         }

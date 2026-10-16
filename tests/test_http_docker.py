@@ -153,6 +153,18 @@ async def test_actual_file_execution_entry_equivalence_and_post_close_download(
             assert len(model.calls) == 2
             async with runtime.storage.transaction() as tx:
                 assert await LeaseTransaction(tx).active_count() == 0
+            portable = await runtime.export_run(
+                done.run_id,
+                context=ALICE,
+                include_content=True,
+                artifact_ids=[ref.artifact_id for ref in refs],
+            )
+            import base64
+
+            assert "execution_key" not in portable.model_dump_json()
+            assert "container_id" not in portable.model_dump_json()
+            assert [base64.b64decode(file.data_base64) for file in portable.files] == downloaded
+            assert len(model.calls) == 2
             if entry == "http":
                 repeat = await connection.post(
                     "/v1/runs",

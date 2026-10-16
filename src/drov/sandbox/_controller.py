@@ -563,8 +563,8 @@ class SandboxController:
         )
 
     async def recover(self, record: RunRecord) -> bool:
-        await self.runtime.storage.check_execution_allowed()
         """Query/clean/publish the original execution, never create/start replacement code."""
+        await self.runtime.storage.check_execution_allowed()
         storage = self.runtime.storage
         owner = MemoryScope(
             tenant_id=record.scope.tenant_id,

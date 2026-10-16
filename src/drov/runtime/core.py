@@ -17,6 +17,7 @@ from drov.artifacts.types import ArtifactInfo, ArtifactInput, ArtifactRef
 from drov.auth import Authorizer, OwnerAuthorizer
 from drov.config import Limits
 from drov.errors import CapacityExceeded, ConfigurationError, Conflict, ShutdownIncomplete
+from drov.exports import ExportRedactor, RunExport
 from drov.integrations._mcp_tool import MCPConnection, MCPTool
 from drov.models.protocol import ModelAdapter
 from drov.runtime.registration import AgentRegistration, fingerprint
@@ -345,6 +346,32 @@ class Runtime:
 
     async def cancel(self, run_id: str, *, context: RunContext) -> CancelReceipt:
         return await self._runs.cancel(run_id, context=context)
+
+    async def export_run(
+        self,
+        run_id: str,
+        *,
+        context: RunContext,
+        include_content: bool = False,
+        artifact_ids: Sequence[str] = (),
+        after: str | None = None,
+        limit: int = 100,
+        max_bytes: int = 16 * 1024**2,
+        redactor: ExportRedactor | None = None,
+    ) -> RunExport:
+        from drov.runtime.exports import export_run
+
+        return await export_run(
+            self,
+            run_id,
+            context=context,
+            include_content=include_content,
+            artifact_ids=artifact_ids,
+            after=after,
+            limit=limit,
+            max_bytes=max_bytes,
+            redactor=redactor,
+        )
 
     async def inspect(
         self,

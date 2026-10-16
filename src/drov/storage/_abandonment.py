@@ -218,6 +218,9 @@ async def apply(maintenance: "SQLiteMaintenance", plan: AbandonmentPlan) -> Aban
             ):
                 raise PersistenceUnavailable("Abandonment receipt differs from current state")
             return prior
+        # A restored prepared cursor cannot prove it was never dispatched after
+        # the snapshot. Do not relabel it not_executed from incomplete history.
+        await tx._driver.check_execution_allowed()
         current_plan, run, operations, rows = await select(
             maintenance, tx, plan.scope, plan.run_id, plan.reason
         )

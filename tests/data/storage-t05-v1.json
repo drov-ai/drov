@@ -1,0 +1,241 @@
+{
+  "fixture_format": 1,
+  "description": "Synthetic data actually written by historical T-05 development SDK; no released v0 is implied",
+  "source_commit": "d84c66fb7df36395d679c1dd4b45a99e5bbc23f1",
+  "source_wheel_sha256": "3b95f09fdc40e93b0a4498ae1306cdb4157f063dd251b647fbdb3fd05ae18f58",
+  "source_payload_files_verified": 29,
+  "database_version": 1,
+  "ddl": [
+    "CREATE TABLE metadata (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL)",
+    "CREATE TABLE records (\n        kind TEXT NOT NULL CHECK(kind IN ('session','run','checkpoint','event','start_key',\n            'operation','interaction','context','model_input','model_response','receipt','memory')),\n        tenant_id TEXT NOT NULL, user_id TEXT NOT NULL,\n        namespace TEXT NOT NULL, key TEXT NOT NULL, payload TEXT NOT NULL,\n        version INTEGER NOT NULL CHECK(typeof(version)='integer' AND version >= 1),\n        state TEXT NOT NULL, sequence INTEGER NOT NULL CHECK(sequence >= 0),\n        created_at TEXT NOT NULL,\n        PRIMARY KEY(kind,tenant_id,user_id,namespace,key)\n    )",
+    "CREATE UNIQUE INDEX active_interactions ON records(tenant_id,user_id,namespace)\n        WHERE kind='interaction' AND state='active'",
+    "CREATE INDEX event_pages ON records(kind,tenant_id,user_id,namespace,sequence)",
+    "CREATE INDEX record_pages ON records(kind,tenant_id,user_id,namespace,created_at,key)",
+    "CREATE UNIQUE INDEX run_ids ON records(key) WHERE kind='run'",
+    "CREATE UNIQUE INDEX unfinished_sessions ON records(tenant_id,user_id,namespace)\n        WHERE kind='run' AND state IN ('accepted','running','suspended')"
+  ],
+  "metadata": [
+    [
+      "dedup_secret",
+      "1111111111111111111111111111111111111111111111111111111111111111"
+    ],
+    [
+      "format",
+      "drov.sqlite"
+    ],
+    [
+      "record_schema",
+      "1"
+    ]
+  ],
+  "rows": [
+    [
+      "session",
+      "fixture",
+      "synthetic",
+      "",
+      "unfinished",
+      "{\"schema_version\":1,\"scope\":{\"tenant_id\":\"fixture\",\"user_id\":\"synthetic\",\"session_id\":\"unfinished\"},\"agent_name\":\"assistant\",\"active_run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"created_at\":\"2026-10-16T06:20:13.439630Z\",\"updated_at\":\"2026-10-16T06:20:13.439630Z\",\"version\":1}",
+      1,
+      "",
+      0,
+      "2026-10-16T06:20:13.439630+00:00"
+    ],
+    [
+      "run",
+      "fixture",
+      "synthetic",
+      "unfinished",
+      "ba4f5d4a-34bb-4411-a93f-78e71ec38d5e",
+      "{\"schema_version\":1,\"scope\":{\"tenant_id\":\"fixture\",\"user_id\":\"synthetic\",\"session_id\":\"unfinished\"},\"agent_name\":\"assistant\",\"revision\":\"1\",\"config_hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"input\":\"synthetic historical input\",\"limits\":{\"max_model_steps\":20,\"max_tool_calls\":40,\"run_active_seconds\":300.0,\"advance_seconds\":120.0,\"model_timeout_seconds\":60.0,\"tool_timeout_seconds\":30.0,\"verify_timeout_seconds\":10.0,\"model_retries\":1,\"read_tool_retries\":1,\"write_tool_retries\":0,\"retry_backoff_seconds\":1.0,\"approval_timeout_seconds\":86400.0,\"input_timeout_seconds\":86400.0,\"reconciliation_reminder_seconds\":86400.0,\"expires_at\":null,\"memory_required_seconds\":2.0,\"memory_best_effort_seconds\":0.1,\"max_input_tokens\":null,\"output_reserve_tokens\":2048,\"max_input_bytes\":65536,\"max_arguments_bytes\":65536,\"max_tool_result_bytes\":262144,\"max_memory_bytes\":16384,\"tool_preview_bytes\":16384,\"active_slots\":8,\"unfinished_runs\":1000,\"tool_threads\":4,\"tool_queue_size\":16,\"subscription_buffer\":256,\"max_delta_bytes\":32768,\"page_size\":100,\"max_page_size\":500,\"shutdown_grace_seconds\":10.0},\"created_at\":\"2026-10-16T06:20:13.439630Z\",\"updated_at\":\"2026-10-16T06:20:13.455554Z\",\"state\":{\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"state_version\":5,\"status\":\"running\",\"reason\":null,\"cancel_requested\":false,\"pending\":null,\"operations\":[{\"operation_id\":\"legacy-write\",\"tool_name\":\"external.write\",\"tool_revision\":\"1\",\"effect\":\"write\",\"status\":\"unknown\"}],\"outcome\":null,\"usage\":{\"input_tokens\":null,\"output_tokens\":null,\"cached_input_tokens\":null,\"total_tokens\":null,\"cost_amount\":null,\"currency\":null,\"complete\":false},\"recoverable\":false},\"last_seq\":5}",
+      5,
+      "running",
+      0,
+      "2026-10-16T06:20:13.439630+00:00"
+    ],
+    [
+      "checkpoint",
+      "fixture",
+      "synthetic",
+      "ba4f5d4a-34bb-4411-a93f-78e71ec38d5e",
+      "current",
+      "{\"schema_version\":1,\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"state_version\":5,\"cursor\":\"accepted\",\"data\":{\"tool_dispatch_count\":1}}",
+      5,
+      "",
+      0,
+      ""
+    ],
+    [
+      "event",
+      "fixture",
+      "synthetic",
+      "ba4f5d4a-34bb-4411-a93f-78e71ec38d5e",
+      "1",
+      "{\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"state_version\":1,\"schema_version\":1,\"seq\":1,\"type\":\"run.accepted\",\"occurred_at\":\"2026-10-16T06:20:13.439630Z\",\"data\":{}}",
+      1,
+      "",
+      1,
+      ""
+    ],
+    [
+      "start_key",
+      "fixture",
+      "synthetic",
+      "unfinished",
+      "dc512edf7b617ca372fa2274b67163610a2d1ece26d60d55e7ad3368cb53e2d6",
+      "{\"schema_version\":1,\"fingerprint\":\"57d478de01e7a790e34f4e48b0fc85b3094f0b07b35ca0d102c24f382dee9489\",\"ref\":{\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"state_version\":1}}",
+      1,
+      "",
+      0,
+      ""
+    ],
+    [
+      "event",
+      "fixture",
+      "synthetic",
+      "ba4f5d4a-34bb-4411-a93f-78e71ec38d5e",
+      "2",
+      "{\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"state_version\":2,\"schema_version\":1,\"seq\":2,\"type\":\"run.running\",\"occurred_at\":\"2026-10-16T06:20:13.444936Z\",\"data\":{}}",
+      1,
+      "",
+      2,
+      ""
+    ],
+    [
+      "operation",
+      "fixture",
+      "synthetic",
+      "ba4f5d4a-34bb-4411-a93f-78e71ec38d5e",
+      "legacy-write",
+      "{\"schema_version\":1,\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"kind\":\"operation\",\"item_id\":\"legacy-write\",\"version\":3,\"state\":\"unknown\",\"data\":{\"schema_version\":1,\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"operation_id\":\"legacy-write\",\"tool_name\":\"external.write\",\"tool_revision\":\"1\",\"effect\":\"write\",\"request_hash\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"arguments\":{\"item\":\"synthetic\"},\"version\":3,\"attempts\":1,\"attempt_id\":\"synthetic-attempt\",\"status\":\"unknown\",\"has_result\":false,\"result\":null,\"error_code\":\"reply_lost\"}}",
+      3,
+      "unknown",
+      0,
+      ""
+    ],
+    [
+      "event",
+      "fixture",
+      "synthetic",
+      "ba4f5d4a-34bb-4411-a93f-78e71ec38d5e",
+      "3",
+      "{\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"state_version\":3,\"schema_version\":1,\"seq\":3,\"type\":\"tool.prepared\",\"occurred_at\":\"2026-10-16T06:20:13.449289Z\",\"data\":{}}",
+      1,
+      "",
+      3,
+      ""
+    ],
+    [
+      "event",
+      "fixture",
+      "synthetic",
+      "ba4f5d4a-34bb-4411-a93f-78e71ec38d5e",
+      "4",
+      "{\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"state_version\":4,\"schema_version\":1,\"seq\":4,\"type\":\"tool.dispatched\",\"occurred_at\":\"2026-10-16T06:20:13.452254Z\",\"data\":{}}",
+      1,
+      "",
+      4,
+      ""
+    ],
+    [
+      "event",
+      "fixture",
+      "synthetic",
+      "ba4f5d4a-34bb-4411-a93f-78e71ec38d5e",
+      "5",
+      "{\"run_id\":\"ba4f5d4a-34bb-4411-a93f-78e71ec38d5e\",\"state_version\":5,\"schema_version\":1,\"seq\":5,\"type\":\"tool.unknown\",\"occurred_at\":\"2026-10-16T06:20:13.455554Z\",\"data\":{}}",
+      1,
+      "",
+      5,
+      ""
+    ],
+    [
+      "session",
+      "fixture",
+      "synthetic",
+      "",
+      "terminal",
+      "{\"schema_version\":1,\"scope\":{\"tenant_id\":\"fixture\",\"user_id\":\"synthetic\",\"session_id\":\"terminal\"},\"agent_name\":\"assistant\",\"active_run_id\":null,\"created_at\":\"2026-10-16T06:20:13.458291Z\",\"updated_at\":\"2026-10-16T06:20:13.463326Z\",\"version\":2}",
+      2,
+      "",
+      0,
+      "2026-10-16T06:20:13.458291+00:00"
+    ],
+    [
+      "run",
+      "fixture",
+      "synthetic",
+      "terminal",
+      "a6659c53-e9e2-4d8f-a789-90b3adfe9536",
+      "{\"schema_version\":1,\"scope\":{\"tenant_id\":\"fixture\",\"user_id\":\"synthetic\",\"session_id\":\"terminal\"},\"agent_name\":\"assistant\",\"revision\":\"1\",\"config_hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"input\":\"synthetic historical input\",\"limits\":{\"max_model_steps\":20,\"max_tool_calls\":40,\"run_active_seconds\":300.0,\"advance_seconds\":120.0,\"model_timeout_seconds\":60.0,\"tool_timeout_seconds\":30.0,\"verify_timeout_seconds\":10.0,\"model_retries\":1,\"read_tool_retries\":1,\"write_tool_retries\":0,\"retry_backoff_seconds\":1.0,\"approval_timeout_seconds\":86400.0,\"input_timeout_seconds\":86400.0,\"reconciliation_reminder_seconds\":86400.0,\"expires_at\":null,\"memory_required_seconds\":2.0,\"memory_best_effort_seconds\":0.1,\"max_input_tokens\":null,\"output_reserve_tokens\":2048,\"max_input_bytes\":65536,\"max_arguments_bytes\":65536,\"max_tool_result_bytes\":262144,\"max_memory_bytes\":16384,\"tool_preview_bytes\":16384,\"active_slots\":8,\"unfinished_runs\":1000,\"tool_threads\":4,\"tool_queue_size\":16,\"subscription_buffer\":256,\"max_delta_bytes\":32768,\"page_size\":100,\"max_page_size\":500,\"shutdown_grace_seconds\":10.0},\"created_at\":\"2026-10-16T06:20:13.458291Z\",\"updated_at\":\"2026-10-16T06:20:13.463326Z\",\"state\":{\"run_id\":\"a6659c53-e9e2-4d8f-a789-90b3adfe9536\",\"state_version\":3,\"status\":\"completed\",\"reason\":null,\"cancel_requested\":false,\"pending\":null,\"operations\":[],\"outcome\":{\"run_id\":\"a6659c53-e9e2-4d8f-a789-90b3adfe9536\",\"state_version\":3,\"status\":\"completed\",\"usage\":{\"input_tokens\":null,\"output_tokens\":null,\"cached_input_tokens\":null,\"total_tokens\":null,\"cost_amount\":null,\"currency\":null,\"complete\":false},\"output\":\"synthetic historical output\"},\"usage\":{\"input_tokens\":null,\"output_tokens\":null,\"cached_input_tokens\":null,\"total_tokens\":null,\"cost_amount\":null,\"currency\":null,\"complete\":false},\"recoverable\":false},\"last_seq\":3}",
+      3,
+      "completed",
+      0,
+      "2026-10-16T06:20:13.458291+00:00"
+    ],
+    [
+      "checkpoint",
+      "fixture",
+      "synthetic",
+      "a6659c53-e9e2-4d8f-a789-90b3adfe9536",
+      "current",
+      "{\"schema_version\":1,\"run_id\":\"a6659c53-e9e2-4d8f-a789-90b3adfe9536\",\"state_version\":3,\"cursor\":\"completed\",\"data\":{}}",
+      3,
+      "",
+      0,
+      ""
+    ],
+    [
+      "event",
+      "fixture",
+      "synthetic",
+      "a6659c53-e9e2-4d8f-a789-90b3adfe9536",
+      "1",
+      "{\"run_id\":\"a6659c53-e9e2-4d8f-a789-90b3adfe9536\",\"state_version\":1,\"schema_version\":1,\"seq\":1,\"type\":\"run.accepted\",\"occurred_at\":\"2026-10-16T06:20:13.458291Z\",\"data\":{}}",
+      1,
+      "",
+      1,
+      ""
+    ],
+    [
+      "start_key",
+      "fixture",
+      "synthetic",
+      "terminal",
+      "79beb4aded40e9fd660addf9f9062acf1692659ff7a0fd2de2fe158040494d3d",
+      "{\"schema_version\":1,\"fingerprint\":\"57d478de01e7a790e34f4e48b0fc85b3094f0b07b35ca0d102c24f382dee9489\",\"ref\":{\"run_id\":\"a6659c53-e9e2-4d8f-a789-90b3adfe9536\",\"state_version\":1}}",
+      1,
+      "",
+      0,
+      ""
+    ],
+    [
+      "event",
+      "fixture",
+      "synthetic",
+      "a6659c53-e9e2-4d8f-a789-90b3adfe9536",
+      "2",
+      "{\"run_id\":\"a6659c53-e9e2-4d8f-a789-90b3adfe9536\",\"state_version\":2,\"schema_version\":1,\"seq\":2,\"type\":\"run.running\",\"occurred_at\":\"2026-10-16T06:20:13.461166Z\",\"data\":{}}",
+      1,
+      "",
+      2,
+      ""
+    ],
+    [
+      "event",
+      "fixture",
+      "synthetic",
+      "a6659c53-e9e2-4d8f-a789-90b3adfe9536",
+      "3",
+      "{\"run_id\":\"a6659c53-e9e2-4d8f-a789-90b3adfe9536\",\"state_version\":3,\"schema_version\":1,\"seq\":3,\"type\":\"run.completed\",\"occurred_at\":\"2026-10-16T06:20:13.463326Z\",\"data\":{\"output\":\"synthetic historical output\"}}",
+      1,
+      "",
+      3,
+      ""
+    ]
+  ],
+  "run_ids": {
+    "unfinished": "ba4f5d4a-34bb-4411-a93f-78e71ec38d5e",
+    "terminal": "a6659c53-e9e2-4d8f-a789-90b3adfe9536"
+  }
+}

@@ -65,6 +65,9 @@ def inspect_archives(wheel: Path, sdist: Path) -> None:
             "examples/maintenance_offline.py",
             "examples/abandonment_offline.py",
             "examples/backup_offline.py",
+            "examples/migration_offline.py",
+            "examples/export_offline.py",
+            "tests/data/storage-t05-v1.json",
             "examples/sandbox_offline.py",
             "docs/reference/storage-sandbox-schema-v1.sql",
             "workbench/package-lock.json",
@@ -190,6 +193,8 @@ def main() -> None:
                     "maintenance_offline.py",
                     "abandonment_offline.py",
                     "backup_offline.py",
+                    "migration_offline.py",
+                    "export_offline.py",
                     *(("artifact_inputs_offline.py",) if os.name == "posix" else ()),
                 )
                 for arguments in ([], ["--stream"])

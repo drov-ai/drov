@@ -202,3 +202,6 @@ T-15 第三批的[放弃专项](../../tests/test_abandonment.py)检查accepted/r
 
 
 T-15备份专项（ADR-0030）验证实际SQLite backup API/原库不变、完整SQL+header/stage/ready字节hash、空库/旧审批/备份后缺失Run和键、未知写/verifier/租约/费用不重派发、跨Session来源墓碑、实际Docker CSV/PNG恢复后授权读取；版本/库存/配对/ready损坏拒绝，目标/原锁拒绝覆盖，实际线程取消与复制/发布进程硬终止。Windows纯数据库与POSIX配对文件分别验证，skip不代表文件支持；检查/安装/平台/未跑范围见[本批记录](../validation/t15-backup.md)，不从此推断实际迁移、用户导出或断电验证。
+
+
+T-15迁移实际使用T-05历史开发SDK写出的v1 Run/事件/派发/去重夹具；验证真实字段变换、语义/版本/unknown/请求键不变、原始完整备份、未来版本拒绝、事务故障/丢回执/取消/真实进程kill回滚及CLI，不能只用版本拒绝替代迁移。导出覆盖SDK/stream×内存/SQLite、默认元数据/正文上下文、同tenant read与view_content分离/跨tenant/撤权/逐文件权限、仅选定来源、应用副本/附件hash、分页/限额/未知事件/Gone、源清理和恢复屏障后的共享文件及真实Docker三入口CSV/PNG。旧prepared在屏障下不能因cancel/放弃被错误记未派发。具体验收只见[本轮记录](../validation/t15-migration-export.md)。

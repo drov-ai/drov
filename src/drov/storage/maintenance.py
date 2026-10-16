@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Self
 
-from drov._json import canonical_json
+from drov._json import canonical_json, load_json
 from drov.artifacts.local import LocalArtifacts
 from drov.artifacts.records import ArtifactRecord
 from drov.artifacts.transaction import ArtifactTransaction
@@ -22,6 +22,7 @@ from drov.errors import (
     Conflict,
     ContentGone,
     DrovError,
+    IncompatibleStorage,
     PersistenceUnavailable,
     RecordNotFound,
     StorageInUse,
@@ -46,6 +47,7 @@ from drov.storage._abandonment import (
 from drov.storage._backup import BackupManifest, RestoreResult
 from drov.storage._barrier import RecoveryBarrier
 from drov.storage._driver import Key, Row
+from drov.storage._migration import MigrationPlan, MigrationReceipt
 from drov.storage._reclamation import (
     RECLAMATION_DDL,
     ReclamationEntry,
@@ -79,6 +81,8 @@ __all__ = [
     "BackupManifest",
     "RestoreResult",
     "RecoveryBarrier",
+    "MigrationPlan",
+    "MigrationReceipt",
 ]
 
 
@@ -220,6 +224,14 @@ class SQLiteMaintenance:
         for (name,) in sorted(tables):
             rows, _ = await driver.execute(f'SELECT * FROM "{name}" ORDER BY rowid')
             snapshot[name] = [list(row) for row in rows]
+        for row in snapshot["records"]:
+            try:
+                payload = load_json(row[5])
+            except ValueError as exc:
+                raise PersistenceUnavailable("Maintenance record envelope is invalid") from exc
+            version = payload.get("schema_version") if isinstance(payload, dict) else None
+            if type(version) is not int or version != 1:
+                raise IncompatibleStorage("Maintenance refuses unknown record envelope versions")
         return snapshot
 
     async def preview_session(
@@ -660,6 +672,33 @@ class SQLiteMaintenance:
             assert settled.value is not None
             return settled.value
 
+    async def preview_migration(self) -> MigrationPlan:
+        from drov.storage._backup import validate
+        from drov.storage._migration import select
+
+        async with self._gate:
+            self._require_open()
+            await validate(self)
+            async with self._storage.transaction() as tx:
+                plan, _ = await select(self, tx)
+                return plan
+
+    async def migrate(
+        self, plan: MigrationPlan, *, backup_directory: str | Path
+    ) -> MigrationReceipt:
+        from drov.storage._migration import apply
+
+        plan = MigrationPlan.from_json(plan.model_dump_json())
+        async with self._gate:
+            self._require_open()
+            settled = await _settle(apply(self, plan, Path(backup_directory)))
+            if settled.error is not None:
+                raise settled.error
+            if settled.cancelled:
+                raise asyncio.CancelledError
+            assert settled.value is not None
+            return settled.value
+
     @staticmethod
     async def inspect_backup(source: str | Path) -> BackupManifest:
         from drov.storage._backup import inspect
@@ -1028,6 +1067,8 @@ def main() -> int:
             "backup",
             "restore",
             "inspect-backup",
+            "preview-migration",
+            "migrate",
             "get-recovery-barrier",
         ),
     )
@@ -1054,6 +1095,8 @@ def main() -> int:
         parser.error("this action requires --database")
     if args.action in ("backup", "restore") and args.destination is None:
         parser.error("backup and restore require a new --destination")
+    if args.action == "migrate" and (args.destination is None or args.plan_file is None):
+        parser.error("migrate requires --plan-file and new --destination for its backup")
     if args.action in ("restore", "inspect-backup") and args.source is None:
         parser.error("restore and inspect-backup require --source")
     if args.action in (
@@ -1097,6 +1140,9 @@ def main() -> int:
             return
         files = LocalArtifacts(directory=args.artifacts) if args.artifacts is not None else None
         async with SQLiteMaintenance(args.database, artifacts=files) as maintenance:
+            if args.action == "preview-migration":
+                print((await maintenance.preview_migration()).model_dump_json(indent=2))
+                return
             if args.action == "backup":
                 print((await maintenance.backup(args.destination)).model_dump_json(indent=2))
                 return
@@ -1125,11 +1171,17 @@ def main() -> int:
                 )
                 print(preview.model_dump_json(indent=2))
                 return
-            if args.action in ("reclaim", "abandon-run"):
+            if args.action in ("reclaim", "abandon-run", "migrate"):
                 with args.plan_file.open("rb") as source:
                     raw = source.read(65537)
                 if len(raw) > 65536:
                     raise ConfigurationError("Maintenance plan exceeds its bound")
+                if args.action == "migrate":
+                    migrated = await maintenance.migrate(
+                        MigrationPlan.from_json(raw), backup_directory=args.destination
+                    )
+                    print(migrated.model_dump_json(indent=2))
+                    return
                 if args.action == "abandon-run":
                     fact = await maintenance.abandon_run(AbandonmentPlan.from_json(raw))
                     print(fact.model_dump_json(indent=2))

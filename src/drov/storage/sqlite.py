@@ -342,6 +342,11 @@ class SQLiteStorage(Storage):
                             raise IncompatibleStorage("Recovery extension is unsupported")
                         expected_names.add("recovery_barrier")
                         await self._validate_recovery_schema()
+                    if "migration_schema" in values:
+                        if values["migration_schema"] != "1":
+                            raise IncompatibleStorage("Migration extension is unsupported")
+                        expected_names.add("migration_receipts")
+                        await self._validate_migration_schema()
                     if names != expected_names:
                         raise IncompatibleStorage("Database tables do not match its schema version")
                     if values.get("format") != "drov.sqlite" or values.get("record_schema") != str(
@@ -443,6 +448,20 @@ class SQLiteStorage(Storage):
         if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(BARRIER_DDL[0].split()):
             raise IncompatibleStorage("Recovery extension table is invalid")
         await get(SQLiteDriver(self._sql))
+
+    async def _validate_migration_schema(self) -> None:
+        from drov.storage._migration import MIGRATION_DDL, MigrationReceipt
+
+        rows, _ = await self._sql("SELECT sql FROM sqlite_master WHERE name='migration_receipts'")
+        if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(MIGRATION_DDL[0].split()):
+            raise IncompatibleStorage("Migration extension table is invalid")
+        rows, _ = await self._sql("SELECT identity,payload FROM migration_receipts")
+        try:
+            for identity, payload in rows:
+                if MigrationReceipt.from_json(payload).plan_digest != identity:
+                    raise ValueError("Migration identity differs")
+        except (ValueError, TypeError) as exc:
+            raise PersistenceUnavailable("Migration receipts are invalid") from exc
 
     async def _validate_abandonment_schema(self) -> None:
         from drov.storage._abandonment import ABANDONMENT_DDL, AbandonmentFact

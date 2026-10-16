@@ -12,6 +12,7 @@ from drov.artifacts.records import ARTIFACT_DDL
 from drov.artifacts.uploads import UPLOAD_DDL, UploadReceipt
 from drov.auth import ArtifactResource, Resource, ToolResource
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
+from drov.exports import ExportedArtifact, RunExport
 from drov.integrations.e2b import E2BLimits
 from drov.models.protocol import ModelEvent, ModelRequest, ModelResponse
 from drov.runtime import AgentRegistration
@@ -20,12 +21,15 @@ from drov.sandbox._leases import SANDBOX_DDL
 from drov.server.types import AgentCatalog, ResponseBody, ServerLimits, StartBody, VerifyBody
 from drov.storage._abandonment import ABANDONMENT_DDL
 from drov.storage._barrier import BARRIER_DDL
+from drov.storage._migration import MIGRATION_DDL
 from drov.storage._reclamation import RECLAMATION_DDL
 from drov.storage._retention import RETENTION_DDL
 from drov.storage.maintenance import (
     AbandonmentFact,
     AbandonmentPlan,
     BackupManifest,
+    MigrationPlan,
+    MigrationReceipt,
     ReclamationPlan,
     ReclamationResult,
     RecoveryBarrier,
@@ -102,6 +106,10 @@ def schema_text() -> str:
         "BackupManifest": BackupManifest,
         "RecoveryBarrier": RecoveryBarrier,
         "RestoreResult": RestoreResult,
+        "MigrationPlan": MigrationPlan,
+        "MigrationReceipt": MigrationReceipt,
+        "RunExport": RunExport,
+        "ExportedArtifact": ExportedArtifact,
     }
     bundle = {
         "schema_version": 1,
@@ -128,6 +136,12 @@ def main() -> None:
     for target, expected in (
         (root / "schema-v1.json", schema_text()),
         (root / "storage-schema-v1.sql", sql),
+        (
+            root / "storage-migration-schema-v1.sql",
+            "-- Explicit compatible v1 record backfill receipts; original schemas unchanged.\n"
+            + ";\n\n".join(statement.strip() for statement in MIGRATION_DDL)
+            + ";\n",
+        ),
         (
             root / "storage-recovery-schema-v1.sql",
             "-- Explicit offline recovery barrier extension v1; original schemas unchanged.\n"

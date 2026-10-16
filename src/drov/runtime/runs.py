@@ -1421,6 +1421,7 @@ class RunController:
         async with self.storage.transaction() as tx:
             record = await self.locate_in(tx, context, run_id)
         await self.authorize(context, self.resource(record), ("cancel",))
+        await self.storage.check_execution_allowed()
         owner = self.resource(record).owner
 
         async def apply() -> CancelReceipt:

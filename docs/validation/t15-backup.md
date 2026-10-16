@@ -32,3 +32,13 @@
 992037dd43d1ffd556868d111db7f9c9ade15bd1的核心CI38860944818在Windows3.14 HTTP专项实际为61通过/14skip/1失败：备份_inventory比较路径lstat与句柄fstat的完整token，误报同一文件变化；原生完整job日志`.drov/t15-backup-windows314-failure.log`，初次workflow未结束时gh --log-failed尚不可用的记录另保留。没有将其他平台或旧构件结果当作此项通过。
 
 2026-10-16查阅CPython一手[问题157671](https://github.com/python/cpython/issues/157671)：报告Windows3.14的stat/fstat对ctime取值含义可能不同，与本次失败边界相符；它是诊断依据，原生修复结果另验。修正跨API只比较inode/device/size/mtime；分别记录并比较路径前后和句柄前后的完整token，两个ctime检查均保留，且再次核对私有文件/硬链接。新增2个不同时间来源与真正读取中变更的故障回归，含原HTTP共41项通过（5.36s，`.drov/t15-backup-windows-local.log`）。类型检查修正合成stat结果的可选Windows属性读取方式，mypy174文件通过；SDK源码未因该测试类型修正改变，最终构件与全库/原生CI另记。
+
+## 最终修复验收
+
+最终SDK/测试检查点 **a83fa79ab071ae5572b4527d2f78f7872aa49879** 已推送。修正后SDK指纹冻结，本地3.14含真实Docker全库 **1292通过/59skip（329.15s，1351项）**（`.drov/t15-backup-windows-full314.log`）；合成stat夹具随后仅调整可选属性的mypy读取写法，最终41项再验通过、SDK载荷未变。两解释器四套core-only/九个POSIX例normal与stream安装通过；随后重建包含最终测试/文档的sdist并各自重建wheel，87个SDK/资源逐字对应最终SDK，wheel和重建wheel完全相同，两套构件相同。wheel **fff9bd6c3f2a6fbf38d58273528c95a79e6de1324b8129b459e26ab57f016362**、最终sdist **5d323fa010d6840044730ec2e6b3ac3724cb0cb1d27aa00ec2de72f81e09eb56**，`.drov/t15-backup-windows-{package,sdist,installed}{311,314}.log`、`archives.json`。两套独立server真实loopback HTTP/SSE/工作台资产、Twine strict及历史a4c8c7a SDK接受原库/拒绝新副本且字节不变再次通过（compat/artifacts/twine日志）。
+
+精确SHA的[核心38862203005](https://github.com/drov-ai/drov/actions/runs/38862203005)全部11个job、[Docker38862203009](https://github.com/drov-ai/drov/actions/runs/38862203009)全部4个job最终completed/success。元数据含headSha及完整日志`.drov/t15-backup-windows-{core,docker}-ci.{json,log}`。核心Linux/macOS3.11为969通过/160skip，Linux3.12–3.14/macOS3.14为971通过/158skip；Windows3.11为807通过/322skip，3.14为809通过/320skip，两个Windows的原生HTTP专项均通过。Windows不支持的配对字节分支适用跳过，纯数据库备份/恢复/屏障/硬终止实际通过，未宣称Windows配对文件或目录fsync。
+
+Docker首次3.11浏览器用例为23通过/1失败：5秒内未取得Actual sum is 60结果，完整首次失败`.drov/t15-backup-windows-docker-failure.log`；其他原生Docker项通过。没有改变源码/断言/期限，使用同一SHA重新跑失败job，实际浏览器24项通过（33.7s）；最终四套Docker均success，不能把第一次失败写成第一次成功，也没有据超时推断已证实的根因。后续CI已不再复用992037d失败结果。
+
+**第四批一致备份/恢复屏障子范围已验收；当时T-15整卡仍进行中。** 同轮之后的迁移/授权导出及cancel/新放弃事实保护补充见[收尾记录](t15-migration-export.md)，不套用a83fa79检查点结果。

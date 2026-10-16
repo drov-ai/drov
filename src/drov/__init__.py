@@ -3,6 +3,7 @@
 from drov.agent import Agent
 from drov.auth import OwnerAuthorizer
 from drov.config import ContextPolicy, Limits, Memory, ModelCapabilities
+from drov.exports import ExportedArtifact, RunExport
 from drov.runtime import ResourceBinding, Runtime
 from drov.server import DrovApp
 from drov.storage import MemoryStorage, SQLiteStorage
@@ -30,6 +31,8 @@ __all__ = [
     "ContextPolicy",
     "DrovApp",
     "Failed",
+    "ExportedArtifact",
+    "RunExport",
     "HumanInput",
     "InputResponse",
     "Limits",

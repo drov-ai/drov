@@ -101,3 +101,5 @@ T-15 第二批的显式整阶段字节回收、pending/done中断台账、普通
 T-15 第三批的离线data_abandoned、最小未知事实/不可恢复标记、原租约/费用保留和正文清理边界见[ADR-0029](../decisions/0029-offline-run-abandonment.md)，实际检查见[放弃验证](../validation/t15-abandonment.md)；不将放弃当作核实、销毁或旧备份屏障。
 
 T-15第四批成对SQLite/文件快照、新目录发布与持久恢复屏障见[ADR-0030](../decisions/0030-quarantined-consistent-backups.md)，实际检查/未验收范围见[备份验证](../validation/t15-backup.md)；任务状态仍只在progress。
+
+T-15收尾的实际早期v1兼容迁移/回执见[ADR-0031](../decisions/0031-compatible-v1-record-migration.md)，授权分页导出/副本脱敏见[ADR-0032](../decisions/0032-authorized-portable-exports.md)；统一实际证据见[收尾验证](../validation/t15-migration-export.md)，任务状态仍只在progress。

@@ -152,3 +152,6 @@ T-15 首批由 `storage.maintenance` 持有可信本地管理生命周期，复�
 
 
 T-15的`storage._backup/_barrier`（ADR-0030）归属可信离线管理：SQLite backup与原文件配对、完整bundle/新目录原子发布、副本内存储整体屏障。原库/后端执行状态不随备份改变；Storage接收、Runtime控制及内核派发检查同一持久事实，观察保留权限。它不是用户导出模块或模型/沙箱后端，不能自动核实/销毁外部资源或解除屏障。
+
+
+T-15的storage._migration在原存储/维护边界做具名同义字段迁移与独立回执；原状态机、事件、去重、所有权与后端执行边界不变。runtime.exports从现有授权观察/文件读取生成RunExport副本，drov.exports维护导出类型，宿主redactor不能成为恢复状态写入接口（ADR-0031/0032）。

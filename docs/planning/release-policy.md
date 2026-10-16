@@ -134,3 +134,6 @@ T-15 第三批补充（[ADR-0029](../decisions/0029-offline-run-abandonment.md)�
 
 
 T-15成对备份/恢复的实际增量见[ADR-0030](../decisions/0030-quarantined-consistent-backups.md)：原SQL/字节停机锁下通过SQLite backup API、原字节复制和ready/hash核对形成完整bundle；新目录发布前先持久化recovery_schema=1屏障，原库不升级。即使直接打开备份SQL，或恢复空库/缺少备份之后Run/键，也不能新接收/控制/派发。restore只到新目录，原配对/所有版本/清单校验，不覆盖拼接。备份含原始敏感数据且不是用户导出；校验和不是对本地管理员的签名认证。无自动或force解除屏障的方法，独立业务核实/必要事实补齐之前继续阻断；本批未提供应用专用重建/解锁工具。取消/硬终止边界、Windows/POSIX耐久性和实际通过范围见[验证](../validation/t15-backup.md)，不推断已完成旧记录迁移/授权导出。
+
+
+T-15实际迁移与导出落实见[ADR-0031](../decisions/0031-compatible-v1-record-migration.md)/[ADR-0032](../decisions/0032-authorized-portable-exports.md)。历史v1字段先完整备份后原子同义回填，原记录/事件/去重不变义，独立迁移回执扩展与旧SDK拒绝；不声称存在已发布v0或支持任意未来schema。导出默认元数据，正文/每个选定附件单独授权并在转换后重查，宿主redactor只处理副本，原始备份仍是另一种管理员能力。文件保留原来源hash和实际导出副本hash；原已授权读取发现真实损坏仍记unavailable。输出页/脱敏文本不作为恢复记录或逐字模型重放，调用方自行安全保存与管理外部副本。屏障下cancel/新放弃也不推断prepared未执行；通用自动/force解除保持未提供。具体平台/故障/安装边界以[验证](../validation/t15-migration-export.md)为准。
