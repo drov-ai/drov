@@ -517,3 +517,13 @@ ReclamationPlan 包含 scope、expired_uploads、as_of、fingerprint、stages、
 ReclamationResult 包含 completed_stages、bytes_reclaimed、capacity_released；字节数是本次确认完成阶段的原库存数据长度，容量另含原预留及清单额度。中断前已删字节可计入恢复完成的阶段，不能将多次结果当成独立磁盘/费用计量；每阶段持久 done 才是累计依据。重复完成后 resume 返回零。
 
 pending 意图使普通 SQLiteStorage/Runtime 打开返回 PersistenceUnavailable；离线入口可用 resume_reclamation 完成同一次删除，其他维护动作先返回 Conflict。引用/租约或文件身份与原台账不符时保留 pending 并拒绝，不强制跳过。此阻断用于本次删除，不能代替旧备份恢复的 recovery barrier。有效清单以外的旧孤儿/未知项继续拒绝，不能据猜测删除。POSIX、安全擦除/备份限制和具体恢复命令见 [工程方案](engineering.md#显式字节回收与中断恢复) / [ADR-0028](../decisions/0028-resumable-byte-reclamation.md)。
+
+## 显式放弃遗留运行（T-15 第三批）
+
+同一SQLiteMaintenance提供 `preview_abandonment(RunContext, run_id, reason=...) -> AbandonmentPlan`、`abandon_run(plan) -> AbandonmentFact` 和 `get_abandonment(RunContext, run_id) -> AbandonmentFact`。仍是持原排他锁的宿主文件管理能力，无HTTP管理路由；不可强抢原拥有者。仅非终态可首次放弃，需显式1–512字符非空白可打印单行原因；它是长期保留的管理说明，不从用户正文自动生成。
+
+预览包含scope/Run、原status/state_version、unknown_operations/retained_leases数量和全库/阶段fingerprint；完整计划变化返回Conflict。放弃同事务结束为failed/data_abandoned、retryable=False/recoverable=False，保留已知用量并标complete=False；prepared记not_executed，dispatched/unknown及已知结果原样保留，当前pending交互关闭。原批准/恢复不能再派发，同键仍返回原失败Run；取消和放弃含义不同。
+
+AbandonmentFact是不可变管理回执，包含opaque Run/Session、Agent、终态/不可恢复标记、最终版本/原状态、原因、未知operation/tool/revision/effect/status、放弃时保留租约数量和时间；无输入/参数/代码/文件名或明文owner/request_key。普通SDK/HTTP失败消息不含管理原因，原因仅在这个管理员查询中返回。提交不确定后须先重开原存储，同一完整计划重试返回同一回执，不再增事件/版本；换计划冲突。已清理正文后仍可查事实，同scope旧Session/请求墓碑仍Gone。
+
+只有事实与当前failed/data_abandoned/版本/归属及未知操作逐项匹配，Session逻辑清理才允许去掉对应未知正文；无事实或不匹配仍拒绝。未确认销毁租约始终阻止清理，放弃不删租约、不调用后端、不退预算，也不自动回收字节。资源清理仍需原资源/后端的独立确认；保留租约数量只是放弃当时的快照。恢复旧备份的屏障仍是独立能力。可运行的无Key/预算SDK/stream例见[abandonment_offline.py](../../examples/abandonment_offline.py)，取舍见[ADR-0029](../decisions/0029-offline-run-abandonment.md)。

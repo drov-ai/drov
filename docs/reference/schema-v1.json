@@ -2,6 +2,244 @@
   "description": "Independent JSON Schema documents; cross-field invariants also require Python validation.",
   "schema_version": 1,
   "schemas": {
+    "AbandonmentFact": {
+      "$defs": {
+        "OperationSummary": {
+          "additionalProperties": false,
+          "properties": {
+            "effect": {
+              "enum": [
+                "read",
+                "write",
+                "unknown"
+              ],
+              "title": "Effect",
+              "type": "string"
+            },
+            "operation_id": {
+              "minLength": 1,
+              "title": "Operation Id",
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "prepared",
+                "dispatched",
+                "succeeded",
+                "failed_known",
+                "unknown",
+                "not_executed"
+              ],
+              "title": "Status",
+              "type": "string"
+            },
+            "tool_name": {
+              "minLength": 1,
+              "title": "Tool Name",
+              "type": "string"
+            },
+            "tool_revision": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Tool Revision",
+              "type": "string"
+            }
+          },
+          "required": [
+            "operation_id",
+            "tool_name",
+            "tool_revision",
+            "effect",
+            "status"
+          ],
+          "title": "OperationSummary",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "abandoned_at": {
+          "format": "date-time",
+          "title": "Abandoned At",
+          "type": "string"
+        },
+        "agent_name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Agent Name",
+          "type": "string"
+        },
+        "error_code": {
+          "const": "data_abandoned",
+          "default": "data_abandoned",
+          "title": "Error Code",
+          "type": "string"
+        },
+        "original_status": {
+          "enum": [
+            "accepted",
+            "running",
+            "suspended"
+          ],
+          "title": "Original Status",
+          "type": "string"
+        },
+        "plan_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Plan Digest",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "recoverable": {
+          "default": false,
+          "title": "Recoverable",
+          "type": "boolean"
+        },
+        "retained_leases": {
+          "minimum": 0,
+          "title": "Retained Leases",
+          "type": "integer"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "session_id": {
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "state_version": {
+          "exclusiveMinimum": 0,
+          "title": "State Version",
+          "type": "integer"
+        },
+        "status": {
+          "const": "failed",
+          "default": "failed",
+          "title": "Status",
+          "type": "string"
+        },
+        "unknown_operations": {
+          "items": {
+            "$ref": "#/$defs/OperationSummary"
+          },
+          "title": "Unknown Operations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "run_id",
+        "session_id",
+        "agent_name",
+        "state_version",
+        "original_status",
+        "reason",
+        "unknown_operations",
+        "retained_leases",
+        "abandoned_at",
+        "plan_digest"
+      ],
+      "title": "AbandonmentFact",
+      "type": "object"
+    },
+    "AbandonmentPlan": {
+      "$defs": {
+        "RunContext": {
+          "additionalProperties": false,
+          "properties": {
+            "tenant_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Tenant Id",
+              "type": "string"
+            },
+            "user_id": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "tenant_id",
+            "user_id"
+          ],
+          "title": "RunContext",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "fingerprint": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Fingerprint",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "retained_leases": {
+          "minimum": 0,
+          "title": "Retained Leases",
+          "type": "integer"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/RunContext"
+        },
+        "state_version": {
+          "exclusiveMinimum": 0,
+          "title": "State Version",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "accepted",
+            "running",
+            "suspended"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "unknown_operations": {
+          "minimum": 0,
+          "title": "Unknown Operations",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scope",
+        "run_id",
+        "reason",
+        "fingerprint",
+        "status",
+        "state_version",
+        "unknown_operations",
+        "retained_leases"
+      ],
+      "title": "AbandonmentPlan",
+      "type": "object"
+    },
     "AgentCatalog": {
       "$defs": {
         "AgentSummary": {

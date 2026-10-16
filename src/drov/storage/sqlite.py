@@ -327,6 +327,11 @@ class SQLiteStorage(Storage):
                             raise PersistenceUnavailable(
                                 "Byte reclamation is incomplete; resume offline maintenance"
                             )
+                    if "abandonment_schema" in values:
+                        if values["abandonment_schema"] != "1":
+                            raise IncompatibleStorage("Abandonment extension is unsupported")
+                        expected_names.add("abandonment_facts")
+                        await self._validate_abandonment_schema()
                     if names != expected_names:
                         raise IncompatibleStorage("Database tables do not match its schema version")
                     if values.get("format") != "drov.sqlite" or values.get("record_schema") != str(
@@ -420,6 +425,21 @@ class SQLiteStorage(Storage):
         if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(RECLAMATION_DDL[0].split()):
             raise IncompatibleStorage("Reclamation extension table is invalid")
         await entries(SQLiteDriver(self._sql))
+
+    async def _validate_abandonment_schema(self) -> None:
+        from drov.storage._abandonment import ABANDONMENT_DDL, AbandonmentFact
+
+        rows, _ = await self._sql("SELECT sql FROM sqlite_master WHERE name='abandonment_facts'")
+        if len(rows) != 1 or " ".join(rows[0][0].split()) != " ".join(ABANDONMENT_DDL[0].split()):
+            raise IncompatibleStorage("Abandonment extension table is invalid")
+        facts, _ = await self._sql("SELECT identity,payload FROM abandonment_facts")
+        try:
+            for key, payload in facts:
+                if len(key) != 64 or any(character not in "0123456789abcdef" for character in key):
+                    raise ValueError("Invalid abandonment identity")
+                AbandonmentFact.from_json(payload)
+        except (ValueError, TypeError) as exc:
+            raise PersistenceUnavailable("Abandonment facts are invalid") from exc
 
     async def _bind_artifacts(self, store_id: str) -> None:
         """Pair one private byte directory with this database; no record/DDL migration."""

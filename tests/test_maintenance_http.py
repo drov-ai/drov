@@ -104,3 +104,59 @@ async def test_http_gone_dedup_guess_and_revoked_read(tmp_path: Path, files: boo
         assert (await connection.post("/v1/maintenance/delete", json={})).status_code == 404
         fresh = await connection.post("/v1/runs", json=body(session="fresh"))
         assert fresh.status_code == 202
+
+
+@pytest.mark.asyncio
+async def test_abandonment_is_not_an_http_action_and_terminal_run_cannot_dispatch(
+    tmp_path: Path,
+) -> None:
+    from drov import tool
+    from tests.test_interactions import plan
+
+    calls = []
+
+    @tool(name="write", effect="write", approval="required")
+    def write(value: int) -> int:
+        calls.append(value)
+        return value
+
+    model = ScriptedModel([plan(("write", {"value": 7}))])
+    a = definition(model, tools=[write])
+    policy = Policy()
+    path = tmp_path / "state.db"
+
+    def app() -> DrovApp:
+        return DrovApp(
+            agents={"assistant": a}, storage=SQLiteStorage(path), auth=Auth(), authorizer=policy
+        )
+
+    service = app()
+    async with client(service) as connection:
+        accepted = await connection.post("/v1/runs", json=body(request_key="once"))
+        assert accepted.status_code == 202
+        run_id = accepted.json()["run_id"]
+        paused = await service.runtime.wait(run_id, context=ALICE)
+        assert paused.status == "suspended" and paused.pending is not None
+        request_id = paused.pending.request_id
+        assert (
+            await connection.post("/v1/maintenance/abandon", json={"run_id": run_id})
+        ).status_code == 404
+    async with SQLiteMaintenance(path) as maintenance:
+        await maintenance.abandon_run(
+            await maintenance.preview_abandonment(ALICE, run_id, reason="operator declaration")
+        )
+    async with client(app()) as connection:
+        view = await connection.get(f"/v1/runs/{run_id}?include_content=true")
+        assert view.status_code == 200 and view.json()["snapshot"]["status"] == "failed"
+        assert view.json()["snapshot"]["outcome"]["error"]["code"] == "data_abandoned"
+        assert "operator declaration" not in view.text
+        assert (await connection.post(f"/v1/runs/{run_id}/recover", json={})).status_code == 409
+        response = {"request_id": request_id, "response": {"kind": "approval", "approved": True}}
+        assert (
+            await connection.post(f"/v1/runs/{run_id}/responses", json=response)
+        ).status_code == 409
+        duplicate = await connection.post("/v1/runs", json=body(request_key="once"))
+        assert duplicate.status_code == 202 and duplicate.json()["run_id"] == run_id
+        policy.denied.add("read")
+        assert (await connection.get(f"/v1/runs/{run_id}")).status_code == 404
+    assert calls == [] and len(model.calls) == 1

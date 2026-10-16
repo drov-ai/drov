@@ -374,3 +374,5 @@ T-15 首批的实际清理接点见 [ADR-0027](../decisions/0027-offline-session
 维护引用判定仍受归属隔离：同一tenant/user/Agent内保守保留正文中的引用；跨作用域只承认实际grant/类型化执行或上传引用。其他用户、租户或Agent仅在文本中提到原Artifact ID，不能使源文件在最后合法引用清理后仍保持ready。
 
 T-15 第二批按 [ADR-0028](../decisions/0028-resumable-byte-reclamation.md) 单独接通显式字节回收。Session 逻辑删除继续保留字节；物理回收只在完整预览不变、整阶段无保留引用/租约/未结束或未知执行时开始。已消费上传不按 TTL 删除，过期未消费上传需显式选择。先将待删库存和必要上传移除同事务提交，再删原字节/清单、同步目录并逐阶段确认 done。中断或回执未知保留 pending；普通存储打开被阻断，离线恢复只处理原库存且复核剩余文件身份和当前引用，不调用模型/后端或重写输入。取消须结算实际字节 worker 后才放锁。无可信原库存的未知/缺清单目录不能自动回收；本次 pending 也不替代恢复旧备份的全存储 recovery barrier。
+
+T-15 第三批按[ADR-0029](../decisions/0029-offline-run-abandonment.md)落地第11节的显式data_abandoned例外。持原离线锁、完整预览和显式管理原因，将非终态同事务结束为failed/data_abandoned、retryable=False/recoverable=False，保留已知用量并标complete=False；prepared记未执行，已派发/未知与已知结果不改，当前pending交互关闭，历史回执保留。独立最小事实与结果共同提交，原计划重试只返回同一回执；普通恢复/批准不可重派发。仅当前终态/版本/归属/未知操作与该事实相符时，后续Session清理可删除相应未知正文，事实/墓碑仍在。未确认销毁租约继续阻止清理，放弃不改租约/预算或派发后端；字节仍按独立回收规则处理。原因不出现在普通SDK/HTTP终态消息中，只有管理员事实查询返回它。

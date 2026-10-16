@@ -18,9 +18,16 @@ from drov.runtime import AgentRegistration
 from drov.sandbox import SandboxLimits, SandboxResult
 from drov.sandbox._leases import SANDBOX_DDL
 from drov.server.types import AgentCatalog, ResponseBody, ServerLimits, StartBody, VerifyBody
+from drov.storage._abandonment import ABANDONMENT_DDL
 from drov.storage._reclamation import RECLAMATION_DDL
 from drov.storage._retention import RETENTION_DDL
-from drov.storage.maintenance import ReclamationPlan, ReclamationResult, SessionDeletionPlan
+from drov.storage.maintenance import (
+    AbandonmentFact,
+    AbandonmentPlan,
+    ReclamationPlan,
+    ReclamationResult,
+    SessionDeletionPlan,
+)
 from drov.storage.sqlite import DDL, RECORD_VERSION, SCHEMA_VERSION
 from drov.tools import PermissionPolicy
 from drov.tools.permissions import PermissionDecision
@@ -86,6 +93,8 @@ def schema_text() -> str:
         "SessionDeletionPlan": SessionDeletionPlan,
         "ReclamationPlan": ReclamationPlan,
         "ReclamationResult": ReclamationResult,
+        "AbandonmentPlan": AbandonmentPlan,
+        "AbandonmentFact": AbandonmentFact,
     }
     bundle = {
         "schema_version": 1,
@@ -116,6 +125,12 @@ def main() -> None:
             root / "storage-retention-schema-v1.sql",
             "-- Explicit offline retention extension v1; core records/user_version remain 1.\n"
             + ";\n\n".join(statement.strip() for statement in RETENTION_DDL)
+            + ";\n",
+        ),
+        (
+            root / "storage-abandonment-schema-v1.sql",
+            "-- Explicit offline abandonment extension v1; original schemas unchanged.\n"
+            + ";\n\n".join(statement.strip() for statement in ABANDONMENT_DDL)
             + ";\n",
         ),
         (

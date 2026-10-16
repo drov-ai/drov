@@ -1,6 +1,6 @@
 # 当前进度与下一轮
 
-更新：2026-10-16（Asia/Shanghai；T-15 第二批验收，接续遗留运行放弃）。
+更新：2026-10-16（Asia/Shanghai；T-15 第三批遗留运行放弃实施与验证）。
 
 ## 当前状态
 
@@ -17,7 +17,11 @@
 
 Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三个参考应用检验通用性，不限定业务。渐进 API、统一运行机制、可检查上下文/记忆是待验证的优势假设，不把类型、存储或生命周期测试写成完整 Agent 能力或体验领先。
 
-## 本轮交付：T-15 第二批显式字节回收与中断台账
+## 当前交付：T-15 第三批显式放弃遗留运行
+
+第三批已接续实现显式离线data_abandoned、完整预览/不可变回执、最小未知事实和匹配事实后的正文清理。原未知操作、租约/费用不因放弃被核销；prepared未派发和当前交互结束有实际记录，普通恢复/批准不能复活。最终3.14含真实Docker全库1254通过/59项未授权云skip，双解释器构件/四套core-only与两套server独立安装通过，旧SDK接受原库/拒绝新扩展且库字节未变；跨平台CI待推送后绑定SHA，当前不关闭本子范围或T-15。设计与实际失败/验证见[ADR-0029](../decisions/0029-offline-run-abandonment.md)/[第三批记录](../validation/t15-abandonment.md)；一致备份/恢复/barrier、实际迁移、授权导出仍未实现。
+
+## 本轮已验收：T-15 第二批显式字节回收与中断台账
 
 按[ADR-0028](../decisions/0028-resumable-byte-reclamation.md)在原SQLiteMaintenance新增preview_reclamation/reclaim/resume_reclamation；完整预览和精确owner/Agent，整阶段保留共享引用/未结束或未知执行/租约，过期未消费上传必须显式选择，已消费输入不按TTL删。先提交独立reclamation_schema=1的pending库存，再删原数据/清单、同步目录，最后确认done；中断期间普通SQLiteStorage/Runtime打开拒绝，离线只恢复原库存。原所有DDL/版本、字节格式/额度、Session逻辑删除的零字节语义和云费用预留保持。
 

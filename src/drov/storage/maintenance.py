@@ -27,6 +27,22 @@ from drov.errors import (
     StorageInUse,
 )
 from drov.sandbox._leases import LeaseTransaction, SandboxLease
+from drov.storage._abandonment import (
+    AbandonmentFact,
+    AbandonmentPlan,
+)
+from drov.storage._abandonment import (
+    apply as apply_abandonment,
+)
+from drov.storage._abandonment import (
+    lookup as lookup_abandonment,
+)
+from drov.storage._abandonment import (
+    matches as abandonment_matches,
+)
+from drov.storage._abandonment import (
+    select as select_abandonment,
+)
 from drov.storage._driver import Key, Row
 from drov.storage._reclamation import (
     RECLAMATION_DDL,
@@ -51,7 +67,14 @@ from drov.storage.transaction import UNFINISHED, Transaction, _decode
 from drov.tools.operations import ToolOperation
 from drov.types import RunContext, UtcTime, WireModel
 
-__all__ = ["SQLiteMaintenance", "SessionDeletionPlan", "ReclamationPlan", "ReclamationResult"]
+__all__ = [
+    "SQLiteMaintenance",
+    "SessionDeletionPlan",
+    "ReclamationPlan",
+    "ReclamationResult",
+    "AbandonmentPlan",
+    "AbandonmentFact",
+]
 
 
 class SessionDeletionPlan(WireModel):
@@ -277,13 +300,24 @@ class SQLiteMaintenance:
             except (ValueError, TypeError) as exc:
                 raise PersistenceUnavailable("Invalid operation prevents maintenance") from exc
             operations[(op.run_id, op.operation_id)] = op
-            if op.status in ("dispatched", "unknown"):
-                blockers.add("unresolved_operation")
         for run in runs:
             for summary in run.state.operations:
                 operation = operations.get((run.state.run_id, summary.operation_id))
                 if operation is None or operation.summary() != summary:
                     raise PersistenceUnavailable("Run and operation facts disagree")
+            uncertain = [
+                op
+                for (run_id, _), op in operations.items()
+                if run_id == run.state.run_id and op.status in ("dispatched", "unknown")
+            ]
+            if uncertain:
+                fact = await lookup_abandonment(tx, scope, run.state.run_id)
+                if fact is None or not abandonment_matches(
+                    fact,
+                    run,
+                    [op for (run_id, _), op in operations.items() if run_id == run.state.run_id],
+                ):
+                    blockers.add("unresolved_operation")
 
         leases = []
         other_leases = []
@@ -580,6 +614,32 @@ class SQLiteMaintenance:
             async with self._storage.transaction() as tx:
                 plan, _, _ = await self._select_reclamation(tx, scope, expired_uploads, tx._now())
                 return plan
+
+    async def preview_abandonment(
+        self, scope: RunContext, run_id: str, *, reason: str
+    ) -> AbandonmentPlan:
+        scope = RunContext.from_json(scope.model_dump_json())
+        async with self._gate:
+            self._require_open()
+            async with self._storage.transaction() as tx:
+                plan, _, _, _ = await select_abandonment(self, tx, scope, run_id, reason)
+                return plan
+
+    async def abandon_run(self, plan: AbandonmentPlan) -> AbandonmentFact:
+        plan = AbandonmentPlan.from_json(plan.model_dump_json())
+        async with self._gate:
+            self._require_open()
+            return await apply_abandonment(self, plan)
+
+    async def get_abandonment(self, scope: RunContext, run_id: str) -> AbandonmentFact:
+        scope = RunContext.from_json(scope.model_dump_json())
+        async with self._gate:
+            self._require_open()
+            async with self._storage.transaction() as tx:
+                fact = await lookup_abandonment(tx, scope, run_id)
+                if fact is None:
+                    raise RecordNotFound("Abandonment is unavailable")
+                return fact
 
     async def _select_reclamation(
         self, tx: Transaction, scope: MemoryScope, expire: bool, as_of: UtcTime
@@ -910,6 +970,9 @@ def main() -> int:
             "preview-reclamation",
             "reclaim",
             "resume-reclamation",
+            "preview-abandonment",
+            "abandon-run",
+            "get-abandonment",
         ),
     )
     parser.add_argument("--database", required=True, type=Path)
@@ -918,14 +981,24 @@ def main() -> int:
     parser.add_argument("--user")
     parser.add_argument("--session")
     parser.add_argument("--agent")
+    parser.add_argument("--run")
+    parser.add_argument(
+        "--reason", help="Bounded administrator reason retained after content deletion"
+    )
     parser.add_argument("--expired-uploads", action="store_true")
-    parser.add_argument("--plan-file", type=Path, help="Exact JSON from preview-reclamation")
+    parser.add_argument(
+        "--plan-file", type=Path, help="Exact JSON from the matching maintenance preview"
+    )
     parser.add_argument("--include-memory", action="store_true")
     parser.add_argument("--fingerprint", help="Exact fingerprint from the current preview")
     args = parser.parse_args()
-    if args.action in ("preview-session", "delete-session", "preview-reclamation") and (
-        args.tenant is None or args.user is None
-    ):
+    if args.action in (
+        "preview-session",
+        "delete-session",
+        "preview-reclamation",
+        "preview-abandonment",
+        "get-abandonment",
+    ) and (args.tenant is None or args.user is None):
         parser.error("preview and session actions require --tenant and --user")
     if args.action in ("preview-session", "delete-session") and args.session is None:
         parser.error("session actions require --session")
@@ -933,6 +1006,12 @@ def main() -> int:
         parser.error("preview-reclamation requires --agent")
     if args.action == "reclaim" and args.plan_file is None:
         parser.error("reclaim requires --plan-file from preview-reclamation")
+    if args.action == "abandon-run" and args.plan_file is None:
+        parser.error("abandon-run requires --plan-file from preview-abandonment")
+    if args.action in ("preview-abandonment", "get-abandonment") and args.run is None:
+        parser.error("abandonment preview/lookup requires --run")
+    if args.action == "preview-abandonment" and args.reason is None:
+        parser.error("preview-abandonment requires an explicit --reason")
     if args.action == "delete-session" and args.fingerprint is None:
         parser.error("delete-session requires --fingerprint from a preview")
     if args.fingerprint is not None and (
@@ -944,6 +1023,20 @@ def main() -> int:
     async def run() -> None:
         files = LocalArtifacts(directory=args.artifacts) if args.artifacts is not None else None
         async with SQLiteMaintenance(args.database, artifacts=files) as maintenance:
+            if args.action == "preview-abandonment":
+                abandoned = await maintenance.preview_abandonment(
+                    RunContext(tenant_id=args.tenant, user_id=args.user),
+                    args.run,
+                    reason=args.reason,
+                )
+                print(abandoned.model_dump_json(indent=2))
+                return
+            if args.action == "get-abandonment":
+                fact = await maintenance.get_abandonment(
+                    RunContext(tenant_id=args.tenant, user_id=args.user), args.run
+                )
+                print(fact.model_dump_json(indent=2))
+                return
             if args.action == "preview-reclamation":
                 preview = await maintenance.preview_reclamation(
                     MemoryScope(tenant_id=args.tenant, user_id=args.user, agent_name=args.agent),
@@ -951,11 +1044,15 @@ def main() -> int:
                 )
                 print(preview.model_dump_json(indent=2))
                 return
-            if args.action == "reclaim":
+            if args.action in ("reclaim", "abandon-run"):
                 with args.plan_file.open("rb") as source:
                     raw = source.read(65537)
                 if len(raw) > 65536:
-                    raise ConfigurationError("Reclamation plan exceeds its bound")
+                    raise ConfigurationError("Maintenance plan exceeds its bound")
+                if args.action == "abandon-run":
+                    fact = await maintenance.abandon_run(AbandonmentPlan.from_json(raw))
+                    print(fact.model_dump_json(indent=2))
+                    return
                 result = await maintenance.reclaim(ReclamationPlan.from_json(raw))
                 print(result.model_dump_json(indent=2))
                 return

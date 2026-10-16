@@ -302,3 +302,15 @@ python -m drov.storage.maintenance resume-reclamation --database /private/drov/s
 这是现有库用法，不对用户真实库自动执行。预览文件最多64KiB，只含归属/统计/摘要；保持在宿主私有目录。需回收过期未消费上传时在 preview-reclamation 显式加 --expired-uploads；reclaim 必须原完整预览，旧计划冲突后重新预览，不能改摘要或数量。pending 时不产生新计划，先运行 resume-reclamation；完成/重复恢复返回统计零或本次完成阶段统计，不重新执行模型/代码。
 
 恢复拒绝原库存之外的文件、链接/硬链接、替换目录、改动文件及新增数据库引用，保留台账供人工检查。无有效 stage.json 且没有原 pending 台账的目录仍 fail closed，本批不猜测其 owner 或强删。不能手工删 pending 表绕过阻断；库、原字节目录与台账共同保留。bytes_reclaimed 表示逻辑数据长度，不包含磁盘块、SQLite空闲页、外部备份或物理安全擦除；累计云费用不退款。
+
+## 显式放弃与保留未知事实
+
+按[ADR-0029](../decisions/0029-offline-run-abandonment.md)在同一离线入口提供以下现有库用法；它们不会自动对用户真实库执行。配对库还需原 --artifacts，管理原因会长期保留，使用不含正文/凭据的说明。
+
+```sh
+python -m drov.storage.maintenance preview-abandonment --database /private/drov/state.db --tenant tenant --user alice --run RUN_ID --reason "source process cannot continue" > /private/drov/abandonment-plan.json
+python -m drov.storage.maintenance abandon-run --database /private/drov/state.db --plan-file /private/drov/abandonment-plan.json
+python -m drov.storage.maintenance get-abandonment --database /private/drov/state.db --tenant tenant --user alice --run RUN_ID
+```
+
+首次实际放弃启用[abandonment_schema=1](../reference/storage-abandonment-schema-v1.sql)，原格式不改，新SDK仍读旧库、旧SDK拒绝新扩展。数据库失败/取消/提交丢回执遵循原保护，若存储poison须关闭重开再用原完整计划获取原回执；不能手工去标记或修改计划强行重试。最小事实和当前Run/未知操作匹配后才允许正文逻辑清理，未确认租约仍阻止；字节回收仍另行预览，不把放弃当销毁/核实/退款或旧备份屏障。
