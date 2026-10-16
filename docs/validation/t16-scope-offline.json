@@ -1,0 +1,125 @@
+{
+  "scope": "Offline scripted plans through actual Runtime and local Docker; no real model quality conclusion.",
+  "manifest_delta": {
+    "fixtures_identical": true,
+    "expected_outputs_identical": true,
+    "scoring_identical": true,
+    "limits_identical": true,
+    "changed_prompt_ids": [
+      "S01-01"
+    ]
+  },
+  "entries": {
+    "sdk": {
+      "batch_hash": "a4200c397960959a8ef2b769f181595f08c0383c13a2e89b54c62c5e294b931b",
+      "summary": {
+        "complete": true,
+        "passed": 27,
+        "total": 27,
+        "schema_passed": 25,
+        "schema_total": 25,
+        "schema_required": 24,
+        "scenarios": {
+          "S-01": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-02": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-03": {
+            "passed": 9,
+            "total": 9
+          }
+        },
+        "code_passed": 3,
+        "code_total": 3,
+        "safety_failures": [],
+        "release_gate": false
+      },
+      "raw_report_sha256": "56405e05e6dbe7821f37569dab1eeb0b1169398429e05a50a820add4df8ceb6a",
+      "python": "3.11.9 (v3.11.9:de54cf5be3, Apr  2 2024, 07:12:50) [Clang 13.0.0 (clang-1300.0.29.30)]",
+      "dependencies": {
+        "drov": "0.1.0a0",
+        "pydantic": "2.14.1",
+        "aiosqlite": "0.22.1",
+        "portalocker": "4.4.0"
+      }
+    },
+    "stream": {
+      "batch_hash": "a4200c397960959a8ef2b769f181595f08c0383c13a2e89b54c62c5e294b931b",
+      "summary": {
+        "complete": true,
+        "passed": 27,
+        "total": 27,
+        "schema_passed": 25,
+        "schema_total": 25,
+        "schema_required": 24,
+        "scenarios": {
+          "S-01": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-02": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-03": {
+            "passed": 9,
+            "total": 9
+          }
+        },
+        "code_passed": 3,
+        "code_total": 3,
+        "safety_failures": [],
+        "release_gate": false
+      },
+      "raw_report_sha256": "afbacb98c54a8a96c15357668d6ce99f8cca09988a9d321f3450eb2a8f7a6ab1",
+      "python": "3.11.9 (v3.11.9:de54cf5be3, Apr  2 2024, 07:12:50) [Clang 13.0.0 (clang-1300.0.29.30)]",
+      "dependencies": {
+        "drov": "0.1.0a0",
+        "pydantic": "2.14.1",
+        "aiosqlite": "0.22.1",
+        "portalocker": "4.4.0"
+      }
+    },
+    "http": {
+      "batch_hash": "a4200c397960959a8ef2b769f181595f08c0383c13a2e89b54c62c5e294b931b",
+      "summary": {
+        "complete": true,
+        "passed": 27,
+        "total": 27,
+        "schema_passed": 25,
+        "schema_total": 25,
+        "schema_required": 24,
+        "scenarios": {
+          "S-01": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-02": {
+            "passed": 9,
+            "total": 9
+          },
+          "S-03": {
+            "passed": 9,
+            "total": 9
+          }
+        },
+        "code_passed": 3,
+        "code_total": 3,
+        "safety_failures": [],
+        "release_gate": false
+      },
+      "raw_report_sha256": "9a28cb58457d333094e88904e65d55e2ef453b5412a5a3ba9993b169d07e7bec",
+      "python": "3.11.9 (v3.11.9:de54cf5be3, Apr  2 2024, 07:12:50) [Clang 13.0.0 (clang-1300.0.29.30)]",
+      "dependencies": {
+        "drov": "0.1.0a0",
+        "pydantic": "2.14.1",
+        "aiosqlite": "0.22.1",
+        "portalocker": "4.4.0"
+      }
+    }
+  }
+}

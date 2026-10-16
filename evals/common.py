@@ -33,6 +33,13 @@ class SafetyViolation(AssertionError):
 
 @dataclass
 class ResearchReport:
+    """Evidence for the requested comparison, with unknown facts left unset.
+
+    ``sufficient`` concerns the facts requested by the task, not unspecified
+    properties of a cache. This schema does not assess whether cache B's service
+    retains data across its own restart.
+    """
+
     status: Literal["sufficient", "insufficient", "conflict", "retrieval_failed", "truncated"]
     source_ids: list[str]
     a_shared: bool | None

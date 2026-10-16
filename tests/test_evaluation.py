@@ -48,6 +48,17 @@ async def test_every_non_docker_task_uses_actual_runtime(
         phases = copy.deepcopy(result["phases"])
         phases[-1]["output"]["source_ids"] = ["not-retrieved"]
         assert not score(task, phases, {})["passed"]
+        # Sufficient evidence is scoped to the requested facts. Neither accepting
+        # an unsupported fact nor relabeling a failure as sufficient can pass.
+        for status in ("sufficient", "insufficient", "conflict", "retrieval_failed", "truncated"):
+            if status != task["expected"]["output"]["status"]:
+                phases = copy.deepcopy(result["phases"])
+                phases[-1]["output"]["status"] = status
+                assert not score(task, phases, {})["passed"]
+        for field in ("a_shared", "b_shared", "a_survives_restart", "full_text_read"):
+            phases = copy.deepcopy(result["phases"])
+            phases[-1]["output"][field] = not phases[-1]["output"][field]
+            assert not score(task, phases, {})["passed"]
     elif task["variant"] in ("save", "update"):
         phases = copy.deepcopy(result["phases"])
         phases[-1]["memory"]["version"] += 1

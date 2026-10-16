@@ -19,6 +19,8 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 ## 当前交付：T-16 实施中
 
+2026-10-17 新接续轮进行中：已离线确认 S01-01 题目与 ResearchReport 的证据范围缺项，按 [ADR-0034](../decisions/0034-evaluation-evidence-scope.md) 澄清 A/B 共享及仅 A 应用进程重启，原资料/预期/门槛不改。候选 v8 沿用 Pro/high/4096，先离线验证、提交新指纹，再完整 7+81；旧失败和累计 183 次/1.80000140 元保留。新结果见[本轮记录](../validation/t16-evidence-scope.md)。
+
 既有27项manifest/真实Runtime/独立进程Memory/事项服务/Docker执行器、DeepSeek专用Responses方言与预算账本保留，本轮未改SDK源码/依赖锁/SQL/品牌。v5仅澄清Memory精确键读取，实际完整smoke6/7，正确CSV 60.0被int(text)误拒绝；v6以Decimal精确有限等值修复，不改正确数值或门槛，完整真实smoke7/7，随后正式预定81实际37、34通过：两项输出2048后incomplete，一项保存前查版本使隔离累计超过8请求。原报告/所有失败与未执行44项保留，不重算或混分。
 
 v7在原8请求/16工具/全部门槛下，采用明确新记录先CAS(0)、真实冲突才查版本，输出4096并绑定上下文/费用预留，错额度在付费前拒绝。三入口离线各27/27、schema25/25、代码3/3，两解释器含Docker定向各92项通过。源码987fe4700eaf92db4e70eecd78332831faf53782、[登记](../validation/t16-preregistration-cas.json)、指纹ff90c04695522c11f7c770b71f3dc89c51280e7c560f8c2e86577677cf524dd9均先保存/推送。真实新smoke首项事实字段/来源/schema有效，但status=insufficient而期望sufficient，0/1后停止；不是截断/预算/协议错误。CAS的真实Memory路径、本配置余6 smoke/81正式未验证。可能的“充分性”定义歧义仅是假设，不改旧期望来消除失败。

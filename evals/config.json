@@ -1,6 +1,6 @@
 {
-  "version": 7,
-  "amendment": "Evidence-based follow-up to incomplete v6 formal 34/37: use optimistic CAS version 0 for explicitly requested new memory before any version lookup, query after actual conflict; raise reasoning-inclusive output allowance from 2048 to 4096 after two exhausted-output failures. Provider/model/high, corpus, numerical oracle, thresholds and 8-request/16-tool trial limits unchanged. Preserve all old samples and costs; new complete smoke and formal, adaptive not blind.",
+  "version": 8,
+  "amendment": "Resolve the independently audited S01-01 task/schema evidence-scope mismatch: ask A/B sharing and only A application-process restart retention; define research status against requested facts. Corpus, expected outputs, oracle, Pro/high/4096, 8-request/16-tool limits and all thresholds unchanged. All old failures/costs retained; new complete smoke and formal; adaptive, not blind.",
   "provider": "DeepSeek official",
   "endpoint": "https://api.deepseek.com",
   "model": "deepseek-v4-pro",
@@ -21,7 +21,7 @@
     "output": "27"
   },
   "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
-  "price_checked": "2026-10-16",
+  "price_checked": "2026-10-17",
   "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
   "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
 }

@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "name": "drov-t16-synthetic-v1",
+  "version": 2,
+  "name": "drov-t16-synthetic-v2",
   "repeats": 3,
   "smoke": [
     "S01-01",
@@ -56,7 +56,7 @@
       "id": "S01-01",
       "scenario": "S-01",
       "variant": "complete",
-      "prompt": "比较缓存A和B的跨进程共享及重启保留能力。",
+      "prompt": "比较缓存A和B的跨进程共享能力，并说明A所属应用进程重启后是否保留缓存。",
       "references": [
         "S-01-A",
         "B-10",
