@@ -1,0 +1,69 @@
+{
+  "scope": "Saved observations only; no provider, tool or sandbox execution. Timing includes host buffering; not time-to-first-token.",
+  "batch_hash": "f87a14beac59598163912e577e8841bc46460a3cc6591068db711a163d0a1112",
+  "suite": "smoke",
+  "trial_latency": {
+    "count": 3,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 10.125120374839753,
+    "p95_seconds": 64.10346616618335,
+    "total_seconds": 79.61467833304778
+  },
+  "model_request_latency": {
+    "count": 10,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 2.4432101249694824,
+    "p95_seconds": 53.14312000013888,
+    "total_seconds": 77.43967741401866
+  },
+  "paid_requests": 10,
+  "normalized_model_invocations": 10,
+  "observed_model_retries": 0,
+  "observed_external_tool_retries": 0,
+  "ordinary_tool_dispatched_events": 2,
+  "recorded_operations_including_builtin_memory_and_sandbox": 6,
+  "operation_statuses": {
+    "succeeded": 6
+  },
+  "usage": {
+    "input_tokens": 12206,
+    "output_tokens": 7784,
+    "total_tokens": 19990,
+    "cached_input_tokens": 10368
+  },
+  "cost_upper_cny": "0.2298204",
+  "all_history_accounting": {
+    "attempts": 585,
+    "status_counts": {
+      "settled": 585
+    },
+    "cost_upper_cny": "6.94020020",
+    "ceiling_cny": "13",
+    "usable_cny": "11",
+    "stopped": null
+  },
+  "not_provider_bill_or_balance": true,
+  "failed_trials": [
+    {
+      "trial": "S02-01-1",
+      "score": {
+        "passed": false,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": false,
+          "persistent_content_version": false,
+          "answer_used_memory": false,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    }
+  ],
+  "model_generated_code": [],
+  "raw_report_sha256": "dcef075c7bf4889c5db5177a7d72d0f7faa70f771940587ee8b26f295dc4e60d"
+}

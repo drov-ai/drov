@@ -69,3 +69,17 @@ S02-04-3实际save2、other-user2、other-tenant2、other-agent两次相同精�
 按[ADR-0036](../decisions/0036-evaluation-trial-limit-scope.md)纠正局部限额与全批费用保护的范围：新trial_stops不可续原试验，但允许已结算/预算充足时继续其他独立样本；旧全局stopped仍须明确reviewed_trial_limit新登记。v11只改此执行器行为，Pro/high/8192/提示/语料/oracle/预期/8请求及阈值不变。旧39项与未执行42项不续跑或替换，新源码/登记后完整7+81。并补跨打开/跨登记限额、其他试验准入、pending阻断与完整81迭代的合成driver回归，合成质量标offline。
 
 v11最终三入口完整离线各27/27、schema25/25、代码3/3、零安全失败，见[摘要](t16-scoped-offline.json)。Python3.11含Docker定向101 passed（29.26s），3.14为101 passed（31.17s）。新增两个限额/driver回归的功能检查通过；首轮mypy指出合成driver visited缺list[str]注解，已补齐，静态最终结果后补。未改SDK/SQL/锁/品牌；旧全局stopped尚未解除，真实新批次需先提交与登记。
+
+## v11 smoke2/3，重复成功保存失败
+
+源码208031992624494ac0c143306c55d75c75b015ea / [登记](t16-preregistration-scoped.json)6284871先推送；f87a14beac59598163912e577e8841bc46460a3cc6591068db711a163d0a1112。原575次全settled后，以reviewed_trial_limit明确复核旧全批停止，新登记保留全部费用/计数。新[smoke原报告](t16-scoped-smoke.json)/[计量](t16-scoped-smoke-metrics.json)前两项通过，第3项S02-01失败后停止，余4及正式81未执行。
+
+[实际失败复核](t16-scoped-review.json)：第一次remember(expected0)成功版本1，随后模型recall后又提出不同的新remember(expected1)，再成功到版本2，memory.changed=2；新进程如实读取版本2。不是同一operation被重复派发或自动重试，但违反原一次提交/版本1预期，保持任务失败。schema有效，不能据此算保存正确。此smoke10请求全部settled、峰值上界0.2298204元，历史585次/6.94020020元，无pending/unknown/stopped，未因预算不足停止。局部限额新行为尚未在此live配置触发，不能将合成driver当真实限额案例。
+
+v12按[ADR-0037](../decisions/0037-evaluation-memory-terminal-conditions.md)补读成功/写成功立即最终回答、自动注入是已提交结果的结束规则；不改SDK/Memory语义/期望版本/模型/门槛/预算。新增更高实际版本与第二次成功提交仍失败的反例。旧v11失败不替换，新登记完整7+81。
+
+## Windows旧源码失败的检查
+
+6142ff1的Docker38936492101四jobs成功；核心38936492018的Windows3.14在既有test_actual_process_kill_at_abandonment_commit[before]中，已wait终止的合成子进程后立即重开StorageInUse，原错误日志保留.drov/t16-bounded-core-failure.log。九jobs成功、Windows3.11被后续源码并发规则取消；整轮conclusion=cancelled，不能算成功。仅测试增加Windows子进程已回收后的5s有界锁释放观察；原进程存活时立即StorageInUse断言、实际事务前/后状态/未知事实断言不变，未改SDK锁规则。POSIX不重试；真实Windows最终结果待新源码CI。
+
+v12三入口离线各27/27、schema25/25、代码3/3、零安全失败，见[摘要](t16-terminal-offline.json)。两解释器含Docker/abandonment定向各128项：首次127 passed/1 failed（3.11 31.28s、3.14 33.23s），新增二次提交反例误把update的seed准备阶段当作写阶段而KeyError；改选第一个非seed阶段，原日志保留。只复验S02-02，两解释器均1 passed，其他127项未变；并非128项在同次全部通过的记录。静态/格式291文件、mypy192源、schema/OpenAPI、98 Markdown/912本地链接/16说明片段AST/保护与凭据模式检查通过。Windows有界观察分支的真实验证仍以最终源码CI为准，本地POSIX两个真实kill边界均已通过。

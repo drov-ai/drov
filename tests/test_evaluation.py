@@ -65,6 +65,19 @@ async def test_every_non_docker_task_uses_actual_runtime(
         phases = copy.deepcopy(result["phases"])
         phases[-1]["memory"]["version"] += 1
         assert not score(task, phases, {})["passed"]
+        duplicate = copy.deepcopy(result["phases"])
+        first_mutation = next(p for p in duplicate if p["phase"] != "seed")
+        first_mutation["memory_changed"] = 2
+        first_mutation["operations"].append(
+            first_mutation["operations"][0] | {"operation_id": "second-successful-write"}
+        )
+        for phase in duplicate:
+            if phase.get("memory"):
+                phase["memory"]["version"] = task["expected"]["version"] + 1
+            if isinstance(phase.get("output"), dict):
+                phase["output"]["version"] = task["expected"]["version"] + 1
+        repeated = score(task, duplicate, {})
+        assert not repeated["passed"] and not repeated["checks"]["mutation_committed"]
     elif task["variant"] == "isolation":
         phases = copy.deepcopy(result["phases"])
         phases[-1].update(state="failed", output=None, schema_valid=False)

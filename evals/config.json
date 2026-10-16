@@ -1,6 +1,6 @@
 {
-  "version": 11,
-  "amendment": "Correct evaluation limit scope after v10 partial36/39: persist the exhausted trial at eight paid requests without halting independent remaining trials when all costs settled and total budget allows. Exhausted trial remains incomplete/failed and cannot resume; unknown/pending/monetary stops remain global, legacy global stop needs explicit review/amend. Same Pro/high/8192, prompts/corpus/oracle/expected/thresholds and 8/16 limits. Preserve v10 failures,42 unexecuted and575 settled requests/costs; new complete7+81, no regrading/mixing.",
+  "version": 12,
+  "amendment": "After v11 smoke2/3, add explicit Memory terminal conditions: read task ends after one successful recall including empty; write task ends immediately after successful remember/forget, no verification recall or second identical mutation; automatic injected record is the just-committed result. Preserve actual version2 duplicate-save failure, all585 settled requests/costs. Same Pro/high/8192, corpus/oracle/expected/thresholds,8/16 limits and scoped trial-stop behavior. New complete7+81; adaptive not blind.",
   "provider": "DeepSeek official",
   "endpoint": "https://api.deepseek.com",
   "model": "deepseek-v4-pro",

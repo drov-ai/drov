@@ -1,0 +1,13 @@
+{
+  "scope": "Read-only review of v11 smoke failure; no provider/tool replay.",
+  "trial": "S02-01-1",
+  "trial_sha256": "cc1f6d6fa5e41bcca665cf3ea6d705fc9a405ee20b564840c3fd5d90c7654120",
+  "finding": "First remember(expected0) succeeded/version1; then recall and a different remember(expected1) both executed, producing second actual mutation/version2; new PID reader truly reads version2. Distinct model plans, not duplicate dispatch of one operation. Original one-mutation/version1 checks fail; all actual statements describe persisted version2.",
+  "actual_save_model_calls": 4,
+  "reader_model_calls": 2,
+  "actual_mutations": 2,
+  "expected_mutations": 1,
+  "actual_version": 2,
+  "expected_version": 1,
+  "disposition": "Keep original failure; explicit post-success terminal conditions preregistered separately."
+}

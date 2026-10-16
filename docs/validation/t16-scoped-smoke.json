@@ -1,0 +1,381 @@
+{
+  "version": 1,
+  "mode": "live",
+  "suite": "smoke",
+  "batch_hash": "f87a14beac59598163912e577e8841bc46460a3cc6591068db711a163d0a1112",
+  "config": {
+    "version": 11,
+    "amendment": "Correct evaluation limit scope after v10 partial36/39: persist the exhausted trial at eight paid requests without halting independent remaining trials when all costs settled and total budget allows. Exhausted trial remains incomplete/failed and cannot resume; unknown/pending/monetary stops remain global, legacy global stop needs explicit review/amend. Same Pro/high/8192, prompts/corpus/oracle/expected/thresholds and 8/16 limits. Preserve v10 failures,42 unexecuted and575 settled requests/costs; new complete7+81, no regrading/mixing.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "high",
+    "max_output_tokens": 8192,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-17",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "git_commit": "6284871581207a1c0ba66d8a72787fdda77bda73",
+  "python": "3.11.9 (v3.11.9:de54cf5be3, Apr  2 2024, 07:12:50) [Clang 13.0.0 (clang-1300.0.29.30)]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "sqlite": "3.45.1",
+  "dependencies": {
+    "drov": "0.1.0a0",
+    "pydantic": "2.14.1",
+    "aiosqlite": "0.22.1",
+    "portalocker": "4.4.0",
+    "openai": "3.29.0",
+    "httpx2": "2.13.1"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "results": [
+    {
+      "trial": "S01-01-1",
+      "task": "S01-01",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 5.386091792024672,
+      "phases": [
+        {
+          "task": "S01-01",
+          "phase": "run",
+          "pid": 21646,
+          "run_id": "d4333a7c-a046-4750-a2e8-10c098f2d6fb",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "3495e24d-4fd7-437b-afc4-992e616af2b2",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "7ce20516-bb89-4da7-9bc9-79dc74213949",
+            "ae995caf-4a8c-4cef-b72f-dd22acf5779f"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-03-1",
+      "task": "S01-03",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 10.125120374839753,
+      "phases": [
+        {
+          "task": "S01-03",
+          "phase": "run",
+          "pid": 21654,
+          "run_id": "24df5f4b-ccdb-41e8-b112-2f40e82474fe",
+          "state": "completed",
+          "output": {
+            "status": "insufficient",
+            "source_ids": [
+              "cache-a"
+            ],
+            "a_shared": false,
+            "b_shared": null,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "76d7c252-87a6-4adb-aff1-da6b76e38797",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "41d82764-e61c-4ca2-92e6-65eb2d9cdd53",
+            "0219d300-b222-4d64-98a9-90b7dbd34c43"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S02-01-1",
+      "task": "S02-01",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 64.10346616618335,
+      "phases": [
+        {
+          "task": "S02-01",
+          "phase": "save",
+          "pid": 21658,
+          "run_id": "9a866695-776f-4911-8b66-9e9d9db7d32e",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 4,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "efcf6aaf-8c52-4a55-8e4b-0051ddf897fc",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "b1026b79-567e-40f8-9128-92798ee4ff7f",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            },
+            {
+              "operation_id": "bee439ed-b9eb-4118-858e-dd9cd8b7875a",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 2,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "included",
+            "included",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "9a866695-776f-4911-8b66-9e9d9db7d32e:operation:bee439ed-b9eb-4118-858e-dd9cd8b7875a",
+            "updated_at": "2026-10-16T17:18:42.650116Z"
+          },
+          "context_ids": [
+            "3a036d7c-73f0-4ef6-a45f-5ae98ef12ce3",
+            "7008ffee-1105-4a32-afbe-e14eec6ec3c9",
+            "6a8d01c5-4686-4bf0-bc76-61339705d5ef",
+            "c2221198-bb2f-423a-9c07-78faa125b504"
+          ]
+        },
+        {
+          "task": "S02-01",
+          "phase": "read",
+          "pid": 21707,
+          "run_id": "20f65eb0-d2e5-409d-ba3d-072f88173b3d",
+          "state": "completed",
+          "output": {
+            "status": "present",
+            "content": "简洁中文",
+            "version": 2
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "c020fa96-4af0-47fc-9ac3-d40c01b02dab",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 2,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "9a866695-776f-4911-8b66-9e9d9db7d32e:operation:bee439ed-b9eb-4118-858e-dd9cd8b7875a",
+            "updated_at": "2026-10-16T17:18:42.650116Z"
+          },
+          "context_ids": [
+            "7b181b2e-99f2-416c-804d-1f47f8808455",
+            "79fee565-7208-4d44-b31c-dbf31f6c1f31"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": false,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": false,
+          "persistent_content_version": false,
+          "answer_used_memory": false,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    }
+  ],
+  "summary": {
+    "complete": false,
+    "passed": 2,
+    "total": 3,
+    "schema_passed": 3,
+    "schema_total": 3,
+    "schema_required": 3,
+    "scenarios": {
+      "S-01": {
+        "passed": 2,
+        "total": 2
+      },
+      "S-02": {
+        "passed": 0,
+        "total": 1
+      },
+      "S-03": {
+        "passed": 0,
+        "total": 0
+      }
+    },
+    "code_passed": 0,
+    "code_total": 0,
+    "safety_failures": [],
+    "release_gate": false
+  }
+}

@@ -471,9 +471,19 @@ async def test_actual_process_kill_at_abandonment_commit(tmp_path: Path, boundar
         await asyncio.to_thread(process.wait, timeout=5)
         assert process.stderr is not None
         process.stderr.close()
-    async with SQLiteStorage(path) as storage:
-        current = await storage.get_run(ALICE, run_id)
-        assert current.state.status == ("running" if boundary == "before" else "failed")
+    deadline = asyncio.get_running_loop().time() + 5
+    while True:
+        try:
+            async with SQLiteStorage(path) as storage:
+                current = await storage.get_run(ALICE, run_id)
+                assert current.state.status == ("running" if boundary == "before" else "failed")
+            break
+        except StorageInUse:
+            # Only allow bounded Windows lock cleanup after the child was reaped;
+            # the live-child ownership assertion above must still fail immediately.
+            if os.name != "nt" or asyncio.get_running_loop().time() >= deadline:
+                raise
+            await asyncio.sleep(0.01)
     async with SQLiteMaintenance(path) as maintenance:
         if boundary == "before":
             with pytest.raises(RecordNotFound):

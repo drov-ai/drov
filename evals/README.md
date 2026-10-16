@@ -42,3 +42,5 @@ CSV数值评分使用精确有限Decimal等值，合法整数/小数/科学记�
 文件复用 oracle 按原阶段 summary.csv 与新阶段 copied.csv 的唯一目标/hash 比较，额外交付文件不计入这对目标；缺失/重名/错阶段/字节变化仍拒绝。缺最终回答保持失败并保留安全诊断。v9完整81原报告不重算，v10修订及8192输出候选见[ADR-0035](../docs/decisions/0035-evaluation-artifact-oracle.md)。
 
 [ADR-0036](../docs/decisions/0036-evaluation-trial-limit-scope.md)取代新试验的全批停止行为：trial_stops持久拒绝原试验，报告completion=incomplete/trial_stop且任务/schema失败；其他独立试验仅在全部费用settled、无全局停止且原总预留允许时继续。旧全局stopped仍须显式reviewed_trial_limit新登记，不自动解除；原计数/费用/13与11上限保持，不补答/重放/剔除失败。
+
+Memory的读成功/写成功结束规则只属于本评测应用提示，不改变SDK工具语义；重复成功提交导致实际较高版本仍失败。v11原2/3保留，v12事前选择见[ADR-0037](../docs/decisions/0037-evaluation-memory-terminal-conditions.md)。

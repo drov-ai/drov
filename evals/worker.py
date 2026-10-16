@@ -74,6 +74,9 @@ INSTRUCTIONS = {
     "已有注入记录时直接使用；需要读取且未注入时，只调用一次memory.recall，"
     "key=reply-style、query=null。精确键成功返回空数组就是当前作用域不存在该记录，"
     "不要改成子串查询或重复检索。remember/forget只有实际工具成功才报告保存/删除成功。"
+    "结束规则：读任务在一次recall成功后（包括空数组）立即输出最终schema，不再调用记忆工具。"
+    "写任务在remember/forget成功后立即输出最终schema，不要recall复核或重复写入相同内容；"
+    "工具成功后自动注入的记录就是本次提交结果，不是新的保存要求。实际写入冲突才允许查询版本。"
     "最终只根据实际记忆/工具结果输出schema，读取不保存，未知content/version用null。"
     "保存后status=saved，更新updated，删除forgotten，写失败write_failed；"
     "读取有记录present，无可用记录absent。普通聊天不保存。",
