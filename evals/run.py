@@ -426,6 +426,7 @@ async def run(options: argparse.Namespace) -> None:
                 batch_hash=batch_hash,
                 ceiling=config["budget_cny"],
                 usable=config["usable_budget_cny"],
+                rates=config["peak_cny_per_million"],
             )
     repeats = 3 if options.suite == "formal" else 1
     results: list[dict[str, Any]] = []

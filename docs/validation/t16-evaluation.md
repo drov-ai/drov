@@ -26,3 +26,11 @@
 预注册源码923ad39、固定[登记](t16-preregistration.json)和语料hash先提交/推送；随后首项S01-01真实调用2次，工具实际检索2次，最终schema有效、主要缓存事实/引用正确，但full_text_read=false且原期望只检索1次，按原规则任务失败。驱动停止；实际1/7试验、0通过，其余6未执行，正式81未执行，无安全失败。原始记录`.drov/t16-smoke`，可审查[汇总](t16-smoke-v1.json)。两次用量均完整且已结算，按高峰上界合计0.0033936元，不是供应商账单实扣。没有丢样本/重抽成功替代，也没有修改原评分。
 
 v2只澄清两条提示含义：search_docs一次返回整个候选语料，只允许一次检索；成功无preview标记的返回即完整可见。模型/参数/语料/事实oracle/门槛不变。它是看见v1失败后形成的新登记，不作为完全未见结果的独立盲测；v1保留且不混入v2分数。新配置须重新完整7 smoke再81正式，88按单一固定配置批次计；一次13元总费用授权覆盖所有历史和新登记。只进行这一次提示澄清，不无限自动改提示重抽。账本amend必须全部旧请求已结算，保留所有attempt/cost及原13/11元上限，追加旧/新hash/原因；不重建/退款。新增拒绝pending及费用/上限逐字保留回归。
+
+## Flash v2与独立Pro候选
+
+[Flash v2登记](t16-preregistration-v2.json)后，实际4/7 smoke、3通过；S01-01/S01-03/S02-01通过，S02-04模型直接回答saved（content包含键名、version=0），完全没有memory.remember操作，真实存储与mutation事件均为空。三个其他scope读取均正确未知，未泄漏。按原事实断言失败并停止，余3 smoke/81正式未执行，见[原汇总](t16-smoke-v2.json)；不把schema有效当保存事实。两轮Flash合计17个真实请求，全settled，高峰上界累计0.020024元。
+
+用户原授权同时允许Pro，因此不再改提示/语料/评分，另登记deepseek-v4-pro/low/2048的独立候选；Flash旧失败不混分。官方同日人民币高峰价缓存0.30/输入9/输出27元每百万token，思考输出包含在output用量内，完整原始usage细分另记。账本为每个attempt保存当时价格，amend保留全部旧费用，不能用Pro价格重算Flash或沿用Flash低价预留Pro。新增混价实际结算/预留回归。仍为合计13元上限、11元可用/2元余量；未知用量停止。Pro完整7 smoke通过才正式81；如该候选仍未通过，不再自动换提示/抽样。
+
+本地SDK冻结全库1450收集、1391通过/59未授权E2B skip（359.46s，`.drov/t16-full314.log`）；随后仅评测提示/登记账本新增，相关57项通过（`t16-amendment-target.log`），SDK源码不变。两解释器core-only wheel/sdist重建与四套安装通过；3.14独立openai-extra四种OpenAI/DeepSeek SDK/stream loopback通过，锁94包无变更。初始923ad39 CI的Windows3.11/3.14收集发现Git自动CRLF转换使CSV hash不符，原失败保留（`t16-initial-windows311.log`），通过对该唯一CSV设置-text保留提交字节，未改CSV/manifest/hash/评分。最终原生平台结果另记，不复用初始失败任务的绿色部分。

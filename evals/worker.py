@@ -168,6 +168,7 @@ async def execute(options: argparse.Namespace) -> dict[str, Any]:
 
             from drov.models.deepseek import DeepSeekResponses
 
+            live_config = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
             # Host-only loading; no execution of env syntax or output of values.
             env = Path(options.env_file)
             if await asyncio.to_thread(env.is_symlink) or (
@@ -192,11 +193,11 @@ async def execute(options: argparse.Namespace) -> dict[str, Any]:
             values.clear()
             stack.push_async_callback(client.close)
             model_source = DeepSeekResponses(
-                model="deepseek-flash",
+                model=live_config["model"],
                 capabilities=CAPS,
                 client=client,
-                max_output_tokens=2048,
-                reasoning_effort="none",
+                max_output_tokens=live_config["max_output_tokens"],
+                reasoning_effort=live_config["reasoning_effort"],
             )
         else:
             model_source = FixtureModel(task, phase)

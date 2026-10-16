@@ -18,6 +18,21 @@ class BudgetStop(RuntimeError):
     pass
 
 
+FLASH_RATES = {"input_miss": "2", "input_hit": "0.04", "output": "8"}
+
+
+def checked_rates(rates: dict[str, str]) -> dict[str, str]:
+    if set(rates) != set(FLASH_RATES):
+        raise ValueError("Expected three CNY token rates")
+    numbers = {k: Decimal(v) for k, v in rates.items()}
+    if (
+        any(not v.is_finite() or v < 0 for v in numbers.values())
+        or numbers["input_hit"] > numbers["input_miss"]
+    ):
+        raise ValueError("Invalid token rates")
+    return dict(rates)
+
+
 class Ledger:
     """Peak-price upper estimates, with explicit uncertain attempts blocking new calls.
 
@@ -44,7 +59,14 @@ class Ledger:
             finally:
                 os.close(fd)
 
-    def create(self, *, batch_hash: str, ceiling: str = "13", usable: str = "11") -> None:
+    def create(
+        self,
+        *,
+        batch_hash: str,
+        ceiling: str = "13",
+        usable: str = "11",
+        rates: dict[str, str] | None = None,
+    ) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with portalocker.Lock(str(self.path) + ".lock", timeout=1):
             if self.path.exists():
@@ -59,10 +81,18 @@ class Ledger:
                     "ceiling": ceiling,
                     "usable": usable,
                     "attempts": [],
+                    "rates": checked_rates(rates or FLASH_RATES),
                 }
             )
 
-    def amend(self, *, previous_hash: str, batch_hash: str, reason: str) -> None:
+    def amend(
+        self,
+        *,
+        previous_hash: str,
+        batch_hash: str,
+        reason: str,
+        rates: dict[str, str] | None = None,
+    ) -> None:
         """Register a new experiment while retaining every cost and the original ceiling."""
         if not reason.strip() or previous_hash == batch_hash:
             raise ValueError("A distinct preregistration and a reason are required")
@@ -78,12 +108,15 @@ class Ledger:
                     "batch_hash": batch_hash,
                     "reason": reason,
                     "retained_attempts": len(data["attempts"]),
+                    "previous_rates": data.get("rates", FLASH_RATES),
+                    "rates": checked_rates(rates or data.get("rates", FLASH_RATES)),
                     "retained_cost_upper_cny": str(
                         sum((Decimal(a["cost_upper_cny"]) for a in data["attempts"]), Decimal(0))
                     ),
                 }
             )
             data["batch_hash"] = batch_hash
+            data["rates"] = checked_rates(rates or data.get("rates", FLASH_RATES))
             self._write(data)
 
     def reserve(
@@ -96,9 +129,13 @@ class Ledger:
         max_output_tokens: int,
     ) -> str:
         # Bill every input byte as a token, ignore caching, use peak CNY prices.
-        amount = (Decimal(input_bytes) * 2 + Decimal(max_output_tokens) * 8) / 1_000_000
         with portalocker.Lock(str(self.path) + ".lock", timeout=1):
             data = json.loads(self.path.read_text(encoding="utf-8"))
+            rates = checked_rates(data.get("rates", FLASH_RATES))
+            amount = (
+                Decimal(input_bytes) * Decimal(rates["input_miss"])
+                + Decimal(max_output_tokens) * Decimal(rates["output"])
+            ) / 1_000_000
             if data["batch_hash"] != batch_hash:
                 raise BudgetStop("Batch fingerprint changed")
             if data.get("stopped"):
@@ -122,6 +159,7 @@ class Ledger:
                     "request_hash": request_hash,
                     "status": "pending",
                     "reserved_cny": str(amount),
+                    "rates": rates,
                 }
             )
             self._write(data)
@@ -146,10 +184,11 @@ class Ledger:
                 assert usage.input_tokens is not None and usage.output_tokens is not None
                 assert usage.cached_input_tokens is not None
                 cached = usage.cached_input_tokens
+                rates = checked_rates(attempt.get("rates", FLASH_RATES))
                 cost = (
-                    Decimal(usage.input_tokens - cached) * 2
-                    + Decimal(cached) * Decimal("0.04")
-                    + Decimal(usage.output_tokens) * 8
+                    Decimal(usage.input_tokens - cached) * Decimal(rates["input_miss"])
+                    + Decimal(cached) * Decimal(rates["input_hit"])
+                    + Decimal(usage.output_tokens) * Decimal(rates["output"])
                 ) / 1_000_000
                 attempt.update(
                     status="settled", cost_upper_cny=str(cost), usage=usage.model_dump(mode="json")

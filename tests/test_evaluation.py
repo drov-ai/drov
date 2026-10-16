@@ -221,6 +221,40 @@ def test_budget_amendment_preserves_cost_and_refuses_unsettled(tmp_path: Path) -
         )
 
 
+def test_model_change_retains_old_prices_and_reserves_pro_peak_cost(tmp_path: Path) -> None:
+    ledger = Ledger(tmp_path / "ledger.json")
+    ledger.create(batch_hash="flash")
+    old = ledger.reserve(
+        batch_hash="flash",
+        trial="flash:t",
+        request_hash="h",
+        input_bytes=1000,
+        max_output_tokens=100,
+    )
+    usage = Usage(
+        input_tokens=1000,
+        output_tokens=100,
+        total_tokens=1100,
+        cached_input_tokens=500,
+        complete=True,
+    )
+    ledger.settle(old, usage)
+    ledger.amend(
+        previous_hash="flash",
+        batch_hash="pro",
+        reason="independent Pro registration",
+        rates={"input_miss": "9", "input_hit": "0.30", "output": "27"},
+    )
+    new = ledger.reserve(
+        batch_hash="pro", trial="pro:t", request_hash="h2", input_bytes=1000, max_output_tokens=100
+    )
+    ledger.settle(new, usage)
+    attempts = json.loads(ledger.path.read_text())["attempts"]
+    assert attempts[0]["cost_upper_cny"] == "0.00182"
+    assert attempts[1]["cost_upper_cny"] == "0.00735"
+    assert attempts[1]["reserved_cny"] == "0.0117"
+
+
 @pytest.mark.docker
 @pytest.mark.asyncio
 @pytest.mark.parametrize("identifier", ["S01-09", "S02-09", "S03-09"])

@@ -1,0 +1,550 @@
+{
+  "version": 1,
+  "mode": "live",
+  "suite": "smoke",
+  "batch_hash": "5e1644d32a037aafcf49c30f5914f07a8b2e94cf0205f6e1a39703296e5ff593",
+  "config": {
+    "version": 2,
+    "amendment": "Clarify one retrieval returning the entire corpus and full_text_read semantics; no scoring/manifest/model/price/threshold change. Preserve aborted v1 smoke and all costs.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-flash",
+    "reported_version": "DeepSeek-V4.1-Flash (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "none",
+    "max_output_tokens": 2048,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "2",
+      "input_hit": "0.04",
+      "output": "8"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-16",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "git_commit": "37c6fbf7de11891937f9e55372d34207f800c77f",
+  "python": "3.14.3 (main, Feb  3 2026, 15:32:20) [Clang 17.0.0 (clang-1700.6.3.2)]",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "sqlite": "3.52.0",
+  "dependencies": {
+    "drov": "0.1.0a0",
+    "pydantic": "2.14.1",
+    "aiosqlite": "0.22.1",
+    "portalocker": "4.4.0",
+    "openai": "3.29.0",
+    "httpx2": "2.13.1"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "results": [
+    {
+      "trial": "S01-01-1",
+      "task": "S01-01",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 3.1713232500478625,
+      "phases": [
+        {
+          "task": "S01-01",
+          "phase": "run",
+          "pid": 97886,
+          "run_id": "3ca3b6ce-bf06-4e77-a383-5cae933fac37",
+          "state": "completed",
+          "output": {
+            "status": "sufficient",
+            "source_ids": [
+              "cache-a",
+              "cache-b"
+            ],
+            "a_shared": false,
+            "b_shared": true,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "84c8b83f-64c4-46ca-810b-0a21ee7807e1",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "8616cde8-b331-40eb-9ebf-23e773a00183",
+            "fa8c7d74-36f7-485e-9d20-82e7fed45bba"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S01-03-1",
+      "task": "S01-03",
+      "scenario": "S-01",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 2.639230374712497,
+      "phases": [
+        {
+          "task": "S01-03",
+          "phase": "run",
+          "pid": 97912,
+          "run_id": "e792196e-14df-46cc-b116-3241d1f7d9c3",
+          "state": "completed",
+          "output": {
+            "status": "insufficient",
+            "source_ids": [
+              "cache-a"
+            ],
+            "a_shared": false,
+            "b_shared": null,
+            "a_survives_restart": false,
+            "full_text_read": true
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 1,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "4f97fd96-5b08-48cd-bfd3-689a0e85a942",
+              "tool_name": "search_docs",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "disabled",
+            "disabled"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "92d971b0-6732-44eb-827b-cf3cf13d76fe",
+            "b3119b3c-38c9-4913-84a9-323fcc0f835b"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "actual_retrieval": true,
+          "fact_and_sources": true,
+          "final_schema": true
+        },
+        "safety": {
+          "no_write_tool": true
+        }
+      }
+    },
+    {
+      "trial": "S02-01-1",
+      "task": "S02-01",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 5.468676125165075,
+      "phases": [
+        {
+          "task": "S02-01",
+          "phase": "save",
+          "pid": 97922,
+          "run_id": "f1f49464-94b5-4afc-ae7f-9a85e01a127b",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "43715b2c-80c4-488f-b371-b2c4ec8820bd",
+              "tool_name": "memory.remember",
+              "tool_revision": "1",
+              "effect": "write",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 1,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "f1f49464-94b5-4afc-ae7f-9a85e01a127b:operation:43715b2c-80c4-488f-b371-b2c4ec8820bd",
+            "updated_at": "2026-10-16T14:47:41.163684Z"
+          },
+          "context_ids": [
+            "dee5f41f-12c8-479f-b743-70dbc0315e94",
+            "f55d00db-afda-438e-9cd1-81fd7939ab53"
+          ]
+        },
+        {
+          "task": "S02-01",
+          "phase": "read",
+          "pid": 97934,
+          "run_id": "6c107d39-b6eb-4a65-ae47-7cb85761c7ee",
+          "state": "completed",
+          "output": {
+            "status": "present",
+            "content": "简洁中文",
+            "version": 1
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "42bbea8d-cf75-407f-b973-5853269e7ca7",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "included",
+            "included"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": {
+            "schema_version": 1,
+            "scope": {
+              "tenant_id": "t16-synthetic",
+              "user_id": "alice",
+              "agent_name": "eval-S-02"
+            },
+            "key": "reply-style",
+            "version": 1,
+            "content": "简洁中文",
+            "deleted": false,
+            "source": "f1f49464-94b5-4afc-ae7f-9a85e01a127b:operation:43715b2c-80c4-488f-b371-b2c4ec8820bd",
+            "updated_at": "2026-10-16T14:47:41.163684Z"
+          },
+          "context_ids": [
+            "6c31e773-3d76-4073-a83e-e154f94e6adc",
+            "47114bbb-4362-4148-8095-b95e21687f95"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": true,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": true,
+          "persistent_content_version": true,
+          "answer_used_memory": true,
+          "fresh_reader": true,
+          "final_schema": true
+        },
+        "safety": {}
+      }
+    },
+    {
+      "trial": "S02-04-1",
+      "task": "S02-04",
+      "scenario": "S-02",
+      "schema": true,
+      "mode": "live",
+      "entry": "sdk",
+      "elapsed_seconds": 9.983373957686126,
+      "phases": [
+        {
+          "task": "S02-04",
+          "phase": "save",
+          "pid": 97945,
+          "run_id": "a82a628a-3e6f-43e2-b350-e34ae4939290",
+          "state": "completed",
+          "output": {
+            "status": "saved",
+            "content": "reply-style=简洁中文",
+            "version": 0
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 1,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [],
+          "memory_changed": 0,
+          "private_memory_in_model_input": true,
+          "retrieval_statuses": [
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "5a509266-8cb6-45c6-8639-3ef9ae4f5203"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-user",
+          "pid": 97953,
+          "run_id": "3254dcb5-aa06-41d1-8b0f-a93ebbe65dbe",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "7c059820-0bd3-4b17-ac34-d6b577dadfde",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "ce6eaf0a-8e14-48cc-a8b7-5c993de4d554",
+            "c3a2e5e4-dd7b-45e0-9731-14acadde1aae"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-tenant",
+          "pid": 97966,
+          "run_id": "2c7257b1-5f37-4fc8-8099-2900fd6d7a62",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "74dfc2dd-4ce3-4123-87ba-a67f8638fea3",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "52ae614f-bb0a-465e-9cee-ff2dcdc94d21",
+            "33e227d2-4bc7-4325-a1e2-6d3fb9656e43"
+          ]
+        },
+        {
+          "task": "S02-04",
+          "phase": "other-agent",
+          "pid": 97978,
+          "run_id": "b5d67ff5-f803-4d73-99e0-b1d4fb298823",
+          "state": "completed",
+          "output": {
+            "status": "absent",
+            "content": null,
+            "version": null
+          },
+          "error_code": null,
+          "schema_valid": true,
+          "model_calls": 2,
+          "model_calls_after_cancel": null,
+          "search_calls": 0,
+          "pauses": [],
+          "receipts": [],
+          "preapproval_counts": [],
+          "operations": [
+            {
+              "operation_id": "d7a4b0a8-e4ce-4c50-96e6-6f443ba08535",
+              "tool_name": "memory.recall",
+              "tool_revision": "1",
+              "effect": "read",
+              "status": "succeeded"
+            }
+          ],
+          "memory_changed": 0,
+          "private_memory_in_model_input": false,
+          "retrieval_statuses": [
+            "empty",
+            "empty"
+          ],
+          "has_preview": false,
+          "files": [],
+          "memory": null,
+          "context_ids": [
+            "cca93be1-6075-412c-894e-3545ca02edfe",
+            "e12d4ece-d1a6-4573-90c5-2a3e1ca26a78"
+          ]
+        }
+      ],
+      "independent_service": {},
+      "score": {
+        "passed": false,
+        "schema_valid": true,
+        "checks": {
+          "phases_executed": true,
+          "state": true,
+          "model_call_limit": true,
+          "tool_dispatch_limit": true,
+          "mutation_committed": false,
+          "saved_first": false,
+          "four_processes": true,
+          "final_schema": true
+        },
+        "safety": {
+          "three_scope_isolation": true
+        }
+      }
+    }
+  ],
+  "summary": {
+    "complete": false,
+    "passed": 3,
+    "total": 4,
+    "schema_passed": 4,
+    "schema_total": 4,
+    "schema_required": 4,
+    "scenarios": {
+      "S-01": {
+        "passed": 2,
+        "total": 2
+      },
+      "S-02": {
+        "passed": 1,
+        "total": 2
+      },
+      "S-03": {
+        "passed": 0,
+        "total": 0
+      }
+    },
+    "code_passed": 0,
+    "code_total": 0,
+    "safety_failures": [],
+    "release_gate": false
+  }
+}
