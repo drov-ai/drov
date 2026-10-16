@@ -1,0 +1,47 @@
+{
+  "version": 12,
+  "registered_at": "2026-10-17T00:37:54.661634+08:00",
+  "source_commit": "7cd58dd79850e1f17738ad73e1f7cdd523979007",
+  "batch_hash": "97dca1e8467ec44cf62299ab1045f23de0a0a0ea39d910d76a369fe516c8cbcd",
+  "config": {
+    "version": 9,
+    "amendment": "After v8 complete smoke 6/7, clarify the already declared strict JSON integer types for final CodeReport count/total, distinct from CSV numeric notation. Correct model-generated CSV/PNG and post-close hashes passed, but final total=60.0 was rejected by existing strict int decoding. No SDK/oracle/schema/corpus/expected/limits/threshold/model changes; preserve v8 failure and all historical costs; new complete 7+81.",
+    "provider": "DeepSeek official",
+    "endpoint": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "reported_version": "DeepSeek-V4-Pro-0813 (rolling alias; no immutable snapshot)",
+    "protocol": "drov.deepseek.responses.v1",
+    "streaming": true,
+    "reasoning_effort": "high",
+    "max_output_tokens": 4096,
+    "context_window": 1000000,
+    "model_retries": 0,
+    "read_tool_retries": 0,
+    "budget_cny": "13",
+    "usable_budget_cny": "11",
+    "settlement_reserve_cny": "2",
+    "peak_cny_per_million": {
+      "input_miss": "9",
+      "input_hit": "0.30",
+      "output": "27"
+    },
+    "price_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "price_checked": "2026-10-17",
+    "scoring": "manifest.json; all preregistered assertions; manual failure review and 3 successes/scenario",
+    "data": "synthetic only; Docker backend; no E2B calls; no provider hosted tools"
+  },
+  "docker_config_hash": "99ea325fd79548906f433bf8f4c802ff9f897fc136bf700556e1ab4d07ee85ec",
+  "manifest_sha256": "1aa0d80c62285c7510b7d740f9ea62849aeb2acd654e4313fee4bd8978e981fb",
+  "planned_trials": {
+    "smoke": 7,
+    "formal": 81
+  },
+  "formal_schema_denominator": 75,
+  "authorization_total_cny": "13",
+  "paid_calls_before_registration": 204,
+  "previous_registration": "a4200c397960959a8ef2b769f181595f08c0383c13a2e89b54c62c5e294b931b",
+  "retained_cost_upper_cny": "2.10906680",
+  "reviewed_stop": null,
+  "selection": "After v8 complete smoke 6/7, clarify the already declared strict JSON integer types for final CodeReport count/total, distinct from CSV numeric notation. Correct model-generated CSV/PNG and post-close hashes passed, but final total=60.0 was rejected by existing strict int decoding. No SDK/oracle/schema/corpus/expected/limits/threshold/model changes; preserve v8 failure and all historical costs; new complete 7+81.",
+  "review_evidence": "v8 complete 6/7: final total=60.0 is rejected by pre-existing strict Python int decoding; CSV/PNG/hash/scope checks passed. Keep schema failure; only clarify final JSON field types, no coercion/schema/oracle change. Both Python versions 97 passed incl five typed final regressions; all three offline entries 27/27. See saved v8 review and ADR-0034."
+}
