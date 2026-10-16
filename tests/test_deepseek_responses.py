@@ -242,23 +242,26 @@ async def test_complete_usage_survives_invalid_plan_without_accepting_plan(tmp_p
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("reservation", [2048, 4096])
+@pytest.mark.parametrize(
+    ("output_budget", "reservation"), [(4096, 2048), (4096, 4096), (8192, 4096), (8192, 8192)]
+)
 async def test_evaluation_reserves_the_configured_reasoning_output_allowance(
     tmp_path: Path,
+    output_budget: int,
     reservation: int,
 ) -> None:
     value = response(
         [reasoning(), message()],
         usage={
             "input_tokens": 10,
-            "output_tokens": 4000,
-            "total_tokens": 4010,
+            "output_tokens": output_budget - 96,
+            "total_tokens": output_budget - 86,
             "input_tokens_details": {"cached_tokens": 0},
         },
     )
     async with fixture([Reply(completed(value))]) as (server, client, _):
         source = DeepSeekResponses(
-            model="offline", capabilities=CAPS, client=client, max_output_tokens=4096
+            model="offline", capabilities=CAPS, client=client, max_output_tokens=output_budget
         )
         ledger = Ledger(tmp_path / "ledger.json")
         ledger.create(batch_hash="fixed")
@@ -270,17 +273,17 @@ async def test_evaluation_reserves_the_configured_reasoning_output_allowance(
             trial="fixture",
             max_output_tokens=reservation,
         )
-        if reservation != 4096:
+        if reservation != output_budget:
             with pytest.raises(ValueError, match="cost reservation"):
                 await collect_response(model.generate(request()))
             assert server.requests == []
             assert json.loads(ledger.path.read_text())["attempts"] == []
             return
         await collect_response(model.generate(request()))
-        assert server.requests[0]["max_output_tokens"] == 4096
+        assert server.requests[0]["max_output_tokens"] == output_budget
         attempts = json.loads(ledger.path.read_text())["attempts"]
         assert len(attempts) == 1 and attempts[0]["status"] == "settled"
-        assert attempts[0]["usage"]["output_tokens"] == 4000
+        assert attempts[0]["usage"]["output_tokens"] == output_budget - 96
 
 
 @pytest.mark.asyncio

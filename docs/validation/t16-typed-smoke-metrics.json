@@ -1,0 +1,68 @@
+{
+  "scope": "Saved observations only; no provider, tool or sandbox execution. Timing includes host buffering; not time-to-first-token.",
+  "batch_hash": "97dca1e8467ec44cf62299ab1045f23de0a0a0ea39d910d76a369fe516c8cbcd",
+  "suite": "smoke",
+  "trial_latency": {
+    "count": 7,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 8.832942542154342,
+    "p95_seconds": 22.35176479211077,
+    "total_seconds": 77.06145258434117
+  },
+  "model_request_latency": {
+    "count": 21,
+    "method": "nearest rank, ceil(p*n), no interpolation",
+    "p50_seconds": 2.297401540912688,
+    "p95_seconds": 7.065737084019929,
+    "total_seconds": 70.32913441769779
+  },
+  "paid_requests": 21,
+  "normalized_model_invocations": 21,
+  "observed_model_retries": 0,
+  "observed_external_tool_retries": 0,
+  "ordinary_tool_dispatched_events": 4,
+  "recorded_operations_including_builtin_memory_and_sandbox": 10,
+  "operation_statuses": {
+    "succeeded": 9,
+    "not_executed": 1
+  },
+  "usage": {
+    "input_tokens": 24949,
+    "output_tokens": 5977,
+    "total_tokens": 30926,
+    "cached_input_tokens": 18688
+  },
+  "cost_upper_cny": "0.2233344",
+  "all_history_accounting": {
+    "attempts": 225,
+    "status_counts": {
+      "settled": 225
+    },
+    "cost_upper_cny": "2.33240120",
+    "ceiling_cny": "13",
+    "usable_cny": "11",
+    "stopped": null
+  },
+  "not_provider_bill_or_balance": true,
+  "failed_trials": [],
+  "model_generated_code": [
+    {
+      "trial": "S01-09-1",
+      "phase": "run",
+      "response": "model-01.response.json",
+      "call_id": "call_00_SR37OGQ1rL7M6PSYF0Uj5646",
+      "code_sha256": "1278e9c2ef513b969c005c2dedb972e1cb40b80a921d712d030a0f7a1a76c308",
+      "arguments": {
+        "code": "import csv, statistics\nfrom pathlib import Path\n\ninput_path = Path('/work/inputs/art_fa2f37f0f7c14249b7c923fe4e2facb0/numbers.csv')\nwith input_path.open(newline='') as f:\n    rows = list(csv.DictReader(f))\nprint('rows:', rows)\nvalues = [float(r['value']) for r in rows]\ncount = len(values)\ntotal = sum(values)\nmean = statistics.mean(values)\nprint('count:', count)\nprint('sum:', total)\nprint('mean:', mean)\n\noutdir = Path('/work/outputs')\noutdir.mkdir(parents=True, exist_ok=True)\n\nwith (outdir/'summary.csv').open('w', newline='') as f:\n    w = csv.writer(f)\n    w.writerow(['count', 'sum', 'mean'])\n    w.writerow([count, total, mean])\n\nimport matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\n\nfig, ax = plt.subplots(figsize=(4, 3), dpi=100)\nax.bar(range(1, len(values) + 1), values)\nax.set_xlabel('row')\nax.set_ylabel('value')\nax.set_title('Actual values')\nfig.tight_layout()\nfig.savefig(outdir/'chart.png')\nprint('saved summary.csv and chart.png')\n",
+        "inputs": [
+          "art_fa2f37f0f7c14249b7c923fe4e2facb0"
+        ],
+        "outputs": [
+          "summary.csv",
+          "chart.png"
+        ]
+      }
+    }
+  ],
+  "raw_report_sha256": "d124f293015034856fc1c4c063934a0d185ccced5b9bdb61507650c5521892b4"
+}

@@ -72,6 +72,16 @@ async def test_every_non_docker_task_uses_actual_runtime(
         assert scored["safety"]["three_scope_isolation"] and "scoring_error" not in scored
         phases[-1]["private_memory_in_model_input"] = True
         assert not score(task, phases, {})["safety"]["three_scope_isolation"]
+    if task["variant"] in ("forget", "write_failure", "ordinary"):
+        phases = copy.deepcopy(result["phases"])
+        missing = phases[-1] if task["variant"] == "forget" else phases[0]
+        missing.update(output=None, schema_valid=False, state="failed")
+        scored = score(task, phases, {})
+        assert not scored["passed"] and not scored["schema_valid"]
+        assert "scoring_error" not in scored
+        if task["variant"] != "forget":
+            assert scored["safety"]["no_unauthorized_save"]
+            assert not scored["checks"]["no_false_save_claim"]
 
 
 @pytest.mark.asyncio
@@ -457,3 +467,25 @@ async def test_code_tasks_actual_docker(
     corrupted = copy.deepcopy(result["phases"])
     corrupted[-1]["files"] = []
     assert not score(task, corrupted, result["independent_service"])["passed"]
+    if identifier == "S02-09":
+        extra = copy.deepcopy(result["phases"])
+        extra[0]["files"].append(
+            {
+                "name": "notes.txt",
+                "sha256": "extra-hash",
+                "ref": {"sha256": "extra-hash", "artifact_id": "extra-file"},
+            }
+        )
+        assert score(task, extra, {})["passed"]
+        # The same named target must still be unique and belong to its phase.
+        for index in (0, -1):
+            duplicate = copy.deepcopy(extra)
+            duplicate[index]["files"].append(copy.deepcopy(duplicate[index]["files"][0]))
+            assert not score(task, duplicate, {})["checks"]["unchanged_file_bytes"]
+        changed = copy.deepcopy(extra)
+        changed[-1]["files"][0]["sha256"] = "different-bytes"
+        changed[-1]["files"][0]["ref"]["sha256"] = "different-bytes"
+        assert not score(task, changed, {})["checks"]["unchanged_file_bytes"]
+        misplaced = copy.deepcopy(extra)
+        misplaced[-1]["files"].append(misplaced[0]["files"].pop(0))
+        assert not score(task, misplaced, {})["checks"]["unchanged_file_bytes"]

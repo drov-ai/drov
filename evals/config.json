@@ -1,6 +1,6 @@
 {
-  "version": 9,
-  "amendment": "After v8 complete smoke 6/7, clarify the already declared strict JSON integer types for final CodeReport count/total, distinct from CSV numeric notation. Correct model-generated CSV/PNG and post-close hashes passed, but final total=60.0 was rejected by existing strict int decoding. No SDK/oracle/schema/corpus/expected/limits/threshold/model changes; preserve v8 failure and all historical costs; new complete 7+81.",
+  "version": 10,
+  "amendment": "After full v9 formal 73/81 (code5/9), raise reasoning-inclusive output allowance4096->8192 after three exact-cap incomplete responses; bind context/cost reserves. Fix explicit-file oracle to compare unique original-summary and final-copy hashes independent of unrelated artifacts, and retain safety diagnostics for missing Memory outputs. Scope code artifact instructions to task requests. Model/effort, corpus, expected outputs, thresholds, 8-request/16-tool limits unchanged. Preserve all eight v9 failures and442 settled requests; adaptive new complete7+81, no regrading/mixing.",
   "provider": "DeepSeek official",
   "endpoint": "https://api.deepseek.com",
   "model": "deepseek-v4-pro",
@@ -8,7 +8,7 @@
   "protocol": "drov.deepseek.responses.v1",
   "streaming": true,
   "reasoning_effort": "high",
-  "max_output_tokens": 4096,
+  "max_output_tokens": 8192,
   "context_window": 1000000,
   "model_retries": 0,
   "read_tool_retries": 0,

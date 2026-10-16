@@ -1,10 +1,10 @@
 # 当前进度与下一轮
 
-更新：2026-10-17（Asia/Shanghai；T-16 v6正式34/37未完成；v7 smoke首项状态不符，尚未整卡验收）。
+更新：2026-10-17（Asia/Shanghai；T-16 v9完整真实smoke7/7，正式73/81但代码5/9未过，v10离线验证中，尚未整卡验收）。
 
 ## 当前状态
 
-- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-16继续进行：v6真实smoke7/7、正式34/37后限额停止；v7首项状态判定不符0/1，未获准进入正式，不能关闭或进入T-17。** 本轮修复CSV数值oracle、配置化输出/上下文/费用预留，新增22项回归；三入口离线各27/27、两解释器含Docker定向各92项通过。累计183真实请求全部settled、费用峰值上界1.80000140元，无pending/unknown/stopped；已停止新增付费。源码987fe47/登记2bb6496已推送，最终源码Docker38930298815四jobs全success、核心38930298760仍在运行，不能冒充全平台验收。见[接续验证](../validation/t16-followup.md)；实际Git与最终CI以记录为准。
+- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-16继续进行：v9完整真实smoke7/7，正式73/81但代码5/9未过，v10离线验证中，尚不能关闭或进入T-17。** 本轮按ADR-0034修清研究任务证据范围，保留v8完整6/7类型失败，v9仅明确已有最终JSON严格整数要求；三入口离线各27/27、两解释器含Docker定向各97通过。真实正式与费用/CI最终结果见[本轮验证](../validation/t16-evidence-scope.md)，以实际Git/报告为准。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；实验性工作台已完整验收；T-15的SQLiteMaintenance/CLI、逻辑清理/墓碑、显式字节回收/中断台账、data_abandoned、一致备份/恢复屏障、实际历史v1字段迁移与授权导出均已验收。未验收：T-16至T-18；多 Agent/Skill/持久工作区等后续，无空壳。

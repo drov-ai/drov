@@ -38,3 +38,5 @@ CSV数值评分使用精确有限Decimal等值，合法整数/小数/科学记�
 跨阶段累计达到单任务8次请求上限会持久记录trial_model_limit，和预算不足/缺用量不同。默认amend仍拒绝所有stopped。只有离线复核完成、全部旧费用已settled、明确新指纹与原因，宿主才能显式使用Ledger.amend(..., reviewed_trial_limit=True)登记新批次并在审计中保留reviewed_stop；原attempt/单任务计数/费用/13与11元上限不变，不允许继续原试验。budget_exhausted、其他停止原因或任一pending/unknown不能通过该参数恢复。实际停止状态只见progress，执行器不会自动恢复。
 
 研究任务充分性按题目要求的事实判定，状态定义见质量计划。manifest v2 澄清 S01-01 只问 A 的应用进程重启保留，与 ResearchReport 一致；资料、预期答案和评分不变。v7 的原 0/1 失败保留，新批次单独登记并完整执行，见 [ADR-0034](../docs/decisions/0034-evaluation-evidence-scope.md)。
+
+文件复用 oracle 按原阶段 summary.csv 与新阶段 copied.csv 的唯一目标/hash 比较，额外交付文件不计入这对目标；缺失/重名/错阶段/字节变化仍拒绝。缺最终回答保持失败并保留安全诊断。v9完整81原报告不重算，v10修订及8192输出候选见[ADR-0035](../docs/decisions/0035-evaluation-artifact-oracle.md)。

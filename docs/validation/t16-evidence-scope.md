@@ -33,3 +33,23 @@ ruff 静态与格式（288 文件）、mypy（192 源）、schema/OpenAPI 检查
 v8的[逐项复核](t16-scope-review.json)保留最终原JSON/正确CSV与图片观察、四进程8请求隔离、批准1/拒绝0写入。v9补充5个最终JSON严格整数正反例（60接受，60.0/6e1/字符串/布尔拒绝），不改变原SDK类型规则。最终三入口离线再次各27/27、schema25/25、代码3/3、零安全失败，见[摘要](t16-typed-offline.json)；两解释器定向结果和新登记如下续记。
 
 v9源码提交前定向测试：Python3.11为97 passed（29.24s），Python3.14为97 passed（31.07s），均显式提供原Docker及分析镜像记录。静态/格式、mypy192源、95份Markdown/870本地链接/16片段AST通过。新源码只改开发评测提示与相应反例/文档，不改SDK/锁/SQL/品牌。
+
+## v9 完整真实 smoke 7/7；正式批次开始
+
+源码 7cd58dd79850e1f17738ad73e1f7cdd523979007 / [登记](t16-preregistration-typed.json) f3ed3e4 在付费前提交并推送；batch_hash=97dca1e8467ec44cf62299ab1045f23de0a0a0ea39d910d76a369fe516c8cbcd。[完整原smoke](t16-typed-smoke.json)/[计量与原代码](t16-typed-smoke-metrics.json)为7/7、schema7/7、代码1/1、零安全失败，正式资格满足。Memory隔离实际保存2请求、三个foreign各2，原8次上限；代码原生成/实际执行/CSV与400×300PNG/销毁后下载hash均通过，最终total为严格整数60。
+
+本smoke21请求全部settled，输入24949/输出5977/缓存18688 tokens，费用峰值上界0.2233344元；历史累计225次/2.33240120元，无pending/unknown/stopped。正式新目录 .drov/t16-typed-formal 以同一冻结配置执行完整81，不混入smoke或旧批次。结果执行后补记。
+
+受影响v9 sdist实际重建并逐字核对10个评测/测试源文件，排除.env.local/.drov/Git/品牌；SHA256=dd64ffb65a6fa511bc0700d00a5efda84d8c3c52fbe8cabbd0a534dd6c7abf0f（构建时文档快照）。SDK wheel源码未改，不重复声称新跑安装矩阵；实际平台检查绑定源码7cd58dd的CI。
+
+## v9 正式完整81：73/81，代码子组未过
+
+[原正式报告](t16-typed-formal.json)/[计量与模型原代码](t16-typed-formal-metrics.json)为73/81，场景22/27、24/27、27/27，schema72/75，代码5/9，零已观察安全失败，release_gate=false。所有81均实际执行，不以纠错分数替换旧报告。共217次正式请求，峰值费用上界3.2442144元；历史累计442次全部settled、5.57661560元，无pending/unknown/stopped。任务耗时nearest-rank p50=9.200s、p95=41.271s，包含宿主缓冲，不是首字延迟。
+
+[复核](t16-typed-review.json)覆盖全部八失败及每场景至少三个正式成功。三次重复检索是模型重新提出计划，适配器/工具自动重试仍为0；三个响应恰好4096后incomplete（两次代码首次、一次普通聊天首次）；两次文件复用被无关产物数量误拒绝。普通聊天的二级TypeError来自评分器索引缺失回答，不是持久写入，不能掩盖原model_incomplete。独立服务审批/拒绝/澄清/撤权/重复批准/重启/未知核查和取消均通过；正式S03为27/27，包含原模型建议表与拒绝后0写入。
+
+## v10 候选：目标文件 oracle、缺失回答诊断与8192输出
+
+按[ADR-0035](../decisions/0035-evaluation-artifact-oracle.md)修复原任务的两处评分诊断缺陷；新增额外文件可接受、目标缺失/重名/错阶段/变字节反例和Memory缺回答的完整score入口检查。代码说明按本题选择图/建议表；max_output_tokens8192绑定原上下文/费用预留，实际官方客户端loopback扩展8096输出用量结算/错配零HTTP零预留。SDK/公开类型/语料/全部expected/阈值和8请求/16工具保持，旧报告不变。此为已见失败后的联合修订，不声称盲测或单变量提升。先离线检查/源码提交和新登记，再沿原442次账本完整7+81，结果后补。
+
+v10调用前：三入口完整离线各27/27、schema25/25、代码3/3、零安全失败，见[摘要](t16-bounded-offline.json)。Python3.11定向99 passed（29.02s），3.14为99 passed（30.74s），均含实际Docker。静态/格式289文件、mypy192源、schema/OpenAPI、96 Markdown/880本地链接/16片段AST/凭据与保护文件检查通过。[只读纠错诊断](t16-artifact-oracle-diagnostic.json)确认两次相同字节不再因额外产物误拒绝，缺失聊天仍失败且保留零写入安全事实；原报告hash未变，不将诊断重算为旧批次成绩。
