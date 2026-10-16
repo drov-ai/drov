@@ -92,13 +92,17 @@ class Ledger:
         batch_hash: str,
         reason: str,
         rates: dict[str, str] | None = None,
+        reviewed_trial_limit: bool = False,
     ) -> None:
         """Register a new experiment while retaining every cost and the original ceiling."""
         if not reason.strip() or previous_hash == batch_hash:
             raise ValueError("A distinct preregistration and a reason are required")
         with portalocker.Lock(str(self.path) + ".lock", timeout=1):
             data = json.loads(self.path.read_text(encoding="utf-8"))
-            if data["batch_hash"] != previous_hash or data.get("stopped"):
+            stopped = data.get("stopped")
+            if data["batch_hash"] != previous_hash or (
+                stopped and not (reviewed_trial_limit and stopped == "trial_model_limit")
+            ):
                 raise BudgetStop("Cannot amend a different or stopped budget")
             if any(a["status"] != "settled" for a in data["attempts"]):
                 raise BudgetStop("Reconcile every unfinished paid attempt before amendment")
@@ -107,6 +111,7 @@ class Ledger:
                     "previous_hash": previous_hash,
                     "batch_hash": batch_hash,
                     "reason": reason,
+                    "reviewed_stop": stopped,
                     "retained_attempts": len(data["attempts"]),
                     "previous_rates": data.get("rates", FLASH_RATES),
                     "rates": checked_rates(rates or data.get("rates", FLASH_RATES)),
@@ -117,6 +122,8 @@ class Ledger:
             )
             data["batch_hash"] = batch_hash
             data["rates"] = checked_rates(rates or data.get("rates", FLASH_RATES))
+            if stopped == "trial_model_limit":
+                del data["stopped"]
             self._write(data)
 
     def reserve(

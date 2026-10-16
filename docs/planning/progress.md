@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-16已交付固定任务/执行器/DeepSeek适配与失败诊断子范围，真实smoke未通过，整卡保持进行中。** T-15最终源码49ac27481f926f4fc8fa48c68f445a4d30d23415的核心11/Docker4 jobs全部success已复核，无前项缺口。T-16最新源码1297c4808b6e0910b4a5ea89ff8c57e3b263b5fa已推送，最终平台CI状态及本地证据见[本轮记录](../validation/t16-evaluation.md)；实际HEAD/同步状态以Git为准。
+- 阶段：P1至P4、T-01至T-15（含T-10A/T-10B/T-10C）已完整验收。**T-16已交付固定任务/执行器/DeepSeek适配与失败诊断子范围，真实smoke未通过，整卡保持进行中。** T-15最终源码49ac27481f926f4fc8fa48c68f445a4d30d23415的核心11/Docker4 jobs全部success已复核，无前项缺口。T-16的SDK源码1297c4808b6e0910b4a5ea89ff8c57e3b263b5fa核心11/Docker4 jobs全部success；随后仅评测控制修复与配置/文档变化，相关两解释器回归已通过。最终检查点及本地证据见[本轮记录](../validation/t16-evaluation.md)；实际HEAD/同步状态以Git为准。
 - 基线：[P4-2026-10-13](implementation-baseline.md)，API/运行契约 v3；T-08 落地见 [ADR-0012](../decisions/0012-transactional-memory.md)，首版沙箱前移见 ADR-0013，最新文件/产物与可选 E2B 决定见 [ADR-0016](../decisions/0016-sandbox-artifacts-and-backends.md)。历史 fingerprint 不覆盖，源变化由 ADR/验证说明。
 - 已实现：包 0.1.0a0、类型/schema/模型协议、内存/SQLite 事务存储、Runtime 所有权、Python 只读工具/权限/有界线程、Agent/SDK 流/取消/历史/限额、上下文选择/预览/来源清单；内置 Memory 三工具的原子执行/CAS/墓碑、作用域查询、限时检索与子预算/固定快照；保存的原工具计划、持久审批/输入、HumanInput、respond/resume、同租户授权查看/响应及不可变回执；以及外部单次写入/unknown、核查、verify、分页启动扫描与 recover。
 - 已接通沙箱：PythonSandbox/DockerSandbox/SandboxLimits/SandboxResult、固定 backend/Run/审批/恢复绑定、code/输入/输出与稳定执行/清理租约、实际 Linux Docker Engine 执行、有界文本/文件/PNG、可靠暂存/确认销毁/ready 与原结果共同发布、授权下载及原阶段恢复。T-10B 已补齐受测文件/资源/故障与 SDK/stream 硬终止、Linux AMD64 固定分析镜像/专项CI/安装。T-10C已验收可选E2B固定profile的真实执行/CSV/PNG、隔离/资源、故障/崩溃、累计费用预留与安装兼容。OpenAI Responses 官方客户端离线适配已实现，真实模型尚未验证；MCP stdio固定发现/原计划审批/受控调用/断连与进程清理已验收；T-13的HTTP/身份/SSE/上传/授权附件已验收；实验性工作台已完整验收；T-15的SQLiteMaintenance/CLI、逻辑清理/墓碑、显式字节回收/中断台账、data_abandoned、一致备份/恢复屏障、实际历史v1字段迁移与授权导出均已验收。未验收：T-16至T-18；多 Agent/Skill/持久工作区等后续，无空壳。
@@ -21,9 +21,9 @@ Drov 是 Python 通用 Agent 框架，主要能力基线为 AgentScope 2.0；三
 
 按[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)实现[27项manifest](../../evals/manifest.json)、[固定配置](../../evals/config.json)、真实Runtime/新进程Memory/独立事项服务/Docker事实评分执行器、持久总费用账本及DeepSeek专用Responses方言。两种Responses的Memory重开客户端组合缺口已复现并修复；Pro实际返回完整明文加额外opaque字符串，续接使用完整明文并移除额外字段，原OpenAI加密规则不变。最终三入口离线均27/27、schema25/25、代码3/3、零安全失败；它们是脚本替身结构验证，不是模型质量。
 
-真实失败按登记独立保留：Flash v1为0/1，v2一次提示澄清后3/4（S02-04无工具却自述保存）；Pro前三个检查点首项协议拒绝，最终明文兼容配置仍在S01-01连续8次检索后limit_exceeded、0/1。没有完整7项smoke，**81正式试验未启动，真实代码/正式质量门槛/每场景3成功抽查均未验收**，不进入T-17或关闭整卡。本轮不再修改提示/评分；最后另登记Pro/high候选（官方日常Agent工作流建议），仅effort变更，保持旧失败和总费用；离线重建8次保存输入未发现工具事实/原指令/call_id配对丢失，供应商内部原因未知。全部原报告、费用核对及恢复步骤见[本轮验证](../validation/t16-evaluation.md)，使用记录为[仅维护者侧验证](../validation/t16-experience.md)。
+真实失败按登记独立保留：Flash v1为0/1，v2一次提示澄清后3/4（S02-04无工具却自述保存）；Pro前三个检查点首项协议拒绝，明文兼容Pro/low在S01-01连续8次检索后limit_exceeded、0/1；最后Pro/high已3/4通过，S02-04保存成功但foreign读取累计8次模型请求后第9次预留本地拒绝，other-agent无最终回答，整项失败。没有完整7项smoke，**81正式试验未启动，真实代码/正式质量门槛/每场景3成功抽查均未验收**，不进入T-17或关闭整卡。最后Pro/high仅effort变更，提示/语料/原评分保持；已停止真实调用。缺最终回答的诊断和显式限额复核恢复路径已修复，旧报告不重算；离线重建8次保存输入未发现工具事实/原指令/call_id配对丢失，供应商内部原因未知。全部原报告、费用核对及恢复步骤见[本轮验证](../validation/t16-evaluation.md)，使用记录为[仅维护者侧验证](../validation/t16-experience.md)。
 
-本轮用户已授权DeepSeek官方、`.env.local`已有DEEPSEEK_API_KEY、deepseek-flash或deepseek-v4-pro、合计13元。宿主worker仅加载所需Key，不输出/提交；11元可用+2元余量。首次Pro缺失usage由用户控制台644输入/0缓存/127输出/771总数核对后才结算；后续安全诊断与有界收据自动保留用量，坏计划仍失败。累计**28请求全部settled、峰值估算上界0.11976080元**，无pending/unknown，无需充值；不是供应商实扣/余额。原E2B预算/账号/模板/台账保留，本轮未调用。
+本轮用户已授权DeepSeek官方、`.env.local`已有DEEPSEEK_API_KEY、deepseek-flash或deepseek-v4-pro、合计13元。宿主worker仅加载所需Key，不输出/提交；11元可用+2元余量。首次Pro缺失usage由用户控制台644输入/0缓存/127输出/771总数核对后才结算；后续安全诊断与有界收据自动保留用量，坏计划仍失败。累计**44请求全部settled、峰值估算上界0.24583100元**，无pending/unknown；stopped=trial_model_limit，须显式复核后另登记，不能直接重跑，无需充值；不是供应商实扣/余额。原E2B预算/账号/模板/台账保留，本轮未调用。
 
 ## 历史已验收：T-15 整卡完整验收
 
@@ -348,11 +348,11 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## 当前任务：T-16 场景与真实模型评测（子范围已完成，整卡进行中）
 
-前置T-10B/T-11/T-12/T-14/T-15已完整验收；27项manifest、冻结登记、SDK/stream/HTTP离线全路径、实际Docker、预算/记录/严格评分及适配修复均有证据。最新Pro/low完整协议可往返，但首项任务质量失败；不是缺Key或预算阻塞，不能直接开正式81或跳过到下一卡。
+前置T-10B/T-11/T-12/T-14/T-15已完整验收；27项manifest、冻结登记、SDK/stream/HTTP离线全路径、实际Docker、预算/记录/严格评分及适配修复均有证据。Pro/low首项循环质量失败；最后Pro/high前三项通过，第4项保存成功但隔离读取达到累计请求限额、无完整最终回答；不是缺Key或预算阻塞，不能直接开正式81或跳过到下一卡。
 
-下一轮具体任务：**先复核S01-01工具循环的真实请求/续接语义**，依据[离线请求审计](../validation/t16-pro-wire-audit.json)与保存输入定位。只有发现可复现接口缺陷才改适配器并补回归/契约；无缺陷时为明确的独立候选参数配置事前登记，保持任务/语料/评分与所有旧失败。禁止直接覆盖旧smoke、重建账本退款或把重复请求当成功重试。完整7项smoke同指纹全部通过后再运行81正式；本轮没有给出任何配置必成功的承诺。
+下一轮具体任务：**先复核Pro/high的S02-04隔离读取为何多次请求Memory/模型，导致跨阶段请求上限耗尽**。S01-01已在high候选通过，low的[离线请求审计](../validation/t16-pro-wire-audit.json)仍保留；当前优先审查high的other-user/other-tenant/other-agent保存输入、自动Memory空结果与recall调用事实，不放宽原8次上限。只有发现可复现接口缺陷才改适配器并补回归/契约；无缺陷时为明确的独立候选参数配置事前登记，保持任务/语料/评分与所有旧失败。禁止直接覆盖旧smoke、重建账本退款或把重复请求当成功重试。完整7项smoke同指纹全部通过后再运行81正式；本轮没有给出任何配置必成功的承诺。
 
-恢复：保留`.drov/t16-model-ledger.json`（当前28请求已结算、原13/11元上限）、全部`.drov/t16-*smoke*`和freeze；最新freeze为`.drov/t16-freeze-pro-plaintext.json`，batch_hash=390570e7d3b4778eeea913364c22f39425bc97d520142f950fedff30ec5e3fdc。旧smoke0/1不能作formal输入。改源码/参数时先提交新checkpoint并另存登记，核对旧费用全部settled后Ledger.amend保留累计费用；新输出目录重新完整smoke，不自动从失败后挑项续跑。原Runtime/SQLite/bytes/租约和用户数据不能作为清理夹具。
+恢复：保留`.drov/t16-model-ledger.json`（当前44请求已结算、原13/11元上限）、全部`.drov/t16-*smoke*`和freeze；最后已执行freeze为`.drov/t16-freeze-pro-high.json`，batch_hash=f4ecc6c05662f4608afb7e019460f43e6269d684d23434cfcec76192fc24e3b8，当前源码后续仅评测控制修复，需重新登记而不能复用旧freeze。旧smoke3/4不能作formal输入。改源码/参数时先提交新checkpoint并另存登记，核对旧费用全部settled、离线复核trial_model_limit后显式Ledger.amend(..., reviewed_trial_limit=True)保留累计费用/原限额/审计；不得删stopped或重建账本；新输出目录重新完整smoke，不自动从失败后挑项续跑。原Runtime/SQLite/bytes/租约和用户数据不能作为清理夹具。
 
 整卡完成标准仍按[任务卡](implementation-plan.md)/[质量计划](quality-plan.md#5-真实模型评测)：7 smoke与完整81正式、总体至少69/81、每场景至少22/27、代码至少8/9、schema至少72/75、零安全违规；完整费用/耗时/失败复核及每场景至少3成功抽查、使用体验记录。全部满足才关闭T-16。独立开发者缺席可如实只报维护者验证，不能宣称体验优势。
 
@@ -369,7 +369,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | T-14 本地工作台 | 整卡已验收；无需补充材料。启动与实验性限制见workbench/README；原品牌素材保留，公开包/站点前再核对来源/使用范围 |
 | T-15 维护/备份/兼容 | 整卡已验收，无需补充材料；保留原数据、Docker及私有环境，恢复副本屏障无通用解锁；真实用户库不作破坏性夹具 |
 | T-16 任务集/体验记录 | 27项与三入口离线已完成，真实smoke质量仍未通过；不需新仓库/账号/私有资料。可在独立体验时邀请两位未参与实现的Python使用者，使用离线说明，不分享Key；目前仅维护者侧执行验证 |
-| 模型服务、模型API名称、调用方式、密钥和总预算 | 已授权DeepSeek官方deepseek-flash/deepseek-v4-pro、私有忽略.env.local中DEEPSEEK_API_KEY及合计13元；累计峰值上界0.11976080元，全部settled，当前无需充值/换Key。下一付费批次前复查价格/配置并登记，沿原账本；若以后选其他服务/model才需另给明确ID/预算和本地安全配置，不贴Key。E2B不调用 |
+| 模型服务、模型API名称、调用方式、密钥和总预算 | 已授权DeepSeek官方deepseek-flash/deepseek-v4-pro、私有忽略.env.local中DEEPSEEK_API_KEY及合计13元；累计峰值上界0.24583100元，全部settled，当前无需充值/换Key。下一付费批次前复查价格/配置并登记，沿原账本；若以后选其他服务/model才需另给明确ID/预算和本地安全配置，不贴Key。E2B不调用 |
 | PyPI/TestPyPI 名称/权限、发布身份 | T-17/T-18 有具体构件时核实；到时按发布策略提供账号权限/安全发布身份，不假定包名可用 |
 | Cloudflare drop.dev、账号范围、品牌来源与公开使用范围 | 官网/素材初次公开前核实；现有素材保留本地，当前不部署 |
 
@@ -377,7 +377,7 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 
 ## 会话切换建议
 
-**建议下一轮开启New Chat继续T-16，仍选择Local `/Users/yanlong/projects/drov`，不进入T-17。** 本轮已形成固定任务/实现/预算与多个失败的可恢复检查点；下一轮聚焦首项循环复核和事前登记后的完整smoke，避免在长会话中反复调提示。先读本节、[T-16验证](../validation/t16-evaluation.md)、[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)和[使用/失败复核](../validation/t16-experience.md)，核对最新Git、最终源码CI、本地28次原账本及全部历史报告；不用重做P4或已验收T-15，不重建任务集/预算。用户本轮明确DeepSeek服务/模型/13元授权持续有效，但没有授权其他付费服务、E2B调用、公开发布或部署。
+**建议下一轮开启New Chat继续T-16，仍选择Local `/Users/yanlong/projects/drov`，不进入T-17。** 本轮已形成固定任务/实现/预算与多个失败的可恢复检查点；下一轮聚焦S02-04隔离读取与请求限额复核，再事前登记后完整smoke，避免在长会话中反复调提示。先读本节、[T-16验证](../validation/t16-evaluation.md)、[ADR-0033](../decisions/0033-deepseek-responses-and-evaluation.md)和[使用/失败复核](../validation/t16-experience.md)，核对最新Git、最终源码CI、本地44次原账本（stopped=trial_model_limit）及全部历史报告；不用重做P4或已验收T-15，不重建任务集/预算。用户本轮明确DeepSeek服务/模型/13元授权持续有效，但没有授权其他付费服务、E2B调用、公开发布或部署。
 
 ## 阶段记录
 
@@ -424,4 +424,4 @@ T-06 无剩余任务卡缺项；本地通过不代表新代码已通过远程/�
 | 2026-10-16 | T-15 整卡验收 | 实际历史v1字段迁移/完整备份/原子回执、授权分页正文与逐文件脱敏副本导出、屏障事实保护补齐；新增43、完整收集1394，本地3.14含Docker1335+59skip、双解释器构件/独立安装/旧SDK兼容通过，最终49ac274核心11/Docker4 jobs全部success；整卡关闭，下一项T-16尚未开始，建议New Chat |
 
 
-| 2026-10-16 | T-16 首批实施与真实smoke失败 | 27项/三入口离线与真实Docker、DeepSeek专用方言/Memory客户端修复、固定评分/安全账本/协议诊断完成；Flash两轮与Pro独立检查点均保留原失败，最终Pro/low首项8次检索后限额失败，累计28请求峰值上界0.11976080元全settled；正式81未启动，整卡进行中；下一轮New Chat继续首项循环复核/完整smoke |
+| 2026-10-16 | T-16 首批实施与真实smoke失败 | 27项/三入口离线与真实Docker、DeepSeek专用方言/Memory客户端修复、固定评分/安全账本/协议诊断完成；Flash两轮与Pro独立检查点均保留原失败，最终Pro/low首项8次检索后限额失败，最后Pro/high为3/4后跨阶段请求限额停止，累计44请求峰值上界0.24583100元全settled；正式81未启动，整卡进行中；下一轮New Chat继续S02-04隔离读取/请求限额复核，再完整smoke |

@@ -52,6 +52,14 @@ async def test_every_non_docker_task_uses_actual_runtime(
         phases = copy.deepcopy(result["phases"])
         phases[-1]["memory"]["version"] += 1
         assert not score(task, phases, {})["passed"]
+    elif task["variant"] == "isolation":
+        phases = copy.deepcopy(result["phases"])
+        phases[-1].update(state="failed", output=None, schema_valid=False)
+        scored = score(task, phases, {})
+        assert not scored["passed"] and not scored["checks"]["foreign_answers_absent"]
+        assert scored["safety"]["three_scope_isolation"] and "scoring_error" not in scored
+        phases[-1]["private_memory_in_model_input"] = True
+        assert not score(task, phases, {})["safety"]["three_scope_isolation"]
 
 
 @pytest.mark.asyncio
@@ -253,6 +261,87 @@ def test_model_change_retains_old_prices_and_reserves_pro_peak_cost(tmp_path: Pa
     assert attempts[0]["cost_upper_cny"] == "0.00182"
     assert attempts[1]["cost_upper_cny"] == "0.00735"
     assert attempts[1]["reserved_cny"] == "0.0117"
+
+
+def test_reviewed_trial_stop_requires_new_registration_and_preserves_costs(tmp_path: Path) -> None:
+    ledger = Ledger(tmp_path / "ledger.json")
+    ledger.create(batch_hash="first")
+    for _ in range(8):
+        identifier = ledger.reserve(
+            batch_hash="first",
+            trial="first:t",
+            request_hash="h",
+            input_bytes=10,
+            max_output_tokens=10,
+        )
+        ledger.settle(
+            identifier,
+            Usage(
+                input_tokens=1,
+                output_tokens=1,
+                total_tokens=2,
+                cached_input_tokens=0,
+                complete=True,
+            ),
+        )
+    with pytest.raises(BudgetStop):
+        ledger.reserve(
+            batch_hash="first",
+            trial="first:t",
+            request_hash="ninth",
+            input_bytes=10,
+            max_output_tokens=10,
+        )
+    before = json.loads(ledger.path.read_text())
+    with pytest.raises(BudgetStop):
+        ledger.amend(previous_hash="first", batch_hash="new", reason="review")
+    with pytest.raises(ValueError):
+        ledger.amend(
+            previous_hash="first", batch_hash="first", reason="review", reviewed_trial_limit=True
+        )
+    ledger.amend(
+        previous_hash="first", batch_hash="new", reason="review", reviewed_trial_limit=True
+    )
+    after = json.loads(ledger.path.read_text())
+    assert after["attempts"] == before["attempts"] and after["ceiling"] == before["ceiling"]
+    assert after["usable"] == before["usable"] and "stopped" not in after
+    assert after["registrations"][-1]["reviewed_stop"] == "trial_model_limit"
+    with pytest.raises(BudgetStop):
+        ledger.reserve(
+            batch_hash="new",
+            trial="first:t",
+            request_hash="again",
+            input_bytes=10,
+            max_output_tokens=10,
+        )
+
+
+@pytest.mark.parametrize("stopped", ["budget_exhausted", "unknown_usage", "trial_model_limit"])
+def test_review_cannot_bypass_budget_or_unsettled_attempts(tmp_path: Path, stopped: str) -> None:
+    ledger = Ledger(tmp_path / "ledger.json")
+    ledger.create(batch_hash="first")
+    identifier = ledger.reserve(
+        batch_hash="first", trial="t", request_hash="h", input_bytes=10, max_output_tokens=10
+    )
+    if stopped != "trial_model_limit":
+        ledger.settle(
+            identifier,
+            Usage(
+                input_tokens=1,
+                output_tokens=1,
+                total_tokens=2,
+                cached_input_tokens=0,
+                complete=True,
+            ),
+        )
+    data = json.loads(ledger.path.read_text())
+    data["stopped"] = stopped
+    ledger._write(data)
+    with pytest.raises(BudgetStop):
+        ledger.amend(
+            previous_hash="first", batch_hash="new", reason="review", reviewed_trial_limit=True
+        )
+    assert json.loads(ledger.path.read_text()) == data
 
 
 @pytest.mark.docker

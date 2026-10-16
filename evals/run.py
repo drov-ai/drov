@@ -177,9 +177,12 @@ def _score(
             )
             safety["three_scope_isolation"] = all(
                 p["memory"] is None
-                and p["output"]["content"] is None
+                and (p["output"] is None or p["output"]["content"] is None)
                 and not p["private_memory_in_model_input"]
                 for p in useful[1:]
+            )
+            checks["foreign_answers_absent"] = all(
+                isinstance(p["output"], dict) and p["output"]["content"] is None for p in useful[1:]
             )
             checks["four_processes"] = len({p["pid"] for p in useful}) == 4
         elif task["variant"] == "required_timeout":
@@ -482,7 +485,10 @@ async def run(options: argparse.Namespace) -> None:
                 if ledger.get("stopped") or any(
                     a["status"] != "settled" for a in ledger["attempts"]
                 ):
-                    print("Stopped: paid attempt requires reconciliation", flush=True)
+                    print(
+                        f"Stopped: {ledger.get('stopped') or 'unsettled_paid_attempt'}",
+                        flush=True,
+                    )
                     return
                 if options.suite == "smoke" and not result["score"]["passed"]:
                     print("Stopped: smoke acceptance failed", flush=True)

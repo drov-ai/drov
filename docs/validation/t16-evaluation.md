@@ -75,3 +75,15 @@ CSV字节规则修复时一度误覆盖.gitattributes原四条Moby逐字保护�
 ## 最后一项独立候选：Pro/high
 
 Pro/low的完整协议往返与离线输入审计完成后，尚有10.88元可用估算余量；官方[Pro GA说明](https://api-docs.deepseek.com/news/news260813/)将high用于日常Agent工作流。因此本轮增加最后一个独立Pro/high候选，只有reasoning_effort由low改high；提示/语料/评分/2048输出上限与价格不变。这是看见旧结果后的参数选择，不能作为盲测或替换旧样本。全部旧失败/费用保留；先提交配置/新指纹再调用，仍要完整7 smoke后81正式。该候选失败后本轮不再改参数/提示抽样。SDK/执行器源码与1297c48相同，配置JSON/登记改变，不重复声称原CI对应新参数质量。
+
+
+Pro/high的[事前登记](t16-preregistration-pro-high.json)后实际4/7 smoke、3通过：S01-01/S01-03/S02-01通过；S02-04实际保存Memory（1次mutation、版本1/简洁中文），其他user/tenant读取正确absent，但4阶段共已发8次模型请求，第9次在宿主预留时被拒绝，原Agent阶段计数包含这次本地失败。最后other-agent无最终回答，整项失败；余3 smoke/81正式未执行，见[原报告](t16-pro-smoke-high.json)。第4项旧评分在output=None时退为TypeError/scoreable_facts=false，未被算成功；同轮修正缺回答的答案断言与无跨scope记录/私有输入事实分离，仍不得通过，不重算原报告。
+
+真实调用到此停止：全部**44请求settled、峰值上界0.24583100元**，可用估算余量10.754169元，另2元预留；不是账单实扣/余额。当前stopped=trial_model_limit，**不是未知费用或余额不足**；原驱动通用提示requires reconciliation不准确，已改为明确停止代码。安全形状/私有输入实际未观察到泄漏，但第三foreign scope无回答，不能写完整隔离任务通过。本轮不再调用模型/改参数抽样。
+
+为下一轮可恢复新增显式审核单任务限额后的新登记路径；只测试于新临时账本，未清除本地真实账本停止标志。默认amend仍拒绝stopped，reviewed_trial_limit=True也必须旧费用全settled/新指纹/原因，只允许trial_model_limit；预算不足/其他停止/unknown/pending继续拒绝，旧试验8次计数与费用/13/11元上限保留，审计保存reviewed_stop。复用旧trial标签仍拒绝第9次，不能用新登记补跑旧失败。
+
+SDK源码1297c4808b6e0910b4a5ea89ff8c57e3b263b5fa的核心38922182329最终**11/11 success**，含Windows3.11/3.14全部测试/构件/安装；Docker38922182332最终**4/4 success**。后续只有evals预算/失败评分/停止提示与配置/文档变化，无SDK/依赖/SQL/品牌变化；Python3.14相关129项（含真实Docker）通过，3.11相关126通过/3缺Docker配置skip，见`t16-stop-review-target{314,311}.log`。预算恢复负向强化另行小组验证，最新SDK全库仍以冻结源码1401/59记录为准，不把新评测控制代码说成已跑完整全平台矩阵。
+
+
+评测控制修复的强化负向小组在3.11/3.14各4项通过（`t16-stop-review-negative{311,314}.log`），包括已settled但预算停止仍拒绝、未知/未结费用拒绝、原trial第9次仍拒绝。ruff/285格式与mypy192源通过。只重建受影响sdist并逐字检查新evals/budget.py/run.py/config.json，排除私有目录/凭据，SHA256=fcd3a353fbf8c3f905552d267a104e32b49feff74bf124ed0e51c2269f06ac72（构建时文档快照）；SDK wheel载荷未改，未重复不相关安装矩阵。下一轮优先S02-04隔离读取/多余recall和跨阶段请求限额，保持原8次上限。
