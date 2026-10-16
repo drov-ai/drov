@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from drov import Agent, RunContext, Runtime, SQLiteStorage
-from drov.errors import ContentGone
+from drov.errors import ContentGone, IncompatibleStorage
 from drov.models import ScriptedModel
 from drov.models.protocol import ModelResponse
 from drov.storage.maintenance import SQLiteMaintenance
@@ -48,6 +48,16 @@ async def check(directory: Path, *, stream: bool) -> None:
         else:
             raise AssertionError("A deleted Session was recreated")
     assert len(model.calls) == 1
+    empty = directory / "empty.db"
+    empty.touch()
+    try:
+        async with SQLiteMaintenance(empty):
+            pass
+    except IncompatibleStorage:
+        pass
+    else:
+        raise AssertionError("Maintenance initialized an existing empty file")
+    assert empty.read_bytes() == b""
     print(
         json.dumps(
             {

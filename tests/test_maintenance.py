@@ -514,6 +514,33 @@ async def test_readonly_open_of_old_database_keeps_original_format(tmp_path: Pat
     assert before == path.read_bytes()
 
 
+@pytest.mark.asyncio
+async def test_existing_empty_file_is_not_initialized(tmp_path: Path) -> None:
+    path = tmp_path / "empty.db"
+    path.touch()
+    with pytest.raises(IncompatibleStorage):
+        async with SQLiteMaintenance(path):
+            pass
+    assert path.read_bytes() == b""
+
+
+@pytest.mark.asyncio
+@POSIX
+async def test_missing_pairing_metadata_is_not_repaired_by_maintenance(tmp_path: Path) -> None:
+    a: Agent[str] = Agent(name="assistant", revision="1", model=ScriptedModel([final("done")]))
+    async with file_runtime(tmp_path, a):
+        pass
+    path = tmp_path / "state.db"
+    with closing(sqlite3.connect(path)) as connection:
+        connection.execute("DELETE FROM metadata WHERE key='artifact_store_id'")
+        connection.commit()
+    before = path.read_bytes()
+    with pytest.raises(ConfigurationError):
+        async with SQLiteMaintenance(path, artifacts=LocalArtifacts(directory=tmp_path / "files")):
+            pass
+    assert path.read_bytes() == before
+
+
 class DenyReads(OwnerAuthorizer):
     async def authorize(self, actor: RunContext, action: Action, resource: Resource) -> bool:
         return False if action == "read" else await super().authorize(actor, action, resource)

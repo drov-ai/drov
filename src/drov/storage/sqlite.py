@@ -252,6 +252,9 @@ class SQLiteStorage(Storage):
         return cast(tuple[list[Any], int], settled.value)
 
     async def open(self) -> None:
+        await self._open(initialize=True)
+
+    async def _open(self, *, initialize: bool) -> None:
         self._check_lifecycle()
         async with self._gate:
             self._check_not_open()
@@ -281,6 +284,8 @@ class SQLiteStorage(Storage):
                     raise IncompatibleStorage(
                         "Non-empty unversioned database requires explicit migration"
                     )
+                if schema_version == 0 and not initialize:
+                    raise IncompatibleStorage("Offline maintenance cannot initialize a database")
                 if schema_version not in (0, SCHEMA_VERSION):
                     raise IncompatibleStorage(
                         "Database schema is unsupported; no automatic migration"

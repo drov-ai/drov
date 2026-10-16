@@ -98,10 +98,15 @@ class SQLiteMaintenance:
             if self._artifacts is not None and self._artifacts.is_open:
                 raise StorageInUse("Maintenance requires an unopened artifact store")
             try:
-                await self._storage.open()
+                await self._storage._open(initialize=False)
                 metadata, _ = await self._storage._sql("SELECT key,value FROM metadata")
-                paired = "artifact_schema" in dict(metadata)
+                values = dict(metadata)
+                paired = "artifact_schema" in values
                 if paired:
+                    if "artifact_store_id" not in values:
+                        raise ConfigurationError(
+                            "Maintenance cannot repair missing artifact pairing"
+                        )
                     if self._artifacts is None:
                         raise ConfigurationError("Maintenance requires the paired artifact store")
                     if not (self._artifacts.directory / "store.json").is_file():
