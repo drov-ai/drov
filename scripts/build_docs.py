@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import ast
 import gzip
 import hashlib
@@ -184,7 +185,8 @@ def prepare() -> tuple[str, dict[str, object]]:
     manifest: dict[str, object] = {
         "format": 1,
         "package_version": release,
-        "source_commit": commit,
+        "source_commit": commit if dirty is not None else None,
+        "source_link_commit": commit,
         "working_tree_dirty": dirty,
         "source_kind": "source_archive" if dirty is None else "git_checkout",
         "public_deployment": False,
@@ -206,7 +208,12 @@ def main() -> None:
     from mkdocs.config import load_config
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--update-signatures", action="store_true")
+    options = parser.parse_args()
     os.chdir(ROOT)
+    if options.update_signatures:
+        (ROOT / "docs/guide/api-signatures.md").write_text(signature_page(), encoding="utf-8")
     release, manifest = prepare()
     nav: list[dict[str, object]] = [
         {"首页": "index.md"},

@@ -11,9 +11,11 @@ uv run --locked --group docs python -m http.server 8000 --bind 127.0.0.1 --direc
 
 在本机打开 `http://127.0.0.1:8000`。构建输出为 `.drov/site/`，压缩构件为 `dist/drov-docs-0.1.0a0.zip`，摘要在 `dist/drov-docs-0.1.0a0.sha256`。最后一条只启动本地预览，Ctrl-C 停止。
 
-构建器只把明确允许的用户文档、社区说明和生成 schema 放进暂存目录，严格构建 MkDocs 并检查产物内的链接/锚点。规划、评测原始 JSON、私有 `.drov`、凭据和品牌原件不进入输出。指向未内置的源码/证据链接指向构建时精确 Git 提交；无 Git 的 sdist 构建使用发布源码基准提交并明确标记 source archive。构建 manifest 记录实际输入 hash，不能只凭版本号断言字节相同。
+构建器只把明确允许的用户文档、社区说明和生成 schema 放进暂存目录，严格构建 MkDocs 并检查产物内的链接/锚点。规划、评测原始 JSON、私有 `.drov`、凭据和品牌原件不进入输出。指向未内置的源码/证据链接指向构建时精确 Git 提交；无 Git 的 sdist 构建把 source_commit 记为 null，单列 SDK 源码链接基准并标记 source_archive，不据此声称整个源码包来自该提交。构建 manifest 记录实际输入 hash，不能只凭版本号断言字节相同。
 
 `mkdocs.yml` 和自有主题在仓库中，MkDocs 及其依赖只属于 docs group，不成为 SDK 必装依赖。主题使用系统字体和本地 CSS/JS，无外部字体、统计或第三方运行时。当前使用文本 Drov 字标，忽略目录中的品牌素材不复制进站点；公开前仍需确认原品牌来源与使用范围。
+
+SDK 公共签名改变时，用同一构建命令加 `--update-signatures` 显式重生成并提交签名页；普通构建只校验，不改写仓库源文档。
 
 ## Cloudflare Pages 条件
 
