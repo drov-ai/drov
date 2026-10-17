@@ -13,7 +13,7 @@ uv run --locked python examples/research_offline.py --stream
 
 例子对应 S-01-A：真实 Python 工具从自有合成语料检索 A/B 两条资料，ScriptedModel 检查实际工具结果，再返回预设 JSON；最终输出严格校验成 Report，并核对引用集合与实际来源一致。`--stream` 用相同 Runtime 入口打印已提交事件，随后读取相同结果。
 
-这是可执行的离线契约验证，回答是预设夹具，不证明真实模型的推理质量。运行只用内存存储；SQLite、去重、取消、正文授权与失败提交另由集成测试验证。外部 Python 工具支持 read/write/unknown，写入/未知工具单次派发并沿权限/审批执行；内置 Memory 使用专用事务路径。显式 Runtime 的 ASK 已支持持久审批，临时 Agent.run 仍失败为 interaction_unavailable；T-09 已交付未知效果/显式恢复；真实模型质量和 HTTP 尚未验证；Responses 离线协议适配见下方新增例子。完整范围与下一项见 [progress](../docs/planning/progress.md)。
+这是可执行的离线契约验证，回答是预设夹具，不证明真实模型的推理质量。运行只用内存存储；SQLite、去重、取消、正文授权与失败提交另由集成测试验证。外部 Python 工具支持 read/write/unknown，写入/未知工具单次派发并沿权限/审批执行；内置 Memory 使用专用事务路径。显式 Runtime 的 ASK 已支持持久审批，临时 Agent.run 仍失败为 interaction_unavailable。HTTP 已有实际本地验证，DeepSeek 固定合成任务质量及限制见[T-16](../docs/validation/t16-evidence-scope.md)，OpenAI 真实模型未验证。完整范围与下一项见 [progress](../docs/planning/progress.md)。
 
 T-07 的 S-01-C 预览/引用检查：
 

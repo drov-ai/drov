@@ -1,6 +1,6 @@
 # Third-party sources and dependencies
 
-Updated: 2026-10-15. Drov has not copied or modified source code from another Agent
+Updated: 2026-10-17. Drov has not copied or modified source code from another Agent
 framework. Design references are recorded in `docs/planning/evidence.md` and the
 decision records. Integration does not make upstream capabilities Drov inventions.
 
@@ -41,6 +41,18 @@ The server extra implements a lifespan-owned or borrowed Runtime HTTP/SSE transp
 | pytest-asyncio | Development async tests | Apache-2.0 | https://github.com/pytest-dev/pytest-asyncio |
 | twine | Distribution metadata checks | Apache-2.0 | https://github.com/pypa/twine |
 | uv | Development resolver/installer, not a runtime dependency | MIT OR Apache-2.0 | https://github.com/astral-sh/uv |
+| mkdocs | Documentation-only builder, 1.6.1 in docs group | BSD-2-Clause | https://github.com/mkdocs/mkdocs |
+
+## Documentation site
+
+The site theme under `docs/theme/` is Drov's own HTML/CSS/JavaScript and uses system
+fonts. It does not copy the ignored brand originals or use a third-party theme.
+MkDocs 1.6.1 and its transitive build dependencies are installed separately and
+locked in `uv.lock`; they are not SDK runtime requirements. Its built-in search
+plugin generates the documentation's JSON index; the build removes unused MkDocs
+search scripts and Lunr before packaging. The browser runs only Drov's own search
+client, which reads that local index. No MkDocs/Lunr runtime source is redistributed
+in the static site. No external search service, font, tracking or CDN is configured.
 
 GitHub Actions use `actions/checkout` and `astral-sh/setup-uv`, pinned to specific
 upstream commits in the workflow. These are CI tooling, not redistributed library code.

@@ -1,0 +1,31 @@
+name: 缺陷报告
+description: 使用合成数据描述可复现的行为问题
+body:
+  - type: markdown
+    attributes:
+      value: "安全漏洞请使用仓库 Security 页的私密报告。请勿填写 Key、令牌、真实数据库或业务资料。"
+  - type: input
+    id: version
+    attributes:
+      label: Drov 版本 / commit、Python 与平台
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 最小合成复现
+      description: 写明所选 extra、步骤与非敏感配置；不要附私有环境文件。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期与实际行为
+      description: 可提供结构化错误码；不上传原始请求正文。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 已做检查与限制
+      description: 区分真实执行、离线夹具与跳过的检查。

@@ -1,6 +1,6 @@
 # 本地开发
 
-包版本为 `0.1.0a0`。已有模型协议、事务存储、Runtime/Agent、工具/权限、上下文/Memory、交互及 verify/recover。T-10A 已接通文件输入、PythonSandbox 审批/实际执行、有界导出及销毁后原工具结果/ready 共同发布，[真实 Docker 示例](../examples/sandbox_offline.py) 可运行；T-10B 完整隔离/故障已验收；OpenAI Responses 离线协议适配见 ADR-0022，DeepSeek专用方言/固定任务见[评测说明](../evals/README.md)；真实模型质量尚未验收，HTTP/维护CLI的实际状态以progress为准。任务状态见 [progress](planning/progress.md)，实际证据见 [本轮验证](validation/t10a-runtime-sandbox.md)。
+包版本为 `0.1.0a0`。用户使用入口见[快速入门](guide/quickstart.md)与[API 导航](guide/api.md)。核心、Docker、可选 E2B、模型适配、MCP、HTTP/工作台及维护已实现；固定合成任务的 DeepSeek 真实评测达到门槛，三个失败和局限见[T-16](validation/t16-evidence-scope.md)。OpenAI 真实模型尚未验证；任务状态统一见 [progress](planning/progress.md)。本页维护开发环境和检查方法。
 
 ## 环境与安装
 
@@ -31,6 +31,8 @@ uv run --locked python -c "import drov; print(drov.__version__)"
 ```
 
 `uv.lock` 锁定开发、核心和可选依赖；默认 sync 安装核心与开发组，不安装模型/MCP/Web extras。PyPI 包名与发布权限尚未核验，当前只使用本地源码或本地构件安装，不提供 `pip install drov` 的公开发布承诺。
+
+文档依赖位于独立 docs group：`uv sync --locked --group docs` 后运行 `uv run --locked --group docs python scripts/build_docs.py`。输出 `.drov/site` 和 `dist/drov-docs-0.1.0a0.zip`；严格构建后自动检查站内链接/锚点与收录范围，不执行部署。配置、版本和 Pages 准备见[构建说明](guide/hosting.md)。
 
 ## 日常检查
 

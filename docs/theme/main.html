@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ config.site_description | e }}">
+  <meta name="color-scheme" content="light">
+  <title>{{ page.title | e }} · Drov</title>
+  <link rel="stylesheet" href="{{ 'assets/style.css' | url }}">
+  <script defer src="{{ 'assets/site.js' | url }}"></script>
+</head>
+<body data-root="{{ '.' | url }}">
+  <a class="skip-link" href="#content">跳至正文</a>
+  <header class="site-header">
+    <a class="wordmark" href="{{ '.' | url }}" aria-label="Drov 首页">drov<span aria-hidden="true">.</span></a>
+    <nav aria-label="主导航">
+      <a href="{{ config.extra.version_home | url }}">文档</a>
+      <a href="{{ config.extra.api_page | url }}">API</a>
+      <a href="{{ 'versions/' | url }}" class="version">{{ config.extra.version }}</a>
+      <a href="https://github.com/drov-ai/drov">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+  {% if page.is_homepage %}
+  <main id="content" class="home-content">{{ page.content }}</main>
+  {% else %}
+  <div class="docs-layout">
+    <aside class="sidebar" aria-label="文档导航">
+      <details class="doc-menu" open>
+        <summary>浏览文档</summary>
+        <label for="doc-search">搜索文档</label>
+        <input id="doc-search" type="search" placeholder="如：Memory、审批" autocomplete="off">
+        <div id="search-status" role="status" aria-live="polite"></div>
+        <ul id="search-results" aria-label="搜索结果" hidden></ul>
+        <nav id="doc-nav" aria-label="章节">
+        {% for item in nav %}
+          {% if item.children %}
+          <p class="nav-label">{{ item.title | e }}</p>
+          {% for child in item.children %}
+          <a href="{{ child.url | url }}"{% if child.active %} aria-current="page"{% endif %}>{{ child.title | e }}</a>
+          {% endfor %}
+          {% else %}
+          <a href="{{ item.url | url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.title | e }}</a>
+          {% endif %}
+        {% endfor %}
+        </nav>
+      </details>
+    </aside>
+    <main id="content" class="article">
+      <p class="article-kicker">DROV DOCUMENTATION / {{ config.extra.version }}</p>
+      {{ page.content }}
+      <div class="page-turn">
+        {% if page.previous_page %}<a href="{{ page.previous_page.url | url }}">← {{ page.previous_page.title | e }}</a>{% endif %}
+        {% if page.next_page %}<a href="{{ page.next_page.url | url }}">{{ page.next_page.title | e }} →</a>{% endif %}
+      </div>
+    </main>
+    <aside class="toc" aria-label="本页目录">
+      <p class="nav-label">本页内容</p>
+      {% for item in page.toc %}
+        {% for child in item.children %}
+        <a href="{{ child.url }}">{{ child.title | e }}</a>
+        {% endfor %}
+      {% endfor %}
+    </aside>
+  </div>
+  {% endif %}
+  <footer class="site-footer">
+    <span>drov. <span class="footer-detail">Python Agent Framework</span></span>
+    <span>开发快照 {{ config.extra.version }} · 尚未公开发包</span>
+    <a href="{{ 'community/license/' | url }}">Apache-2.0 与来源</a>
+    <a href="{{ 'community/security/' | url }}">安全报告</a>
+  </footer>
+</body>
+</html>

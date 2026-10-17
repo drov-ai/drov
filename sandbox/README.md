@@ -65,7 +65,7 @@ uv run --locked python examples/sandbox_offline.py \
 
 加 --stream 检查流入口；不加 --chart 可用预装固定标准库镜像。示例自己通过默认审批后检查工具真实结果，模型是确定性夹具，不能作为真实模型质量。默认输入/输出额、PNG 有界解码 profile 与 POSIX 限制见工程方案第 9 节；合法但超出 PNG profile 的文件也会被拒绝。T-10B 的受测隔离/资源/硬终止与 Linux3.11–3.14原生AMD64专项CI/安装已完整通过，见专项验证；完整维护/备份仍T-15，不用于敌对公网多租户部署承诺。
 
-当前字节层仅在 POSIX 控制下可打开；构造/导入在其他平台仍无 I/O。文件目录、store.json、stage.json 与原始 ID 字节共同构成配对数据；不能在尚未完成 T-15 备份 barrier 时声称有完整 Artifact 备份。无清单目录、临时清单或其他未知项使 open fail closed，保留证据，不手工删除/改写后假装恢复已验收。调小容量不会清空旧预留；容量不足明确拒绝。
+当前字节层仅在 POSIX 控制下可打开；构造/导入在其他平台仍无 I/O。文件目录、store.json、stage.json 与原始 ID 字节共同构成配对数据；完整备份必须使用 T-15 已实现的成对备份/恢复屏障，见[数据维护](../docs/guide/maintenance.md)。无清单目录、临时清单或其他未知项使 open fail closed，保留证据，不手工删除/改写后假装恢复已验收。调小容量不会清空旧预留；容量不足明确拒绝。
 
 [许可 inventory](analysis/license-inventory-linux-arm64.json) 记录实际 wheel 中的声明和 license 文件 hash；依赖源码归属及 Moby profile 来源见 [THIRD_PARTY](../THIRD_PARTY.md)。安全 profile 是未修改的上游 v27.0.3 文件，不是 Drov 原创，也不是漏洞扫描证明。
 

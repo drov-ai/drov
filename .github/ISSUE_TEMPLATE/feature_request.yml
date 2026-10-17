@@ -1,0 +1,22 @@
+name: 能力建议
+description: 从用户问题与验收条件提出建议
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你要解决什么问题？
+      description: 描述具体触发和期望行为，使用合成例子。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案与替代方案
+      description: 如涉及 API、状态或存储，写明兼容性和权限影响。
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 怎样判断完成？
+      description: 给出可观察的验收条件，避免仅列功能名称。

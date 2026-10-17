@@ -44,6 +44,9 @@ dev = [
   "ruff>=0.17.0,<0.18",
   "twine>=7.0.0,<8",
 ]
+docs = [
+  "mkdocs>=1.6,<2",
+]
 
 [tool.uv]
 required-version = "==0.13.0"
@@ -57,7 +60,7 @@ packages = ["src/drov"]
 [tool.hatch.build.targets.sdist]
 only-include = [
   "src", "tests", "scripts", "examples", "evals", "docs", "sandbox", "workbench", "pyproject.toml", "uv.lock",
-  "README.md", "AGENTS.md", "LICENSE", "THIRD_PARTY.md", ".python-version",
+  "README.md", "AGENTS.md", "CONTRIBUTING.md", "SECURITY.md", "LICENSE", "THIRD_PARTY.md", ".python-version", "mkdocs.yml",
 ]
 
 [tool.ruff]
@@ -73,7 +76,7 @@ strict = true
 files = ["src", "tests", "scripts", "examples", "evals"]
 
 [[tool.mypy.overrides]]
-module = ["openai", "openai.*", "httpx2", "httpx2.*", "e2b", "e2b.*", "httpx", "httpx.*", "mcp", "mcp.*", "jsonschema", "jsonschema.*", "fastapi", "fastapi.*", "starlette", "starlette.*", "uvicorn", "uvicorn.*"]
+module = ["openai", "openai.*", "httpx2", "httpx2.*", "e2b", "e2b.*", "httpx", "httpx.*", "mcp", "mcp.*", "jsonschema", "jsonschema.*", "fastapi", "fastapi.*", "starlette", "starlette.*", "uvicorn", "uvicorn.*", "mkdocs", "mkdocs.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

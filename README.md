@@ -1,85 +1,46 @@
 # Drov
 
-面向 Python 开发者的通用 Agent 框架，目标是以少量核心概念提供完整、可组合的能力，并让开发、调试和服务化使用一致的运行机制。
+Python 通用 Agent 框架，用同一套 Runtime 组织模型、工具、上下文、记忆与人工控制。渐进 API、运行机制一致和上下文可检查是当前设计主张，尚无竞品优势结论。
 
-**开发版本 `0.1.0a0`；T-10A/T-10B 的 Docker Python、文件与故障专项已验收。** Runtime 支持受控文件输入、代码审批、实际单次执行、CSV/PNG 持久产物与授权下载。完整任务状态和下一项以 [progress](docs/planning/progress.md) 为准；受测隔离/资源/SDK硬终止、原生Linux3.11–3.14 Docker专项与安装证据见 [T-10B 验证](docs/validation/t10b-sandbox-faults.md)。包另提供模型协议、事务存储、工具/权限、Agent 循环、上下文/Memory 和持久交互/恢复。OpenAI Responses 已实现离线协议适配，MCP stdio已接通（实际验收见progress）；HTTP按ADR-0025接通（验收见progress），实验性[本地工作台](workbench/README.md)已接入同一HTTP；尚未公开发布包；DeepSeek固定合成任务真实评测已达门槛（smoke7/7、正式78/81、代码9/9、schema73/75），三个失败与完整限制见[T-16记录](docs/validation/t16-evidence-scope.md)，整卡最终状态以progress为准。
+**源码开发快照 `0.1.0a0`，尚未公开发布 Python 包或官网。** 核心 SDK、Docker 单次 Python/受控文件/CSV 与 PNG、可选 E2B、Responses 适配、MCP stdio、HTTP/实验性工作台及离线维护已有实现。准确范围见[使用限制](docs/guide/limits.md)，任务状态统一见 [progress](docs/planning/progress.md)。
 
-P4 的设计决定保存在 [实施基线](docs/planning/implementation-baseline.md)。当前开发入口与限制见 [开发说明](docs/development.md)，可导入的定义见 [类型与 schema](docs/reference/README.md)，实际检查见 [T-08 验证记录](docs/validation/t08-memory.md)。本轮证据见 [T-09 子范围验证](docs/validation/t09-interactions.md)，完整证据见 [核查/恢复验证](docs/validation/t09-reconciliation-recovery.md)，T-10 已验收，见 [专项验证](docs/validation/t10-faults-cancellation.md)；下一项及资源准备见 progress；换会话方法见 [交接说明](docs/handoff.md)。
+## 开始使用
 
-## 本地开发
-
-使用 Python 3.11+ 和 uv 0.13.0，在仓库根目录执行；uv 的隔离安装方式见开发说明。
+需要 Python 3.11–3.14 与 uv 0.13.0。在仓库根目录执行，无需 Key 或 Docker：
 
 ```sh
 uv sync --locked
-uv run --locked python -c "import drov; print(drov.__version__)"
-uv run --locked pytest
-```
-
-构建和干净环境安装验证：
-
-```sh
-uv run --locked python scripts/check_package.py
-uv run --locked twine check --strict dist/*.whl dist/*.tar.gz
-```
-
-可直接运行 [离线检索示例](examples/README.md)，使用真实本地检索工具、预设 ScriptedModel 和严格 Report 输出：
-
-```sh
 uv run --locked python examples/research_offline.py
 uv run --locked python examples/research_offline.py --stream
 ```
 
-预设回答只验证运行契约，不证明模型推理质量。外部 Python 工具已支持 read/write/unknown；内置 Memory 使用专用事务工具与限时检索。显式 Runtime 的 ASK 保存审批并支持原子响应，临时 Agent.run 仍 failed/interaction_unavailable；外部 write/unknown 单次派发，未知效果须显式核查，不承诺外部 exactly-once。上下文/记忆来源可由 get_context 核对。
+实际工具检索两条合成资料，输出带来源的严格 `Report`；模型回答由离线夹具预设。完整可复制程序、源码安装与每个 extra 见[快速入门](docs/guide/quickstart.md)。PyPI 名称和发布权限尚未核验，当前使用源码或本地构件。
 
-这些操作不需要 API Key。构件生成在本地 `dist/`，不会发布到 PyPI。openai extra 已提供 [Responses 离线适配](docs/decisions/0022-openai-responses-adapter.md)；mcp extra已提供 [本地stdio适配](docs/decisions/0024-mcp-stdio-tools.md)；server提供 [HTTP/身份/SSE与文件上传下载](docs/decisions/0025-http-identity-and-uploads.md)，可运行`examples/http_offline.py`及`--stream`例。
+## 从一个工具到完整应用
 
-官方客户端的本地 HTTP/SSE 示例（不读取真实凭据）：
+| 你想做什么 | 从这里开始 |
+| --- | --- |
+| 检索、严格输出和长资料预览 | [三个参考应用](docs/guide/examples.md) |
+| 跨会话 Memory、来源与权限 | [运行原理](docs/guide/concepts.md) |
+| 人工输入、审批、未知效果核查 | [Python API](docs/guide/api.md) |
+| Responses 模型、stdio MCP 工具 | [模型与 MCP](docs/guide/integrations.md) |
+| 本机 HTTP/SSE 与工作台 | [服务与工作台](docs/guide/server.md) |
+| CSV → Python → 持久 CSV/PNG | [Docker 与可选 E2B](docs/guide/sandbox.md) |
+| 清理、备份/恢复、迁移与授权导出 | [数据维护](docs/guide/maintenance.md) |
+| 错误定位、平台和威胁边界 | [排错](docs/guide/troubleshooting.md) / [限制](docs/guide/limits.md) |
+
+Drov 主要能力范围对标 AgentScope 2.0，三个应用检验通用性，不构成产品业务边界。多 Agent、Skill、持久 Notebook/共享工作区等仍为后续，没有可用空壳。工作台为实验性界面。
+
+DeepSeek 固定合成任务真实评测为 smoke7/7、正式78/81、schema73/75、代码9/9，三项模型失败保留；适用配置、证据与限制见[T-16记录](docs/validation/t16-evidence-scope.md)。OpenAI 供应商真实模型未验证。以上不承诺任意任务成功率，体验仅维护者验证。
+
+## 本地文档与开发
 
 ```sh
-uv run --locked --extra openai python examples/openai_responses_offline.py
-uv run --locked --extra openai python examples/openai_responses_offline.py --stream
+uv sync --locked --group docs
+uv run --locked --group docs python scripts/build_docs.py
+uv run --locked --group docs python -m http.server 8000 --bind 127.0.0.1 --directory .drov/site
 ```
 
-## 项目方向
+站点提供 `0.1.0a0` 版本文档，输出 `.drov/site/` 与本地 zip/hash，不执行部署。构建、版本与 Cloudflare Pages 准备见[托管说明](docs/guide/hosting.md)。开发检查/构建 wheel 见[开发说明](docs/development.md)；接口字段来自[生成参考](docs/reference/README.md)。设计与任务导航见[规划目录](docs/planning/README.md)，跨会话接续见[交接说明](docs/handoff.md)。
 
-- 能力范围对标 AgentScope 2.0，覆盖工具、MCP、Memory、权限、Human-in-the-loop、Tracing、持久化与应用服务。
-- 面向多种 Agent 应用；官方示例用于验证通用性，不限定产品业务范围。
-- 优先验证三项设计主张：渐进式 Python API、跨入口一致的运行机制、可检查的上下文与记忆。
-- Docker Python/受控文件/持久产物已有真实离线 SDK [示例](examples/sandbox_offline.py) 与 [验证](docs/validation/t10a-runtime-sandbox.md)，需显式配置 Docker 和固定镜像。可选 E2B adapter 已接入相同 Runtime，实际验证及限制见 [T-10C](docs/validation/t10c-e2b.md) 与 [ADR-0023](docs/decisions/0023-e2b-single-execution.md)；范围见 [ADR-0016](docs/decisions/0016-sandbox-artifacts-and-backends.md)，当前状态见 progress。
-- 本地工作台用于呈现上述能力；复杂集成按需安装。
-
-以上是产品目标，不代表已经实现，也不代表已证明优于其他框架。
-
-## 从这里开始
-
-| 文档 | 用途 |
-| --- | --- |
-| [规划导航](docs/planning/README.md) | 阅读顺序、文档职责和实施前阶段安排 |
-| [当前进度与下一轮](docs/planning/progress.md) | 已完成的工作、待解决问题、下一轮交接 |
-| [开发说明](docs/development.md) / [T-01 验证](docs/validation/t01-engineering.md) | 安装、检查、构建方式与实际验证范围 |
-| [P4 实施基线](docs/planning/implementation-baseline.md) | 代码就绪审查、文档指纹与 T-01 交接 |
-| [产品定义](docs/planning/product.md) | 目标、原则、边界与差异化假设 |
-| [能力对标表](docs/planning/capability-matrix.md) | AgentScope 基线、首期/实验性/后续范围、验收依据 |
-| [公共 API 草案](docs/planning/api-draft.md) | 调用语义、接口字段、schema 支持范围 |
-| [架构与模块边界](docs/planning/architecture.md) | 统一内核、数据归属、资源所有权与组合边界 |
-| [运行行为契约](docs/planning/runtime-contract.md) | 状态机、审批、恢复、Memory 时序与故障处理 |
-| [三类参考应用](docs/planning/reference-scenarios.md) | 使用片段、预期行为与验证案例 |
-| [首版工程方案](docs/planning/engineering.md) | 技术栈、包结构、依赖边界、默认限额 |
-| [质量与评估计划](docs/planning/quality-plan.md) | 离线/集成/故障/真实模型及体验验收 |
-| [分期实施任务](docs/planning/implementation-plan.md) | 21 张任务卡（含必交 T-10A/T-10B、可选 T-10C）、前置依赖、交付与完成条件 |
-| [数据与维护发布](docs/planning/release-policy.md) | 数据、迁移、许可、发布、官网和准备材料 |
-| [交付与就绪标准](docs/planning/delivery-plan.md) | 规划轮次、开发里程碑与进入代码阶段的条件 |
-| [证据与假设](docs/planning/evidence.md) | 外部事实、来源、版本及待验证判断 |
-| [项目方向决策](docs/decisions/0001-project-direction.md) | 已确认方向及其原因 |
-| [统一运行内核决策](docs/decisions/0002-unified-runtime.md) | 入口一致、步骤恢复和执行边界的取舍 |
-| [上下文与记忆决策](docs/decisions/0003-context-and-memory.md) | 可检查输入、检索策略与事务提交的取舍 |
-| [首版工程决策](docs/decisions/0004-first-release-engineering.md) | 首期范围、依赖和维护规则的取舍 |
-| [控制与查看决策](docs/decisions/0005-control-and-observation.md) | 原子响应、正文权限、历史与核查收尾的取舍 |
-| [协作规则](AGENTS.md) | 后续每轮必须遵守的工作方式 |
-
-## 品牌与发布
-
-现有素材位于 [drov-brand](drov-brand/README.md)。GitHub 组织为 [drov-ai](https://github.com/drov-ai)，npm 组织为用户提供的 [drov](https://www.npmjs.com/org/drov)。Python 核心拟通过 PyPI 发布，分发包名与权限尚待核验。自有代码/文档采用 [Apache-2.0](LICENSE)，第三方来源与品牌边界见 [THIRD_PARTY](THIRD_PARTY.md)；现有品牌文件未改动，也未打入 Python 构件。
-
-用户提供的域名为 `drop.dev`；是否为最终官网域名待核实。当前不提供官网上线、安装命令或发布状态声明。
+欢迎通过 [GitHub Issues](https://github.com/drov-ai/drov/issues/new/choose)提交合成复现或建议；开发流程见[CONTRIBUTING](CONTRIBUTING.md)，漏洞使用[SECURITY 私密渠道](SECURITY.md)。自有代码与文档采用 [Apache-2.0](LICENSE)，依赖/复用声明见[THIRD_PARTY](THIRD_PARTY.md)。现有品牌素材保持原样，公开使用范围待确认，不随本站构建复制。仓库记录域名 `drop.dev` 尚待最终核实，未绑定或上线。

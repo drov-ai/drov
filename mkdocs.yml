@@ -1,0 +1,31 @@
+site_name: Drov
+site_description: Python 通用 Agent 框架 · 显式运行控制与可检查的上下文
+docs_dir: .drov/docs-source
+site_dir: .drov/site
+strict: true
+use_directory_urls: true
+theme:
+  name: null
+  custom_dir: docs/theme
+  static_templates:
+    - 404.html
+plugins:
+  - search:
+      lang: en
+      indexing: full
+markdown_extensions:
+  - fenced_code
+  - tables
+  - toc:
+      permalink: true
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    unrecognized_links: warn
+    anchors: warn
+    absolute_links: warn
+# scripts/build_docs.py supplies versioned nav and exact source metadata.
