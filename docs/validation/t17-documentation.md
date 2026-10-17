@@ -61,6 +61,8 @@ Docker只使用起点既有的可信CLI/Unix socket、标准库manifest及分析
 
 `d35f2123c8a5a11eb12d08f64bc678c62d932ae0` 已推送 origin/main。其[核心38991997845](https://github.com/drov-ai/drov/actions/runs/38991997845) **13 jobs** 和[Docker38991997762](https://github.com/drov-ai/drov/actions/runs/38991997762) **4 jobs**全部completed/success；逐项核对headSha、jobs和steps，没有失败步骤。完整平台/步骤/原日志hash见[最终CI快照](t17-final-ci.json)，不把40f315e/5aab10c被后续提交替代或取消的运行写成最终成功。
 
+过程中CLI watch因GitHub jobs API的unexpected EOF退出，原`.drov/t17-core-watch.log`保留；随后直接读取完整最终run/jobs/steps并下载日志成功。watch传输失败没有被写成命令成功，也没有据其退出码误判CI；上述结论来自最终平台快照。
+
 13项包含两套新增文档检查（Linux3.11/Windows3.14）、八套既有支持平台的适用全库/构件/核心及extra安装、质量、工作台浏览器与Python3.15探测；3.15通过仍仅为探测，不升级正式支持。四套Linux Docker包括固定分析镜像、实际故障/文件/硬终止、core-only安装后SDK/stream，3.11另含实际Docker工作台。普通核心缺Docker/云配置的skip不等于对应执行通过，云未新增调用。
 
 任务卡内本地交付、干净运行、链接/许可/真实状态及站点构件均已对应验证。精确源码CI通过后，收尾只改progress、本记录与两份证据JSON，以skip ci保存；SDK、源码工具/指南/主题/锁及本地zip保持已验证字节，不用文档补记伪称重建成同一个sdist。任务关闭与下一项统一见progress。公开托管和发包仍按下列限制处理。
