@@ -61,7 +61,7 @@ def check() -> dict[str, int]:
                 if unquote(target.fragment) not in pages[destination].ids:
                     raise RuntimeError(f"Broken anchor: {source.relative_to(SITE)}: {href}")
             links += 1
-    manifest = json.loads((SITE / "build-manifest.json").read_text())
+    manifest = json.loads((SITE / "build-manifest.json").read_text(encoding="utf-8"))
     release = manifest["package_version"]
     allowed_roots = {"assets", "community", "search", release}
     allowed_files = {

@@ -43,7 +43,7 @@ LINK = re.compile(r"(?<!!)\[[^\]\n]+\]\(([^\s)]+)\)")
 
 
 def version() -> str:
-    tree = ast.parse((ROOT / "src/drov/__init__.py").read_text())
+    tree = ast.parse((ROOT / "src/drov/__init__.py").read_text(encoding="utf-8"))
     for node in tree.body:
         if isinstance(node, ast.Assign) and any(
             isinstance(target, ast.Name) and target.id == "__version__" for target in node.targets
@@ -112,7 +112,7 @@ def signature_page() -> str:
     ]
     for name, file in sources.items():
         source = ROOT / file
-        source_text = source.read_text()
+        source_text = source.read_text(encoding="utf-8")
         source_lines = source_text.splitlines()
         lines += [f"## {name}", "", f"[源码](../../{file})", "", "```python"]
         tree = ast.parse(source_text)
@@ -142,7 +142,7 @@ def prepare() -> tuple[str, dict[str, object]]:
     mapping = {ROOT / "docs/index.md": STAGING / "index.md"}
     for name, _ in GUIDES:
         mapping[ROOT / f"docs/guide/{name}.md"] = STAGING / release / f"{name}.md"
-    if (ROOT / "docs/guide/api-signatures.md").read_text() != signature_page():
+    if (ROOT / "docs/guide/api-signatures.md").read_text(encoding="utf-8") != signature_page():
         raise RuntimeError("API signatures changed; regenerate docs/guide/api-signatures.md")
     for source_name, target in (
         ("CONTRIBUTING.md", "contributing.md"),
@@ -165,7 +165,7 @@ def prepare() -> tuple[str, dict[str, object]]:
     license_page.write_text(
         "# 许可与来源\n\nDrov 自有代码/文档采用 Apache-2.0。品牌素材没有据此重新许可。"
         "[第三方来源](third-party.md)另列依赖与声明。\n\n```text\n"
-        + (ROOT / "LICENSE").read_text()
+        + (ROOT / "LICENSE").read_text(encoding="utf-8")
         + "\n```\n",
         encoding="utf-8",
     )
