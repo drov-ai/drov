@@ -1,0 +1,2684 @@
+{
+  "date": "2026-10-17",
+  "timezone": "Asia/Shanghai",
+  "implementation_commit": "d35f2123c8a5a11eb12d08f64bc678c62d932ae0",
+  "workflows": {
+    "core": {
+      "run_id": 38991997845,
+      "url": "https://github.com/drov-ai/drov/actions/runs/38991997845",
+      "conclusion": "success",
+      "headSha": "d35f2123c8a5a11eb12d08f64bc678c62d932ae0",
+      "jobs": [
+        {
+          "completedAt": "2026-10-17T01:48:01Z",
+          "conclusion": "success",
+          "databaseId": 117276410366,
+          "name": "python-next",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:42Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:43Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:45Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:47Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:47:55Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked pytest",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:47:58Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 9,
+              "startedAt": "2026-10-17T01:47:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:47:58Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 10,
+              "startedAt": "2026-10-17T01:47:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:47:58Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 11,
+              "startedAt": "2026-10-17T01:47:58Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410366"
+        },
+        {
+          "completedAt": "2026-10-17T01:44:02Z",
+          "conclusion": "success",
+          "databaseId": 117276410493,
+          "name": "docs (windows-latest, 3.14)",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:41Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:49Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:52Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:56Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --group docs",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:58Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --group docs python scripts/build_docs.py",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --group docs python scripts/check_docs.py",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 11,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:01Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 12,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:01Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 13,
+              "startedAt": "2026-10-17T01:44:01Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410493"
+        },
+        {
+          "completedAt": "2026-10-17T01:45:06Z",
+          "conclusion": "success",
+          "databaseId": 117276410516,
+          "name": "workbench",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:43Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:45Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:48Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:54Z",
+              "conclusion": "success",
+              "name": "Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:56Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:57Z",
+              "conclusion": "success",
+              "name": "Run npm ci",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:57Z",
+              "conclusion": "success",
+              "name": "Run npm run schema",
+              "number": 7,
+              "startedAt": "2026-10-17T01:43:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:57Z",
+              "conclusion": "success",
+              "name": "Run git diff --exit-code -- workbench/src/schema.d.ts",
+              "number": 8,
+              "startedAt": "2026-10-17T01:43:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:58Z",
+              "conclusion": "success",
+              "name": "Run npm run format:check",
+              "number": 9,
+              "startedAt": "2026-10-17T01:43:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "Run npm run build",
+              "number": 10,
+              "startedAt": "2026-10-17T01:43:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "Run git diff --exit-code -- src/drov/server/static",
+              "number": 11,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:24Z",
+              "conclusion": "success",
+              "name": "Run npx playwright install --with-deps chromium",
+              "number": 12,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:02Z",
+              "conclusion": "success",
+              "name": "Run npm test",
+              "number": 13,
+              "startedAt": "2026-10-17T01:44:24Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:02Z",
+              "conclusion": "success",
+              "name": "Post Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "number": 24,
+              "startedAt": "2026-10-17T01:45:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:02Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 25,
+              "startedAt": "2026-10-17T01:45:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:02Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 26,
+              "startedAt": "2026-10-17T01:45:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:02Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 27,
+              "startedAt": "2026-10-17T01:45:02Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410516"
+        },
+        {
+          "completedAt": "2026-10-17T02:03:48Z",
+          "conclusion": "success",
+          "databaseId": 117276410523,
+          "name": "package (windows-latest, 3.11)",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:41Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:49Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:50Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:55Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:12Z",
+              "conclusion": "success",
+              "name": "HTTP identity, real loopback SSE and file boundaries",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:13Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --extra server python scripts/generate_openapi.py --check",
+              "number": 6,
+              "startedAt": "2026-10-17T01:44:12Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:14Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra mcp",
+              "number": 7,
+              "startedAt": "2026-10-17T01:44:13Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:46:42Z",
+              "conclusion": "success",
+              "name": "Real MCP stdio integration",
+              "number": 8,
+              "startedAt": "2026-10-17T01:44:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:46:43Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 9,
+              "startedAt": "2026-10-17T01:46:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:58:25Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked pytest",
+              "number": 10,
+              "startedAt": "2026-10-17T01:46:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:25Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked python scripts/check_package.py",
+              "number": 11,
+              "startedAt": "2026-10-17T01:58:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:27Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked twine check --strict dist/*.whl dist/*.tar.gz",
+              "number": 12,
+              "startedAt": "2026-10-17T02:02:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:28Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --all-extras",
+              "number": 13,
+              "startedAt": "2026-10-17T02:02:27Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:29Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --all-extras python -I -B scripts/check_installed.py",
+              "number": 14,
+              "startedAt": "2026-10-17T02:02:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:37Z",
+              "conclusion": "success",
+              "name": "Offline official Responses client",
+              "number": 15,
+              "startedAt": "2026-10-17T02:02:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:03:02Z",
+              "conclusion": "success",
+              "name": "Installed MCP extra and stdio examples",
+              "number": 16,
+              "startedAt": "2026-10-17T02:02:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:03:13Z",
+              "conclusion": "success",
+              "name": "Installed server extra and real loopback HTTP/SSE examples",
+              "number": 17,
+              "startedAt": "2026-10-17T02:03:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:03:15Z",
+              "conclusion": "success",
+              "name": "Offline E2B adapter",
+              "number": 18,
+              "startedAt": "2026-10-17T02:03:13Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:03:22Z",
+              "conclusion": "success",
+              "name": "Installed E2B extra without cloud calls",
+              "number": 19,
+              "startedAt": "2026-10-17T02:03:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:03:40Z",
+              "conclusion": "success",
+              "name": "Installed Responses extra and loopback examples",
+              "number": 20,
+              "startedAt": "2026-10-17T02:03:22Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:03:45Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 39,
+              "startedAt": "2026-10-17T02:03:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:03:47Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 40,
+              "startedAt": "2026-10-17T02:03:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:03:47Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 41,
+              "startedAt": "2026-10-17T02:03:47Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410523"
+        },
+        {
+          "completedAt": "2026-10-17T01:50:31Z",
+          "conclusion": "success",
+          "databaseId": 117276410559,
+          "name": "package (ubuntu-latest, 3.11)",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:42Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:44Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:47Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:48Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:58Z",
+              "conclusion": "success",
+              "name": "HTTP identity, real loopback SSE and file boundaries",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --extra server python scripts/generate_openapi.py --check",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra mcp",
+              "number": 7,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:25Z",
+              "conclusion": "success",
+              "name": "Real MCP stdio integration",
+              "number": 8,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:25Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 9,
+              "startedAt": "2026-10-17T01:45:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:26Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked pytest",
+              "number": 10,
+              "startedAt": "2026-10-17T01:45:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:02Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked python scripts/check_package.py",
+              "number": 11,
+              "startedAt": "2026-10-17T01:48:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:02Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked twine check --strict dist/*.whl dist/*.tar.gz",
+              "number": 12,
+              "startedAt": "2026-10-17T01:50:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:03Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --all-extras",
+              "number": 13,
+              "startedAt": "2026-10-17T01:50:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:03Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --all-extras python -I -B scripts/check_installed.py",
+              "number": 14,
+              "startedAt": "2026-10-17T01:50:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:06Z",
+              "conclusion": "success",
+              "name": "Offline official Responses client",
+              "number": 15,
+              "startedAt": "2026-10-17T01:50:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:13Z",
+              "conclusion": "success",
+              "name": "Installed MCP extra and stdio examples",
+              "number": 16,
+              "startedAt": "2026-10-17T01:50:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:17Z",
+              "conclusion": "success",
+              "name": "Installed server extra and real loopback HTTP/SSE examples",
+              "number": 17,
+              "startedAt": "2026-10-17T01:50:13Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:19Z",
+              "conclusion": "success",
+              "name": "Offline E2B adapter",
+              "number": 18,
+              "startedAt": "2026-10-17T01:50:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:21Z",
+              "conclusion": "success",
+              "name": "Installed E2B extra without cloud calls",
+              "number": 19,
+              "startedAt": "2026-10-17T01:50:19Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:28Z",
+              "conclusion": "success",
+              "name": "Installed Responses extra and loopback examples",
+              "number": 20,
+              "startedAt": "2026-10-17T01:50:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:28Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 39,
+              "startedAt": "2026-10-17T01:50:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:28Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 40,
+              "startedAt": "2026-10-17T01:50:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:28Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 41,
+              "startedAt": "2026-10-17T01:50:28Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410559"
+        },
+        {
+          "completedAt": "2026-10-17T02:03:01Z",
+          "conclusion": "success",
+          "databaseId": 117276410612,
+          "name": "package (windows-latest, 3.14)",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:42Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:50Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:54Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:57Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:12Z",
+              "conclusion": "success",
+              "name": "HTTP identity, real loopback SSE and file boundaries",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:14Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --extra server python scripts/generate_openapi.py --check",
+              "number": 6,
+              "startedAt": "2026-10-17T01:44:12Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:15Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra mcp",
+              "number": 7,
+              "startedAt": "2026-10-17T01:44:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:46:30Z",
+              "conclusion": "success",
+              "name": "Real MCP stdio integration",
+              "number": 8,
+              "startedAt": "2026-10-17T01:44:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:46:30Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 9,
+              "startedAt": "2026-10-17T01:46:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:57:11Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked pytest",
+              "number": 10,
+              "startedAt": "2026-10-17T01:46:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:01:49Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked python scripts/check_package.py",
+              "number": 11,
+              "startedAt": "2026-10-17T01:57:11Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:01:51Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked twine check --strict dist/*.whl dist/*.tar.gz",
+              "number": 12,
+              "startedAt": "2026-10-17T02:01:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:01:52Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --all-extras",
+              "number": 13,
+              "startedAt": "2026-10-17T02:01:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:01:53Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --all-extras python -I -B scripts/check_installed.py",
+              "number": 14,
+              "startedAt": "2026-10-17T02:01:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:00Z",
+              "conclusion": "success",
+              "name": "Offline official Responses client",
+              "number": 15,
+              "startedAt": "2026-10-17T02:01:53Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:17Z",
+              "conclusion": "success",
+              "name": "Installed MCP extra and stdio examples",
+              "number": 16,
+              "startedAt": "2026-10-17T02:02:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:26Z",
+              "conclusion": "success",
+              "name": "Installed server extra and real loopback HTTP/SSE examples",
+              "number": 17,
+              "startedAt": "2026-10-17T02:02:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:29Z",
+              "conclusion": "success",
+              "name": "Offline E2B adapter",
+              "number": 18,
+              "startedAt": "2026-10-17T02:02:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:35Z",
+              "conclusion": "success",
+              "name": "Installed E2B extra without cloud calls",
+              "number": 19,
+              "startedAt": "2026-10-17T02:02:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:57Z",
+              "conclusion": "success",
+              "name": "Installed Responses extra and loopback examples",
+              "number": 20,
+              "startedAt": "2026-10-17T02:02:35Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:57Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 39,
+              "startedAt": "2026-10-17T02:02:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:59Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 40,
+              "startedAt": "2026-10-17T02:02:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T02:02:59Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 41,
+              "startedAt": "2026-10-17T02:02:59Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410612"
+        },
+        {
+          "completedAt": "2026-10-17T01:51:01Z",
+          "conclusion": "success",
+          "databaseId": 117276410629,
+          "name": "package (macos-latest, 3.11)",
+          "startedAt": "2026-10-17T01:43:44Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:46Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:48Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:49Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:51Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:01Z",
+              "conclusion": "success",
+              "name": "HTTP identity, real loopback SSE and file boundaries",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:02Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --extra server python scripts/generate_openapi.py --check",
+              "number": 6,
+              "startedAt": "2026-10-17T01:44:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:02Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra mcp",
+              "number": 7,
+              "startedAt": "2026-10-17T01:44:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:29Z",
+              "conclusion": "success",
+              "name": "Real MCP stdio integration",
+              "number": 8,
+              "startedAt": "2026-10-17T01:44:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:29Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 9,
+              "startedAt": "2026-10-17T01:45:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:46Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked pytest",
+              "number": 10,
+              "startedAt": "2026-10-17T01:45:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:25Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked python scripts/check_package.py",
+              "number": 11,
+              "startedAt": "2026-10-17T01:48:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:25Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked twine check --strict dist/*.whl dist/*.tar.gz",
+              "number": 12,
+              "startedAt": "2026-10-17T01:50:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:26Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --all-extras",
+              "number": 13,
+              "startedAt": "2026-10-17T01:50:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:26Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --all-extras python -I -B scripts/check_installed.py",
+              "number": 14,
+              "startedAt": "2026-10-17T01:50:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:30Z",
+              "conclusion": "success",
+              "name": "Offline official Responses client",
+              "number": 15,
+              "startedAt": "2026-10-17T01:50:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:37Z",
+              "conclusion": "success",
+              "name": "Installed MCP extra and stdio examples",
+              "number": 16,
+              "startedAt": "2026-10-17T01:50:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:41Z",
+              "conclusion": "success",
+              "name": "Installed server extra and real loopback HTTP/SSE examples",
+              "number": 17,
+              "startedAt": "2026-10-17T01:50:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:44Z",
+              "conclusion": "success",
+              "name": "Offline E2B adapter",
+              "number": 18,
+              "startedAt": "2026-10-17T01:50:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:46Z",
+              "conclusion": "success",
+              "name": "Installed E2B extra without cloud calls",
+              "number": 19,
+              "startedAt": "2026-10-17T01:50:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:53Z",
+              "conclusion": "success",
+              "name": "Installed Responses extra and loopback examples",
+              "number": 20,
+              "startedAt": "2026-10-17T01:50:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:57Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 39,
+              "startedAt": "2026-10-17T01:50:53Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:57Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 40,
+              "startedAt": "2026-10-17T01:50:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:59Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 41,
+              "startedAt": "2026-10-17T01:50:57Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410629"
+        },
+        {
+          "completedAt": "2026-10-17T01:43:48Z",
+          "conclusion": "success",
+          "databaseId": 117276410633,
+          "name": "docs (ubuntu-latest, 3.11)",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:41Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:42Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:44Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:45Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --group docs",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:46Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --group docs python scripts/build_docs.py",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:46Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --group docs python scripts/check_docs.py",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:46Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 11,
+              "startedAt": "2026-10-17T01:43:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:47Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 12,
+              "startedAt": "2026-10-17T01:43:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:47Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 13,
+              "startedAt": "2026-10-17T01:43:47Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410633"
+        },
+        {
+          "completedAt": "2026-10-17T01:43:53Z",
+          "conclusion": "success",
+          "databaseId": 117276410667,
+          "name": "quality",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:41Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:43Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:46Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:47Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:47Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked ruff check .",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:47Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked ruff format --check .",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:50Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked mypy",
+              "number": 7,
+              "startedAt": "2026-10-17T01:43:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:51Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked python scripts/generate_schemas.py --check",
+              "number": 8,
+              "startedAt": "2026-10-17T01:43:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:51Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 15,
+              "startedAt": "2026-10-17T01:43:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:51Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 16,
+              "startedAt": "2026-10-17T01:43:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:51Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-10-17T01:43:51Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410667"
+        },
+        {
+          "completedAt": "2026-10-17T01:51:23Z",
+          "conclusion": "success",
+          "databaseId": 117276410682,
+          "name": "package (ubuntu-latest, 3.12)",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:42Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:43Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:44Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:45Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:56Z",
+              "conclusion": "success",
+              "name": "HTTP identity, real loopback SSE and file boundaries",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:56Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --extra server python scripts/generate_openapi.py --check",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:56Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra mcp",
+              "number": 7,
+              "startedAt": "2026-10-17T01:43:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:31Z",
+              "conclusion": "success",
+              "name": "Real MCP stdio integration",
+              "number": 8,
+              "startedAt": "2026-10-17T01:43:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:31Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 9,
+              "startedAt": "2026-10-17T01:45:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:57Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked pytest",
+              "number": 10,
+              "startedAt": "2026-10-17T01:45:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:50Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked python scripts/check_package.py",
+              "number": 11,
+              "startedAt": "2026-10-17T01:48:57Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:51Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked twine check --strict dist/*.whl dist/*.tar.gz",
+              "number": 12,
+              "startedAt": "2026-10-17T01:50:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:51Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --all-extras",
+              "number": 13,
+              "startedAt": "2026-10-17T01:50:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:51Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --all-extras python -I -B scripts/check_installed.py",
+              "number": 14,
+              "startedAt": "2026-10-17T01:50:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:55Z",
+              "conclusion": "success",
+              "name": "Offline official Responses client",
+              "number": 15,
+              "startedAt": "2026-10-17T01:50:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:03Z",
+              "conclusion": "success",
+              "name": "Installed MCP extra and stdio examples",
+              "number": 16,
+              "startedAt": "2026-10-17T01:50:55Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:08Z",
+              "conclusion": "success",
+              "name": "Installed server extra and real loopback HTTP/SSE examples",
+              "number": 17,
+              "startedAt": "2026-10-17T01:51:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:11Z",
+              "conclusion": "success",
+              "name": "Offline E2B adapter",
+              "number": 18,
+              "startedAt": "2026-10-17T01:51:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:13Z",
+              "conclusion": "success",
+              "name": "Installed E2B extra without cloud calls",
+              "number": 19,
+              "startedAt": "2026-10-17T01:51:11Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:20Z",
+              "conclusion": "success",
+              "name": "Installed Responses extra and loopback examples",
+              "number": 20,
+              "startedAt": "2026-10-17T01:51:13Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:21Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 39,
+              "startedAt": "2026-10-17T01:51:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:21Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 40,
+              "startedAt": "2026-10-17T01:51:21Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:21Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 41,
+              "startedAt": "2026-10-17T01:51:21Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410682"
+        },
+        {
+          "completedAt": "2026-10-17T01:52:05Z",
+          "conclusion": "success",
+          "databaseId": 117276410701,
+          "name": "package (ubuntu-latest, 3.13)",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:42Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:44Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:45Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:47Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "HTTP identity, real loopback SSE and file boundaries",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:00Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --extra server python scripts/generate_openapi.py --check",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:00Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra mcp",
+              "number": 7,
+              "startedAt": "2026-10-17T01:44:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:41Z",
+              "conclusion": "success",
+              "name": "Real MCP stdio integration",
+              "number": 8,
+              "startedAt": "2026-10-17T01:44:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:41Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 9,
+              "startedAt": "2026-10-17T01:45:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:49:25Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked pytest",
+              "number": 10,
+              "startedAt": "2026-10-17T01:45:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:28Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked python scripts/check_package.py",
+              "number": 11,
+              "startedAt": "2026-10-17T01:49:25Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:29Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked twine check --strict dist/*.whl dist/*.tar.gz",
+              "number": 12,
+              "startedAt": "2026-10-17T01:51:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:29Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --all-extras",
+              "number": 13,
+              "startedAt": "2026-10-17T01:51:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:29Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --all-extras python -I -B scripts/check_installed.py",
+              "number": 14,
+              "startedAt": "2026-10-17T01:51:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:33Z",
+              "conclusion": "success",
+              "name": "Offline official Responses client",
+              "number": 15,
+              "startedAt": "2026-10-17T01:51:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:42Z",
+              "conclusion": "success",
+              "name": "Installed MCP extra and stdio examples",
+              "number": 16,
+              "startedAt": "2026-10-17T01:51:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:47Z",
+              "conclusion": "success",
+              "name": "Installed server extra and real loopback HTTP/SSE examples",
+              "number": 17,
+              "startedAt": "2026-10-17T01:51:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:50Z",
+              "conclusion": "success",
+              "name": "Offline E2B adapter",
+              "number": 18,
+              "startedAt": "2026-10-17T01:51:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:51:53Z",
+              "conclusion": "success",
+              "name": "Installed E2B extra without cloud calls",
+              "number": 19,
+              "startedAt": "2026-10-17T01:51:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:00Z",
+              "conclusion": "success",
+              "name": "Installed Responses extra and loopback examples",
+              "number": 20,
+              "startedAt": "2026-10-17T01:51:53Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:01Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 39,
+              "startedAt": "2026-10-17T01:52:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:02Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 40,
+              "startedAt": "2026-10-17T01:52:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:02Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 41,
+              "startedAt": "2026-10-17T01:52:02Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410701"
+        },
+        {
+          "completedAt": "2026-10-17T01:52:40Z",
+          "conclusion": "success",
+          "databaseId": 117276410718,
+          "name": "package (ubuntu-latest, 3.14)",
+          "startedAt": "2026-10-17T01:43:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:41Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:42Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:43Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:45Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:58Z",
+              "conclusion": "success",
+              "name": "HTTP identity, real loopback SSE and file boundaries",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --extra server python scripts/generate_openapi.py --check",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra mcp",
+              "number": 7,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:46Z",
+              "conclusion": "success",
+              "name": "Real MCP stdio integration",
+              "number": 8,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:46Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 9,
+              "startedAt": "2026-10-17T01:45:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:49:45Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked pytest",
+              "number": 10,
+              "startedAt": "2026-10-17T01:45:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:02Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked python scripts/check_package.py",
+              "number": 11,
+              "startedAt": "2026-10-17T01:49:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:02Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked twine check --strict dist/*.whl dist/*.tar.gz",
+              "number": 12,
+              "startedAt": "2026-10-17T01:52:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:03Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --all-extras",
+              "number": 13,
+              "startedAt": "2026-10-17T01:52:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:03Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --all-extras python -I -B scripts/check_installed.py",
+              "number": 14,
+              "startedAt": "2026-10-17T01:52:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:07Z",
+              "conclusion": "success",
+              "name": "Offline official Responses client",
+              "number": 15,
+              "startedAt": "2026-10-17T01:52:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:17Z",
+              "conclusion": "success",
+              "name": "Installed MCP extra and stdio examples",
+              "number": 16,
+              "startedAt": "2026-10-17T01:52:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:23Z",
+              "conclusion": "success",
+              "name": "Installed server extra and real loopback HTTP/SSE examples",
+              "number": 17,
+              "startedAt": "2026-10-17T01:52:17Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:26Z",
+              "conclusion": "success",
+              "name": "Offline E2B adapter",
+              "number": 18,
+              "startedAt": "2026-10-17T01:52:23Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:28Z",
+              "conclusion": "success",
+              "name": "Installed E2B extra without cloud calls",
+              "number": 19,
+              "startedAt": "2026-10-17T01:52:26Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:37Z",
+              "conclusion": "success",
+              "name": "Installed Responses extra and loopback examples",
+              "number": 20,
+              "startedAt": "2026-10-17T01:52:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:38Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 39,
+              "startedAt": "2026-10-17T01:52:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:38Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 40,
+              "startedAt": "2026-10-17T01:52:38Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:52:38Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 41,
+              "startedAt": "2026-10-17T01:52:38Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410718"
+        },
+        {
+          "completedAt": "2026-10-17T01:50:48Z",
+          "conclusion": "success",
+          "databaseId": 117276410907,
+          "name": "package (macos-latest, 3.14)",
+          "startedAt": "2026-10-17T01:43:45Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:47Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:45Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:49Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:50Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:51Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:50Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:01Z",
+              "conclusion": "success",
+              "name": "HTTP identity, real loopback SSE and file boundaries",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:01Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --extra server python scripts/generate_openapi.py --check",
+              "number": 6,
+              "startedAt": "2026-10-17T01:44:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:01Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra mcp",
+              "number": 7,
+              "startedAt": "2026-10-17T01:44:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:28Z",
+              "conclusion": "success",
+              "name": "Real MCP stdio integration",
+              "number": 8,
+              "startedAt": "2026-10-17T01:44:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:45:28Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 9,
+              "startedAt": "2026-10-17T01:45:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:28Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked pytest",
+              "number": 10,
+              "startedAt": "2026-10-17T01:45:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:14Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked python scripts/check_package.py",
+              "number": 11,
+              "startedAt": "2026-10-17T01:48:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:15Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked twine check --strict dist/*.whl dist/*.tar.gz",
+              "number": 12,
+              "startedAt": "2026-10-17T01:50:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:15Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --all-extras",
+              "number": 13,
+              "startedAt": "2026-10-17T01:50:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:16Z",
+              "conclusion": "success",
+              "name": "Run uv run --locked --all-extras python -I -B scripts/check_installed.py",
+              "number": 14,
+              "startedAt": "2026-10-17T01:50:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:20Z",
+              "conclusion": "success",
+              "name": "Offline official Responses client",
+              "number": 15,
+              "startedAt": "2026-10-17T01:50:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:28Z",
+              "conclusion": "success",
+              "name": "Installed MCP extra and stdio examples",
+              "number": 16,
+              "startedAt": "2026-10-17T01:50:20Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:32Z",
+              "conclusion": "success",
+              "name": "Installed server extra and real loopback HTTP/SSE examples",
+              "number": 17,
+              "startedAt": "2026-10-17T01:50:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:35Z",
+              "conclusion": "success",
+              "name": "Offline E2B adapter",
+              "number": 18,
+              "startedAt": "2026-10-17T01:50:32Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:37Z",
+              "conclusion": "success",
+              "name": "Installed E2B extra without cloud calls",
+              "number": 19,
+              "startedAt": "2026-10-17T01:50:35Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:44Z",
+              "conclusion": "success",
+              "name": "Installed Responses extra and loopback examples",
+              "number": 20,
+              "startedAt": "2026-10-17T01:50:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:46Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 39,
+              "startedAt": "2026-10-17T01:50:44Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:46Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 40,
+              "startedAt": "2026-10-17T01:50:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:47Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 41,
+              "startedAt": "2026-10-17T01:50:46Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997845/job/117276410907"
+        }
+      ],
+      "status": "completed"
+    },
+    "docker": {
+      "run_id": 38991997762,
+      "url": "https://github.com/drov-ai/drov/actions/runs/38991997762",
+      "conclusion": "success",
+      "headSha": "d35f2123c8a5a11eb12d08f64bc678c62d932ae0",
+      "jobs": [
+        {
+          "completedAt": "2026-10-17T01:49:00Z",
+          "conclusion": "success",
+          "databaseId": 117276367206,
+          "name": "sandbox (3.13)",
+          "startedAt": "2026-10-17T01:43:27Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:29Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:31Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:32Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:34Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:32Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:39Z",
+              "conclusion": "success",
+              "name": "Prepare explicit local Docker configuration",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:59Z",
+              "conclusion": "success",
+              "name": "Build fixed analysis image without build-time networking",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:39Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:46:56Z",
+              "conclusion": "success",
+              "name": "Actual Docker isolation, client/storage faults and SDK hard kills",
+              "number": 7,
+              "startedAt": "2026-10-17T01:43:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:47Z",
+              "conclusion": "success",
+              "name": "Core wheel and sdist installations",
+              "number": 8,
+              "startedAt": "2026-10-17T01:46:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:56Z",
+              "conclusion": "success",
+              "name": "Installed core-only wheel with actual stdlib/analysis SDK and stream",
+              "number": 9,
+              "startedAt": "2026-10-17T01:48:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:56Z",
+              "conclusion": "skipped",
+              "name": "Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "number": 10,
+              "startedAt": "2026-10-17T01:48:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:56Z",
+              "conclusion": "skipped",
+              "name": "Run uv sync --locked --extra server",
+              "number": 11,
+              "startedAt": "2026-10-17T01:48:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:56Z",
+              "conclusion": "skipped",
+              "name": "Run npm ci",
+              "number": 12,
+              "startedAt": "2026-10-17T01:48:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:56Z",
+              "conclusion": "skipped",
+              "name": "Run npx playwright install --with-deps chromium",
+              "number": 13,
+              "startedAt": "2026-10-17T01:48:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:56Z",
+              "conclusion": "skipped",
+              "name": "Browser workbench with actual Docker CSV and PNG",
+              "number": 14,
+              "startedAt": "2026-10-17T01:48:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:59Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 27,
+              "startedAt": "2026-10-17T01:48:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:59Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 28,
+              "startedAt": "2026-10-17T01:48:59Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:48:59Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 29,
+              "startedAt": "2026-10-17T01:48:59Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997762/job/117276367206"
+        },
+        {
+          "completedAt": "2026-10-17T01:50:04Z",
+          "conclusion": "success",
+          "databaseId": 117276367324,
+          "name": "sandbox (3.14)",
+          "startedAt": "2026-10-17T01:43:27Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:29Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:28Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:30Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:31Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:33Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:39Z",
+              "conclusion": "success",
+              "name": "Prepare explicit local Docker configuration",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:01Z",
+              "conclusion": "success",
+              "name": "Build fixed analysis image without build-time networking",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:39Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:47:30Z",
+              "conclusion": "success",
+              "name": "Actual Docker isolation, client/storage faults and SDK hard kills",
+              "number": 7,
+              "startedAt": "2026-10-17T01:44:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:49:49Z",
+              "conclusion": "success",
+              "name": "Core wheel and sdist installations",
+              "number": 8,
+              "startedAt": "2026-10-17T01:47:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:01Z",
+              "conclusion": "success",
+              "name": "Installed core-only wheel with actual stdlib/analysis SDK and stream",
+              "number": 9,
+              "startedAt": "2026-10-17T01:49:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:01Z",
+              "conclusion": "skipped",
+              "name": "Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "number": 10,
+              "startedAt": "2026-10-17T01:50:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:01Z",
+              "conclusion": "skipped",
+              "name": "Run uv sync --locked --extra server",
+              "number": 11,
+              "startedAt": "2026-10-17T01:50:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:01Z",
+              "conclusion": "skipped",
+              "name": "Run npm ci",
+              "number": 12,
+              "startedAt": "2026-10-17T01:50:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:01Z",
+              "conclusion": "skipped",
+              "name": "Run npx playwright install --with-deps chromium",
+              "number": 13,
+              "startedAt": "2026-10-17T01:50:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:01Z",
+              "conclusion": "skipped",
+              "name": "Browser workbench with actual Docker CSV and PNG",
+              "number": 14,
+              "startedAt": "2026-10-17T01:50:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:03Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 27,
+              "startedAt": "2026-10-17T01:50:01Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:03Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 28,
+              "startedAt": "2026-10-17T01:50:03Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:03Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 29,
+              "startedAt": "2026-10-17T01:50:03Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997762/job/117276367324"
+        },
+        {
+          "completedAt": "2026-10-17T01:50:51Z",
+          "conclusion": "success",
+          "databaseId": 117276367339,
+          "name": "sandbox (3.11)",
+          "startedAt": "2026-10-17T01:43:28Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:30Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:31Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:35Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:36Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:35Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:41Z",
+              "conclusion": "success",
+              "name": "Prepare explicit local Docker configuration",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:36Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:44:00Z",
+              "conclusion": "success",
+              "name": "Build fixed analysis image without build-time networking",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:41Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:47:31Z",
+              "conclusion": "success",
+              "name": "Actual Docker isolation, client/storage faults and SDK hard kills",
+              "number": 7,
+              "startedAt": "2026-10-17T01:44:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:49:36Z",
+              "conclusion": "success",
+              "name": "Core wheel and sdist installations",
+              "number": 8,
+              "startedAt": "2026-10-17T01:47:31Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:49:47Z",
+              "conclusion": "success",
+              "name": "Installed core-only wheel with actual stdlib/analysis SDK and stream",
+              "number": 9,
+              "startedAt": "2026-10-17T01:49:36Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:49:54Z",
+              "conclusion": "success",
+              "name": "Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "number": 10,
+              "startedAt": "2026-10-17T01:49:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:49:54Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked --extra server",
+              "number": 11,
+              "startedAt": "2026-10-17T01:49:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:49:56Z",
+              "conclusion": "success",
+              "name": "Run npm ci",
+              "number": 12,
+              "startedAt": "2026-10-17T01:49:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:16Z",
+              "conclusion": "success",
+              "name": "Run npx playwright install --with-deps chromium",
+              "number": 13,
+              "startedAt": "2026-10-17T01:49:56Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:47Z",
+              "conclusion": "success",
+              "name": "Browser workbench with actual Docker CSV and PNG",
+              "number": 14,
+              "startedAt": "2026-10-17T01:50:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:48Z",
+              "conclusion": "success",
+              "name": "Post Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "number": 26,
+              "startedAt": "2026-10-17T01:50:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:48Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 27,
+              "startedAt": "2026-10-17T01:50:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:48Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 28,
+              "startedAt": "2026-10-17T01:50:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:48Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 29,
+              "startedAt": "2026-10-17T01:50:48Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997762/job/117276367339"
+        },
+        {
+          "completedAt": "2026-10-17T01:50:11Z",
+          "conclusion": "success",
+          "databaseId": 117276367382,
+          "name": "sandbox (3.12)",
+          "startedAt": "2026-10-17T01:43:28Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-17T01:43:30Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-17T01:43:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:32Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 2,
+              "startedAt": "2026-10-17T01:43:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:33Z",
+              "conclusion": "success",
+              "name": "Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 3,
+              "startedAt": "2026-10-17T01:43:32Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:34Z",
+              "conclusion": "success",
+              "name": "Run uv sync --locked",
+              "number": 4,
+              "startedAt": "2026-10-17T01:43:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:40Z",
+              "conclusion": "success",
+              "name": "Prepare explicit local Docker configuration",
+              "number": 5,
+              "startedAt": "2026-10-17T01:43:34Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:43:58Z",
+              "conclusion": "success",
+              "name": "Build fixed analysis image without build-time networking",
+              "number": 6,
+              "startedAt": "2026-10-17T01:43:40Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:47:30Z",
+              "conclusion": "success",
+              "name": "Actual Docker isolation, client/storage faults and SDK hard kills",
+              "number": 7,
+              "startedAt": "2026-10-17T01:43:58Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:49:54Z",
+              "conclusion": "success",
+              "name": "Core wheel and sdist installations",
+              "number": 8,
+              "startedAt": "2026-10-17T01:47:30Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:06Z",
+              "conclusion": "success",
+              "name": "Installed core-only wheel with actual stdlib/analysis SDK and stream",
+              "number": 9,
+              "startedAt": "2026-10-17T01:49:54Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:06Z",
+              "conclusion": "skipped",
+              "name": "Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+              "number": 10,
+              "startedAt": "2026-10-17T01:50:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:06Z",
+              "conclusion": "skipped",
+              "name": "Run uv sync --locked --extra server",
+              "number": 11,
+              "startedAt": "2026-10-17T01:50:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:06Z",
+              "conclusion": "skipped",
+              "name": "Run npm ci",
+              "number": 12,
+              "startedAt": "2026-10-17T01:50:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:06Z",
+              "conclusion": "skipped",
+              "name": "Run npx playwright install --with-deps chromium",
+              "number": 13,
+              "startedAt": "2026-10-17T01:50:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:06Z",
+              "conclusion": "skipped",
+              "name": "Browser workbench with actual Docker CSV and PNG",
+              "number": 14,
+              "startedAt": "2026-10-17T01:50:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:08Z",
+              "conclusion": "success",
+              "name": "Post Run astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884",
+              "number": 27,
+              "startedAt": "2026-10-17T01:50:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:08Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+              "number": 28,
+              "startedAt": "2026-10-17T01:50:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-17T01:50:08Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 29,
+              "startedAt": "2026-10-17T01:50:08Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/drov-ai/drov/actions/runs/38991997762/job/117276367382"
+        }
+      ],
+      "status": "completed"
+    }
+  },
+  "failed_steps": [],
+  "log_sha256": {
+    ".drov/t17-final-core-ci.log": "ad38e5ddf1cbbc3ec7215a24b85a5b494a9df31673dafc9de98681295a93b340",
+    ".drov/t17-final-docker-ci.log": "1542d483ac745dd7b5e308d8146f838e2d433e83990e8fbc73f70177e6834eb2"
+  },
+  "superseded_runs": {
+    "40f315e": [
+      38991845980,
+      38991845975
+    ],
+    "5aab10c": [
+      38991893030,
+      38991892966
+    ]
+  },
+  "superseded_interpretation": "cancelled or superseded by the final implementation; never substituted for its result"
+}

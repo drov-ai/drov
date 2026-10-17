@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-17",
+  "timezone": "Asia/Shanghai",
+  "implementation_commit": "d35f2123c8a5a11eb12d08f64bc678c62d932ae0",
+  "package_version": "0.1.0a0",
+  "mkdocs": "1.6.1",
+  "uv": "0.13.0",
+  "python": [
+    "3.11.9",
+    "3.14.3"
+  ],
+  "site": {
+    "html_pages": 21,
+    "local_links_and_anchors": 778,
+    "files": 29,
+    "same_input_zip_rebuild": "identical",
+    "source_archive": {
+      "source_commit": null,
+      "source_link_commit": "0aa0168572f7994326e84ab66e53a0a83fae6132",
+      "sdk_payloads_verified": 91
+    }
+  },
+  "executions": {
+    "core_only_wheel_and_rebuilt_sdist_examples": 44,
+    "independent_installed_quickstart": 1,
+    "independent_local_http_mcp_responses": 8,
+    "clean_core_only_real_docker": 4
+  },
+  "negative_site_boundary_cases": 6,
+  "targeted_regression_passed": 11,
+  "static": {
+    "ruff_formatted_files": 312,
+    "mypy_sources": 194,
+    "schema": "passed",
+    "openapi": "passed",
+    "core_without_docs_mypy": "passed"
+  },
+  "browser": {
+    "viewports": [
+      [
+        390,
+        844
+      ],
+      [
+        1280,
+        900
+      ]
+    ],
+    "horizontal_document_overflow": false,
+    "chinese_search_matches": 7,
+    "search_anchor_navigation": "passed",
+    "prefix_search": "/docs/",
+    "snapshots": [
+      ".drov/t17-home.jpg",
+      ".drov/t17-mobile.jpg"
+    ]
+  },
+  "private_vulnerability_reporting": {
+    "enabled": true,
+    "user_authorized": true
+  },
+  "model_or_cloud_calls": 0,
+  "deployment_or_package_upload": false,
+  "existing_lock_version_changes": [],
+  "artifact_sha256": {
+    "drov-docs-0.1.0a0.zip": "dfa4e1067ca242d6b842d5e042cb9315c139d1768ec0e104decf8492a5b65e9f",
+    "drov-0.1.0a0-py3-none-any.whl": "9b431f5279093cadefd0c6050e482d4e691740d9a367e7fc0dcac23b995986db",
+    "drov-0.1.0a0.tar.gz": "faf9ec0750b56c2c2991e1a0ac07d04f703df253e27bafe5f88284133c694462"
+  },
+  "local_log_sha256": {
+    ".drov/t17-build.log": "c8bc02891689d8b144bbf0fa8e1f06d9056d8629a8d50f908544cf0b90cc3660",
+    ".drov/t17-package.log": "43f10c2c9480350beaa3786e8ba808f4f1073a7b964073b804e2518b19ba4211",
+    ".drov/t17-installed-examples.log": "5c385d44562317e05965e95c2c02af7716195ecd4cf5e4e62ff2d250595df93f",
+    ".drov/t17-docker.log": "01a33e3a83c0e065e14b6928c16b930b2c4dd9f593713d5508867c37b117d458",
+    ".drov/t17-sdist-docs.log": "9c45ce7b14e02a9152e776418e63a3e3384803b02391d87d4519f8a97adbe09a",
+    ".drov/t17-site-boundaries.log": "7a14a8f999b818e3bff3b903cc734274cf0ad9dc258c726949f1a8316860ebfb",
+    ".drov/t17-docs-source-check.log": "c6a72144799335e24bf14f0e98b5926eb90acad714af1518e037bded575c441d",
+    ".drov/t17-regression.log": "dc5abc25b4de0db3e83687b927adb94a659ce82ac389b73170041e03f190b451",
+    ".drov/t17-core-only-types.log": "455fdd2255a151e6462fb386b37d8679f38840782cb4cf9bcb99f5633f6bf452",
+    ".drov/t17-final-site.log": "eb87b2433d98dad655e6510862e9f72b83ef4f2bac3f2d1f65d276471b64c8aa",
+    ".drov/t17-final-source-package.log": "c0ce820439053c701806ed9301e3ea6fdfac308b0338e72c40eb5d5ebb49cf01",
+    ".drov/t17-checkpoint-package.log": "de7541309fa021662b36d2d986f5a6f36a13dd96bff1107a88f113ecf75cb489"
+  },
+  "screenshot_sha256": {
+    "t17-home.jpg": "8d07e8ef3aba4ec98e3a7ef5b5bd5cf2de9cbc006382112d43f58ca97e1310fe",
+    "t17-mobile.jpg": "cf5cbfbf8dca26ab750d08c79e7c569e6bd12e2e7937ad2d824c7841391b3fd9"
+  },
+  "artifact_paths": {
+    "drov-docs-0.1.0a0.zip": "dist/drov-docs-0.1.0a0.zip",
+    "drov-0.1.0a0-py3-none-any.whl": ".drov/t17-release-checkpoint-dist/drov-0.1.0a0-py3-none-any.whl",
+    "drov-0.1.0a0.tar.gz": ".drov/t17-release-checkpoint-dist/drov-0.1.0a0.tar.gz"
+  },
+  "source_document_checks": {
+    "markdown_files": 118,
+    "local_file_links": 1008,
+    "python_snippets_ast": 21,
+    "existing_locked_version_changes": [],
+    "credential_patterns": "none",
+    "closing_files": 4,
+    "frozen_site_zip": "unchanged"
+  }
+}
