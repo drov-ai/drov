@@ -107,3 +107,34 @@ v12受影响sdist已实际重建，逐字核对12个评测/测试源文件（含
 仅测试把启动等待改10秒、夹具线程保护上限改30秒，finally仍显式释放；被测20毫秒shutdown_grace、延迟通知1.1秒、ShutdownIncomplete、槽位与SQLite锁、取消持久化及迟到结果不采用的断言不变。SDK/评测/模型/语料/配置指纹6df093...逐字相同，已完成L4报告保持原commit，不重新付费或改原报告。此测试修订的本地与最终平台结果在完成后补记。
 
 测试启动屏障修订本地：Python3.11 agent_runs组50 passed/1 Python3.12+ API skip（2.83s），3.14为51 passed（2.83s）；两种实际线程/延迟通知/持锁/取消迟到结果均通过。静态/格式291文件与mypy192源通过。待该测试修订精确commit最终CI完成前，T-16只记真实质量子范围通过，不提前关闭。
+
+## 最终精确源码与平台收尾
+
+最终测试检查点为`0aa0168572f7994326e84ab66e53a0a83fae6132`，已提交推送origin/main；其SDK/评测/配置/语料指纹与真实模型源码`6ba039f4ec295a7b77552a1cec224d45564df2a4`完全相同。此后收尾只更新报告/文档，不修改已验证代码、测试、锁或冻结指纹，也不重新付费。
+
+[核心38942872052](https://github.com/drov-ai/drov/actions/runs/38942872052)11 jobs、[Docker38942872230](https://github.com/drov-ai/drov/actions/runs/38942872230)4 jobs全部completed/success，逐项核对headSha和所有步骤（包括3.15探测），无失败步骤。完整平台/步骤与本地原日志hash见[最终CI快照](t16-final-ci.json)，原日志为`.drov/t16-final-core-ci.log`及`.drov/t16-final-docker-ci.log`。
+
+| 范围 | 最终实际验证 |
+| --- | --- |
+| 核心矩阵与构件 | Linux3.11–3.14、macOS/Windows3.11/3.14八套package jobs通过，含适用全库、HTTP/真实loopback SSE、实际MCP stdio、官方模型客户端离线协议、各extra及core-only构件/新环境安装。3.15独立探测成功，不升级为正式支持 |
+| 核心全库适用计数 | POSIX3.11每套1080 passed/169 skipped，3.12–3.14每套1082 passed/167 skipped；Windows3.11为916/333skip，3.14为918/331skip。普通核心没有Docker配置及云授权，相关skip不作为真实沙箱或云验证；HTTP/MCP及extra另有实际安装后步骤 |
+| 实际Docker | Linux3.11–3.14四套每套105 passed/3模块依赖skip/1296 deselected；三个skip为非本组E2B×2/MCP×1模块缺可选包，105项真实Docker未跳过。固定分析镜像构建、SDK硬终止/文件/故障及core-only安装后SDK/stream实际执行全部通过；3.11另含真实Docker浏览器24 passed（28.9s） |
+| 最终本地相关组 | 显式原Docker配置/分析镜像记录；`pytest tests/test_evaluation.py tests/test_deepseek_responses.py tests/test_abandonment.py tests/test_agent_runs.py -q`：3.11.9为178 passed/1 Python3.12+ API skip（26.44s），3.14.3为179 passed（27.62s）。原日志`.drov/t16-final-target311.log`/`314.log`保留；不是声称本地重新跑全部SDK测试 |
+| 静态/参考/构件 | Ruff检查及格式291文件、mypy192源、schema/OpenAPI生成检查通过。最终sdist实际重建，13个受影响评测/测试文件逐字核对、私有环境/.drov/Git/品牌排除；SHA256=`1f40fd5a88f82ab4a612bffa9456a28179d365ef0e8191f85dfd2c6c3a0b2361`（当时文档快照）。后续文档补记不伪称同一tar字节或重新本地全安装；最终CI另有实际构件/安装证据 |
+
+两处Windows等待故障的原失败都保留；最终八套平台实际通过修正后的测试。仅夹具线程启动/子进程已回收后的锁观察作有界等待，运行时关闭期限、存储锁和取消/未知事实断言保持，未通过放宽SDK契约获得成功。
+
+## 任务卡验收结论与限制
+
+| T-16条件 | 完成证据 |
+| --- | --- |
+| 固定27项/三参考应用/代码文件变体 | manifest v2，原expected/资料/门槛与8请求/16工具上限保持；三入口离线各27/27，SDK/stream/HTTP共享事实评分，真实Docker。T-10B/13/14/15的S/X/B离线与故障前置记录仍保留，最终平台回归通过 |
+| 真实7项smoke与完整81正式 | 同一v12指纹，smoke7/7；正式78/81≥69，S01/S02/S03为26/27、25/27、27/27且均≥22；schema73/75≥72；代码9/9≥8；安全断言零失败。报告不混入smoke、旧配置或离线替身 |
+| 原模型代码与持久产物 | 九个正式代码任务、12实际代码阶段/15下载文件，CSV/PNG/原代码、独立服务计数及销毁后字节/hash/授权全部复核；没有宿主预制计算替代模型代码 |
+| 失败、成功、用量、延迟、费用与体验 | 三失败全部保留、每场景至少三成功复核；完整tokens/任务和请求p50/p95/零自动重试、全部814次独立会计及原183次不变；[维护者使用记录](t16-experience.md)与局限明确 |
+
+上述任务卡范围已完整验收；当前状态、下一项与会话建议只维护在[progress](../planning/progress.md)。通过的是自适应配置后的固定合成任务工作门槛，三个模型失败仍存在；不是盲测、任意任务可靠性、竞品优势或独立用户易用性证据。DeepSeek Pro为滚动alias，OpenAI供应商真实模型及E2B经本评测的质量未验证；本轮无新增云调用。E2B已有独立T-10C远端契约/成本记录，不混入Docker模型分数。
+
+累计814次全部settled/峰值费用上界9.63982400元，无pending/unknown或停止项；没有更多模型请求。该值不是供应商实扣/余额，无需充值。未公开发布/部署；T-17本地文档与T-18发布验收仍未完成，不能把T-16门槛通过写成正式版已发布。
+
+最终收尾检查：98份Markdown/928个本地文件链接/16个Python说明片段AST、可识别凭据模式与`git diff --check`通过。manifest排除version/name版本标签及S01-01提示后与起点逐值相同；最终指纹仍6df093...，本地账本与提交的完整会计逐字段相同，814次费用重新求和相符、原183次不变。相对起点8d1356b，SDK、uv.lock、pyproject、sandbox、workbench、品牌无差异，原SQL和历史基线未改。此次收尾仅三份Markdown及最终CI JSON快照，以skip ci提交推送既有origin/main；实际最终HEAD/同步以Git为准。
